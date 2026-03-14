@@ -1,0 +1,635 @@
+{
+  "object": "vector_store.file_content.page",
+  "data": [
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 1 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "BiocharStorage in the Built\r\nEnvironment\r\nThis module details durability and monitoring requirements for\r\nbiochar storage in the built environment.\r\nStorage\r\nModule\r\nv1.0\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 1/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 2 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "1 Introduction\r\n2 Applicability\r\n3 Background\r\n3.1 Biochar\r\n3.1.1 Additional Removal Potential\r\n3.2 Built Environment\r\n3.2.1 Concrete\r\n3.2.2 Asphalt\r\n3.2.3 Built Asset Life Cycles\r\n3.2.3.1 Types of Built Assets and Associated Design Life\r\n3.2.3.2 End-State Use Cases\r\n3.2.3.2.1 Concrete\r\n3.2.3.2.2 Asphalt\r\n4 Environmental and Social Safeguards\r\n4.1 Required measurements\r\n5 System Boundaries\r\n6 Biochar Characterization\r\n7 Quantification of CO2eStored\r\n7.1 Summary\r\n7.2 Quantification of CO2eRemoval\r\n7.2.1 Calculation of CO2eStored\r\n7.2.1.1 Calculation of Organic Carbon Content\r\n7.2.1.2 Measurement of Mass of Biochar Incorporated\r\n7.2.1.3 Calculation of FDurable, Material\r\n7.2.1.3.1 Calculation of F_{Inertinite}\r\n7.2.1.3.2 Calculation of F_{Reversal}\r\n7.2.1.3.3 Calculation of F_{Labile}\r\n7.2.2 Calculation of CO2eCounterfactual,RP\r\n7.2.3 Calculation of CO2eEmissions,RP\r\nContents\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 2/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 3 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "7.3 Buffer Pool\r\n8 Monitoring Requirements\r\n8.1 Process Requirements\r\n8.1.1 Reactor and Equipment Description\r\n8.1.2 Biochar Characterization\r\n8.1.3 Storage Site\r\n9 Compliance with Product Standards\r\n10 Appendix 1: Reversal risk\r\n10.1 Biochar Durability in the Built Environment\r\n10.1.1 Definition of Storage Uncertainty\r\n10.1.2 Biochar Reversal\r\n10.1.2.1 Biochar in Concrete\r\n10.1.2.2 Biochar in Asphalt\r\n10.2 Reversal Risk Approach and Calculation of Uncertainty Discounts\r\n10.2.1 Concrete\r\n10.2.2 Asphalt\r\n11 Contributors\r\n12 Definitions and Acronyms\r\n13 Relevant Works\r\nFootnotes\r\nContributors\r\nChangelog\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 3/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 4 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "This Module details the requirements for storage of carbon\r\nas biochar in the built environment, including reversal risk\r\nand durability. Within this Module, a built material is defined\r\nas a product used in the construction of buildings or\r\ninfrastructure projects, including concrete, cement and\r\nasphalt. Durability refers to the stability of CO stored as\r\nbiochar in the built material and the length of time for which\r\nCO is removed from Earth's atmosphere (> 1,000 years).\r\nWithin this Module, concrete durability is used to refer to the\r\nstructural durability of concrete. This Module is intended for\r\nuse in conjunction with other Isometric Protocols and\r\nModules, and assumes the following:\r\nThe full quantification of the net tonnes of CO e\r\nremoved for Crediting follows the Isometric Biochar\r\nProduction and Storage Protocol.\r\nAll environmental and social safeguards have been\r\nfollowed according to Section 5 in the Biochar\r\nProduction and Storage Protocol and this Module.\r\nThe stability of carbon within the built environment, and thus\r\nits durability, depends on interactions with the surrounding\r\nenvironment and intended use case. Built materials used for\r\nthe construction of buildings or infrastructure projects may\r\nbe exposed to variable environmental conditions during their\r\nuse life. Potential risk factors which may affect the expected\r\ndurability of built materials include, but are not limited to,\r\ninteractions with acidic fluids (e.g. acid rain, low-pH\r\ngroundwater), building fire, abrasion and high-temperature\r\nclosed-loop recycling of concrete. For the purpose of this\r\nModule, built materials are treated as an open system\r\nstorage mechanism. In comparison, closed systems are\r\nisolated from external environmental changes.\r\n1.0\r\nIntroduction\r\n2\r\n2\r\n2\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 4/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 4 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 5 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Biochar storage in the built environment is a novel CDR\r\napproach, so this Module incorporates requirements that\r\nmay be more stringent than some current relevant\r\nregulations or other Protocols related to biochar for CDR.\r\nThis Module will be reviewed when there is an update to\r\nscientific published literature which would affect net CO e\r\nremoval quantification, durability claims or the monitoring\r\nguidelines outlined in this Module. Future versions of this\r\nModule may be altered, particularly regarding requirements\r\nfor demonstrating durability of biochar, as the stability of\r\ncarbon in biochar is better demonstrated and documented;\r\nquantification of biochar degradation is further improved\r\nand refined; and the overall body of knowledge and data\r\nregarding all processes, from feedstock supply to conversion\r\nand to permanent storage, is significantly increased.\r\nProjects seeking Credits from biochar stored in the built\r\nenvironment will be subject to applicability requirements\r\n(Section 2.0), biochar characterisation requirements\r\n(Section 6.0) and reversal risk assessment (Section 10.0) to\r\naccount for unobservable reversals.\r\n2\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 5/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 5 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 6 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "This Module is applicable to Projects that store CO in the\r\nbuilt environment in the form of biochar incorporated into\r\nbuilt materials. The following products are applicable under\r\nthis Module:\r\nConcrete, in which biochar is incorporated as:\r\nSupplementary Cementitious Material (SCM)\r\nFiller (i.e., cement substitute)\r\nAdmixture\r\nAggregate substitute\r\nAsphalt, in which biochar is used as:\r\nAggregate\r\nModifier\r\nOther building materials (e.g. concrete bricks, roof tiles\r\nand potentially geopolymers or plasters) may be\r\nconsidered under this Module if the Project Proponent\r\ncan demonstrate sufficient similarity in material life\r\ncycles as those presented in Section 10.0. This evidence\r\nwill be audited by Isometric and the VVB and must be\r\nincluded, with full justification, in the PDD.\r\nProjects seeking Credits under this Module must meet the\r\nfollowing criteria:\r\nConstruction materials produced with incorporated\r\nbiochar must meet the same performance requirements\r\nof a conventional product for the intended use case. Any\r\nrequired admixtures or processing steps should be\r\nstandard industry practice and not result in\r\ndisproportionately greater resource use or emissions\r\ncompared to conventional materials.\r\n2.0\r\nApplicability\r\n2\r\n1,2\r\n3,4\r\n5,6\r\n7\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 6/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 6 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 7 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Construction materials produced with incorporated\r\nbiochar do not require additional products or activities\r\nrelated to installation and maintenance as compared to\r\nconventional products.\r\nProjects that are explicitly not applicable under this Module\r\ninclude:\r\nProjects storing CO in the built environment in the form\r\nof carbonate minerals\r\nProjects storing CO in the built environment in the form\r\nof lumber\r\n2\r\n2\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 7/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 8 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "3.0\r\nBackground\r\nBiochar is a durable carbon-rich solid material produced\r\nfrom the pyrolysis of waste biomass. The carbon content in\r\nbiochar can be further separated into stable (with inertinite\r\nas a proxy) and degradable (labile) fractions. These distinct\r\ncarbon fractions have different carbon durabilities, with the\r\nstable fraction of biochar being stored durably for a time\r\nhorizon of 1,000 years and above while the labile fraction\r\ncan degrade over shorter time horizons in the range of a few\r\nyears to decades, when used in conventional soil\r\namendment applications (see Isometric Biochar Production\r\nand Storage Protocol). Different production processes and\r\nfeedstocks directly impact biochar's quality and stability, as\r\nthey may result not only in variations in the proportions of\r\nlabile and fixed (stable) fraction but also changes in biochar\r\nstructure.\r\nThe labile fraction of biochar gradually degrades over time\r\nthrough various pathways, depending on the conditions of\r\nits storage environment. In the context of the built\r\nenvironment, these pathways can include:\r\nPhysical (dust loss, particle size reduction due to reuse\r\nor material recycling),\r\nAbiotic degradation - Chemical reactions related to\r\nenvironmental factors including but not limited to:\r\nnatural mineralization, photodegradation, leaching due\r\nto water flows or freeze - thaw cycles .\r\nWhen assessing the total carbon removal capacity for each\r\nmaterial, the durability of the stored carbon is impacted by\r\n3.1\r\nBiochar\r\n8\r\n9\r\n10\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 8/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 9 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "both the biochar quality and type of construction material\r\nend application. Therefore, the reversal risk is dependent on\r\nthe material use, exposure to environmental conditions and\r\nhow these interact with the building elements. See Section\r\n10.0 for further discussion of reversal risk and how this is\r\nused to determine an uncertainty discount for biochar in the\r\nbuilt environment.\r\nIn recent years, the incorporation of biochar in construction\r\nmaterials has been receiving increasing interest, owing to its\r\nunique properties such as porosity, high specific surface\r\narea, water retention capacity and organic carbon content.\r\nBiochar's unique structure and porosity makes it a versatile\r\nand innovative material that can be utilized in multiple\r\napplications including concrete, asphalt, bricks, tiles,\r\ninsulation materials , composites, panels, plasters and\r\ngeopolymers. These uses not only contribute to permanent\r\ncarbon removal but may also enhance specific material\r\nproperties .\r\nPrevious studies have focused on integrating biochar in\r\nconstruction materials as a substitute, filler, additive or\r\nmodifier, mainly in concrete and asphalt production .\r\nApplications that have gained traction include biochar used\r\nin:\r\nConcrete production process as an aggregate\r\nreplacement\r\nCement production as a filler material, reducing the\r\namount of carbon intensive clinker and concrete\r\nAsphalt applications used as an asphalt modifier\r\nand/or binder\r\nThese applications are discussed in further detail in Section\r\n1.2.2.\r\n11\r\n12\r\n4,12\r\n12\r\n13\r\n3.1.1\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 9/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 10 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "New research on biochar stored in built materials has shown\r\nthat these novel materials may capture additional CO from\r\nthe air, particularly in the case of biochar - cement\r\ncomposites . Replacement of the aggregates in concrete\r\nproduction with biochar improves pore size distribution and\r\ncan enhance the CO carbonation process and increases\r\nconcrete's ability to sequester carbon .\r\nAt the time of writing, there is not sufficient evidence to\r\ninclude this in the quantification framework for net CDR\r\nachieved by biochar storage in the built environment. This\r\nwill be revisited in future editions of the Module as new\r\nevidence is published and/or presented to Isometric by\r\nProject Proponents as proof of quantification.\r\nAdditional Removal Potential\r\n2\r\n14\r\n12\r\n2\r\n2\r\n3.2\r\nBuilt Environment\r\nConcrete, made from cement, sand, aggregate, water, and\r\nchemical admixtures, is the most widely used construction\r\nmaterial in the world, with approximately 4.2 billion tonnes\r\nproduced globally in 2020 (Global Cement and Concrete\r\nAssociation, Cement and Concrete Around the World).\r\nCompared to other structural materials, concrete has a\r\nrelatively low cost and embodied carbon, while also\r\nproviding strength, durability and adaptability. However,\r\nbecause of the large volume of concrete produced and used\r\nglobally, the concrete supply chain has a large carbon\r\nimpact - accounting for approximately 5-8% of total global\r\nCO emissions . The vast majority of emissions during\r\nconcrete production result from manufacturing Portland\r\nCement (PC) via calcination. During this process, crushed\r\n3.2.1\r\nConcrete\r\n2\r\n15\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 10/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 11 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "limestone (CaCO₃) is heated in a kiln to high temperatures\r\n(~1400°C), causing degradation to CaO (lime) and CO :\r\n(Equation 1)\r\nThough a portion of emissions are associated with\r\nprocessing limestone and heating the kilns, approximately\r\nhalf of the process emissions are the result of direct\r\nemissions from calcination .\r\nUsing less material in the built environment and using lower\r\nembodied carbon alternatives to PC both play a key role in\r\nefforts to reduce the climate impact of the construction\r\nindustry. Several recent studies (summarized well in Legan et\r\nal. ) have shown that addition of biochar in building\r\nmaterials, notably cement, can improve several key\r\nperformance indicators while reducing the environmental\r\nimpact of concrete production. For example, researchers\r\nhave observed enhanced mechanical properties of biochar￾amended concrete, including compressive, flexural and\r\ntensile strength; thermal stability and conductivity; bulk\r\ndensity; ductility; flowability; water absorption and\r\npenetration potential; and albedo . However, some studies\r\nhave also noted decreased flexural strength and\r\ndecreased compressive strength at biochar dosages up to\r\n40% by mass of cement.\r\nLimits to the amount of biochar addition in construction\r\nmaterials are dictated from material specification and\r\nperformance standards, especially in terms of the fresh and\r\nhardened mechanical properties of concrete and other\r\ncementitious composites. The impact on the mechanical\r\n2\r\nCaCO3 → CaO + CO2\r\n16\r\n14\r\n17\r\n17\r\n18\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 11/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 12 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "performance and other properties is dependent on the\r\nbiochar type (e.g., feedstock used, temperature of\r\nproduction, post-processing), percentage of biochar\r\nincorporated, and concrete mix design. Previously reported\r\nlimit values of biochar in built materials ranged from 0.5% -\r\n40% , although these thresholds can vary depending on the\r\nmaterial and application. Biochar is typically added at rates\r\nof up to 20% and 15% in concrete and asphalt production,\r\nrespectively .\r\nFigure 1: Stages of a concrete product, from materials\r\nextraction, through processing, use and end-of-life\r\nscenarios. Biochar is incorporated in the processing stage\r\nas aggregate, filters or as an SCM.\r\n14\r\n19,20,21\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 12/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 12 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 13 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Asphalt is a viscoelastic material that is commonly used in\r\npavement construction, roofing and other building\r\napplications . It is a composite material typically including\r\na mixture of aggregate materials, such as crushed stone,\r\nsand and gravel, bound together with bitumen, a highly\r\nviscous material derived from petroleum. Asphalt production\r\nrequires significant energy consumption and is consequently\r\nan emissions-intensive process . Conventional methods of\r\nasphalt production are referred to as 'hot-mix asphalt'\r\n, in\r\nwhich aggregates are heated to remove moisture and are\r\ncombined with bitumen at high temperatures (typically 170-\r\n190°C) .\r\nSeveral alternatives to hot-mix asphalt have been proposed\r\nto reduce the environmental impact of pavement\r\nconstruction. These include warm-mix asphalt, which\r\nproduces a similar product at lower temperatures (130-\r\n150°C) ; recycled asphalt pavements; and bio-asphalt,\r\nwhich encompasses both the partial replacement of fossil\r\nfuel-derived bitumen with plant-derived bio-oil and\r\naddition of biochar to the mixture as an asphalt modifier .\r\nRecent studies have shown that addition of modest amounts\r\nof biochar can maintain the rheological behaviors and\r\nenhance the oxidation resistance of asphalt , improve\r\ndeformation resistance , and inhibit volatile organic\r\ncompounds (VOCs) .\r\n3.2.2\r\nAsphalt\r\n18\r\n22\r\n23\r\n22\r\n24\r\n21\r\n25\r\n24\r\n26\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 13/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 14 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Figure 2: Stages of an asphalt product, from materials\r\nextraction, through processing, use and end-of-life\r\nscenarios. Biochar is incorporated in the processing stage\r\nas an aggregate.\r\n3.2.3\r\nBuilt Asset Life Cycles\r\nPerformance requirements for built assets and individual\r\ncomponents are influenced by a complex set of factors,\r\nincluding the intended design life, the exposure environment\r\nand the mechanical properties needed to meet the\r\nrequirements of the installation and application.\r\nThe design life of a built asset is the assumed period for\r\nwhich it can be used for its intended purpose. Examples of\r\ncommon asset types and design lives (as defined in EN\r\n3.2.3.1\r\nTypes of Built Assets and Associated Design Life\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 14/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 14 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 15 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "1990:2023 and CD 226) are summarized in Table 1. Assets\r\nwith slow rates of change, such as transport or public health\r\ninfrastructure, will typically be designed with a longer\r\nservice life and the minimization of maintenance in mind.\r\nCorporate office buildings, which are more likely to change\r\nin alignment with trends, may be designed with\r\nreplaceability, adaptability or de-constructability in mind. It\r\nis important to note that design life of an asset is not\r\nnecessarily equivalent to functional service life, which may\r\nbe longer or shorter than the design life based on a variety\r\nof factors such as asset ownership, changes in regional\r\nregulatory environments, societal preferences and asset\r\nperformance. A study of buildings in North America found\r\nthat the majority of demolished buildings were less than 50\r\nyears old and the Royal Institute of British Architects\r\nhighlight that, in the UK, the functional service lives of\r\nbuildings within the commercial sector are 25 to 30 years .\r\nTable 1: Overview of common asset types and their design\r\nlives as defined in EN 1990:2023 and CD 226.\r\nASSET TYPE\r\nDESIGN LIFE\r\n(YEARS)\r\nMonumental building structures, bridges, other civil engineering structure\r\nsupporting road or railway traffic\r\n100\r\nBuilding structures, including commercial and residential buildings 50\r\nAsphalt pavement 40\r\nAgricultural (or similar) structures, replaceable structural parts other than tension\r\ncomponents\r\n25\r\nTemporary structures (e.g. pavilions, emergency buildings, structures associated\r\nwith specific sport or art events)\r\n< 10\r\nWithin a given asset, different components will have different\r\nexpected design lives. For some element groups, such as the\r\n27\r\n28\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 15/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 16 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "structural skeleton of buildings or the piers of a bridge, which\r\nserve the key functional purpose of providing the structure of\r\nthe asset, the goal is a long service life. Elements with more\r\ntransient functional requirements, such as internal space\r\npartitions, or those prone to disturbance, such as paving\r\nover buried services or utilities, will typically have shorter\r\ndesign lives.\r\nConcrete may be used in one or more types of asset\r\nthroughout its functional life, depending on regional policies\r\nand trends surrounding end-state concrete use. This topic is\r\ncovered in further detail in (Section 3.2.3.2.1). Similarly,\r\nasphalt may be recycled into new pavement or other civil\r\nengineering projects throughout its functional life (Section\r\n3.2.3.2.2).\r\nAcross long timescales, the process of construction,\r\ndemolition and reuse may occur several times, and each of\r\nthese cycles will have a Project-specific associated reversal\r\nrisk (described in depth in Section 10.0). Consequently, the\r\nuncertainty in the remaining biochar content, and thus the\r\nvolume of CO stored within a given amount of a built\r\nmaterial, increases with each subsequent construction￾demolition-reuse cycle. The design life of an asset therefore\r\ninfluences the number of these cycles that an amount of\r\nconcrete may move through across 1,000+ years, which is\r\ncritical for informing models of reversal risk (Section 10.0). A\r\nlist of common asset types and their typical design life (as\r\ndefined in EN 1990:2023 and CD 226) is given in Table 1.\r\n2\r\n3.2.3.2\r\nEnd-State Use Cases\r\nFigure 1 summarizes the typical life cycle of concrete, from\r\nprocurement of raw material, through to processing, use and\r\n3.2.3.2.1\r\nConcrete\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 16/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 17 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "end-of-life scenarios. In the context of this Module, end￾state use case refers to the fate of a given amount of\r\nbiochar-amended concrete co-located within a single asset\r\nafter the functional service life of that asset. How concrete is\r\nused after the end of an asset's life is influenced by a variety\r\nof complex factors, notably the geographic location and the\r\neconomic and regulatory landscape for particular waste\r\nroutes. Here, we discuss five possible end-state use cases\r\nand implications for CO stored within concrete.\r\n1. In-situ Reuse\r\nIn-situ reuse refers to extending the use of concrete in its\r\noriginal form. Some level of repair may be required. Because\r\nthe concrete remains in its original form, it is not subjected to\r\nadditional reversal risk and stored biochar is considered\r\nstable.\r\n2. Ex-situ Reuse\r\nEx-situ reuse refers to reuse of concrete in its original form,\r\nbut in a different asset. This is uncommon practice for\r\nreinforced structural concrete elements due to the difficulty\r\nof extracting these components, lack of demand and the\r\nrelatively low cost of new concrete. There are greater\r\nopportunities for ex-situ reuse with precast concrete\r\nelements, as these may be designed to facilitate\r\ndeconstruction. There are currently limited regulatory\r\nframeworks worldwide that incentivize extensive re-use,\r\nthough some examples do exist (see Norwegian Standard\r\nNS 3682). Frameworks currently under development will likely\r\nlimit concrete reuse based on exposure class, potentially\r\nresulting in more extensive reuse of lower performance\r\nelements. Because the concrete remains in its original form,\r\nit is not subjected to additional reversal risk and stored\r\nbiochar is considered stable.\r\n3. Closed-loop Recycling\r\n2\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 17/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 18 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Closed-loop recycling refers to waste processing that\r\noccurs in a closed loop, allowing the waste to retain its\r\noriginal value and return to the original production process.\r\nTechnologies for concrete closed-loop recycling remain\r\nnascent and have not yet been deployed at scale. As such,\r\nthe current likelihood that concrete will be recycled at end￾of-life is very low. However, it is important to note that\r\nclosed-loop recycling commonly involves high-temperature\r\nwaste processing that may result in exposure and\r\ndegradation of stored biochar.\r\n4. Downcycling\r\nDowncycling refers to waste processing where the resultant\r\nproduct has lower value than the original product. This is the\r\nmost common end-state use case for concrete, for example\r\napproximately 90% of concrete and demolition waste in the\r\nUK is managed in this way (DEFRA, UK Statistics on Waste .\r\nThis process typically involves crushing of concrete and\r\nsubsequent use in applications such as road subbase,\r\ncoastal defenses, engineering fill and external landscaping.\r\nDowncycled concrete may also be used as aggregate in new\r\nconcrete products in instances where contamination from\r\nother waste products is low. Downcycling increases\r\nuncertainty about the location of biochar-amended\r\nconcrete, but does not introduce any direct reversal risks.\r\n5. Landfill\r\nConcrete is landfilled when it cannot be effectively used in\r\nanother application through reuse, closed-loop recycling or\r\ndowncycling. Landfilled concrete can be assumed to remain\r\nwithin a single storage location for long timescales,\r\ndecreasing geographical uncertainty. However, additional\r\nreversal risks may be introduced (e.g. acidic groundwater)\r\ndepending on regional environmental characteristics and\r\nregulations.\r\n29\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 18/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 19 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "A report published by the National Asphalt Pavement\r\nAssociation in 2024 found that 99% of reclaimed asphalt\r\npavement (RAP) is recycled, with 93% reused in new asphalt\r\npavements and the remaining percentage used in other civil\r\nengineering projects, such as unbound aggregate bases. A\r\nsmall percentage (0.2% reported in 2022) of RAP is landfilled\r\nif it cannot be used in construction, for example if it contains\r\nhazardous materials.\r\nIn addition to recycling and landfilling of asphalt, it is\r\nimportant to note that some material is removed from road\r\nsurfaces due to abrasion caused by friction between tire\r\ntreads and the pavement, generating tire wear particles\r\n(TWP) and road pavement wear particles (RPWP). The road\r\nabrasion rate is dependent on several factors, including\r\ndriving conditions and traffic volume, but has been reported\r\nat 0.04-0.5 mm per year . A recent study found that, for\r\nasphalt pavement, wear particle size distributions peaked at\r\n63-106 μm, with 84% of the wear particles falling in the size\r\nrange of 38-212 μm. This introduces uncertainty in the\r\nenvironment to which these particles will be exposed and\r\nmay potentially increase the risk of reversal (See Section\r\n10.0). If biochar is used exclusively in sub-surface layers\r\n(e.g., binder or base courses), it is generally not exposed to\r\ndirect mechanical wear and thus less susceptible to particle\r\nloss through abrasion. Project Proponents are\r\nrecommended to specify the location of biochar within the\r\npavement structure. However, it should be noted that the\r\napproach for assessing reversal will still be consistent with\r\nthe approach used for concrete applications (See Section\r\n10.0).\r\n3.2.3.2.2\r\nAsphalt\r\n30\r\n31 32\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 19/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 20 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "The Project Proponent must specify in the Project Design\r\nDocument (PDD) how contaminant levels will be monitored,\r\nincluding their potential impact on product quality and the\r\nsurrounding environment, the specific contaminants to be\r\ntracked, and the frequency of testing. If material quality or\r\ngroundwater are demonstrated or anticipated to be\r\nadversely affected, the Project Proponent must complete the\r\nfollowing:\r\nThe Project Proponent must collaborate with relevant\r\nstakeholders to implement product quality practices\r\nthat maintain product quality and limit any potential\r\nimpacts on human health.\r\nThe Project Proponent must provide technical support,\r\ntraining and resources to help relevant stakeholders\r\nadapt to any changes in soil conditions due to the CDR\r\nproject, including scenarios such as runoff or leaching\r\nfrom biochar-enhanced materials. This support could\r\ninclude optimizing biochar properties to facilitate\r\nremediation.\r\n4.0\r\nEnvironmental and Social\r\nSafeguards\r\nAs outlined in the Biochar Production and Storage Protocol,\r\nthere are some potential risks to environmental and human\r\nhealth associated with biochar composition, for example:\r\nHeavy metals, which may impact soil health and may be\r\ntransported through groundwater flow\r\n4.1\r\nRequired measurements\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 20/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 20 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 21 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Contamination Persistent Organic Pollutants\r\nProject Proponents must include environmental legal and\r\nregulatory requirements applicable to their Project in the\r\nPDD. In the absence of regulation, the World Biochar\r\nCertificate guidelines must be met for storage of biochar in\r\nmaterials for:\r\n1. Heavy metals; including Pb, Cd, Cu, Ni, Hg, Zn, Cr, As,\r\nSb, Co, V (declaration of concentration required)\r\n2. Organic contaminants; including: a. 16 EPA PAH\r\n(declaration of concentration required) b. PCB (0.2 mg\r\nkg⁻¹ DM) c. PCDD/F (20 ng kg⁻¹)\r\nBest practice for how to carry out measurements of these\r\nparameters is provided by the World Biochar Certificate ,\r\nand should be followed by Project Proponents and outlined\r\nin full in the PDD.\r\n33\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 21/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 22 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Activities that were already occurring and would continue to\r\noccur without the Project may be omitted from the system\r\nboundary of the GHG accounting, if evidence that the\r\nactivity was already occurring and would have continued to\r\noccur in the absence of the biochar storage activity can be\r\nprovided. Emissions associated with upstream and\r\ndownstream activities associated with the biochar storage\r\nprocess may be omitted from the system boundary if the\r\nbiochar-amended product meets the same performance\r\nrequirements as a conventional product for the intended use\r\ncase and does not require additional products or activities\r\nrelated to product manufacturing, installation, maintenance\r\nand end-of-life, as compared to conventional products. This\r\nis based on the assumption that emissions associated with\r\nbiochar-amended product manufacturing, installation,\r\nmaintenance and end-of-life would have occurred anyway\r\nhad a different product been produced and used. The\r\nexception to this rule is that additional information is\r\nrequired for exclusion of transport emissions, including\r\ntransport of biochar-amended built materials to the end-use\r\nsite (defined as the final location where the biochar￾amended product is installed or used). This is to negate the\r\nrisk of induced transport associated with lower availability\r\nof novel biochar-amended products. In order to exclude\r\ntransport emissions from the system boundary, the Project\r\nProponent must provide suitable justification that transport\r\ndistances are expected to be within the bounds of national\r\naverage transport distances for equivalent conventional\r\nmaterials.\r\nEmissions associated with all activities and equipment\r\nrelated to biochar storage in the built environment must be\r\nfully accounted for within the Project system boundary.\r\n5.0\r\nSystem Boundaries\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 22/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 23 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "The chemical analyses required to assess the reactivity and\r\ndurability of biochar-C in different storage environments are\r\ngiven in Table 2. Some of these measurements will be used in\r\nthe quantification of CO e stored, as outlined in Section 7.0.\r\nThe required and recommended measurements listed below\r\ninvestigate multiple mechanisms of reactivity (or prevention\r\nof), including aromaticity and aromatic condensation,\r\nfunctional groups and volatility.\r\nSpecific analysis, including heavy metals and PAHs, should\r\nbe conducted to assess the potential impact of biochar\r\nwhen used in building materials.\r\nPlease note that this is not an exhaustive list of analytical\r\nmethods for each property. If Project Proponents wish to use\r\nan alternative, appropriate method of analysis, they may\r\njustify its use in the PDD.\r\nTable 2: Requirements for physical characterization of\r\nbiochar\r\nPROPERTY THRESHOLD\r\nANALYTICAL\r\nMETHOD DESCRIPTION\r\nMONITORING\r\nFREQUENCY\r\nRECOMMEN\r\nOR REQUIRE\r\nTotal Carbon\r\nContent\r\n- Standard Test\r\nMethods for\r\nDetermination of\r\nCarbon, Hydrogen\r\nand Nitrogen in\r\nAnalysis Samples\r\nof Coal and\r\nCarbon in Analysis\r\nSamples of Coal\r\nand Coke ASTM\r\nThe carbon\r\ncontent of\r\napplied biochar\r\nis necessary for\r\nthe\r\nquantification\r\nC and thus\r\nCO e stored, in\r\naccordance with\r\nSection 7.0 See\r\nMeasure every\r\nproduction/storage\r\nbatch as per the\r\nguidance in\r\nSection 8.3.1 of the\r\nBiochar Production\r\nand Storage\r\nProtocol. Minimum\r\nnumber of 3\r\nRequired\r\n6.0\r\nBiochar Characterization\r\n2\r\norg\r\n2\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 23/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 24 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "PROPERTY THRESHOLD\r\nANALYTICAL\r\nMETHOD DESCRIPTION\r\nMONITORING\r\nFREQUENCY\r\nRECOMMEN\r\nOR REQUIRE\r\nD5373 or\r\nStandard Test\r\nMethod for\r\nDetermination of\r\nCarbon, Hydrogen\r\nand Nitrogen in\r\nAnalysis of Solid\r\nBiofuels EN ISO\r\n16948:2015\r\nthe Biochar\r\nProduction and\r\nStorage\r\nProtocol for\r\ncarbon content\r\nsampling\r\nguidance.\r\nsamples per\r\nstorage batch.\r\nInorganic\r\nCarbon\r\nContent\r\n(C )\r\n-\r\nStandard Test\r\nMethod for Rapid\r\nDetermination of\r\nCarbonate\r\nContent of Soils\r\nASTM D4373-02\r\nor Testing of Solid\r\nFuels -\r\nDetermination of\r\nthe Carbonate\r\nCarbon Dioxide\r\nContent DIN\r\n51726:2004-06\r\nMeasurement of\r\ninorganic\r\ncarbon in\r\nbiochar is\r\nrequired to\r\naccurately\r\ndifferentiate C\r\nfrom total\r\ncarbon content,\r\nwhich may\r\ninclude both\r\ninorganic and\r\norganic forms.\r\nOnly C is\r\ncredited for\r\nunder this\r\nProtocol and\r\nModule.\r\nMeasure every\r\nproduction/storage\r\nbatch as per the\r\nguidance in\r\nSection 8.3.1 of the\r\nBiochar Production\r\nand Storage\r\nProtocol. Minimum\r\nnumber of 3\r\nsamples per\r\nstorage batch.\r\nRequired\r\nm - Direct mass\r\nmeasurement with\r\ncalibrated weigh\r\nscales\r\nThe carbon\r\ncontent of\r\napplied biochar\r\nis necessary for\r\nthe\r\nquantification of\r\nMeasure every\r\nstorage batch\r\nRequired\r\ninorg\r\norg\r\norg\r\nbiochar\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 24/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 24 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 25 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "PROPERTY THRESHOLD\r\nANALYTICAL\r\nMETHOD DESCRIPTION\r\nMONITORING\r\nFREQUENCY\r\nRECOMMEN\r\nOR REQUIRE\r\nCO e stored, in\r\naccordance with\r\nSection 7.0. See\r\nthe Biochar\r\nProduction and\r\nStorage\r\nProtocol for\r\ncarbon content\r\nsampling\r\nguidance.\r\nMoisture\r\nContent\r\n-\r\nStandard Test\r\nMethods for\r\nDetermination of\r\nMoisture Content\r\nin Analysis\r\nSamples of Wood\r\nCharcoal ASTM\r\nD1762-84 or\r\nStandard Test\r\nMethod for\r\nDetermination of\r\nMoisture Content\r\nin Analysis of\r\nChemical and\r\nPhysical Tests of\r\nSoil Improvers BS\r\nEN 13040:2007\r\nThe moisture\r\ncontent of\r\napplied biochar\r\nis necessary for\r\nthe\r\nquantification of\r\nCO e stored, in\r\naccordance with\r\nthe Biochar\r\nProduction and\r\nStorage\r\nProtocol.\r\nCarbon content\r\ncan be reported\r\non a dry basis to\r\naccount for\r\ndifferences in\r\ntotal biochar\r\nmass.\r\nMeasure every\r\nproduction/storage\r\nbatch as per the\r\nguidance in\r\nSection 8.3.1 of the\r\nBiochar Production\r\nand Storage\r\nProtocol. Minimum\r\nnumber of 3\r\nsamples per\r\nstorage batch\r\nRequired\r\nRandom\r\nReflectance\r\n(R₀)\r\n> 2% White-light\r\nmicroscopy, eg\r\nISO 7404-5:2009\r\nRandom\r\nreflectance is an\r\nindicator of\r\naromaticity,\r\nMeasure every\r\nproduction/storage\r\nbatch as per the\r\nguidance in\r\nRequired\r\n2\r\n2\r\n10,34\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 25/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 25 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 26 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "PROPERTY THRESHOLD\r\nANALYTICAL\r\nMETHOD DESCRIPTION\r\nMONITORING\r\nFREQUENCY\r\nRECOMMEN\r\nOR REQUIRE\r\naromatic ring\r\nunit size and\r\ncondensation. A\r\nR₀ value greater\r\nthan 2% has\r\nbeen proposed\r\nas a benchmark\r\nfor quantifying\r\nthe permanent\r\npool of carbon\r\nin a biochar. The\r\nR₀ frequency\r\ndistribution\r\nhistogram can\r\nbe used to\r\ndecide what\r\nfraction of\r\nbiochar above\r\nthis benchmark\r\ncan be\r\nclassified as\r\nchemically inert\r\n.\r\nSection 8.3.1 of the\r\nBiochar Production\r\nand Storage\r\nProtocol. Minimum\r\nnumber of 3\r\nsamples per\r\nstorage batch\r\n8\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 26/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 27 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "PROPERTY THRESHOLD\r\nANALYTICAL\r\nMETHOD DESCRIPTION\r\nMONITORING\r\nFREQUENCY\r\nRECOMMEN\r\nOR REQUIRE\r\nReactive\r\nOrganic\r\nCarbon and\r\nResidual\r\nOrganic\r\nCarbon (C\r\n)\r\n-\r\nThermogravimetric\r\nanalysis e.g.,\r\nHawk, Rock-Eval®\r\nor equivalent. The\r\nsample is\r\nsubjected to re￾pyrolysis using a\r\nstandardized\r\nheating\r\nprocedure: it is\r\nfirst held\r\nisothermally at\r\n300°C, then\r\nheated at a rate of\r\n25°C per minute\r\nuntil reaching\r\n650°C. During this\r\nstage, the reactive\r\norganic carbon is\r\nvolatilized and\r\nquantified. The\r\nremaining material,\r\nreferred to as\r\n“residual organic\r\ncarbon,\r\n” is\r\nsubsequently\r\nmeasured by\r\ncombustion at\r\ntemperatures up\r\nto 850°C.\r\nMeasurement of\r\nreactive organic\r\ncarbon in\r\nbiochar is\r\nimportant\r\nbecause this\r\nfraction\r\nrepresents the\r\nmore labile,\r\neasily\r\ndegradable\r\ncomponent of\r\norganic carbon.\r\nElevated levels\r\nof ROC can\r\nreduce biochar’s\r\nlong-term\r\ncarbon stability,\r\nas it is more\r\nsusceptible to\r\nmicrobial\r\ndecomposition\r\nand\r\nmineralization in\r\nsoil. Random\r\nreflectance\r\nvalues are\r\nsubsequently\r\nonly applied to\r\nthe residual,\r\nstable fraction\r\nof biochar.\r\nMeasure every\r\nproduction/storage\r\nbatch as per the\r\nguidance in\r\nSection 8.3.1 of the\r\nBiochar Production\r\nand Storage\r\nProtocol. Minimum\r\nnumber of 3\r\nsamples per\r\nstorage batch\r\nRequired\r\nnon￾reactive\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 27/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 28 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "PROPERTY THRESHOLD\r\nANALYTICAL\r\nMETHOD DESCRIPTION\r\nMONITORING\r\nFREQUENCY\r\nRECOMMEN\r\nOR REQUIRE\r\nAsh Content -\r\nStandard Test\r\nMethod for the\r\nDetermination of\r\nAsh Content in\r\nSolid Biofuels ISO\r\n18122:2022\r\nAsh is the\r\ninorganic\r\nportion of\r\nbiochar that will\r\nnot volatilize\r\neven if\r\ncombusted\r\nMeasure every\r\nproduction/storage\r\nbatch as per the\r\nguidance in\r\nSection 8.3.1 of the\r\nBiochar Production\r\nand Storage\r\nProtocol. Minimum\r\nnumber of 1\r\nsamples per\r\nstorage batch\r\nRequired\r\nPolycyclic\r\nAromatic\r\nHydrocarbons\r\nPAHs, sum of\r\nUSEPA 16\r\n- Gas\r\nChromatography\r\ncoupled with\r\nMass\r\nSpectrometry\r\n(GC-MS) and/or\r\nHigh Performance\r\nLiquid\r\nChromatography\r\nanalysis eg ISO\r\n13859:2014 or BS\r\nEN 17503:2022\r\nPolycyclic\r\naromatic\r\nhydrocarbons\r\nare organic\r\nmolecules with\r\nfused aromatic\r\nrings that can\r\nbe formed\r\nduring the\r\npyrolysis\r\nprocess and\r\nretained in the\r\nbiochar. They\r\nare chemically\r\nstable with a\r\nhigh sorption\r\ncapacity, known\r\ncarcinogens and\r\nare persistent\r\npollutants that\r\ncan travel in the\r\nMeasure at project\r\nvalidation unless\r\nfeedstock, reactor\r\nor process\r\nparameters\r\nchange. Minimum\r\nnumber of 1 sample\r\nRequired\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 28/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 28 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 29 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "PROPERTY THRESHOLD\r\nANALYTICAL\r\nMETHOD DESCRIPTION\r\nMONITORING\r\nFREQUENCY\r\nRECOMMEN\r\nOR REQUIRE\r\nenvironment\r\nchain.\r\nHeavy metals\r\nincluding As,\r\nCr, Cd, Co,\r\nCu, Hg, Ni, Pb,\r\nSb, Zn, V\r\n-\r\nElements As, Cd,\r\nCr, Cu, Ni, Pb, Zn\r\nrefer to EN ISO\r\n17294-2 ICP - MS\r\nstandard test\r\nmethod for\r\ndetermination of\r\nselected elements.\r\nElement Hg refer\r\nto ISO 16772:2004\r\nstandard test\r\nmethod for the\r\ndetermination of\r\nMercury using\r\ncold - vapor\r\natomic absorption\r\nspectrometry.\r\nElements Sb, Co, V\r\nrefer to EN\r\n15411:2011\r\nstandard test\r\nmethod for the\r\ndetermination of\r\ntrace elements\r\nConcentration\r\nof heavy metals\r\nin biochar is\r\ndependent on\r\nthe feedstock\r\nand the process\r\nused . Specific\r\nheavy metals\r\nhave adverse\r\neffects and are\r\nselected for\r\nmonitoring .\r\nHigh\r\nconcentrations\r\nof heavy metals\r\nmay result in\r\nbioaccumulation\r\nin biotic systems\r\nand increase\r\ntoxicity in soils\r\nand the\r\nenvironment .\r\nMeasure at project\r\nvalidation unless\r\nfeedstock, reactor\r\nor process\r\nparameters\r\nchange. Minimum\r\nnumber of 1 sample\r\nRequired\r\n35\r\n36\r\n37\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 29/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 30 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "7.0\r\nQuantification of CO2eStored\r\nThis section details the calculation of net CO storage in\r\nbiochar-amended built materials. The monitoring\r\nrequirements are described in detail in Section 8.0.\r\nAccurate quantification of net CO stored requires a robust\r\nquantification of associated project emissions within the\r\nproject boundary. In the context of this Module, a Project\r\nrefers to the point of CO capture and the point of CO\r\nstorage. This Module defines the point of CO storage as the\r\npoint of incorporation of biochar into a built material. Note\r\nthat this Module only applies to biochar that is considered\r\nto be durable for 1,000 years.\r\nProjects are required to provide detailed descriptions of\r\nproject boundaries for all Crediting activities. Project\r\nboundaries must include all areas where removal\r\nmechanisms/processes may occur, removed carbon storage\r\nlocations/forms and potential reversal/loss pathways.\r\n7.1\r\nSummary\r\n2\r\n2\r\n2 2\r\n2\r\nThe quantity of net CO removal for each Reporting\r\nPeriod,RP, can be calculated as follows:\r\n7.2\r\nQuantification of CO2eRemoval\r\n2\r\nCO2eRemoval, RP = CO2eStored, RP − CO2eCounterfactual, RP − CO2eEm\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 30/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 30 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 31 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "(Equation 2)\r\nWhere:\r\nis the net quantity of CO e removed as\r\na result of Project activities during a Reporting Period, in\r\ntonnes of CO e.\r\nis the total quantity of carbon stored as\r\nbiochar in the built environment during a Reporting\r\nPeriod, in tonnes of CO e.\r\nis the total quantity of CO\r\nremoved from the atmosphere and permanently stored\r\nin the baseline scenario during a Reporting Period, in\r\ntonnes of CO e.\r\nis the total quantity of greenhouse\r\ngas (GHG) emissions from Project activities for a\r\nReporting Period, in tonnes of CO e.\r\nCO2eRemoval, RP 2\r\n2\r\nCO2eStored, RP\r\n2\r\nCO2eCounterfactual, RP 2\r\n2\r\nCO2eEmissions, RP\r\n2\r\n(Equation 3)\r\nWhere\r\nis the total quantity of carbon stored as\r\nbiochar in the built environment during a Reporting\r\nPeriod, in tonnes of CO e.\r\n7.2.1\r\nCalculation of CO2eStored\r\nCO2e,Stored, RP = CBiochar × mBiochar × FDurable, Material ×\r\n12\r\n44\r\nCO2eStored, RP\r\n2\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 31/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 32 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "is the carbon content of the biochar (empirical,\r\nin %).\r\nis the dry mass of biochar incorporated, in\r\ntonnes.\r\nis the fraction of durable biochar that\r\nremains in the built material for the full duration of the\r\nCrediting timeline (1,000 years), and can be Credited\r\nunder this Module.\r\nis the mass fraction of carbon dioxide and elemental\r\ncarbon.\r\nCBiochar\r\nmBiochar\r\nFDurable,Material\r\n12\r\n44\r\nThis Module only Credits for the durably stored organic\r\ncarbon fraction of biochar, which is used to calculate\r\n. While biochar associated inorganic carbon\r\ngenerally makes up a small fraction of total biochar carbon.\r\nHowever, the fate of biochar-associated inorganic carbon is\r\nmuch less predictable. Thus, is calculated using the\r\nfollowing equation:\r\n(Equation 4)\r\nWhere:\r\nTotal Carbon Content is the total carbon content of the\r\nbiochar as analysed using the methods described in\r\nTable 2.\r\n7.2.1.1\r\nCalculation of Organic Carbon Content\r\nCO2eStored\r\nCBiochar\r\nCbiochar = Total Carbon Content − Cinorg\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 32/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 33 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "is the inorganic carbon content of the biochar as\r\nanalysed using the methods described in Table 2, in %.\r\nCinorg\r\nSee Section 8.3.1.1 of the Biochar Production and Storage\r\nProtocol for full guidelines on measurement of mass of\r\nbiochar buried, .\r\n7.2.1.2\r\nMeasurement of Mass of Biochar Incorporated\r\nmBiochar\r\nis calculated as:\r\n(Equation 5)\r\nWhere:\r\nis the fraction of durable biochar that\r\nremains in the built material for the full duration of the\r\nCrediting timeline (1,000 years), and can be Credited\r\nunder this Module.\r\nis the fraction of biochar that is present as\r\ninertinite.\r\nis the fraction of biochar that is assumed to\r\ndegrade over a 1,000 year period. Note that a safety\r\nfactor of 3 is included in this calculation to account for\r\nuncertainty in the amount of exposure over a 1,000 year\r\nperiod.\r\n7.2.1.3\r\nCalculation of FDurable, Material\r\nFDurable,Material\r\nFDurable,Material = FInertinite + [1 − (3 × FReversal)]FLabile\r\nFDurable,Material\r\nFInertinite\r\nFReversal\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 33/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 34 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "is the fraction of biochar that is not present as\r\ninertinite and may degrade if exposed to ambient\r\natmospheric conditions.\r\nFLabile\r\nThe quantification framework for determining the\r\nfor 1000-year durability is based on the\r\nquantification approach set out by Sanei et al,. (2024)\r\nThis approach quantifies biochar on the random reflectance\r\nvalue of the biochar, compared to inertinite as a proxy for\r\ngeologically stable carbon. Using petrographic analysis,\r\nSanei et al., (2024) identified that biochars with a mean\r\nrandom reflectance (R₀ ≥ 2%) exhibit structural\r\ncharacteristics equivalent to inertinite macerals in fossil\r\ncoals and chars, which are known to persist over geological\r\ntimescales.\r\nAs outlined in Section 6.0 of this Module, Project Proponents\r\nmust report a set of at least 500 measurements of ,\r\ncalculated at the maceral-level, for each sample of their\r\nbiochar. Batches that adopt this measurement approach\r\ncan be credited for the fraction of their biochar which\r\npasses the 2% benchmark, as outlined in Sanei et al.\r\n(2024) . The histogram of the values must be submitted\r\nat the point of project verification for this Crediting option.\r\nThis method was further updated in Sanei et al., (in\r\nsubmission) to refine the methodology to only account for\r\nthe recalcitrant fraction of biochar (discounting the reactive\r\nfraction, determined by thermogravimetric analysis).\r\nTo ensure a conservative approach when Crediting biochar\r\ndurability, we account for uncertainty in both\r\nmeasurement, and the proportion of carbon that is non￾reactive. Specifically, the credited durable fraction (\r\n) is calculated using the mean values for each parameter\r\n7.2.1.3.1\r\nCalculation of FInertinite\r\nCO2eStored\r\n8 11\r\n8\r\nR0\r\nR0\r\n8 R0\r\n38\r\nR0\r\nFDurable\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 34/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 34 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 35 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "reduced by one standard deviation. This method ensures\r\nthat the durability estimate reflects a lower-bound\r\nconfidence level, mitigating the risk of overestimating long￾term carbon storage.\r\nAs such, is calculated as:\r\n(Equation 6)\r\nWhere:\r\nis the fraction of inert carboniferous material\r\nin a sample after 1000 years.\r\nis the mean of R₀ measurements, in %.\r\nis the individual measurements of , in %.\r\nis the number of measurements for .\r\nis the mean of measurements,\r\nin %.\r\nis the individual measurements of\r\n, in %.\r\nis the number of measurements for .\r\nQuantification of biochar storage for Crediting in the built\r\nenvironment will be updated in future versions of this Module\r\nin line with the best available science as more research in\r\npeer-reviewed literature is published.\r\nFDurable\r\nFinertinite = R0 − R − ×\r\nnR − 1 0\r\n1\r\ni=1\r\n∑\r\nnR0\r\n( 0,i R0)\r\n2 (Cnon-reactive −\r\nFinertinite\r\nR0\r\nR0,i R0\r\nnR0 R0\r\nCnon−reactive Cnon−reactive\r\nCnon−reactive,i\r\nCnon−reactive\r\nnC Cnon−reactive\r\n7.2.1.3.2\r\nCalculation of FReversal\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 35/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 35 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 36 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "This Module distinguishes between for biochar\r\nstored in concrete and biochar stored in asphalt. Note that\r\nfor biochar stored in asphalt is assumed to be\r\n100%, and thus the labile fraction is not included in\r\ncalculation of .\r\nin concrete is determined through a geochemical\r\nmodel that assesses the weathering of a given built material\r\nover 1,000 years. An overview of the geochemical model\r\nused for this assessment and key assumptions underlying\r\nthis model are given in Section 10.0.\r\nThe default value, based on a worst-case assessment\r\n(described in Section 10.0), is 2%. Project Proponents may\r\nchoose to submit additional documentation to conduct a\r\nproject-specific reversal assessment. As shown in Equation\r\n5, a safety factor of 3 is applied to to ensure a\r\nconservative estimate. This approach, and the safety factor\r\napplied, will be reassessed as scientific consensus evolves.\r\nFReversal\r\nFReversal\r\nFDurable,Material\r\nFReversal\r\nFReversal\r\nis defined as the portion of biochar that is not\r\nconsidered inertinite (e.g. does not pass the 2%\r\nthreshold). It is calculated as:\r\n(Equation 7)\r\nWhere:\r\n7.2.1.3.3\r\nCalculation of FLabile\r\nFLabile\r\nR0\r\nFLabile =\r\nmBiochar,total\r\nmBiochar,total − mBiochar,inertinite\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 36/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 37 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "is the fraction of biochar that is not present as\r\ninertinite and may degrade if exposed to ambient\r\natmospheric conditions.\r\nis the total mass of biochar mixed into the\r\nconcrete.\r\nis the total mass of the inertinite\r\nfraction of the biochar mixed into concrete.\r\nFLabile\r\nmBiochar,total\r\nmBiochar,inertinite\r\nFor biochar production, the calculation of\r\nis determined by the requirements\r\nlaid out in Section 2 of the Biomass Feedstock Accounting\r\nModule.\r\n7.2.2\r\nCalculation of CO2eCounterfactual,RP\r\nCO2eCounterfactual, RP\r\nis the total greenhouse gas emissions\r\nassociated with a given Reporting Period, RP.\r\nEquations and emissions calculation requirements for\r\nincluding emissions associated with\r\nreactor operations and reaction monitoring, are set out in\r\nthe relevant Protocol and are not included in this Module.\r\nSpecific considerations for CO stored as biochar in built\r\nmaterials are set out here.\r\nCO removals must not be double counted, regardless of the\r\nproduction of product Environmental Product Declarations.\r\nThe product must still comply with all relevant emission\r\naccounting regulations and requirements, which may mean\r\nemissions are double counted, however removals must not\r\nbe double counted. This is the most conservative approach\r\n7.2.3\r\nCalculation of CO2eEmissions,RP\r\nCO2eEmissions, RP\r\nCO2eEmissions, RP\r\n2\r\n2\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 37/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 37 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 38 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "to take. Crediting claims must be transparently reported and\r\nmust not form part of marketing for a separate product. Allocation procedures may be undertaken to separate\r\nemissions associated with the concrete production and the\r\nemissions associated with the CO storage process.\r\nAllocation procedures must follow the following emissions\r\nallocation procedure:\r\nProcedure 1: Allocate all emissions to CDR\r\nProjects may opt to allocate all emissions to CDR.\r\nProcedure 2: Divide the process into sub-processes\r\nWhere possible, the process may be divided into sub￾processes. For example it may be possible to isolate\r\nprocesses relating to processing and storing CO only.\r\nOnly sub-processes and relevant inputs that are\r\nphysically separable may undergo division, for example\r\nelectricity usage for equipment with separate electricity\r\nmeters. Sub-processes that are physically separable\r\nand do not contribute to CDR may be excluded from the\r\nCDR system boundary.\r\nTransport emissions must be considered if the average\r\ntransport distance for biochar-amended built materials is\r\nmore than the average transport distance of normal\r\nproducts produced by the production facility. All other\r\ndownstream emissions may be excluded from the system\r\nboundary if these activities were already occurring and\r\nwould continue to occur in the absence of the Project. This\r\ncan be evidenced by providing documentation that biochar￾amended product meets the same performance\r\nrequirements of a conventional product for the intended use\r\ncase, as is described under 'Applicability'\r\n.\r\n2\r\n2\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 38/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 39 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "As outlined in Section 5.6.2 of the Isometric Standard, the\r\nBuffer Pool is a mechanism used to insure against Reversal\r\nrisks that may be observable and attributable to a particular\r\nproject through monitoring. Based on present\r\nunderstanding, reversals in Biochar storage will not be\r\ndirectly observable with measurements and attributable to a\r\nparticular project. Projects Crediting against this Module\r\nare Credited conservatively to account for degradation of\r\nlabile pools of biochar within the relevant Crediting time\r\nhorizon. Projects applicable to this Module are categorized\r\nas having a Very Low Risk Level of Reversal according to the\r\nIsometric Standard Risk Assessment Questionnaire. The\r\nBuffer Pool corresponding to this lowest risk score is 2% and\r\nis intended as an additional precaution against unknowns.\r\n7.3\r\nBuffer Pool\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 39/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 40 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "This section outlines the monitoring requirements for\r\nProjects incorporating biochar in building materials either as\r\na filler, aggregate, modifier or other form.\r\n8.0\r\nMonitoring Requirements\r\nProject Proponents are required to provide detailed\r\ninformation on the end material production process in the\r\nPDD. This must include:\r\nThe reactor and equipment description including\r\nengineering design diagrams.\r\nMass percentage of biochar wt.% incorporated into the\r\nfinal construction material (e.g., concrete, brick,\r\ninsulation panel).\r\nProcess specific details including energy consumption,\r\ncuring steps or processing temperatures.\r\nA list of all additional materials or admixtures (e.g.,\r\nsuperplasticizers, accelerators, binders) that are\r\nrequired as a direct consequence of using biochar,\r\nalong with an explanation of their function and whether\r\nthey would be present in the baseline mix design.\r\nTo verify incorporation of biochar into the final product,\r\nProject Proponents must provide documentation in the PDD\r\nin one of the three forms:\r\nBills of sale for biochar-containing admixtures or\r\nmaterials.\r\nFinal product specifications from downstream users, or\r\n8.1\r\nProcess Requirements\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 40/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 41 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Environmental Product Declarations (EPDs) where\r\navailable.\r\nIf the biochar-based product is sold to multiple downstream\r\nmanufacturers (e.g., concrete producers with different mix\r\ndesigns), Project Proponents may provide a representative\r\nrange of use cases and typical incorporation rates, along\r\nwith supporting documentation. In such cases, justification\r\nfor the assumed biochar content in the final construction\r\nmaterial must be clearly stated, and conservative\r\nassumptions must be used.\r\nAn engineering design diagram of the process steps and\r\nequipment used must be included in the PDD. The design\r\ndiagram must include:\r\nDetails of the processing steps.\r\nDimensions and footprints of the equipment and/or\r\nreactor.\r\nThe location of materials inflows/outflows.\r\nPositioning of sensors and any monitoring devices (e.g.,\r\nflow meters, temperature sensors).\r\nProcess details should include acceptable processes\r\nincluding, but not limited to:\r\nParticle size reduction grinding or milling.\r\nMixing, stirring or blending.\r\nCalcination.\r\nDrying and heating (mainly applicable for asphalt\r\nproduction).\r\n8.1.1\r\nReactor and Equipment Description\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 41/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 42 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Characterization of biochar and ongoing monitoring\r\nrequirements are outlined in Section 6.0 and must be\r\nincluded in the PDD for validation and subsequently\r\nsubmitted for verification adhering to the sampling\r\nfrequency requirements.\r\n8.1.2\r\nBiochar Characterization\r\nThough not required, providing specific site information can\r\nhelp demonstrate reduced risk of carbon loss if certain\r\nthresholds are met and highlight portions of the material\r\nstream that may require additional assessment. This may\r\ninclude:\r\nFor asphalt applications:\r\nAsphalt lifespan\r\nTraffic density\r\nAsphalt density\r\nFor concrete applications:\r\nStructural/design lifespan of concrete\r\nExposure class (e.g. using EN206 or equivalent)\r\nConcrete type and strength class\r\nApplication type (example include but are not limited to;\r\nfoundations, structural, decorative)\r\nDemolition likelihood or planned obsolescence\r\nEstimated fraction of returned or unused concrete from\r\nconstruction sites, and its associated end-of-life fate\r\n(e.g., landfill, reuse, downcycling)\r\n8.1.3\r\nStorage Site\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 42/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 43 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "An applicability criteria for Crediting with this Module is that\r\nthe biochar-amended built materials must meet the same\r\nperformance requirements as conventional products for the\r\nintended use case. Project Proponents are required to\r\ndemonstrate compliance with the relevant standards for the\r\nuse case of each mix produced, while also demonstrating\r\nthe product is comparable to traditional products and\r\nresults in no additional product use. It is the responsibility of\r\nthe Project Proponent to clearly demonstrate comparability\r\nbetween produced products and traditional products within\r\nthe PDD submitted to the Project VVB and Isometric.\r\nStandards, methodologies and SOP's that are utilized by a\r\nProject Proponent must be clearly outlined and referenced\r\nin the PDD upon submission, and deviations from standards\r\nmust be highlighted.\r\nBuilt materials produced for the purpose of carbon storage\r\nand Credit issuance are expected to meet the required\r\nperformance standards and criteria for the intended\r\napplication, as defined by applicable codes or regulations.\r\nThese materials should be demonstrably fit for purpose and\r\ncomparable in functional performance to traditional\r\nproducts that would have been used in the absence of the\r\nbiochar-amended material. This may be achieved through\r\nthe undertaking of standardized performance testing\r\nprocedures required in the location the material is utilized. In\r\nthe absence of local or regional standards related to\r\nproduction and performance criteria, a Project Proponent is\r\nrequired to adhere to International Organization for\r\nStandardization (ISO) and/or CEN (the European Committee\r\nfor Standardization) criteria. The final product should be\r\ncompliant with relevant product standards such as EN\r\n9.0\r\nCompliance with Product\r\nStandards\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 43/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 44 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "15804 for Environmental Product Declaration in the\r\nconstruction industry, relevant product classes and quality\r\nstandards that are applicable.\r\nEvidence and data, resulting from research studies of\r\nbiochar addition in built materials such as asphalt, cement\r\nor other building elements, have shown the potential for\r\nadditional benefits and improvements on the final product\r\nquality . Biochar addition can impact a range of\r\ndifferent properties (mechanical, chemical and physical\r\nproperties) including but not limited to the following:\r\nFlexural strength (N/mm²)\r\nSound absorption (Hz) (applicable for concrete and\r\nother building elements like insulation or plaster)\r\nCompressive strength (N/mm²)\r\nTensile strength (N/mm²)\r\nDensity (kg/m³)\r\nElectrical resistance [Ω]\r\nSorption capacity\r\nFire resistance (fire retardant or fire resistance)\r\nProject Proponents should include any additional product\r\ncharacterization, analysis and reported properties of the\r\nfinal produced materials. Changes or deviations from the\r\nbaseline product values should also be included and\r\nrelevant product standards referenced in the PDD Appendix.\r\nDepartures from standard may be permissible on a case-by￾case basis. Project Proponents seeking a departure from\r\nstandard must submit documentation on the requested\r\ndeparture and proof of approval by the relevant regulatory\r\nbody to Isometric and the VVB.\r\n4,39,40\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 44/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 45 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "10.0\r\nAppendix 1: Reversal risk\r\n10.1\r\nBiochar Durability in the Built\r\nEnvironment\r\nA key consideration for the durability of CO stored in the\r\nbuilt environment is not only exposure to conditions in which\r\nbiochar durability is likely to be negatively impacted, but\r\nalso the uncertainty in the location of the product at any\r\ngiven time. As described in Section 2.2 of the CO Storage\r\nvia Carbonation in the Built Environment Module, a built\r\nmaterial may go through many different use cases in its life\r\ncycle, depending on the initial use case, local regulatory\r\nrequirements and economic incentives. In the traditional\r\nconstruction industry, there has not been a need to track\r\nbuilt materials past the life cycle of an asset, particularly\r\nwhere elements are designed to perform with minimal\r\nmaintenance or intervention. Thus, biochar-amended built\r\nmaterials are likely to transition through several\r\nconstruction-demolition-reuse cycles with minimal ability to\r\ntrack these changes. Over long time periods (e.g. 1,000\r\nyears), this leads to a high degree of uncertainty in both the\r\nstorage location of the product and, consequently, whether\r\nor not the product is exposed to conditions that lead to\r\ndegradation of the biochar. This necessitates a conservative\r\napproach to reversal risk, described in the following section.\r\n10.1.1\r\nDefinition of Storage Uncertainty\r\n2\r\n2\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 45/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 46 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "The labile fraction of biochar is subject to degradation over\r\na longer period of time due to different degradation\r\npathways that are applicable to the physical storage\r\nlocation. These pathways can include:\r\nPhysical loss - abrasion or erosion of the material\r\nsurface, or delamination or spalling, fire or high\r\ntemperature events.\r\nAbiotic degradation - chemical reactions related to\r\nenvironmental factors including but not limited to:\r\nnatural mineralization, photodegradation, leaching due\r\nto water flows or freeze - thaw cycles, acid rain, reaction\r\nwith aggressive chemicals .\r\nMicrobial degradation - through the actions of aerobic\r\nor anaerobic microorganisms or lichen colonisation\r\n.\r\nEach of these pathways is directly influenced by the storage\r\nenvironment, with the relevant site characteristics\r\ninfluencing which degradation pathways may be most\r\nprevalent in that storage environment. The durability of\r\nbiochar is dependent not only on the storage site conditions\r\nbut on biochar's physical and chemical properties (see\r\nSection 6.0 for more information).\r\n10.1.2\r\nBiochar Reversal\r\n41\r\n42,43,44\r\nQuantifying the risk of reversal associated with biochar￾amended concrete is inherently complex, given the high\r\ndegree of uncertainty and variability in possible end-states\r\nof the concrete over 1,000 years. Degradation of the labile\r\n10.1.2.1\r\nBiochar in Concrete\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 46/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 47 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "fraction of biochar within concrete can occur when biochar\r\nparticles become exposed, which may occur when the\r\nconcrete is in a 'use case' (e.g. as part of a building), or when\r\nthe concrete goes through an end-of-life transition (e.g.\r\nrecycled). This is the result of processes such as concrete\r\nloss by physical or chemical weathering, demolition of a built\r\nasset or other processes that expose additional surface\r\narea of the concrete. In most scenarios, physical loss of\r\nconcrete is likely to be the most prevalent loss pathway,\r\nleading to exposure of embedded biochar. This may occur\r\nunder the following scenarios:\r\nDuring use:\r\nExposure to acid rain\r\nContact with acidic groundwater or soils (most relevant\r\nfor foundation uses)\r\nExposure to high temperatures, such as those from\r\nhouse or forest fires\r\nDuring end-of-life processes:\r\nDemolition or detonation, which breaks apart concrete\r\nand exposes internal material\r\nExposure to high temperatures during closed-loop\r\nrecycling, where concrete is reprocessed into clinker\r\nContact with acidic groundwater or leachate in landfill\r\nNote that the likelihood of closed-loop recycling occurring,\r\nwhile potentially resulting in some degradation of the labile\r\nfraction of biochar, is currently extremely low due to the\r\nnascency of the technology. At the time of drafting, there are\r\na limited number of pilot projects operating at small scale,\r\nincluding in the United Kingdom, France and Canada. As\r\nclosed-loop recycling is not currently operating at scale, it\r\nhas been excluded from the calculation of reversal risk at\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 47/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 48 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "this time. However, it is important to note that closed-loop\r\nrecycling, if included in the reversal risk model, has a\r\nsignificant impact on the total reversal risk (Figure A1). The\r\ninclusion of closed loop recycling in the reversal risk model\r\nwill be revisited regularly as data availability increases and\r\ntechnologies develop.\r\nFigure A1: Sensitivity of the likelihood of closed-loop\r\nrecycling on the amount of CO emitted to the atmosphere\r\nfrom closed-loop recycling over 1,000 years. The likelihood\r\nof closed-loop recycling was varied from 0 to 100%, while\r\nthe likelihood of downcycling was decreased accordingly.\r\n2\r\nAs discussed in Section 3.2.3.2.2 asphalt is abraded over\r\ntime due to friction between tire treads and the pavement\r\nsurface. Abraded particles fall within a dust-sized particle\r\nsize distribution, and thus these particles can be easily\r\ntransported away from the road surface by wind or water.\r\nThis leads to uncertainty in the final location of the abraded\r\nparticles, as well as the interactions between the\r\nenvironment and co-abraded biochar. Equally, exposure to\r\n10.1.2.2\r\nBiochar in Asphalt\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 48/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 48 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 49 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "chemicals such as chlorides (from road salt) and sulphates\r\n(from surface water) may lead to destabilisation of the\r\nbiochar structure and increased reactivity. Conservatively\r\nconstraining the amount of biochar that is abraded and\r\nsubject to degradation is a critical step in reliably\r\ndetermining the amount of carbon that is durably stored in\r\nbiochar-amended asphalt.\r\n10.2\r\nReversal Risk Approach and Calculation\r\nof Uncertainty Discounts\r\nDue to limited data on the incidence of high-temperature\r\nstructure fires, the reversal risk presented in this section\r\nfocuses on reversal through contact with low-pH fluids.\r\nNumerical Modelling was adopted as a method for\r\nevaluating the associated reversal risks. The model will be\r\nrevisited as more data becomes available.\r\nTo refine the assumption of reversal due to acidic exposure,\r\na geochemical model that simulates CO loss from concrete\r\ndue to long-term acid exposure was developed using\r\nPHREEQC (version 3), an open-source program for\r\nsimulating chemical reactions and transport processes. This\r\nmodel quantifies the extent of degradation in biochar-based\r\nconcrete over a 1,000-year period due to dissolution of\r\nconcrete in acidic environments, both naturally occurring\r\n(e.g., acid rain, acidic groundwater) and industrially\r\nimpacted (e.g., acid mine drainage)—across a pH range\r\nfrom 7 to 0.1, and subsequent exposure of the labile biochar\r\nfraction to atmospheric conditions.\r\nThe geochemical model incorporates equilibrium and kinetic\r\ninteractions between aqueous solutions and cement phases\r\n10.2.1\r\nConcrete\r\n2\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 49/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 50 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "using the Cemdata18 database: a chemical thermodynamic\r\ndatabase for hydrated Portland cement and alkali-activated\r\nmaterials. Key model parameters, data input are sourced\r\nfrom literature studies include: cement composition ,\r\nreactive surface area (grain size) , reaction constant of\r\nspecific mineral phases and acid concentration .\r\nThe geochemical model assumes no carbonation happened\r\nwithin concrete in advance. The Total Inorganic Carbon\r\n(TIC) content before acid weathering is recorded and used\r\nas baseline comparison with remaining TIC after interaction\r\nwith various acidic fluids. This model considers acid rain,\r\nacidic groundwater, acid mine drainage, and an extreme pH\r\nscenario, represented by varying the amount of sulfuric acid\r\nin the model conditions. Sensitivity analysis was performed\r\non scenarios where reactive surface area and temperature\r\nvaried from low to high. The remaining TIC reported for\r\ndifferent scenarios is based on consumption of the initial\r\nmaterial, with the reaction reaching equilibrium at the last\r\nstep of the model. This allows for the computation and\r\ncomparison of the worst case scenario (pH 0.1, high reactive\r\nsurface area, room temperature). This scenario resulted in\r\napproximately 2% loss of the initial concrete material. In\r\nsome less aggressive conditions (e.g., groundwater at pH 7),\r\nthe loss was as low as less than 0.001%.\r\nTaking the result of this reversal risk model, some simplifying\r\nassumptions can be used to conservatively estimate the\r\nportion of biochar that will degrade over 1000 years. These\r\nassumptions include:\r\nBiochar is evenly distributed in the concrete, and the\r\nlabile fraction is evenly distributed among the biochar\r\nparticles.\r\nThe labile fraction of exposed biochar will degrade.\r\n44,45\r\n46,47\r\n48,49,50,51 52,53\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 50/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 50 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 51 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Using this framework, it can be assumed that 2% of concrete\r\nloss by mass over 1000 years correlates with 2% of biochar\r\nby mass that will be exposed to conditions that may lead to\r\ndegradation of the labile fraction. Thus, to account for this\r\nuncertainty, the percentage of the labile fraction that is\r\nassociated with the 2% of the exposed biochar surfaces will\r\nbe discounted from . This is also given a safety\r\nfactor of 3, as described in Section 7.2.1.3, to account for\r\nconcrete degradation pathways that are not considered\r\nwithin the geochemical model but may result in biochar\r\nexposure, such as crushing during demolition.\r\nNote that Projects may choose to provide documentation\r\nspecific to the region of operations to calculate a Project￾specific reversal risk. This documentation may include, but is\r\nnot limited to:\r\nGeologic maps of bedrock lithology (from USGS or\r\nnational equivalent) and groundwater pH.\r\nClimatic data, including average yearly temperature,\r\nprecipitation volume and precipitation pH.\r\nEstimated transport radius of produced materials\r\nIf this is unknown for a given Project, Project\r\nProponents may use either the maximum possible\r\ntransport distance or a conservative average\r\ndistance.\r\nTypes of assets that materials may be used in and a\r\nbreakdown by percentage.\r\nProof of material suitability for the range of applications\r\n(e.g. certificates of compliance with concrete quality\r\nand performance standards).\r\nRisk of external acid attack, based on:\r\nRegional groundwater and precipitation pH.\r\nLikely exposure risk of the concrete containing\r\nstored carbon\r\nCO2eStored\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 51/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 52 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "This can be determined through analysis of\r\npossible asset types and well-justified\r\nassumptions about the location of the concrete\r\nwithin the asset.\r\nProbability analysis of concrete end-state based on\r\nregional trends.\r\nTo conservatively estimate the amount of biochar that a) is\r\nabraded from asphalt over 1000 years and b) degrades over\r\n1000 years, it is useful to base calculations on a\r\nhypothetical scenario, in which we consider a 1 m³ block of\r\nasphalt amended with a given percentage of biochar. Key\r\nassumptions in this scenario are:\r\nThis block of asphalt is in a high-traffic density road,\r\nwhich we assume abrades at a rate of 0.5 mm/year .\r\nThis assumption is conservative, as abrasion rates are\r\nlower in areas with lower traffic density.\r\nThe density of asphalt is taken as 2300 kg/m³ (Iowa\r\nDepartment of Transportation).\r\nThe biochar is evenly distributed through the pavement\r\nin all life cycles, and the labile fraction is evenly\r\ndistributed among the biochar particles.\r\nThe lifespan of asphalt pavement is 15 years, with 93%\r\nof material recycled between lifespans.\r\nThe labile fraction of abraded biochar particles will\r\ndegrade.\r\nUsing these assumptions, it is possible to calculate the\r\namount of biochar that is lost per year and, consequently,\r\nthe percentage of the labile fraction that will degrade per\r\nyear. As shown in Figure A2, these calculations demonstrate\r\n10.2.2\r\nAsphalt\r\n31\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 52/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 53 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "that 100% of the biochar contained in the original block of\r\nasphalt is abraded within 90 years, and thus we assume that\r\n100% of the labile fraction degrades within that time frame.\r\nThe calculations shown in Figure A2 assume that the labile\r\nfraction is 5% per mass of biochar; importantly, because a\r\nkey assumption is that biochar particles are evenly\r\ndistributed in the pavement, the loss percentages do not\r\nchange with the biochar concentration or with the labile\r\nfraction.\r\nFigure A2 Percentage of biochar lost over time from a 1 m\r\nblock of asphalt, assuming an abrasion rate of 0.5 mm/year\r\nand a biochar content of 5% by mass.\r\nBecause these calculations demonstrate complete loss of\r\nthe labile fraction of biochar-amended asphalt within 100\r\nyears, 100% of the labile fraction of the biochar produced by\r\nthe Project Proponent is deducted from the Credits issued\r\nunder this Module.\r\nNote that this framework does not take into account\r\ncommon maintenance practices for asphalt pavements,\r\nsuch as sealcoating and resurfacing, as these practices vary\r\nby region and specific application. Thus, in the absence of\r\nspecific information regarding the use case and regional\r\n3\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 53/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 53 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 54 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "practices relevant to a Project, the most conservative\r\nscenario is used. Project Proponents may choose to provide\r\nadditional information to conduct a Project-specific\r\ndiscount calculation.\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 54/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 55 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Konstantina Stamouli, Ph.D.\r\nElla Holme, Ph.D.\r\nXueya Lu, Ph.D.\r\nRob Brown, Ph.D.\r\n11.0\r\nContributors\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 55/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 56 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Activity\r\nThe steps of a Project Proponent’s Removal process that\r\nresult in carbon fluxes. The carbon flux associated with an\r\nactivity is a component of the Project Proponent’s\r\nProtocol.\r\nAsset\r\nAny tangible or intangible property that has value and can\r\nbe owned, controlled or utilized by an individual or\r\norganization. In the context of this module, an asset refers\r\nto a physical structure.\r\nBaseline\r\nA set of data describing pre-intervention or control\r\nconditions to be used as a reference scenario for\r\ncomparison.\r\nBio-oil\r\nA mixture of water, organic acids, aldehydes, ketones,\r\nsugars, phenols, and other organic compounds derived\r\nfrom the thermal breakdown of biomass. Thermal\r\nbreakdown of biomass is achieved via thermochemical\r\nprocesses, such as pyrolysis, which heat biomass in low￾or no-oxygen environments to high temperatures (~e.g.\r\n350-650°C). Bio-oil is often also referred to as pyrolysis\r\noil or bio-crude.\r\nBuffer Pool\r\nA common and recognized insurance mechanism among\r\nRegistries allowing Credits to be set aside (in this case by\r\nIsometric) to compensate for Reversals which may occur\r\nin the future.\r\nBuilt Material\r\nA material used in the construction of an asset.\r\nCarbon Dioxide Equivalent Emissions (CO₂e)\r\nThe amount of CO₂ emissions that would cause the same\r\nintegrated radiative forcing or temperature change, over a\r\ngiven time horizon, as an emitted amount of GHG or a\r\n12.0\r\nDefinitions and Acronyms\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 56/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 57 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "mixture of GHGs. One common metric of CO₂e is the 100-\r\nyear Global Warming Potential.\r\nCarbon Dioxide Removal (CDR)\r\nActivities that remove carbon dioxide (CO₂) from the\r\natmosphere and store it in products or geological,\r\nterrestrial, and oceanic Reservoirs. CDR includes the\r\nenhancement of biological or geochemical sinks and\r\ndirect air capture (DAC) and storage, but excludes natural\r\nCO₂ uptake not directly caused by human intervention.\r\nCement\r\nA chemical substance used for construction that sets,\r\nhardens, and adheres to other materials to bind them\r\ntogether. Ordinary Portland Cement (PC) is the most\r\ncommon cement used in modern concrete. Other types of\r\ncement include Ground Granulated Blast-furnace Slag\r\n(GGBS), Pulverised Fly Ash (PFA) and natural pozzolans.\r\nConcrete\r\nA composite material composed of aggregate, cement,\r\nsand and water that cures to a solid over time.\r\nConservative\r\nPurposefully erring on the side of caution under\r\nconditions of Uncertainty by choosing input parameter\r\nvalues that will result in a lower net CO₂ Removal than if\r\nusing the median input values. This is done to increase\r\nthe likelihood that a given Removal calculation is an\r\nunderestimation rather than an overestimation.\r\nCredit\r\nA publicly visible uniquely identifiable Credit Certificate\r\nIssued by a Registry that gives the owner of the Credit the\r\nright to account for one net metric tonne of Verified CO₂e\r\nRemoval. In the case of this Standard, the net tonne of\r\nCO₂e Removal comes from a Project Validated against a\r\nCertified Protocol.\r\nDirect Emissions\r\nEmissions that are produced by a specific CDR process\r\nand are directly controllable.\r\nDurability\r\nThe amount of time carbon removed from the atmosphere\r\nby an intervention – for example, a CDR project – is\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 57/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 58 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "expected to reside in a given Reservoir, taking into\r\naccount both physical risks and socioeconomic\r\nconstructs (such as contracts) to protect the Reservoir in\r\nquestion.\r\nEmissions\r\nThe term used to describe greenhouse gas emissions to\r\nthe atmosphere as a result of Project activities.\r\nEnvironmental Product Declaration\r\nA public document that transparently reports objective,\r\ncomparable and third-party verified data about products\r\nand services' environmental performances from a\r\nlifecycle perspective. The EPD is supported by an\r\nunderlying Life Cycle Assessment (LCA) report, a\r\nsystematic and comprehensive summary of the LCA\r\nproject to support the third-party verifier when verifying\r\nthe EPD.\r\nEnvironmental Protection Agency (EPA)\r\nA United States Government agency that protects human\r\nhealth and the environment.\r\nFeedstock\r\nRaw material which is used for CO₂ Removal.\r\nGreenhouse Gas (GHG)\r\nThose gaseous constituents of the atmosphere, both\r\nnatural and anthropogenic (human-caused), that absorb\r\nand emit radiation at specific wavelengths within the\r\nspectrum of terrestrial radiation emitted by the Earth’s\r\nsurface, by the atmosphere itself, and by clouds. This\r\nproperty causes the greenhouse effect, whereby heat is\r\ntrapped in Earth’s atmosphere (CDR Primer, 2022).\r\nInternational Standards Organization (ISO)\r\nA worldwide federation (NGO) of national standards\r\nbodies from more than 160 countries, one from each\r\nmember country.\r\nIssuance (of a Credit)\r\nCredits are issued to the Credit Account of a Project\r\nProponent with whom Isometric has a Validated Protocol\r\nafter an Order for Verification and Credit Issuance\r\nservices from a Buyer and once a Verified Removal has\r\ntaken place.\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 58/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 59 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Losses\r\nfor open systems, biogeochemical and/or physical\r\ninteractions which occur during the removal process that\r\ndecrease the CO₂ removal .\r\nModel\r\nA calculation, series of calculations or simulations that\r\nuse input variables in order to generate values for\r\nvariables of interest that are not directly measured.\r\nModule\r\nIndependent components of Isometric Certified Protocols\r\nwhich are transferable between and applicable to\r\ndifferent Protocols.\r\nPathway\r\nA collection of Removal processes that have mechanisms\r\nin common.\r\nProject\r\nAn activity or process or group of activities or processes\r\nthat alter the condition of a Baseline and leads to\r\nRemovals.\r\nProject Design Document\r\nThe document, written by a Project Proponent, which\r\nrecords key characteristics of a Project and which forms\r\nthe basis for Project Validation and evaluation in\r\naccordance with the relevant Certified Protocol. (Also\r\nknown as “PDD”).\r\nProject Design Document (PDD)\r\nThe document that clearly outlines how a Project will\r\ngenerate rigorously quantifiable Additional high-quality\r\nRemovals.\r\nProject Proponent\r\nThe organization that develops and/or has overall legal\r\nownership or control of a Removal Project.\r\nProject boundary\r\nThe defined temporal and geographical boundary of a\r\nProject.\r\nProtocol\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 59/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 60 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "A document that describes how to quantitatively assess\r\nthe net amount of CO₂ removed by a process. To\r\nIsometric, a Protocol is specific to a Project Proponent's\r\nprocess and comprised of Modules representing the\r\nCarbon Fluxes involved in the CDR process. A Protocol\r\nmeasures the full carbon impact of a process against the\r\nBaseline of it not occurring.\r\nProxy\r\nA measurement which correlates with but is not a direct\r\nmeasurement of the variable of interest.\r\nRP\r\nReporting Period\r\nRemoval\r\nThe term used to represent the CO₂ taken out of the\r\natmosphere as a result of a CDR process.\r\nReversal\r\nThe escape of CO₂ to the atmosphere after it has been\r\nstored, and after a Credit has been Issued. A Reversal is\r\nclassified as avoidable if a Project Proponent has\r\ninfluence or control over it and it likely could have been\r\naverted through application of reasonable risk mitigation\r\nmeasures. Any other Reversals will be classified as\r\nunavoidable.\r\nSafety Factor\r\nA conservative adjustment applied to estimated\r\ngreenhouse gas (GHG) emission reductions or carbon\r\nremovals to account for uncertainties, risks, or variability\r\nin measurement, permanence, or effectiveness of the\r\ncredited activity. It reduces the amount of carbon credits\r\nissued to ensure environmental integrity and avoid over￾crediting.\r\nSensitivity Analysis\r\nAn analysis of how much different components in a Model\r\ncontribute to the overall Uncertainty.\r\nStakeholder\r\nAny person or entity who can potentially affect or be\r\naffected by Isometric or an individual Project activity.\r\nStorage\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 60/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 61 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Describes the addition of carbon dioxide removed from\r\nthe atmosphere to a reservoir, which serves as its ultimate\r\ndestination. This is also referred to as “sequestration”\r\n.\r\nSystem Boundary\r\nGHG sources, sinks and reservoirs (SSRs) associated with\r\nthe project boundary and included in the GHG Statement.\r\nTIC\r\nTotal Inorganic Carbon.\r\nUncertainty\r\nA lack of knowledge of the exact amount of CO₂ removed\r\nby a particular process, Uncertainty may be quantified\r\nusing probability distributions, confidence intervals, or\r\nvariance estimates.\r\nValidation\r\nA systematic and independent process for evaluating the\r\nreasonableness of the assumptions, limitations and\r\nmethods that support a Project and assessing whether\r\nthe Project conforms to the criteria set forth in the\r\nIsometric Standard and the Protocol by which the Project\r\nis governed. Validation must be completed by an\r\nIsometric approved third-party (VVB).\r\nValidation and Verification Bodies (VVBs)\r\nThird-party auditing organizations that are experts in their\r\nsector and used to determine if a project conforms to the\r\nrules, regulations, and standards set out by a governing\r\nbody. A VVB must be approved by Isometric prior to\r\nconducting validation and verification.\r\nVerification\r\nA process for evaluating and confirming the net Removals\r\nfor a Project, using data and information collected from\r\nthe Project and assessing conformity with the criteria set\r\nforth in the Isometric Standard and the Protocol by which\r\nit is governed. Verification must be completed by an\r\nIsometric approved third-party (VVB).\r\nWaste product\r\nAn output of a process that has no intended value to the\r\nproducer.\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 61/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 62 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "13.0\r\nRelevant Works\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 62/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 63 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "1. Kamini, G. P., Tee, K. F., Gimbun, J., & Chin, S. C. (2023).\r\nBiochar in cementitious material—A review on physical,\r\nchemical, mechanical, and durability properties. AIMS\r\nMaterials Science, 10(3), 405-425.↩\r\n2. Gupta, S., Kua, H. W., & Low, C. Y. (2018). Use of biochar\r\nas carbon sequestering additive in cement mortar.\r\nCement and Concrete Composites, 87, 110–129.↩ ↩\r\n3. Wijeyawardana, P., Nanayakkara, N., Law, D.,\r\nGunasekara, C., Karunarathna, A., & Pramanik, B. K.\r\n(2023). Performance of biochar mixed cement paste for\r\nremoval of Cu, Pb and Zn from stormwater.\r\nEnvironmental Research, 232, 116331.↩\r\n4. Barbhuiya, S., Bhusan Das, B., & Kanavaris, F. (2024).\r\nBiochar-concrete: A comprehensive review of properties,\r\nproduction and sustainability. Case Studies in\r\nConstruction Materials, 20, e02859.↩ ↩ ↩\r\n5. Kushwah, S., Singh, S., Agarwal, R., Nighot, N., S., Kumar,\r\nR., Athar, H., & Naik B, S. (2024). Mixture of biochar as a\r\ngreen additive in cement-based materials for carbon\r\ndioxide sequestration. Journal of Materials Science:\r\nMaterials in Engineering, 19, 27.↩\r\n6. Rashid, S., Raghav, A., Goyal, A., Danie Roy, A. B., &\r\nSingh, M. (2024). Biochar as a sustainable additive in\r\ncementitious composites: A comprehensive analysis of\r\nproperties and environmental impact. Industrial Crops\r\nand Products, 209, 118044.↩\r\n7. Zou, S., Sham, M. L., Xiao, J., Leung, L. M., Lu, J. X., &\r\nPoon, C. S. (2024). Biochar-enabled carbon negative\r\naggregate designed by core-shell structure: A novel\r\nbiochar utilizing method in concrete. Construction and\r\nBuilding Materials, 449, 138507.↩\r\n8. Sanei, H., Rudra, A., Przyswitt, Z. M. M., Kousted, S.,\r\nSindlev, M. B., Zheng, X., Nielsen, S. B., & Petersen, H. I.\r\n(2024). Assessing biochar’s permanence: An inertinite\r\n2\r\n2 3\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 63/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 64 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "benchmark. International Journal of Coal Geology, 281,\r\n104409.↩ ↩ ↩ ↩ ↩\r\n9. Woolf, D., Lehmann, J., Ogle, S., Kishimoto-Mo, A. W.,\r\nMcConkey, B., & Baldock, J. (2021). Greenhouse gas\r\ninventory model for biochar additions to soil.\r\nEnvironmental Science & Technology, 55(21), 14795–\r\n14805.↩\r\n10. Wang, H., Nan, Q., Waqas, M., & Wu, W. (2022). Stability\r\nof biochar in mineral soils: Assessment methods,\r\ninfluencing factors and potential problems. Science of\r\nThe Total Environment, 806, 150789.↩ ↩\r\n11. Osman, A. I., Farghali, M., Dong, Y., Kong, J., Yousry, M.,\r\nRashwan, A. K., Chen, Z., Al-Fatesh, A., Rooney, D. W., &\r\nYap, P.-S. (2024). Reducing the carbon footprint of\r\nbuildings using biochar-based bricks and insulating\r\nmaterials: A review. Environmental Chemistry Letters,\r\n22(1), 71–104.↩ ↩\r\n12. Zhang, Y., He, M., Wang, L., Yan, J., Ma, B., Zhu, X., Ok, Y.\r\nS., Mechtcherine, V., & Tsang, D. C. W. (2022). Biochar as\r\nconstruction materials for achieving carbon neutrality.\r\nBiochar, 4(1), 59.↩ ↩ ↩ ↩\r\n13. Rondón-Quintana, H. A., Reyes-Lizcano, F. A., Chaves￾Pabón, S. B., Bastidas-Martínez, J. G., & Zafra-Mejía, C.\r\nA. (2022). Use of biochar in asphalts: Review.\r\nSustainability, 14(8), 4745.↩\r\n14. Legan, M., Gotvajn, A. Ž., & Zupan, K. (2022). Potential of\r\nbiochar use in building materials. Journal of\r\nEnvironmental Management, 309, 114704.↩ ↩ ↩\r\n15. Farfan, J., Fasihi, M., & Breyer, C. (2019). Trends in the\r\nglobal cement industry and opportunities for long-term\r\nsustainable CCU potential for Power-to-X. Journal of\r\nCleaner Production, 217, 821–835.↩\r\n16. Moumin, G., Ryssel, M., Zhao, L., Markewitz, P., Sattler, C.,\r\nRobinius, M., & Stolten, D. (2020). CO emission\r\nreduction in the cement industry by using a solar\r\ncalciner. Renewable Energy, 145, 1578–1596.↩\r\n2 3 4 5\r\n2\r\n2\r\n2 3 4\r\n2 3\r\n2\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 64/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 65 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "17. Praneeth, S., Saavedra, L., Zeng, M., Dubey, B. K., &\r\nSarmah, A. K. (2021). Biochar admixtured lightweight,\r\nporous and tougher cement mortars: Mechanical,\r\ndurability and micro computed tomography analysis.\r\nScience of The Total Environment, 750, 142327.↩ ↩\r\n18. Zhou, X., Moghaddam, T. B., Chen, M., Wu, S., & Adhikari,\r\nS. (2020). Biochar removes volatile organic compounds\r\ngenerated from asphalt. Science of The Total\r\nEnvironment, 745, 141096.↩ ↩\r\n19. Osman, A. I., Farghali, M., Dong, Y., Kong, J., Yousry, M.,\r\nRashwan, A. K., Chen, Z., Al-Fatesh, A., Rooney, D. W., &\r\nYap, P.-S. (2024). Reducing the carbon footprint of\r\nbuildings using biochar-based bricks and insulating\r\nmaterials: A review. Environmental Chemistry Letters,\r\n22(1), 71–104.↩\r\n20. Loise, V., Calandra, P., Policicchio, A., Madeo, L., Oliviero\r\nRossi, C., Porto, M., Abe, A., Agostino, R. G., & Caputo, P.\r\n(2024). The efficiency of bio-char as bitumen modifier.\r\nHeliyon, 10(1), e23192.↩\r\n21. Ma, F., Dai, J., Fu, Z., Li, C., Wen, Y., Jia, M., Wang, Y., &\r\nShi, K. (2022). Biochar for asphalt modification: A case\r\nof high-temperature properties improvement. Science of\r\nThe Total Environment, 804, 150194.↩ ↩\r\n22. Thives, L. P., & Ghisi, E. (2017). Asphalt mixtures emission\r\nand energy consumption: A review. Renewable and\r\nSustainable Energy Reviews, 72, 473–484.↩ ↩\r\n23. Tutu, K. A., & Tuffour, Y. A. (2016). Warm-mix asphalt and\r\npavement sustainability: A review. Open Journal of Civil\r\nEngineering, 06(02), 84–93.↩\r\n24. Yang, X., Mills-Beale, J., & You, Z. (2017). Chemical\r\ncharacterization and oxidative aging of bio-asphalt and\r\nits compatibility with petroleum asphalt. Journal of\r\nCleaner Production, 142, 1837–1847.↩ ↩\r\n25. Walters. (2014). Enhancing asphalt rheological behavior\r\nand aging susceptibility using bio-char and nano-clay.\r\n2\r\n2\r\n2\r\n2\r\n2\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 65/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 66 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "American Journal of Engineering and Applied Sciences,\r\n7(1), 66–76.↩\r\n26. Zhou, Y., Shen, C., Wang, T., & Xue, Y. (2024). Inhibition\r\neffect of three types of biochar on volatile organic\r\ncompounds from asphalt: Revealing chemical\r\nadsorption as the primary mechanism. Construction and\r\nBuilding Material, 411, 134322.↩\r\n27. O’Connor, J. (2004). Survey on actual service lives for\r\nNorth American buildings. Presented at Woodframe\r\nHousing Durability and Disaster Issues conference, Las\r\nVegas, October 2004.↩\r\n28. RIBA. Lifespan. https://www.ribaj.com/culture/lifespan,\r\nAccessed 25/06/2024.↩\r\n29. DEFRA, UK Statistics on Waste.\r\nhttps://www.data.gov.uk/dataset/882186e7-97b0-4ad0-\r\nb253-e28607252f42/uk_statistics_on_waste ↩\r\n30. National Asphalt Pavement Association, The carbon\r\nfootprint of asphalt pavements.\r\nhttps://www.asphaltpavement.org/uploads/documents/\r\nClimate/NAPA-SIP109-\r\nTheCarbonFootprintOfAsphaltPavements￾March2024.pdf ↩\r\n31. Murph, D., Liu, J., & Liu, J. (2022). Designs of abrasion\r\nresistant and durable concrete pavements made with\r\nSCMs for cold climates. Journal of Transportation\r\nEngineering, Part B: Pavements, 148(2), 04022017.↩\r\n↩\r\n32. Bae, S.-H., Chae, E., Park, Y.-S., Lee, S.-W., Yun, J.-H., &\r\nChoi, S.-S. (2024). Characteristics of tire-road wear\r\nparticles (TRWPs) and road pavement wear particles\r\n(RPWPs) generated through a novel tire abrasion\r\nsimulator based on real road pavement conditions.\r\nScience of The Total Environment, 944, 173948.↩\r\n33. WBC. (2023). World Biochar Certificate—Guidelines for\r\na Sustainable Production of Biochar and its\r\nCertification. (Version 1.0).↩\r\n2\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 66/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 67 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "34. Zhong, Y., Igalavithana, A. D., Zhang, M., Li, X., Rinklebe,\r\nJ., Hou, D., Tack, F. M. G., Alessi, D. S., Tsang, D. C. W., &\r\nOk, Y. S. (2020). Effects of aging and weathering on\r\nimmobilization of trace metals/metalloids in soils\r\namended with biochar. Environmental Science:\r\nProcesses & Impacts, 22(9), 1790–1808.\r\nhttps://doi.org/10.1039/D0EM00057D.↩\r\n35. Nguyen, T.-B., Sherpa, K., Bui, X.-T., Nguyen, V.-T., Vo, T.-D.-\r\nH., Ho, H.-T.-T., Chen, C.-W., & Dong, C.-D. (2023). Biochar\r\nfor soil remediation: A comprehensive review of current\r\nresearch on pollutant removal. Environmental Pollution,\r\n337, 122571.↩\r\n36. O’Connor, D., Peng, T., Zhang, J., Tsang, D. C. W., Alessi,\r\nD. S., Shen, Z., Bolan, N. S., & Hou, D. (2018). Biochar\r\napplication for the remediation of heavy metal polluted\r\nland: A review of in situ field trials. Science of The Total\r\nEnvironment, 619–620, 815–826.↩\r\n37. Guo, M., Song, W., & Tian, J. (2020). Biochar-facilitated\r\nsoil remediation: Mechanisms and efficacy variations.\r\nFrontiers in Environmental Science, 8, 521512.↩\r\n38. Sanei, H., Wojtaszek-Kalaitzidi, M., Schovsbo, N. H.,\r\nStenshøj, R., Zhou, Z., Schmidt, H.-P., Hagemann, N.,\r\nChiaramonti, D., Kiaitsis, T., Rudra, A., Lehner, A. J.,\r\nBrown, R. W., Gill, S., Dorr, E., Kalaitzidis, S., Goodarzi, F.,\r\n& Petersen, H. I. (in submission). Quantifying inertinite\r\ncarbon in biochar. Biomass and Bioenergy.↩\r\n39. Yaro, N. S. A., Sutanto, M. H., Habib, N. Z., Usman, A.,\r\nKaura, J. M., Murana, A. A., Birniwa, A. H., & Jagaba, A. H.\r\n(2023). A comprehensive review of biochar utilization for\r\nlow-carbon flexible asphalt pavements. Sustainability,\r\n15(8), 6729.↩\r\n40. Zhang, Y., He, M., Wang, L., Yan, J., Ma, B., Zhu, X., Ok, Y.\r\nS., Mechtcherine, V., & Tsang, D. C. W. (2022). Biochar as\r\nconstruction materials for achieving carbon neutrality.\r\nBiochar, 4(1), 59.↩\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 67/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 68 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "41. Wang, H., Nan, Q., Waqas, M., & Wu, W. (2022). Stability\r\nof biochar in mineral soils: Assessment methods,\r\ninfluencing factors and potential problems. Science of\r\nThe Total Environment, 806, 150789.↩\r\n42. Spokas, K. A., Novak, J. M., Masiello, C. A., Johnson, M.\r\nG., Colosky, E. C., Ippolito, J. A., & Trigo, C. (2014).\r\nPhysical disintegration of biochar: An overlooked\r\nprocess. Environmental Science & Technology Letters,\r\n1(8), 326–332.↩\r\n43. Xie, Y., Li, C., Chen, H., Gao, Y., Vancov, T., Keen, B., Van\r\nZwieten, L., Fang, Y., Sun, X., He, Y., Li, X., Bolan, N., Yang,\r\nX., & Wang, H. (2024). Methods for quantification of\r\nbiochar in soils: A critical review. CATENA, 241, 108082.\r\n↩\r\n44. Kazemian, M., & Shafei, B. (2023). Carbon sequestration\r\nand storage in concrete: A state-of-the-art review of\r\ncompositions, methods, and developments. Journal of\r\nCO Utilization, 70, 102443.↩ ↩\r\n45. Liu, Z., & Meng, W. (2021). Fundamental understanding of\r\ncarbonation curing and durability of carbonation-cured\r\ncement-based composites: A review. Journal of CO\r\nUtilization, 44, 101428.↩\r\n46. Glasser, F. P., Marchand, J., & Samson, E. (2008).\r\nDurability of concrete—Degradation phenomena\r\ninvolving detrimental chemical reactions. Cement and\r\nConcrete Research, 38(2), 226–246.↩\r\n47. Lothenbach, B., Saout, G. L., Gallucci, E., & Scrivener, K.\r\n(2008). Influence of limestone on the hydration of\r\nPortland cements. Cement and Concrete Research,\r\n38(6), 848–860.↩\r\n48. Palandri, J. L., & Kharaka, Y. K. (2004). A compilation of\r\nrate parameters of water-Mineral interaction kinetics for\r\napplication to geochemical modeling. USGS-Report\r\n(2004-1068), Menlo Park, California, USA.↩\r\n49. Nicoleau, L., Nonat, A., & Perrey, D. (2013). The di- and\r\ntricalcium silicate dissolutions. Cement and Concrete\r\n2\r\n2\r\n2\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 68/70"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 69 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Xueya Lu, Ph.D.\r\nElla Holme, Ph.D.\r\nRobert Brown, Ph.D.\r\nv1.0\r\ni i\r\nResearch, 47, 14–30.↩\r\n50. Holmes, N., Tyrer, M., West, R., Lowe, A., & Kelliher, D.\r\n(2022). Using PHREEQC to model cement hydration.\r\nConstruction and Building Materials, 319, 126129.↩\r\n51. Peng, C., Crawshaw, J. P., Maitland, G. C., & Trusler, J. P.\r\nM. (2015). Kinetics of calcite dissolution in CO -\r\nsaturated water at temperatures between (323 and\r\n373)K and pressures up to 13.8MPa. Chemical Geology,\r\n403, 74–85.↩\r\n52. Payus, C. M., Jikilim, C., & Sentian, J. (2020). Rainwater\r\nchemistry of acid precipitation occurrences due to long￾range transboundary haze pollution and prolonged\r\ndrought events during southwest monsoon season:\r\nClimate change driven. Heliyon, 6(9), e04997.↩\r\n53. Foureaux, A. F. S., Moreira, V. R., Lebron, Y. A. R., Santos,\r\nL. V. S., & Amaral, M. C. S. (2020). Direct contact\r\nmembrane distillation as an alternative to the\r\nconventional methods for value-added compounds\r\nrecovery from acidic effluents: A review. Separation and\r\nPurification Technology, 236, 116251.↩\r\n2\r\nContributors\r\nChangelog\r\nCERTIFIED\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 69/70"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 69 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 70 / 70>"
+    },
+    {
+      "type": "text",
+      "text": "Initial Release\r\nBiochar Storage in the Built Environment © 2025 Isometric HQ Ltd is licensed under CC BY-NC-ND 4.0\r\n03/02/2026, 10:56 Biochar Storage in the Built Environment v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-storage-built-environment/1.0 70/70"
+    }
+  ],
+  "has_more": false,
+  "next_page": null
+}

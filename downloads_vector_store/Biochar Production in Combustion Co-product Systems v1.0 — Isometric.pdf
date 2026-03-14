@@ -1,0 +1,119 @@
+{
+  "object": "vector_store.file_content.page",
+  "data": [
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 1 / 13>"
+    },
+    {
+      "type": "text",
+      "text": "BiocharProduction in\r\nCombustion Co-product\r\nSystems\r\nThis module details durability and monitoring requirements\r\nfor biochar production in combustion co-product systems.\r\nCapture &\r\nConversion\r\nModule\r\nv1.0\r\n03/02/2026, 10:56 Biochar Production in Combustion Co-product Systems v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-combustion-co-product/1.0 1/13"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 2 / 13>"
+    },
+    {
+      "type": "text",
+      "text": "1 Introduction\r\n2 Examples of Permissible Systems\r\n3 System Characteristics\r\n4 System Eligibility\r\n5 Appendix I Specific Definitions and Analysis Requirements\r\n5.1 Production Batch Definition\r\n5.2 Sample Analysis Requirements\r\n6 Relevant Works\r\nFootnotes\r\nContributors\r\nChangelog\r\nContents\r\n03/02/2026, 10:56 Biochar Production in Combustion Co-product Systems v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-combustion-co-product/1.0 2/13"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 3 / 13>"
+    },
+    {
+      "type": "text",
+      "text": "This is a Capture and Conversion Module associated with\r\nthe Production of biochar. In some cases Project Proponents\r\nmay seek to produce biochar as a co-product of a\r\ncombustion process. These “combustion co-product”\r\nbiochar systems may produce high stability biochar as a co￾product, alongside other products such as bioenergy, heat,\r\nsyngas, bio-oil, or combined heat and power .\r\n1.0\r\nIntroduction\r\n1, 2, 3, 4, 5\r\n03/02/2026, 10:56 Biochar Production in Combustion Co-product Systems v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-combustion-co-product/1.0 3/13"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 4 / 13>"
+    },
+    {
+      "type": "text",
+      "text": "These systems may include, but are not limited to:\r\nBiomass gasification systems that co-produce biochar\r\nwith bioenergy (heat and electricity) through staged\r\ncombustion processes where volatile gases are\r\ncaptured and converted to energy, while biochar is\r\nharvested as a solid product.\r\nPyrolysis reactors or retorts where biomass is thermally\r\ndecomposed with limited oxygen, producing biochar\r\nalongside pyrolysis oils and gases. The gases and oils\r\nmay be combusted to provide heat for the process and\r\ncan also be further processed into fuels or chemicals.\r\nCombined Heat and Biochar (CHAB) systems designed\r\nto generate thermal energy for heating or cooling\r\napplications while producing biochar.\r\nModular bioreactors to convert biowaste streams (e.g.,\r\nwood waste, cattle manure) into electricity and\r\nsimultaneously produce biochar.\r\nMethanol autothermal reforming (ATR) systems that co￾produce hydrogen and biochar with heat recovery as an\r\nadvanced method.\r\n2.0\r\nExamples of Permissible Systems\r\n03/02/2026, 10:56 Biochar Production in Combustion Co-product Systems v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-combustion-co-product/1.0 4/13"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 5 / 13>"
+    },
+    {
+      "type": "text",
+      "text": "These systems may be characterized by:\r\nVariable oxygen levels with less consistent control of\r\npyrolysis conditions.\r\nCo-mingling of a heterogeneous biochar/ash mixture. If\r\nbiochar and ash are co-mingled then the Project\r\nProponent must detail the method through which\r\nadditional carbon is quantified.\r\nMonitoring setups focused on boiler safety and\r\nemissions compliance, rather than systematic data\r\ncollection on biochar formation.\r\nThe eligibility of combustion co-product pyrolysis\r\ntechnologies for inclusion of crediting under this Module will\r\ndepend on their operating profiles, monitoring capacity, and\r\nemissions characteristics, as these may significantly differ\r\nfrom dedicated pyrolysis units.\r\n3.0\r\nSystem Characteristics\r\n03/02/2026, 10:56 Biochar Production in Combustion Co-product Systems v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-combustion-co-product/1.0 5/13"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 6 / 13>"
+    },
+    {
+      "type": "text",
+      "text": "In addition to all other requirements, to be eligible for\r\ncrediting under this Module combustion co-product\r\npyrolysis systems must meet the following criteria;\r\nBiochar is a defined, intentional output of the process,\r\nand not solely an incidental residue. I.e., the biochar\r\nproduced must comply with the Additionality\r\nrequirements set out in Section 2.5.3. of the Isometric\r\nStandard.\r\nThe boiler system produces a reproducible and\r\nconsistent biochar product that can be sampled and\r\ncharacterized in accordance with the requirements of\r\nthe Biochar Production and Storage Protocol.\r\nBoiler operations meet or exceed the minimum\r\nperformance and emissions thresholds required of\r\npyrolysis reactors (e.g., stable operation within target\r\ntemperature ranges, controlled feedstock handling),\r\nduring the operating periods where biochar is being\r\nproduced.\r\nThe same framework described in the Biochar Production\r\nand Storage Protocol will apply for production batch\r\ndefinition, sampling, and durability assessment to biomass\r\nboilers as to dedicated pyrolysis reactors. Where deviations\r\nare necessary, projects must clearly document these\r\nexceptions and provide a detailed justification\r\ndemonstrating that monitoring and verification requirements\r\nare met with an equivalent or greater level of rigor. As an\r\nadditional requirement in systems that operate continuously,\r\n4.0\r\nSystem Eligibility\r\n03/02/2026, 10:56 Biochar Production in Combustion Co-product Systems v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-combustion-co-product/1.0 6/13"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 7 / 13>"
+    },
+    {
+      "type": "text",
+      "text": "Isometric requires at least 30 consecutive days of sampling\r\nand analysis for biochar characterization data to establish\r\nthe stability of the production process.\r\n03/02/2026, 10:56 Biochar Production in Combustion Co-product Systems v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-combustion-co-product/1.0 7/13"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 8 / 13>"
+    },
+    {
+      "type": "text",
+      "text": "Given the distinct characteristics of combustion co-product\r\nsystems, Isometric has additional requirements on both\r\nproduction batch definitions and sampling methods. Unless\r\notherwise stated, Project Proponents must still refer to all\r\nother requirements listed in the Biochar Production and\r\nStorage Protocol and relevant storage Module.\r\n5.0\r\nAppendix I Specific Definitions\r\nand Analysis Requirements\r\nFor initial sampling under Method A, a production batch is\r\ndefined as biochar produced every 7 days (or if triggered by\r\nany of the ‘deviation’ criteria listed below). The maximum\r\nduration maintains sufficient measurement accuracy given\r\nthe quantities of biochar produced. Note, a new Production\r\nProcess is counted only if the variations listed below persist\r\nfor > 6 hours, or otherwise listed.\r\nFire box average temperature (Based on a rolling\r\naverage of the prior 24 hourly temperatures across\r\nactive boilers).\r\nAbove 450°C, ± 75°C (842°F, ± 167°F) should be the\r\nmaximum temperature deviation.\r\nBelow 450°C (842°F) , temperature variation should\r\nbe less than ± 20%\r\nDepending on the biochar characterization\r\ndata, this may be increased subject to\r\nagreement with Isometric.\r\nFeedstock\r\nAny time the feedstock changes material or source,\r\nas defined in the Biomass Feedstock Accounting\r\n5.1\r\nProduction Batch Definition\r\n03/02/2026, 10:56 Biochar Production in Combustion Co-product Systems v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-combustion-co-product/1.0 8/13"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 9 / 13>"
+    },
+    {
+      "type": "text",
+      "text": "module, and/or the feedstock composition shifts by\r\n± 20%.\r\nFeedstock residence time in reactor\r\nIf the feedstock residence time deviates from ± 20%\r\nof what is defined in the Project Design Document\r\n(PDD) for a typical production process\r\nOxygen dosing\r\nOxygen levels must not exceed 8% in the fire box.\r\nDepending on the biochar characterization\r\ndata, this may be increased subject to\r\nagreement with Isometric.\r\nThese thresholds align with Isometric’s general framework\r\nfor defining Production batches in Biochar Production and\r\nStorage Protocol, whereby the unique characteristics of the\r\nbiomass used, the pyrolysis process, the produced biochar\r\ncharacteristics, transportation distances, and storage site\r\ncharacteristics will be the same for all of the biochar within a\r\nProduction Batch. The exact values of these thresholds will\r\nremain flexible and may be adjusted as additional data on\r\nbiochar chemistry is provided.\r\nSuppliers must follow the sampling requirements outlined in\r\nthe Biochar Production and Storage Protocol, with the\r\nfollowing exceptions:\r\nMethod A, sampling every batch for 60 samples (e.g., a\r\nminimum 3 samples per batch from the first 20 batches),\r\nthis is to establish the variability of the Production\r\nprocess, before transitioning to Method B which will\r\nfollow the same guidelines laid out in the Module.\r\nAs detailed in Biochar Production and Storage\r\nProtocol, the first 30 samples of the 60 need to\r\n5.2\r\nSample Analysis Requirements\r\n03/02/2026, 10:56 Biochar Production in Combustion Co-product Systems v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-combustion-co-product/1.0 9/13"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 10 / 13>"
+    },
+    {
+      "type": "text",
+      "text": "include the ‘full suite’ of analysis detailed in the\r\ntable of the appropriate Biochar Storage Module.\r\nThree samples from the first 30 also need to\r\ninclude heavy metals, Polychlorinated\r\nBiphenyls (PCBs), Polycyclic Aromatic\r\nHydrocarbons (PAHs), Polychlorinated Dibenzo￾p-dioxins (PCDDs), and Volatile Matter or Fixed\r\nCarbon.\r\nThe remaining 30 samples under Method A only\r\nneed to include those parameters needed for\r\nCO e [removal](#definitions-and-acronyms￾removal quantification which will continue\r\nunder Method B.\r\n2\r\n6.0\r\n03/02/2026, 10:56 Biochar Production in Combustion Co-product Systems v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-combustion-co-product/1.0 10/13"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 11 / 13>"
+    },
+    {
+      "type": "text",
+      "text": "Relevant Works\r\n03/02/2026, 10:56 Biochar Production in Combustion Co-product Systems v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-combustion-co-product/1.0 11/13"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 12 / 13>"
+    },
+    {
+      "type": "text",
+      "text": "Robert Brown, Ph.D.\r\nRyan Penney, Ph.D.\r\n1. Afshar, M., & Mofatteh, S. (2024). Biochar for a\r\nsustainable future: Environmentally friendly production\r\nand diverse applications. Results in Engineering, 23,\r\n102433. https://doi.org/10.1016/j.rineng.2024.102433 ↩\r\n2. Siddiqui, S. (2025). Unlocking the environmental\r\npotential of biochar: Production, applications, and\r\nlimitations. Frontiers in Sustainable Food Systems, 9,\r\n1569941. https://doi.org/10.3389/fsufs.2025.1569941 ↩\r\n3. Chen, W.-H., Teng, C.-H., Chein, R.-Y., Nguyen, T.-B., Dong,\r\nC.-D., & Kwon, E. E. (2025). Co-production of hydrogen\r\nand biochar from methanol autothermal reforming\r\ncombining excess heat recovery. Applied Energy, 381,\r\n125152. https://doi.org/10.1016/j.apenergy.2024.125152\r\n↩\r\n4. Yaashikaa, P. R., Kumar, P. S., Varjani, S., & Saravanan, A.\r\n(2020). A critical review on the biochar production\r\ntechniques, characterization, stability and applications\r\nfor circular bioeconomy. Biotechnology Reports, 28,\r\ne00570. https://doi.org/10.1016/j.btre.2020.e00570 ↩\r\n5. Deng, X., Teng, F., Zhang, X., Fan, J.-L., Forsell, N., &\r\nReiner, D. M. (2025). Co-deploying biochar and\r\nbioenergy with carbon capture and storage improves\r\ncost-effectiveness and sustainability of China's carbon\r\nneutrality. One Earth, 8(1), 101172.\r\nhttps://doi.org/10.1016/j.oneear.2024.12.008 ↩\r\nContributors\r\n03/02/2026, 10:56 Biochar Production in Combustion Co-product Systems v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-combustion-co-product/1.0 12/13"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 12 / 13>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 13 / 13>"
+    },
+    {
+      "type": "text",
+      "text": "Sophie Gill, Ph.D.\r\nv1.0\r\nInitial Release\r\nBiochar Production in Combustion Co-product Systems © 2025 Isometric HQ Ltd is licensed under CC BY￾NC-ND 4.0\r\nChangelog\r\nCERTIFIED\r\n03/02/2026, 10:56 Biochar Production in Combustion Co-product Systems v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-combustion-co-product/1.0 13/13"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 13 / 13>"
+    }
+  ],
+  "has_more": false,
+  "next_page": null
+}

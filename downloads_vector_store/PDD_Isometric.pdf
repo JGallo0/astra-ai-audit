@@ -1,0 +1,591 @@
+{
+  "object": "vector_store.file_content.page",
+  "data": [
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 1 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Astra Carbon\r\nProject design document\r\nBiochar Nova Esperança\r\nAstraCarbon partners with Viena Siderúrgica do Maranhão, a major pig\r\niron producer managing 60,000 hectares of eucalyptus plantations to\r\nsupply its own steel operations in Brazil. The project converts harvest\r\nresidues — such as branches, tree tops, and leaves — into biochar using\r\nrectangular kilns with gas burners and thermal control. Whole trees may\r\nalso be used as feedstock in cases of mortality due to phytosanitary or\r\nclimatic causes. The biochar is applied back to the plantation area. The\r\npilot project is expected to remove 2,700 tCO₂/year, with a planned\r\nscale-up to 30,000 annual credits by 2030.\r\nPROJECT DESIGN 1 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 2 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Section A: Project setup\r\nEssential project details including who's involved, the location of your project, and how\r\nmuch carbon will be removed.\r\nProtocol requirements\r\nA.1\r\nProjects must provide a brief explanation for why they are eligible under the selected\r\nprotocol.\r\nSUBMISSION\r\nO projeto Nova Esperança é elegível sob o protocolo ISO-CS-01 v1.1.1 da Isometric, pois converte\r\nresíduos florestais de eucalipto (galhos, cascas e ponteiras, representando 6-13% da massa seca\r\ncolhida) em biochar via pirólise contínua (reator BST-30), sequestrando CO₂ de forma durável (>1.000\r\nanos no solo agrícola). A elegibilidade é fundamentada nos seguintes critérios principais do\r\nprotocolo:\r\nFeedstock Elegível: Resíduos de plantações de eucalipto no Norte de MG (piloto 8.000 ha), sem\r\nnecessidade de FSC, pois baseline é queima aberta (comum na região, emitindo ~1,5 t CO₂e/t\r\nbiomassa). Biomassa anual estimada: Área colhida/ano = 8.000 ha / 7 anos ciclo = 1.143 ha/ano;\r\nProdutividade madeira = MAI 40 m³/ha × 0,5 t/m³ seca = 20 t/ha; Resíduos = 20 t/ha × 10% médio\r\n(IPEF: 8-15 t/ha secos) × 0,8 eficiência coleta = ~1.829 t/ano seca. Não compete com usos\r\nalimentares ou desmatamento.\r\nAdicionalidade: Financeira (ROI depende de créditos voluntários, preços US$150-220/t em\r\nfevereiro 2026 via Puro.earth/Isometric, ~R$785-1.150/t a R$5,23/US$); regulatória (não obrigatório\r\nno Brasil, sem cap-and-trade florestal). Sem incentivos governamentais para pirólise de resíduos.\r\nQuantificação e Durabilidade: LCA Astra confirma 3,72 t CO₂e/t biochar (descontadas emissões\r\nde transporte 0,1-0,2 t/t e energia 0,05 t/kWh). Rendimento 30-35%; biochar com H/C <0,7 e O/C\r\n<0,4 (típico para eucalipto a 450-550°C), modelado via BCDM para permanência >200 anos\r\n(baixa reversão em solos misturados >10 cm). Incerteza <5% via MRV com sensores (peso biochar,\r\nfluxo syngas).\r\nConformidade Ambiental/Social: Emissões compliant (SGS: NOx <200 mg/Nm³, particulados <50\r\nmg/Nm³); ERA identifica riscos baixos (PAHs/metais abaixo thresholds); consulta pública e\r\nlicenciamento IBAMA/SISNAMA MG atendidos. Co-benefícios ODS: Melhora solo (retenção água\r\n+20-30%), reduz erosão.\r\nEssa configuração atende ao escopo de produção distribuída/small scale (módulo v1.0), com\r\nmonitoramento anual via CarbonFuture e verificação VVB. Cálculo CO₂e anual: Biochar ~595 t/ano\r\nPROJECT DESIGN 2 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 3 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "(1.829 t biomassa × 0,325 rendimento) × 3,72 = ~2.213 t removidas, conservador (sensibilidade: 6%\r\nresíduos = 1.097 t biomassa/ano; 13% = 2.375 t).\r\nOwnership\r\nA.2\r\nProjects must provide reasoning and evidence for legal ownership over the rights to all\r\nremovals that will be claimed.\r\nSUBMISSION\r\nAstraCarbon holds the legal ownership over all carbon removals claimed from the project. Bilateral\r\nagreements signed with Viena Siderúrgica do Maranhão S/A clearly establish that the ownership of the\r\ncarbon removals, as well as the exclusive right to claim and commercialize the corresponding credits,\r\nbelongs solely to AstraCarbon. These contracts ensure traceability and prevent double counting, in\r\naccordance with Section 3.1 of the Isometric Standard.\r\nTechnical description\r\nA.3\r\nProjects must provide a brief technical description of the carbon removal Project activity\r\nin accessible language. This should include information on facilities and equipment, the\r\nage and average lifespan of equipment, and all further information essential to\r\nunderstanding how carbon removal is achieved by the Project.\r\nSUBMISSION\r\nAstraCarbon, in partnership with Viena Siderúrgica do Maranhão, is implementing a centralized\r\nbiochar production project in Minas Gerais, Brazil, focused on the use of forest residues from\r\nmechanized eucalyptus harvesting. These residues — including branches, leaves, bark, and tops — are\r\ntypically burned in the field, releasing biogenic CO₂ and other GHGs. The project transforms these\r\nresidues into biochar for soil application, effectively storing atmospheric carbon for at least 1000\r\nyears.\r\nPROJECT DESIGN 3 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 4 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Key technical aspects of the project include:\r\n1. Biomass: The biomass consists of eucalyptus harvest residues from Viena’s plantations. Entire trees\r\nmay be used in cases of mortality caused by phytosanitary or climatic factors, as detailed in the\r\nbiomass annex.\r\n2. Facility: The pilot plant will use rectangular metal kilns operating under controlled incomplete\r\ncombustion. Each kiln measures 6×3×3 meters and has a batch capacity of 54 m³.\r\nFirst unit will be commissioned in 2025.\r\nEach kiln will operate ~6,500 hours/year.\r\nEquipment lifespan is estimated at 15 years.\r\nEach unit is expected to generate ~3,500 carbon credits per year.\r\n1. Equipment: The kilns operate in batch mode, with combustion gases burned in an integrated\r\nfurnace. Heat is partially reused to sustain the process. The system includes thermocouples and\r\npressure sensors, with real-time digital monitoring. Annual emission testing is conducted as part of\r\nthe MRV plan.\r\n2. Sample Monitoring: Biochar is regularly analyzed for carbon stability (H/C ratio) and potential\r\ncontaminants. Analytical procedures and sampling frequency are included in the biochar annex.\r\n3. Process Monitoring (MRV): AstraCarbon’s app logs all production steps — from biomass loading\r\nand transport to pyrolysis conditions (temperature, pressure, residence time). The final version will\r\nsupport photo capture and OCR-based data entry.\r\n4. Biochar Application: Biochar is nutrient-charged (e.g., compost) and applied in Viena’s own\r\neucalyptus fields. Application is supervised by AstraCarbon staff to ensure agronomic performance\r\nand carbon permanence.\r\nProject participants\r\nA.4\r\nProjects must provide a complete list of organizations participating in the project. This\r\nmust include: the organization's name, role in the project, registration number, address,\r\ncontact person, email address, and phone number.\r\nSUBMISSION\r\nPROJECT DESIGN 4 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 5 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Company Registration Number (Unique business identification\r\nnumber in your country of registration): CNPJ: 45.123.456/0001-89\r\nOrganization Name: AstraCarbon Ltda\r\nOrganization Address: Av. do Contorno, 3965 – Suite 802, Belo\r\nHorizonte – MG, Brazil\r\nContact Person: João Gallo\r\nContact Email Address: joao.gallo@astracarbon.com\r\nContact Phone Number: +55 (32) 99198-3847\r\nOrganization Role in Project: Proponent and Technical Coordinator\r\nCompany Registration Number (Unique business identification number\r\nin your country of registration):\r\nCNPJ: 06.956.999/0001-40\r\nOrganization Name: Viena – Siderúrgica do Maranhão S/A\r\nContact Person: Rodrigo Kaukal Valadares\r\nContact Email Address: viena@joinnet.com.br\r\nContact Phone Number: +55 (31) 2121-9101\r\nOrganization Role in Project: Biomass Supplier and Industrial Site Host\r\nProject locations\r\nA.5\r\nProjects must submit at least one address and/or specific geo-coordinates for the project.\r\nProjects may submit multiple project locations – please specify what role each location\r\nplays in the project.\r\nSUBMISSION\r\nThe first project unit will be located in the municipality of Montes Claros, in northern Minas Gerais,\r\nBrazil, within the industrial area of Viena Siderúrgica. The biochar production center will be installed as\r\na pilot facility using adapted rectangular kilns, with biomass sourced from the company's surrounding\r\neucalyptus plantations (within a 30 km radius). The application area for the biochar is defined within\r\nPROJECT DESIGN 5 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 6 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Viena’s own plantation plots. A reference map with the exact coordinates of the facility and sourcing\r\nzone will be included in the technical annex.\r\nFILES\r\nImagem1 - location.png\r\nRemoval capacity\r\nA.6\r\nProjects must provide an estimate of the net carbon removal capacity of this project for\r\nthe duration of the project crediting period (metric tonnes).\r\nSUBMISSION\r\nYear Estimated carbon removal capacity (metric tonnes)\r\n2025 3000\r\n2026 4500\r\n2027 6000\r\n2028 10000\r\n2029 15000\r\n2030 18000\r\n2031 20000\r\n22000\r\nPROJECT DESIGN 6 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 7 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Section B: Protocol & monitoring data\r\nHow will you be measuring, monitoring and maintaining carbon removal, including data\r\nmodels and risk assessments.\r\nBoundaries\r\nB.1\r\nProjects must define the temporal and geographic project boundary.\r\nSUBMISSION\r\nB.2 – System Boundary and GHGs Considered\r\nThe project boundary is defined by the eucalyptus plantation areas documented in the uploaded file\r\nHorto_NOVA_ESPERANCA.pdf. The mapped document contains clearly demarcated boundaries of the\r\noperational forestry estate supplying approximately 170,000 m³ of commercial wood per year.\r\nBiochar application sites will be geo-referenced and documented through dated, geo-tagged\r\nphotographic and video evidence for each batch of application.\r\nUntil full implementation of site-specific soil temperature monitoring, the project applies a conservative\r\nproxy annual average soil temperature of 22°C, derived from regional soil temperature datasets\r\nrepresentative of Northern Minas Gerais. This value is used consistently in durability quantification.\r\nVariations in soil temperature are considered material if exceeding 1°C above the value used for\r\nquantification. If spatial variation exceeds 1°C, the project area will be subdivided or the most\r\nconservative temperature value will be applied for crediting calculations.\r\nLand management practices are consistent across the defined project boundary, including uniform\r\neucalyptus rotation cycles, harvesting systems, and residue handling practices.\r\nSite suitability was determined based on environmental criteria (low erosion risk, absence of protected\r\nareas, appropriate soil types) and anthropic criteria (operational control, logistics access, absence of\r\ncompeting residue uses).\r\nFILES\r\nHorto_NOVA_ESPERANCA_0058_01092023_MG_NENE_OS_JESS (1).pdf\r\nPROJECT DESIGN 7 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 8 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "B.2\r\nProjects must define their system boundary and outline all GHGs considered across all\r\nsources, sinks and reservoirs (SSRs). Robust justification and appropriate evidence must\r\nbe provided for any GHG SSRs that have been excluded from the project boundary.\r\nSUBMISSION\r\nConstruction/Manufacturing Boundaries: Included (BST-30 reactor manufacturing emissions ~0.05 t\r\nCO₂e/t capacity, LCA Astra). Operation Boundaries: Included (collection to storage). Closure/Disposal\r\nBoundaries: Included (equipment decommissioning, recycling biochar plant). All GHG SSRs Inclusion:\r\nAll from construction, operation, closure included (see table). Emissions from Sub-Processes: Included\r\n(e.g., syngas recycling changes). Activities Leading to Credits: All included (pyrolysis to sequestration).\r\nSSRs Controlled by Project: All per Figure 1/Table 1 Isometric (e.g., biomass transport, pyrolysis\r\nemissions). GHGs Associated with SSRs: All per EPA (CO₂, CH₄, N₂O). Quantification to CO₂e: Using\r\n100-year GWP (IPCC AR6). Miscellaneous Emissions: Identified (e.g., minor VOCs from drying, <1%\r\ntotal). Emissions Outside Boundary: Considered (leakage <1%, market displacement none).\r\nBaseline\r\n/ Project\r\nCarbon Flux /\r\nEmission Source\r\nIncluded /\r\nExcluded?\r\nGreenhous\r\ne Gas(es) Justification / Description\r\nBaseline Open burning of\r\nresidues\r\nIncluded CO₂, CH₄,\r\nN₂O\r\nBaseline emissions ~1.5 t CO₂e/t biomass, 90%\r\nC released (IPEF data).\r\nProject Electricity use from\r\nfeedstock transport\r\nIncluded CO₂, CH₄,\r\nN₂O\r\nCO₂ primary from grid (0.05 t/kWh BR mix);\r\nCH₄/N₂O minor. Transport 10-50 km, 0.1 t CO₂e/t.\r\nProject Pyrolysis process Included CO₂, CH₄,\r\nN₂O\r\nSyngas combustion, N₂O <0.01 t/t (SGS\r\ncompliant).\r\nProject Biochar storage in\r\nsoil\r\nIncluded CO₂ Sequestration 3.72 t/t, durable >1,000 years.\r\nProject Upstream planting Excluded All Irrelevant; residues byproduct, no change from\r\nbaseline. Evidence: LCA <1% impact.\r\nB.3\r\nProjects must provide a detailed description of the GHG statement approach and\r\nmethodology in relation to calculations.\r\nSUBMISSION\r\nCarbon removals are calculated per batch according to the Isometric Biochar Carbon Removal\r\nprotocol.\r\nCalculation steps:\r\nPROJECT DESIGN 8 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 9 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "1. Quantify dry biomass residues collected.\r\n2. Apply measured biochar yield.\r\n3. Quantify biochar carbon content through laboratory analysis.\r\n4. Apply +200-year durability model using H/Corg values and annual average soil temperature.\r\n5. Quantify project emissions (construction, operation, closure).\r\n6. Deduct leakage and apply conservative uncertainty adjustments.\r\nThe approach is supported by cradle-to-gate LCA aligned with ISO 14067. All assumptions are\r\nconservative and transparently disclosed.\r\nKey assumptions:\r\nResidues: 6% of commercial wood mass\r\nCollection efficiency: 70%\r\nBiochar yield: 30%\r\nSoil temperature: 22°C proxy pending direct measurement\r\nBaseline\r\nB.4\r\nProjects must reason and evidence the baseline scenario of their activities having not\r\ntaken place. Projects will only be credited for removals above this counterfactual baseline.\r\nSUBMISSION\r\nn the absence of the project, forestry residues are managed through controlled open-air burning, a\r\ndocumented operational practice for residue disposal and fire risk management.\r\nThe baseline assumes near-complete oxidation of biomass carbon via controlled burning.\r\nThe baseline is assessed conservatively for every removal batch.\r\nNo laws or government policies mandate the conversion of forestry residues into biochar or durable\r\ncarbon storage. Regulations governing controlled burning do not require carbon removal and therefore\r\ndo not eliminate baseline emissions.\r\nPROJECT DESIGN 9 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 10 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Leakage\r\nB.5\r\nProjects must evaluate leakage by providing a robust assessment of the potential\r\nincreases in GHG emissions outside the system boundary that occurs as a result of the\r\nproject activity.\r\nSUBMISSION\r\nNo material leakage pathways are identified.\r\nMarket leakage is absent because residues currently have no alternative commercial use.\r\nActivity shifting is not expected because residue management practices remain confined within the\r\nproject boundary.\r\nLeakage is conservatively assessed at 0% and deducted in the GHG statement.\r\nPROJECT DESIGN 10 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 11 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Financial additionality\r\nB.6\r\nProjects must demonstrate financial additionality by evidencing removals are the main\r\npurpose and only source of revenue; OR demonstrating that economic barriers would\r\nprevent project implementation in the absence of carbon finance.\r\nSUBMISSION\r\nFull project financials are provided in the uploaded spreadsheet Fluxo de Caixa_BCNE.xlsx.\r\nThe analysis includes CAPEX, OPEX, production volumes, credit pricing scenarios, and internal rate of\r\nreturn (IRR) calculations.\r\nResults demonstrate that without carbon credit revenues the project fails to achieve an acceptable\r\nIRR. Carbon removal revenues are required to overcome financial barriers.\r\nScenario analysis confirms that project viability is sensitive to carbon credit pricing.\r\nThe project has received no public subsidies or grants.\r\nCommon practice additionality\r\nB.7\r\nProjects must demonstrate that activities similar to the activities of the proposed project\r\nare not common practice.\r\nSUBMISSION\r\nThe project uses a technology pathway at TRL 9 and therefore completes a full common practice\r\nanalysis.\r\nWithin Brazil and Minas Gerais eucalyptus forestry operations, the conversion of forestry residues into\r\nbiochar for verified carbon removal is not common practice.\r\nResidues are predominantly managed via controlled burning or natural decay.\r\nPROJECT DESIGN 11 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 12 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Environmental additionality\r\nB.8\r\nProjects must demonstrate environmental additionality by evidencing the climate impact\r\nof the project is net negative after subtracting the counterfactual CO2 removal and all\r\nproject GHG emissions, including leakage, from project CO2 removals.\r\nSUBMISSION\r\nDemonstration: Net negative: Project removals 3.72 t/t > emissions 0.3 t/t + leakage 0.05 t/t + baseline\r\n1.5 t/t. Evidence: LCA Astra.\r\nThe project demonstrates net-negative climate impact. Gross CO₂ removals through biochar storage\r\nexceed baseline emissions, project emissions, and leakage. Environmental additionality is therefore\r\nsatisfied.\r\nRegulatory additionality\r\nB.9\r\nProjects must demonstrate regulatory additionality by evidencing that the project is not\r\nrequired by existing laws, regulations, policies, or other binding obligations.\r\nSUBMISSION\r\nThe project is not required by any existing law, regulation, or binding obligation. All credited removals\r\nare fully additional.\r\nRegulatory compliance\r\nB.10\r\nProjects must assert the method(s) for compliance with regulations for all jurisdictions to\r\nwhich the project is beholden.\r\nSUBMISSION\r\nPROJECT DESIGN 12 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 13 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "The project complies with all applicable municipal, state, and federal regulations, including\r\nenvironmental licensing requirements in Minas Gerais and occupational safety standards (NR-12).\r\nCompliance is ensured through internal operational procedures and regulatory oversight.\r\nDurability\r\nB.11\r\nProjects must select from the durability threshold(s) defined in the protocol or module to\r\nbe the project durability threshold.\r\nSUBMISSION\r\nThe project selects the +200-year durability threshold as defined in the Isometric protocol.\r\nB.12\r\nProjects must demonstrate a durability in excess of the designated project durability\r\nthreshold.\r\nSUBMISSION\r\nDurability exceeding the +200-year threshold is demonstrated through:\r\nBatch-level elemental laboratory analysis (C, H, O);\r\nApplication of H/Corg-based degradation models consistent with Isometric guidance;\r\nOngoing monitoring and sample archiving.\r\nB.13\r\nIf projects are targeting 200-year durability, details on the method or approach used for\r\nannual average soil temperature calculation must be provided.\r\nSUBMISSION\r\nAnnual average soil temperature is initially estimated using conservative regional datasets. Use\r\nLembrechts et al. (2022) global database (~22°C for MG tropics).\r\nPROJECT DESIGN 13 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 14 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Direct soil temperature measurements at 20 cm depth will be implemented and used for annual\r\nbaselining once available.\r\nReversals\r\nB.14\r\nProjects must complete the protocol or module specific risk assessment to support the\r\nrisk of reversal and buffer pool size.\r\nSUBMISSION\r\n# Question If Yes If No Response\r\n1 Observable reversal? Proceed 2-9 Proceed 8-9 Yes (soil C measurement).\r\n2 Impermeable geologic? Proceed 8-9 +1, proceed 3-9 No (+1).\r\n3 Organic storage? +1 - Yes (+1).\r\n4 Methane conditions? +1 - No.\r\n5 Natural disasters risk? +1 - Low (fires <2% MG).\r\n6 Human-induced risk? Up to +2 - Low (+1, farming changes).\r\n7 Trapping mechanisms? -1 - N/A.\r\n8 10+ years data? -2 - Partial (-1).\r\n9 History of reversals? +0-2 - Limited (+1).\r\n10 Project-specific risks? +1-2 - Low (+1).\r\nTotal - - - 5 (medium risk).\r\nPROJECT DESIGN 14 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 14 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 15 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Uncertainty\r\nB.15\r\nProjects must conduct a sensitivity analysis that demonstrates the impact of each input\r\nparameter’s uncertainty on the final net CO₂e uncertainty.\r\nSUBMISSION\r\nDetails: Method: Monte Carlo (1,000 runs, recreatable in Excel); Parameters: Yield ±5% impacts CO₂e\r\n±0.2 t/t. Omitted Parameters: None >1% change (e.g., minor VOCs <1%). Sources: LCA Astra for\r\nuncertainty data.\r\nB.16\r\nProjects must specify whether they used conservative estimates of input parameters,\r\nvariance propagation and/or Monte Carlo simulations in consideration of uncertainty (one\r\nor multiple options).\r\nSUBMISSION\r\nThe project applies conservative parameter selection, variance propagation, and Monte Carlo\r\nsimulation in addressing uncertainty.\r\nB.17\r\nProjects must detail and justify their uncertainty analysis and any uncertainty adjustments\r\n(e.g. %) applied in instances of high uncertainty.\r\nSUBMISSION\r\nUncertainty Analysis and Adjustments\r\nEmission Factors: From databases (IPCC for transport). Measured Parameters: Instrumentation (PT￾100 ±1°C). Lab Analyses: C content (64.3% organic, lab ISO). Degradation Data: BCDM model.\r\nMin/Max Values: e.g., Yield 30-35%. Adjustment: 2% discount if >10% uncertainty.\r\nUncertainty assessment includes consideration of emission factors, process instrumentation\r\nmeasurements, laboratory analyses, and degradation modeling inputs. Minimum and maximum values\r\nare documented and conservative adjustments are applied where necessary.\r\nPROJECT DESIGN 15 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 16 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Proxies & models\r\nB.18\r\nProjects must describe and justify any models used for quantification, monitoring, and\r\nmeeting specified protocol requirements.\r\nSUBMISSION\r\nDurability and quantification models apply conservative assumptions and are derived from peer￾reviewed correlations between H/Corg values and biochar stability. All model inputs, assumptions, and\r\nlimitations are disclosed and documented.\r\nData collection and storage\r\nB.19\r\nProjects must describe the data collection and storage approach taken, including how\r\ndata is transmitted, collected and stored, the length of time for which records are archived,\r\nbackup procedures and strategies and the person(s) / organization(s) responsible for\r\nmeasurement and data collection.\r\nSUBMISSION\r\nOperational and laboratory data are collected per batch and stored in secure digital systems with\r\nregular backups. Records are archived for a minimum of 20 years. Biochar samples are archived for at\r\nleast 5 years.\r\nApproach: Transmission: SCADA to CarbonFuture cloud; Collection: Daily sensors (weight cells);\r\nStorage: Astra servers, 20 years archive, daily backups; Responsible: Astra team (João Henrique,\r\nLucas Mendes). Sample Archive: Maintained 5+ years (biochar samples).\r\nAnálise Crítica: Cálculos conservadores (% resíduos 10% médio; critique se otimista - use 8% IPEF\r\npara sensibilidade baixa 1.463 t biomassa/ano). Sustentabilidade: Monitore Tsoil real para\r\ndurabilidade precisa. Próximos Passos: Forneça dados medidos (Tsoil, % resíduos) para recalcular;\r\nSugiro web_search para atualizações preços 2026.\r\nPROJECT DESIGN 16 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 17 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Section C: Environmental & social impacts\r\nHow will your project affect people and nature, and how will you manage any risks that\r\narise.\r\nEnvironmental & social impact\r\nC.1\r\nProjects must outline and detail compliance with applicable environmental national and\r\nlocal laws and regulations.\r\nSUBMISSION\r\nThe Project complies with all applicable environmental national, state, and local laws and regulations\r\ngoverning industrial operations, biomass handling, emissions, and land management in Brazil and in\r\nthe State of Minas Gerais.\r\n1. Environmental Permits and Authorizations\r\nThe Project obtains and maintains all required environmental permits from the competent state\r\nenvironmental authority in Minas Gerais prior to commencing operations. These include, where\r\napplicable:\r\nEnvironmental licensing for industrial installation and operation;\r\nAuthorization for biomass processing and thermal treatment activities;\r\nAir emissions authorization;\r\nWaste management and disposal compliance documentation.\r\nAll permits are maintained in good standing and are subject to periodic review and renewal in\r\naccordance with applicable Brazilian environmental law.\r\n2. Compliance with International Conventions and Human Rights Standards\r\nThe Project complies with applicable international conventions and standards governing:\r\nHuman rights;\r\nLabor rights;\r\nEnvironmental protection.\r\nThe Project adheres to Brazilian constitutional protections, labor legislation, and internationally\r\nrecognized human rights principles. No forced labor, child labor, or discriminatory practices are\r\nPROJECT DESIGN 17 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 18 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "permitted. Occupational health and safety requirements are followed in accordance with national\r\nlegislation (including NR-12 and other applicable safety standards).\r\nThe Project does not operate in protected areas, indigenous territories, or legally restricted\r\nconservation areas. No land use change is induced by Project activities.\r\n3. Documentation of Activities Requiring Environmental Permits\r\nThe following Project activities require environmental authorization and are documented accordingly:\r\nInstallation and operation of pyrolysis equipment;\r\nHandling and thermal treatment of forestry residues;\r\nEmissions to air;\r\nStorage and application of biochar to soil.\r\nAll such activities are conducted only after receipt of the relevant permits from competent authorities.\r\nCopies of permits and related documentation are available for audit.\r\nC.2\r\nProjects must provide an overall assessment for the potential material environmental and\r\nsocial impacts, both within and beyond its boundary.\r\nSUBMISSION\r\nThe Project has conducted an internal environmental and social risk assessment covering all\r\noperational stages, including biomass collection, transport, pyrolysis processing, and biochar soil\r\napplication. The assessment evaluates potential material impacts within and beyond the project\r\nboundary.\r\n1. Risk Identification and Mitigation (G-TGC2-0)\r\nThe Project identified and assessed potential environmental and social risks, including:\r\nEnvironmental risks\r\nAir emissions from pyrolysis operations;\r\nSoil disturbance during biochar application;\r\nRisk of accidental biomass stockpile fires;\r\nImproper ash or byproduct handling;\r\nPROJECT DESIGN 18 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 19 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Water contamination risk from operational runoff.\r\nSocial risks\r\nOccupational health and safety risks;\r\nNoise and dust impacts to nearby communities;\r\nTraffic from biomass transport.\r\nMitigation measures include:\r\nInstallation of controlled combustion systems for process gases;\r\nCompliance with air emission limits and monitoring procedures;\r\nControlled biochar application rates and soil suitability criteria;\r\nFire prevention protocols and controlled storage areas;\r\nOccupational safety procedures compliant with national regulations;\r\nDust suppression and operational scheduling to minimize nuisance.\r\n2. Risks Not Applicable to the Project (G-ES7Q-0)\r\nThe following risks were evaluated and determined to be not applicable, with justification:\r\nDeforestation risk: No land use change is induced by the Project.\r\nIndigenous land impact: The Project does not operate in indigenous territories.\r\nMarine ecosystem impact: Project activities occur inland and do not affect marine environments.\r\nLarge-scale hydrological alteration: The Project does not modify watercourses or watershed\r\nstructures.\r\nThese risks are therefore not material to the Project.\r\n3. Third-Party Environmental and Social Assessment (G-1T3C-0)\r\nA third-party environmental and social impact assessment is not legally required under the applicable\r\njurisdiction for this scale and category of industrial operation.\r\nImpacts identified through internal assessment are not considered significant. Should regulatory\r\nauthorities require a formal EIA or equivalent assessment, the Project will comply accordingly.\r\nPROJECT DESIGN 19 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 20 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "4. Coverage of All Project Locations (G-4REH-0)\r\nEnvironmental and social risks have been assessed at:\r\nBiomass generation sites (forestry areas);\r\nTransport routes;\r\nPyrolysis facility location;\r\nBiochar storage and soil application sites.\r\nThe assessment applies uniformly across all project locations.\r\n5. Protection of Terrestrial and Aquatic Ecosystems (G-C25V-0)\r\nThe Project has identified potential risks to terrestrial and aquatic ecosystems and implemented\r\nmitigation measures to eliminate or minimize such risks:\r\nNo operation within protected areas or conservation units;\r\nMaintenance of buffer distances from water bodies;\r\nNo discharge of untreated effluents;\r\nControlled biomass storage to prevent leachate formation;\r\nApplication of biochar only to suitable soils at agronomic rates.\r\nThe Project does not result in biodiversity loss and does not introduce invasive species or harmful\r\nsubstances.\r\nC.3\r\nProjects must demonstrate that it creates no net environmental harm through an\r\nenvironmental impact assessment. This assessment must include, but is not limited to,\r\nresource efficiency and pollution prevention and biodiversity conservation and sustainable\r\nmanagement of living natural resources.\r\nSUBMISSION\r\nThe Project demonstrates that it causes no net environmental harm through an internal environmental\r\nimpact assessment covering resource efficiency, pollution prevention, biodiversity conservation, and\r\nPROJECT DESIGN 20 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 21 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "sustainable management of natural resources.\r\nThe assessment evaluates all operational stages, including biomass collection, transport, pyrolysis\r\nprocessing, and biochar soil application.\r\n1. Resource Efficiency and Pollution Prevention (G-NEZ1-0)\r\nThe Project considers and manages the following potential environmental impacts:\r\nAir Emissions\r\nControlled combustion of pyrolysis gases reduces uncontrolled emissions.\r\nEmissions are maintained within applicable regulatory limits.\r\nNo persistent organic pollutants are intentionally generated.\r\nWater Protection\r\nNo direct discharge of untreated wastewater to surface or groundwater.\r\nNo process effluents released to natural water bodies.\r\nBiochar application rates are controlled to avoid runoff or leaching.\r\nNoise and Vibration\r\nEquipment operates within industrial compliance thresholds.\r\nOperational scheduling minimizes community disturbance.\r\nWaste Management\r\nSolid residues are managed in compliance with environmental regulations.\r\nNo hazardous chemical additives are used in pyrolysis.\r\nNo chemical pesticides or synthetic fertilizers are introduced as part of project activities.\r\nResource Efficiency\r\nThe Project valorizes forestry residues that would otherwise be burned.\r\nBiomass is used efficiently, maximizing stable carbon yield per unit of residue.\r\nNo additional raw material extraction is induced by the Project.\r\nPROJECT DESIGN 21 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 22 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "The Project does not generate significant pollution to air, water, or soil and therefore does not cause\r\nnet environmental harm under this category.\r\n2. Biodiversity Conservation and Sustainable Resource\r\nManagement (G-93TP-0)\r\nThe Project considers biodiversity and ecosystem protection across all locations.\r\nTerrestrial Ecosystems\r\nNo deforestation or land use change occurs as a result of the Project.\r\nOperations are conducted outside protected areas and conservation units.\r\nNo activities occur in indigenous territories or legally restricted zones.\r\nAquatic Ecosystems\r\nNo discharge of pollutants to rivers, streams, or groundwater.\r\nBuffer distances from water bodies are respected.\r\nRare or Endangered Species\r\nThe Project does not modify habitat structures or introduce invasive species.\r\nForestry operations remain unchanged relative to baseline practices.\r\nSoil and Erosion\r\nBiochar application is conducted at agronomic rates appropriate to soil type.\r\nApplication methods avoid excessive soil disturbance and erosion risk.\r\nWater Consumption and Water Stress\r\nThe pyrolysis process does not require significant freshwater consumption.\r\nNo water-intensive processing or irrigation is introduced by the Project.\r\nThe Project therefore maintains biodiversity integrity and supports sustainable management of natural\r\nresources without causing environmental degradation.\r\nPROJECT DESIGN 22 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 23 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "C.4\r\nProjects must demonstrate that it creates no net social harm by evaluating the potential\r\nnegative social risks from a project’s implementation.\r\nSUBMISSION\r\nThe Project demonstrates that it causes no net social harm through a structured social risk assessment\r\ncovering labor practices, community impacts, land rights, and stakeholder engagement. The\r\nassessment evaluates potential negative social risks associated with project implementation and\r\nestablishes mitigation measures where applicable.\r\n1. Labor Rights and Working Conditions\r\nThe Project complies with all applicable Brazilian labor laws and occupational health and safety\r\nregulations.\r\nMeasures implemented include:\r\nCompliance with national labor legislation;\r\nProhibition of forced labor, child labor, and discriminatory practices;\r\nFormal employment contracts where applicable;\r\nOccupational safety protocols consistent with national standards (including NR-12 and other\r\nrelevant safety regulations);\r\nTraining and use of appropriate personal protective equipment (PPE).\r\nNo high-risk labor practices are present.\r\n2. Community Impacts\r\nPotential community risks assessed include:\r\nNoise and dust from operations;\r\nIncreased traffic from biomass transport;\r\nPerceived environmental or safety concerns.\r\nMitigation measures include:\r\nPROJECT DESIGN 23 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 24 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Operational scheduling to reduce disturbance;\r\nTraffic management and safe transport procedures;\r\nCompliance with air emission and environmental standards;\r\nOpen communication channels for concerns or complaints.\r\nNo displacement of communities occurs, and no involuntary resettlement is induced by the Project.\r\n3. Land Tenure and Land Rights\r\nThe Project operates exclusively on legally authorized land with established ownership or operational\r\ncontrol.\r\nNo indigenous territories are involved.\r\nNo traditional community land rights are affected.\r\nNo land acquisition or expropriation is required for project implementation.\r\nLand tenure risks are therefore considered low.\r\n4. Grievance and Risk Mitigation Mechanisms\r\nThe Project maintains a grievance mechanism allowing stakeholders to raise concerns related to\r\nenvironmental or social impacts.\r\nAll grievances are documented and addressed in a timely manner. Social risks are periodically\r\nreviewed and mitigation measures updated if necessary.\r\nBased on the assessment conducted, the Project does not generate significant negative social impacts\r\nand therefore does not cause net social harm.\r\nC.5\r\nProjects must document how agricultural productivity and soil quality will be monitored,\r\nincluding which productivity and soil characteristics will be tested and the frequency of\r\ntesting.\r\nSUBMISSION\r\nPROJECT DESIGN 24 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 25 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "The Project implements a structured monitoring plan to ensure that agricultural productivity and soil\r\nquality are maintained or improved following biochar application.\r\nMonitoring applies to all soil application sites and includes baseline characterization, periodic testing,\r\nand evaluation of agronomic performance.\r\n1. Soil Quality Monitoring Plan\r\nBefore biochar application, baseline soil analyses are conducted, including:\r\nSoil pH\r\nOrganic carbon content\r\nCation exchange capacity (CEC)\r\nNutrient levels (N, P, K, Ca, Mg)\r\nBulk density (where applicable)\r\nFollowing biochar application, soil testing is conducted at regular intervals, with monitoring frequency\r\ndefined as:\r\nBaseline test prior to application\r\nFollow-up testing within the first growing season\r\nPeriodic reassessment (e.g., annually or per agronomic cycle)\r\nTesting is conducted by accredited laboratories using standardized soil analysis methodologies.\r\nBiochar application rates are defined according to soil suitability and agronomic best practices to\r\navoid over-application or nutrient imbalance.\r\n2. Agricultural Productivity Monitoring\r\nAgricultural productivity is monitored through:\r\nCrop yield records (where applicable);\r\nVisual soil health indicators;\r\nComparison with historical yield baselines.\r\nPROJECT DESIGN 25 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 26 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "If productivity or soil quality is demonstrated or anticipated to be adversely affected, the Project will:\r\nAdjust application rates;\r\nProvide technical guidance to land managers;\r\nConduct corrective soil management practices;\r\nDocument nutrient impacts and mitigation measures.\r\n3. Use of Proxy Variables (G-37T6-0)\r\nWhere direct measurement is not immediately available, proxy variables such as soil organic carbon\r\ncontent and crop yield records may be used as indicators of soil health, provided justification is\r\ndocumented.\r\nAll proxies are conservative and correlated with soil productivity indicators.\r\n4. Nutrient Balance and Biomass Removal\r\nThe Project documents the nutrient implications of biomass removal from forestry operations. As the\r\nProject uses residues that are currently burned, no additional nutrient extraction beyond baseline\r\npractices is induced.\r\nBiochar application contributes stable carbon to soil and may enhance soil structure and nutrient\r\nretention.\r\nThe Project therefore ensures that agricultural productivity and soil quality are monitored, maintained,\r\nand not adversely impacted.\r\nPROJECT DESIGN 26 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 27 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Sustainable development\r\nC.6\r\nProjects must demonstrate how their carbon removal activities are consistent with relevant\r\nSDGs.\r\nSUBMISSION\r\n#SDG with\r\nname\r\nDescription of project impact (linked to\r\nUN SDG targets)\r\nDescription of alignment with\r\njurisdiction indicators\r\nIf applicable,\r\nunit of\r\nmeasurement\r\nSDG 13 –\r\nClimate Action\r\n(Target 13.2)\r\nThe Project removes atmospheric CO₂\r\nthrough durable biochar carbon storage,\r\ncontributing to climate mitigation and\r\nintegration of climate measures into\r\nplanning and operations.\r\nAligned with Brazil’s Nationally\r\nDetermined Contribution (NDC)\r\nunder the Paris Agreement and\r\nBrazil’s long-term\r\ndecarbonization strategy.\r\ntCO₂e removed\r\nper year\r\nSDG 12 –\r\nResponsible\r\nConsumption\r\nand Production\r\n(Target 12.5)\r\nThe Project valorizes forestry residues\r\nthat would otherwise be burned, reducing\r\nwaste generation through recycling and\r\nreuse of biomass.\r\nAligned with Brazil’s National\r\nSolid Waste Policy (Law\r\n12.305/2010) promoting waste\r\nvalorization and circular\r\neconomy principles.\r\nTonnes of\r\nforestry residues\r\nconverted per\r\nyear\r\nSDG 15 – Life\r\non Land (Target\r\n15.1, 15.3)\r\nThe Project avoids deforestation and\r\npromotes soil carbon enhancement\r\nthrough biochar application, supporting\r\nsustainable land management and soil\r\nrestoration.\r\nConsistent with Brazilian Forest\r\nCode (Law 12.651/2012) and\r\nnational soil conservation\r\nstrategies.\r\nHectares under\r\nsustainable\r\nmanagement;\r\ntonnes of\r\nbiochar applied\r\nSDG 8 – Decent\r\nWork and\r\nEconomic\r\nGrowth (Target\r\n8.8)\r\nThe Project promotes safe working\r\nenvironments and formal employment\r\naligned with labor protections and\r\noccupational safety standards.\r\nAligned with Brazilian labor\r\nlegislation and occupational\r\nsafety regulations (NR\r\nstandards).\r\nNumber of direct\r\njobs supported\r\nSDG 9 –\r\nIndustry,\r\nInnovation and\r\nInfrastructure\r\n(Target 9.4)\r\nThe Project deploys low-emission\r\nindustrial technology (controlled\r\npyrolysis) contributing to cleaner\r\nindustrial processes.\r\nSupports Brazil’s industrial\r\ndecarbonization and innovation\r\npolicies.\r\nOperational\r\npyrolysis\r\ncapacity\r\n(tonnes/year)\r\nPROJECT DESIGN 27 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 28 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Project closure\r\nC.7\r\nProjects must describe the conditions under which the project will be considered closed,\r\nand describe the project closure plan – outlining any post-cessation actions that will be\r\nundertaken upon closure of the project.\r\nSUBMISSION\r\nThe Project defines closure as the permanent cessation of biochar production and/or carbon credit\r\nissuance activities.\r\nProject closure may occur under the following conditions:\r\nVoluntary termination by the Project Proponent;\r\nRegulatory suspension or revocation of operating permits;\r\nPermanent discontinuation of biomass supply;\r\nInsolvency or force majeure events preventing continued operation.\r\n1. Operational Closure Procedures\r\nUpon closure of operations:\r\nAll pyrolysis and processing equipment will be safely decommissioned;\r\nEquipment will be dismantled, sold, reused, or recycled in accordance with applicable\r\nenvironmental regulations;\r\nAny residual materials will be properly disposed of following waste management requirements;\r\nIndustrial areas will be stabilized to prevent environmental harm.\r\nNo hazardous waste will be abandoned on site.\r\n2. Environmental Safeguards at Closure\r\nThe Project will:\r\nEnsure no contaminated soil or water remains on-site;\r\nRemove any temporary storage structures if required;\r\nPROJECT DESIGN 28 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 29 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Maintain compliance with environmental licensing closure requirements.\r\nIf required by the competent authority, a formal site closure or decommissioning report will be\r\nsubmitted.\r\n3. Post-Closure Carbon Storage Responsibility\r\nCarbon removals already credited remain stored in soil at application sites.\r\nFollowing operational closure:\r\nNo further biochar production will occur;\r\nPreviously applied biochar remains subject to durability and reversal provisions under the Isometric\r\nprotocol;\r\nMonitoring obligations will continue as required by the protocol and crediting framework.\r\nResponsibility for monitoring and reporting remains with the Project Proponent or designated legal\r\nsuccessor.\r\n4. Post-Cessation Monitoring\r\nIf required under the applicable durability threshold and risk assessment framework, monitoring of\r\nreversal risk and soil carbon conditions will continue for the period defined by the protocol.\r\nThe Project closure plan ensures that cessation of operations does not result in environmental or social\r\nharm and that carbon permanence obligations are maintained.\r\nPROJECT DESIGN 29 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 30 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Adaptive management\r\nC.8\r\nProjects must include a plan for information sharing, emergency response and conditions\r\nfor stopping or pausing a deployment.\r\nSUBMISSION\r\nThe Project maintains an adaptive management framework that includes procedures for information\r\nsharing, emergency response, and conditions under which operations must be paused or stopped.\r\nThe plan applies to all operational stages including biomass handling, pyrolysis processing, storage,\r\nand soil application.\r\n1. Conditions for Pausing or Stopping Operations\r\nOperations will be immediately paused or stopped under the following conditions:\r\nInstrument malfunction affecting emission control systems;\r\nDetection of pollutant levels exceeding regulatory thresholds;\r\nIdentification of metals or contaminants in biochar exceeding applicable safety limits;\r\nRegulatory non-compliance or permit suspension;\r\nFire incidents or uncontrolled combustion events;\r\nCompromised health or safety of workers or local stakeholders;\r\nEnvironmental incidents (e.g., unintended discharge, soil contamination).\r\n2. Emergency Response Procedures\r\nIn the event of an incident:\r\nOperations are immediately halted;\r\nEmergency containment measures are activated;\r\nResponsible personnel and environmental authorities are notified when required;\r\nIncident documentation is initiated;\r\nCorrective actions are implemented before resuming operations.\r\nPROJECT DESIGN 30 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 31 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Fire prevention and suppression systems are maintained on site.\r\n3. Information Sharing and Stakeholder Communication\r\nThe Project maintains communication channels for:\r\nWorkers and contractors;\r\nLocal stakeholders;\r\nRegulatory authorities.\r\nIncidents and corrective measures are documented and made available during audit or regulatory\r\nreview.\r\n4. Resumption of Operations\r\nOperations may resume only after:\r\nRoot cause analysis is completed;\r\nCorrective measures are implemented;\r\nEquipment is verified to be functioning properly;\r\nRegulatory compliance is restored.\r\nThe adaptive management framework ensures that risks are identified early and mitigated to prevent\r\nenvironmental or social harm.\r\nPollution prevention\r\nC.9\r\nProjects must describe and provide evidence for pollution prevention against Polycyclic\r\nAromatic Hydrocarbons (PAHs), heavy metals and any other pollutants identified.\r\nSUBMISSION\r\nPROJECT DESIGN 31 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 32 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "The Project implements a structured pollutant screening and mitigation framework to ensure that\r\nbiochar applied to soil does not pose environmental or health risks. All biochar batches are tested by\r\naccredited laboratories prior to soil application.\r\n1. Polycyclic Aromatic Hydrocarbons (PAHs)\r\nThe Project evaluates environmental risks associated with PAHs through:\r\nControlled pyrolysis temperature management;\r\nComplete combustion of pyrolysis gases;\r\nLaboratory testing of representative biochar batches.\r\nBiochar PAH concentrations are tested in accordance with internationally recognized analytical\r\nmethods. Results must remain within upper bound limits defined by the World Biochar Certificate (EBC)\r\nguidelines.\r\nIf PAH concentrations exceed acceptable thresholds, the affected batch is not applied to soil and is\r\nisolated for further assessment.\r\n2. Heavy Metals\r\nAll biochar batches are tested for heavy metals, including but not limited to:\r\nCadmium (Cd)\r\nLead (Pb)\r\nMercury (Hg)\r\nArsenic (As)\r\nChromium (Cr)\r\nNickel (Ni)\r\nBiochar heavy metal concentrations must not exceed the limits established by:\r\nApplicable local environmental regulations; and\r\nWorld Biochar Certificate (EBC) standards.\r\nPROJECT DESIGN 32 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 33 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Following application, soil heavy metal concentrations must remain below regulatory thresholds\r\ndefined by the competent authority.\r\n3. Pre-existing Soil Contamination\r\nIf baseline soil testing identifies elevated heavy metal concentrations exceeding regulatory limits:\r\nThe Project documents existing contamination levels;\r\nBiochar application is paused in affected areas;\r\nRemediation or mitigation measures are evaluated in coordination with land managers.\r\nBiochar is not applied to soils where application would increase total metal concentration above\r\npermissible limits.\r\n4. PCBs, Dioxins, and Furans\r\nThe Project screens biochar for environmental risks related to:\r\nPolychlorinated biphenyls (PCBs);\r\nDioxins;\r\nFurans.\r\nFeedstock used consists exclusively of untreated forestry residues. No painted, chemically treated, or\r\ncontaminated wood is accepted.\r\nWhere required, laboratory screening confirms absence or compliance with safe thresholds.\r\n5. Compliance with World Biochar Certificate (EBC) Limits\r\nAll pollutant concentrations are maintained within the upper bound limits defined by the World Biochar\r\nCertificate.\r\nLaboratory reports are archived and available for audit.\r\nPROJECT DESIGN 33 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 34 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "6. PAH Measurement Flexibility\r\nIf stringent operational risk mitigation (controlled high-temperature pyrolysis and clean feedstock\r\nprotocols) is demonstrated and validated, reduced PAH testing frequency may be considered.\r\nHowever, baseline testing and periodic verification are maintained to ensure compliance.\r\nSite selection\r\nC.10\r\nProjects should collect and detail baseline soil samples prior to spreading biochar,\r\nincluding soil pH, soil moisture content, bulk density/particle size, soil type and texture,\r\nnutrient availability and soil organic content.\r\nSUBMISSION\r\nPrior to any biochar application, the Project conducts baseline soil sampling at all intended\r\napplication sites. Baseline sampling is required to characterize existing soil conditions and ensure that\r\nbiochar application does not negatively impact soil quality.\r\nBaseline sampling is conducted following standardized agronomic and environmental sampling\r\nprotocols and laboratory methods.\r\n1. Soil Parameters Measured\r\nThe following parameters are tested prior to application:\r\nSoil pH\r\nSoil moisture content\r\nSoil organic carbon content (SOC)\r\nBulk density\r\nSoil texture (sand, silt, clay fractions)\r\nParticle size distribution\r\nNutrient availability (N, P, K, Ca, Mg)\r\nCation exchange capacity (CEC)\r\nPROJECT DESIGN 34 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 35 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Where relevant, baseline heavy metal concentrations are also measured to ensure regulatory\r\ncompliance after biochar application.\r\n2. Sampling Methodology\r\nSamples are collected at representative locations within each application area.\r\nSampling depth is standardized (e.g., 0–20 cm for topsoil).\r\nComposite samples may be prepared from multiple sub-samples per hectare.\r\nSampling procedures follow nationally recognized soil testing standards.\r\nLaboratory analysis is conducted by accredited laboratories.\r\nAll baseline results are documented and archived prior to application.\r\n3. Use of Baseline Data\r\nBaseline soil data are used to:\r\nDefine appropriate biochar application rates;\r\nAvoid excessive nutrient loading or pH shifts;\r\nMonitor changes over time under C.5 soil monitoring requirements;\r\nConfirm compliance with heavy metal limits under C.9.\r\nIf baseline results indicate soil constraints (e.g., high existing metal concentration, extreme pH), the\r\napplication plan is adjusted or suspended.\r\nCo-benefits\r\nC.11\r\nProjects may choose to report any co-benefits related to soil health and quality that are a\r\nresult of their activity.\r\nSUBMISSION\r\nPROJECT DESIGN 35 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 36 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "In addition to carbon removal, the Project may generate soil-related co-benefits resulting from biochar\r\napplication. These co-benefits are dependent on soil type, climate conditions, and application rates,\r\nand are monitored where applicable.\r\n1. Improved Soil Structure and Reduced Compaction\r\nBiochar incorporation may improve soil aggregation and porosity, contributing to reduced compaction\r\nand enhanced root penetration in certain soil types.\r\nMonitoring indicators:\r\nBulk density\r\nSoil structure observations\r\n2. Increased Soil Water Retention\r\nBiochar may increase soil water holding capacity, particularly in sandy or degraded soils, potentially\r\nreducing drought stress.\r\nMonitoring indicators:\r\nSoil moisture measurements\r\nCrop performance under dry conditions\r\n3. Reduced Bioavailability of Heavy Metals\r\nBiochar has sorption properties that may reduce the bioavailability of certain heavy metals in\r\ncontaminated soils, depending on soil chemistry and biochar characteristics.\r\nMonitoring indicators:\r\nSoil heavy metal concentration (baseline vs post-application)\r\nPlant tissue analysis (where applicable)\r\nPROJECT DESIGN 36 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 37 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "4. Increased Soil Organic Carbon and Microbial Activity\r\nBiochar application increases stable soil carbon and may stimulate microbial activity in some soil\r\nconditions.\r\nMonitoring indicators:\r\nSoil organic carbon (SOC)\r\nMicrobial biomass indicators (if measured)\r\n5. Potential Yield Stability and Nutrient Retention\r\nBiochar may improve nutrient retention (via increased cation exchange capacity), potentially\r\ncontributing to more stable crop productivity and reduced fertilizer dependency.\r\nMonitoring indicators:\r\nNutrient levels (N, P, K)\r\nCrop yield comparisons\r\nThe Project does not claim guaranteed agronomic improvements. Co-benefits are site-dependent and\r\nevaluated through the soil monitoring framework described in Section C.5 and baseline\r\ncharacterization in Section C.10.\r\nPROJECT DESIGN 37 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 38 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Section D: Stakeholder input process\r\nHow will your project work with and respond to the community while staying compliant and\r\nadaptable.\r\nStakeholder consultation\r\nD.1\r\nProjects must provide a description and documentation of how comments by local\r\nstakeholders have been invited and compiled, a summary of comments received, and\r\nreport on how due account was taken of comments received.\r\nSUBMISSION\r\nThe Project conducted a structured stakeholder consultation process to inform relevant local\r\nstakeholders about the proposed carbon removal activities, gather feedback, and incorporate relevant\r\ninput into project design and implementation.\r\n1. Stakeholder Identification and Notification\r\nRelevant stakeholders were identified based on proximity to project operations and potential impact,\r\nincluding:\r\nLand managers and forestry operators;\r\nLocal community representatives;\r\nWorkers and contractors;\r\nLocal regulatory authorities (where applicable).\r\nStakeholders were informed of:\r\nThe nature of the biochar carbon removal activities;\r\nOperational processes (biomass handling, pyrolysis, soil application);\r\nEnvironmental and social safeguards;\r\nPotential impacts and mitigation measures.\r\nInformation was shared in accessible language and appropriate format.\r\nPROJECT DESIGN 38 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 39 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "2. Equitable and Inclusive Participation\r\nThe consultation process was designed to ensure:\r\nEqual opportunity for participation;\r\nFreedom to provide feedback without coercion;\r\nTransparent communication of project objectives and risks.\r\nAll stakeholders were given the opportunity to provide comments and raise concerns.\r\n3. Transparent and Documented Process\r\nThe consultation process was:\r\nAccessible and voluntary;\r\nTransparent in scope and objectives;\r\nDocumented through meeting notes and attendance records;\r\nDesigned to allow follow-up communication if necessary.\r\nComments received were compiled and reviewed by the Project Proponent.\r\nWhere relevant, adjustments were made to operational practices to address stakeholder concerns.\r\n4. Date, Location, and Evidence\r\nConsultation sessions were conducted at the project locality or nearby accessible locations.\r\nThe Project records:\r\nDate(s) of consultation;\r\nLocation(s) of consultation;\r\nList of participants (where consent is provided);\r\nSummary of comments received;\r\nPhotographic evidence (where available).\r\nAll documentation is archived and available for audit.\r\nPROJECT DESIGN 39 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 40 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "D.2\r\nProjects must outline the mechanism for stakeholders to voice, process and resolve\r\ngrievances.\r\nSUBMISSION\r\nThe Project maintains a formal grievance mechanism that enables stakeholders to submit concerns,\r\ncomplaints, or feedback related to environmental, social, or operational aspects of the Project.\r\nThe mechanism is designed to be accessible, transparent, and responsive.\r\n1. Publicly Available Contact Information (G-W7XH-0)\r\nStakeholders may submit grievances through:\r\nDesignated project email address;\r\nTelephone contact;\r\nIn-person submission at the project site;\r\nWritten submission to the Project Proponent.\r\nContact information is communicated during stakeholder consultations and made available to relevant\r\nlocal stakeholders.\r\nAll grievances are recorded in a grievance registry.\r\n2. Acknowledgment Timeline (G-FWSH-0)\r\nAll grievances received are formally acknowledged within 14 calendar days of receipt.\r\nAcknowledgment includes:\r\nConfirmation of receipt;\r\nRegistration number or reference ID;\r\nOutline of next steps and expected timeline.\r\nPROJECT DESIGN 40 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 41 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "3. Resolution or Escalation Timeline (G-3HN6-0)\r\nThe Project commits to resolving or formally escalating grievances within 60 calendar days of receipt.\r\nResolution process includes:\r\nInternal review and investigation;\r\nConsultation with relevant personnel or stakeholders;\r\nImplementation of corrective measures where necessary;\r\nCommunication of outcome to the complainant.\r\nIf resolution cannot be achieved within 60 days, the case is escalated to senior project management\r\nand the complainant is informed of the revised timeline.\r\nAll grievance records are documented and archived for audit purposes.\r\nPROJECT DESIGN 41 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 42 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Section E: Pathway-specific\r\nHow will your project meet pathway-specific process requirements.\r\nMonitoring requirements\r\nE.1\r\nProjects must create a table that outlines all monitored parameters in their selected\r\nprotocol and modules.\r\nSUBMISSION\r\nThe Project monitors all parameters required under the selected Isometric protocol and modules.\r\nMonitoring procedures include defined data sources, frequency, QA/QC controls, and documentation\r\npractices. All records are archived and made available for audit.\r\nParameter Data Source\r\nFrequency\r\nof\r\nMeasureme\r\nnt QA/QC Procedures\r\nEvidence\r\nProvision\r\nBiomass feedstock\r\nvolume (m³/year)\r\nForestry operational\r\nrecords\r\nPer harvest\r\ncycle\r\nCross-check against\r\ntransport logs\r\nHarvest\r\nrecords,\r\ntransport\r\nreceipts\r\nBiomass dry mass (t) Conversion using density\r\nfactor (500 kg/m³)\r\nPer batch Periodic density\r\nverification\r\nCalculation\r\nsheet, sampling\r\nrecords\r\nResidue fraction (%) Forestry inventory records\r\n(6% of commercial mass)\r\nAnnual\r\nreview\r\nCross-verification\r\nwith field estimates\r\nInventory\r\nreports\r\nCollection efficiency (%) Operational logs (70%) Per\r\ncampaign\r\nReconciliation of\r\nestimated vs\r\nprocessed biomass\r\nOperational\r\nlogs\r\nBiochar yield (%) Process mass balance Per batch Weighbridge\r\ncalibration; mass\r\nbalance check\r\nProduction logs\r\nBiochar carbon content\r\n(%)\r\nAccredited laboratory\r\nanalysis\r\nPer\r\nrepresentati\r\nve batch\r\nDuplicate samples;\r\nlab accreditation\r\nverification\r\nLaboratory\r\nreports\r\nH/Corg ratio Laboratory elemental\r\nanalysis\r\nPer\r\nrepresentati\r\nve batch\r\nQA review of lab\r\ncertificates\r\nLaboratory\r\nreports\r\nPROJECT DESIGN 42 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 43 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Parameter Data Source\r\nFrequency\r\nof\r\nMeasureme\r\nnt QA/QC Procedures\r\nEvidence\r\nProvision\r\nSoil temperature (°C) Direct measurement (20\r\ncm depth) or regional\r\ndataset proxy\r\nAnnual\r\naverage\r\nInstrument\r\ncalibration;\r\ndocumented\r\nmethodology\r\nSoil\r\ntemperature\r\nrecords\r\nHeavy metals in biochar Accredited laboratory\r\nanalysis\r\nPer\r\nrepresentati\r\nve batch\r\nLab QA certificate Laboratory\r\nreports\r\nPAHs Accredited laboratory\r\nanalysis\r\nPeriodic /\r\nper batch\r\nLab QA certificate Laboratory\r\nreports\r\nBaseline soil parameters\r\n(pH, SOC, nutrients, bulk\r\ndensity)\r\nSoil laboratory analysis Before\r\napplication\r\nStandard soil\r\nsampling protocol\r\nSoil lab reports\r\nPost-application soil\r\nmonitoring\r\nSoil laboratory analysis First season\r\n+ periodic\r\nSampling protocol\r\nconsistency\r\nSoil monitoring\r\nreports\r\nEmissions from\r\noperations\r\nOperational\r\nfuel/electricity records\r\nMonthly\r\naggregation\r\nCross-check with\r\ninvoices\r\nUtility bills, fuel\r\nreceipts\r\nGrievances received Grievance registry Continuous Internal review and\r\nlogging procedure\r\nGrievance log\r\nIncident reports Internal HSE reporting\r\nsystem\r\nAs incidents\r\noccur\r\nManagement review Incident\r\ndocumentation\r\nReactor design requirements\r\nE.2\r\nProjects must describe and provide an engineering design diagram of the chemical\r\nreactor used to achieve pyrolysis.\r\nSUBMISSION\r\nThe Project utilizes a continuous pyrolysis reactor designed for controlled thermal decomposition of\r\nbiomass under oxygen-limited conditions.\r\nPROJECT DESIGN 43 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 43 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 44 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "An engineering design package, including process flow diagrams (PFD), piping and instrumentation\r\ndiagrams (P&ID), and reactor layout drawings, is provided as supporting documentation.\r\n1. Reactor Dimensions and Configuration\r\nThe reactor design documentation includes:\r\nOverall reactor length, diameter, and wall thickness;\r\nFeed inlet and biochar discharge outlet positions;\r\nGas outlet and combustion chamber interface;\r\nInsulation layers and refractory lining specifications;\r\nExternal heat transfer and combustion systems.\r\nMaterial inflows and outflows are clearly indicated, including:\r\nBiomass feed input;\r\nSyngas output;\r\nBiochar discharge;\r\nFlue gas exhaust.\r\n2. Monitoring and Control Systems\r\nThe engineering diagram identifies:\r\nTemperature sensors (multiple zones along reactor length);\r\nPressure monitoring points;\r\nGas flow measurement locations;\r\nSafety relief systems;\r\nControl valves and actuators.\r\nSensor positioning ensures continuous monitoring of critical parameters for:\r\nPyrolysis temperature control;\r\nPrevention of oxygen intrusion;\r\nSafe gas combustion.\r\nPROJECT DESIGN 44 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 45 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "3. Internal and External Equipment\r\nInternal equipment details include:\r\nReactor screw or conveying system (if applicable);\r\nInternal heat distribution configuration;\r\nInsulation systems.\r\nExternal equipment included in the design:\r\nGas combustion chamber or thermal oxidizer;\r\nCyclone or particulate separation unit (if applicable);\r\nHeat exchanger (if applicable);\r\nCooling system for biochar discharge;\r\nEmission stack.\r\nAll essential process equipment necessary for safe and effective operation is identified in the\r\nengineering documentation.\r\n4. Viewpoints and Layout Representation\r\nThe engineering documentation includes multiple viewpoints, including:\r\nPlan view;\r\nSide elevation;\r\nCross-sectional view;\r\nProcess flow schematic.\r\nThese views clearly demonstrate the positioning of key components and monitoring instrumentation.\r\nhttps://www.bestongroup.net/wp-content/uploads/2021/11/化双炉流程导示图（中英）.gif\r\nFILES\r\nBST-30_Working_Flow_Chart.pdf, Layout_BST-30.pdf, specifications_BST-30.pdf\r\nPROJECT DESIGN 45 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 46 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "E.3\r\nProjects must describe and evidence the sensors used to quantify any loss of pyrolysis\r\ngasses during operation of the reactor to leakage.\r\nSUBMISSION\r\nE.3 – Sensors Used to Quantify Pyrolysis\r\nGas Leakage\r\nR-SZK5-0\r\nThe Project uses a BST-30 continuous rotary carbonization reactor (304 stainless steel) operating\r\nunder slightly negative pressure conditions with integrated gas recovery and sealed combustion\r\nsystemQuotation of BST-30(304ss) with….\r\nThe design incorporates engineered sealing systems, negative pressure operation, water seal devices,\r\nexplosion relief systems, and continuous PLC-based monitoring to prevent and detect unintended gas\r\nleakage.\r\n1. Flue Gas Outflow Monitoring (G-G21Y-0)\r\nThe BST-30 includes:\r\nHigh-pressure centrifugal fan (explosion-proof, rated up to 600°C) Quotation of BST-30(304ss)\r\nwith…\r\nBoiler centrifugal induced draft fan (standard emission system) Quotation of BST-30(304ss) with…\r\nSealed combustion chamber with negative pressure design Quotation of BST-30(304ss) with…\r\nGas flow is driven through controlled induced draft systems, ensuring all produced syngas is directed\r\nto combustion and not released to atmosphere.\r\nOutflow monitoring is performed through:\r\nCombustion chamber exhaust monitoring\r\nDraft fan performance monitoring\r\nContinuous pressure monitoring of the system\r\nThese parameters allow reconciliation between expected syngas generation and measured\r\ncombustion output.\r\nPROJECT DESIGN 46 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 47 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "2. Reactor Model and Performance Characterization (G-QBS8-0)\r\nThe BST-30 is a continuous-type rotary furnace carbonization system operating with:\r\nIndirect heating (biomass does not contact flame) Quotation of BST-30(304ss) with…\r\nWeak oxygen environment Quotation of BST-30(304ss) with…\r\nContinuous feeding and discharge\r\nThe reactor performance is characterized using:\r\nMeasured biomass input rate (1–1.5 t/h) Quotation of BST-30(304ss) with…\r\nContinuous screw feeding with frequency conversion control Quotation of BST-30(304ss) with…\r\nContinuous screw discharge with water-cooling jacket Quotation of BST-30(304ss) with…\r\nMass balance is based on:\r\nBiomass Input = Biochar Output + Syngas Combusted + Minor Process Losses\r\n3. Chemical Kinetics Consideration (G-YNGJ-0)\r\nThe BST-30 operates under controlled thermal radiation heating in a rotary furnace under oxygen￾limited conditionsQuotation of BST-30(304ss) with….\r\nAlthough the manufacturer does not provide a detailed kinetic equation model, the system:\r\nControls temperature via PLC system Quotation of BST-30(304ss) with…\r\nMaintains weak oxygen atmosphere\r\nRecovers syngas after initial 1–1.5h preheating phase Quotation of BST-30(304ss) with…\r\nGiven industrial continuous operation and fixed temperature range, a steady-state thermochemical\r\nmass balance approach is used instead of a laboratory kinetic model.\r\n4. Model Validation and Mass Balance (G-5Z7W-0)\r\nValidation relies on:\r\nPROJECT DESIGN 47 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 48 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Continuous biomass feed measurement\r\nContinuous screw discharge measurement\r\nSyngas recirculation monitoring\r\nFan performance and draft control\r\nThe system includes:\r\nIntegrated gas recovery system Quotation of BST-30(304ss) with…\r\nWater seal device in combustible gas pipeline Quotation of BST-30(304ss) with…\r\nCyclone dust removal system Quotation of BST-30(304ss) with…\r\nMass balance deviations beyond predefined tolerance trigger operational review.\r\n5. Alternative Leakage Control Measures (G-D8Z6-0)\r\nThe BST-30 integrates multiple leakage prevention systems:\r\nSix-layer sealing system (above industry standard) Quotation of BST-30(304ss) with…\r\nSlight negative pressure operation Quotation of BST-30(304ss) with…\r\nExplosion-proof relief port Quotation of BST-30(304ss) with…\r\nSafety water seal device Quotation of BST-30(304ss) with…\r\nNitrogen purging system Quotation of BST-30(304ss) with…\r\nThese systems significantly reduce risk of gas escape.\r\n6. Continuous Sub-Atmospheric Pressure Operation (G-MJPG-0)\r\nThe manufacturer specifies that:\r\n\"The entire system is in a slightly negative pressure state.\"Quotation of BST-30(304ss) with…\r\nNegative pressure is maintained through:\r\nInduced draft fans\r\nSealed combustion chamber\r\nContinuous pressure monitoring via PLC system Quotation of BST-30(304ss) with…\r\nPROJECT DESIGN 48 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 49 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Maintaining sub-atmospheric pressure ensures that any seal imperfection results in inward air flow\r\nrather than outward gas leakage.\r\n7. Regular Leakage Testing (G-VWDT-0)\r\nThe system includes:\r\nQuality inspection standards for industrial metal pipeline engineering Quotation of BST-30(304ss)\r\nwith…\r\nStandards for instrumentation installation and grounding Quotation of BST-30(304ss) with…\r\nAnnual leakage integrity inspection will include:\r\nPipeline inspection\r\nSeal inspection\r\nPressure stability verification\r\nWater seal functionality check\r\nTesting is conducted at least once every 12 months and after major maintenance.\r\nEvidence to Upload in Certify\r\nWorking Flow Chart (page 6) Quotation of BST-30(304ss) with…\r\nSecurity Design (page 8) Quotation of BST-30(304ss) with…\r\nTechnical Parameters (page 4) Quotation of BST-30(304ss) with…\r\nSyngas system component list (page 14) Quotation of BST-30(304ss) with…\r\nPLC monitoring description (page 11) Quotation of BST-30(304ss) with…\r\nFILES\r\nspecifications_BST-30.pdf\r\nPROJECT DESIGN 49 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 50 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "E.4\r\nProjects must describe the selection of materials for each component of the reactor,\r\nincluding suitable justification of these choices from the perspectives of thermal and\r\nmechanical resilience.\r\nSUBMISSION\r\nE.4 – Selection of Reactor Materials and\r\nJustification\r\nR-DMET-0\r\nThe project uses a BST-30 continuous rotary carbonization reactor constructed primarily of 304\r\nstainless steel, as specified in the technical quotation (“BST-30 (304ss)”)Quotation of BST-30(304ss)\r\nwith….\r\nMaterial selection was made based on:\r\nThermal resilience under continuous pyrolysis temperatures\r\nMechanical resistance under rotary operation\r\nCorrosion resistance due to organic acids and condensable vapors\r\nLong-term operational durability in oxygen-limited environments\r\n1. Primary Reactor Body – 304 Stainless Steel\r\nThe rotary carbonization furnace is fabricated in 304 stainless steelQuotation of BST-30(304ss) with….\r\nThermal Justification\r\nPyrolysis operation occurs at elevated temperatures (typically 450–600°C for biomass\r\ncarbonization).\r\n304 stainless steel maintains mechanical strength and structural stability within this temperature\r\nrange.\r\nIndirect heating design reduces localized thermal shock.\r\nChemical Justification\r\nPROJECT DESIGN 50 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 51 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "During biomass pyrolysis, condensable vapors contain organic acids (acetic acid), phenolics, and\r\nlight tars.\r\n304 stainless steel provides corrosion resistance to weak organic acids and condensable gases.\r\nResistance to oxidation under limited oxygen exposure increases reactor longevity.\r\nMechanical Justification\r\nContinuous rotary motion requires:\r\nFatigue resistance\r\nWeld integrity\r\nDimensional stability\r\n304 stainless steel provides adequate tensile strength and weldability for industrial rotary kilns.\r\n2. External Furnace and Combustion Components\r\nThe combustion chamber and flue gas handling components are designed for:\r\nHigh-temperature flue gas (up to 600°C as per fan specification) Quotation of BST-30(304ss) with…\r\nContinuous negative pressure operation\r\nStructural stability under thermal cycling\r\nHigh-temperature resistant steel alloys are used in fans and combustion components as specified by\r\nthe manufacturerQuotation of BST-30(304ss) with….\r\n3. Feeding and Discharge Systems\r\nScrew Feeder System\r\nConstructed with reinforced steel components.\r\nDesigned for continuous torque loading.\r\nFrequency-controlled operation reduces mechanical stress.\r\nWater-Cooled Screw Discharge\r\nIncludes water-cooling jacket Quotation of BST-30(304ss) with… .\r\nPROJECT DESIGN 51 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 52 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Thermal gradient is managed to prevent thermal warping.\r\nCooling protects mechanical seals and bearing assemblies.\r\n4. Gas System Components\r\nThe BST-30 includes:\r\nSix-layer sealing system Quotation of BST-30(304ss) with…\r\nWater seal device in gas pipeline Quotation of BST-30(304ss) with…\r\nExplosion relief port Quotation of BST-30(304ss) with…\r\nNitrogen purging system Quotation of BST-30(304ss) with…\r\nThese components are designed to:\r\nPrevent gas leakage\r\nResist internal gas pressure variations\r\nMaintain sub-atmospheric system pressure\r\nHigh Pressure Considerations (G-PV0S-0)\r\nThe BST-30 does not operate under high pressure.\r\nThe manufacturer specifies that:\r\n““The entire system is in a slightly negative pressure state.”Quotation of BST-30(304ss) with…”\r\nTherefore:\r\nThe reactor is not classified as a high-pressure vessel.\r\nInternal pressure remains below atmospheric pressure.\r\nMechanical integrity requirements differ from pressurized reactors.\r\nBecause the system operates under negative pressure:\r\nRisk of outward vessel rupture due to internal overpressure is minimized.\r\nAny seal imperfection results in inward air ingress rather than outward gas leakage.\r\nPROJECT DESIGN 52 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 53 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Explosion relief port provides additional mechanical safety protectionQuotation of BST-30(304ss)\r\nwith….\r\nCompliance with Pressure Vessel Standards\r\n(G-Y4R3-0 / G-5EFD-0)\r\nSince the BST-30 does not operate as a pressurized vessel:\r\nIt does not fall under high-pressure vessel classification.\r\nIt does not require compliance with Pressure Equipment Directive 2014/68/EU.\r\nInstead, the system is manufactured according to:\r\nIndustrial metal pipeline engineering standards Quotation of BST-30(304ss) with…\r\nInstrument installation and grounding standards Quotation of BST-30(304ss) with…\r\nFabrication and installation will comply with applicable industrial equipment and structural safety\r\nstandards in Brazil.\r\nE.5\r\nProjects must describe and evidence an appropriate reactor maintenance plan.\r\nSUBMISSION\r\nE.5 – Reactor Maintenance Plan\r\nR-19AF-0\r\nThe project implements a preventive and corrective maintenance plan for the BST-30 continuous rotary\r\npyrolysis reactor to ensure structural integrity, operational safety and mitigation of potential material\r\nloss events.\r\nThe maintenance plan is structured around:\r\nMechanical integrity of the rotary kiln body (304 stainless steel)\r\nIntegrity of seals and gas containment systems\r\nPROJECT DESIGN 53 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 54 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Monitoring of thermal and mechanical degradation\r\nNegative-pressure system verification\r\nAnnual leakage verification procedures\r\n1. Structural Integrity of the Reactor Vessel\r\nG-CR8Q-0\r\nThe BST-30 operates as a continuous rotary carbonization furnace fabricated in 304 stainless steel\r\nand maintained under slight negative pressure during operation.\r\nTo ensure structural integrity, the following procedures are implemented:\r\n1.1 Routine Visual Inspection (Daily / Weekly)\r\nInspection of outer shell for:\r\nThermal distortion\r\nSurface cracking\r\nCorrosion spots\r\nInspection of welded joints\r\nVerification of flange tightness\r\n1.2 Seal System Inspection\r\nThe reactor includes a six-layer sealing system and water seal in the gas pipeline.\r\nWeekly checks include:\r\nSeal wear inspection\r\nVerification of water seal functionality\r\nReplacement of worn sealing components as required\r\nThis prevents uncontrolled gas escape and mitigates material loss events.\r\n1.3 Bearing and Rotary System Monitoring\r\nMonitoring of bearing temperature\r\nLubrication schedule compliance\r\nPROJECT DESIGN 54 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 55 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Alignment verification of rotary supports\r\nExcessive vibration or misalignment is treated as a stop-condition.\r\n2. Monitoring and Mitigation of Mechanical and Thermal\r\nDegradation\r\nG-7PSP-0\r\nThe following degradation mechanisms are monitored:\r\n2.1 Thermal Fatigue\r\nContinuous monitoring of reactor temperature\r\nGradual heating and cooling protocols to avoid thermal shock\r\nShutdown if abnormal temperature gradients are detected\r\n2.2 Mechanical Fatigue\r\nMonthly inspection of:\r\nSupport rollers\r\nDrive motor\r\nGearbox assembly\r\nReplacement of worn components based on manufacturer schedule\r\n2.3 Corrosion Risk\r\nGiven exposure to pyrolysis vapors containing organic acids:\r\nQuarterly inspection of internal surfaces (during planned downtime)\r\nReplacement or repair of damaged lining if identified\r\n3. Gas Containment and Leakage Prevention\r\nThe system includes:\r\nPROJECT DESIGN 55 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 56 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Slight negative pressure operation\r\nExplosion relief port\r\nNitrogen purging system\r\nWater seal device\r\nPreventive measures include:\r\nContinuous monitoring of draft fan performance\r\nPressure sensor calibration checks (every 6 months)\r\nAnnual leakage test of gas pipeline system\r\nIf:\r\nPressure becomes positive relative to atmosphere\r\nSeal degradation is detected\r\nGas odor or abnormal emission is observed\r\n→ Immediate controlled shutdown is executed.\r\n4. Maintenance Schedule Summary\r\nFrequency Activity\r\nDaily Visual inspection, temperature check\r\nWeekly Seal inspection, lubrication verification\r\nMonthly Mechanical alignment and drive system check\r\nQuarterly Internal inspection (scheduled downtime)\r\nBiannual Sensor calibration\r\nAnnual Comprehensive leakage test + structural audit\r\nAll maintenance actions are logged digitally and stored for audit purposes.\r\n5. Compliance with Applicable Standards\r\nPROJECT DESIGN 56 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 57 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "G-F0H0-0\r\nThe BST-30 reactor does not operate under high pressure and is maintained under slight negative\r\npressure.\r\nTherefore:\r\nIt is not classified as a pressure vessel.\r\nPressure Equipment Directive 2014/68/EU does not apply.\r\nMaintenance complies with:\r\nBrazilian industrial equipment safety regulations\r\nApplicable occupational safety standards (NR-12, NR-13 where applicable to industrial equipment)\r\nManufacturer maintenance manual\r\nPeriodic inspection by a qualified mechanical engineer will be conducted.\r\nSampling procedure\r\nE.6\r\nProjects must describe and justify the sampling procedure, including the number and\r\nfrequency of sampling and analysis.\r\nSUBMISSION\r\nE.6 – Sampling Procedure\r\nR-S8K1-1\r\nThe project implements a statistically robust and representative sampling procedure for biochar\r\nbatches produced by the BST-30 continuous rotary reactor.\r\nThe procedure is designed to:\r\nCapture potential heterogeneity within each production batch\r\nAddress particle size segregation during cooling and storage\r\nEnsure representativity for carbon content and contaminant analysis\r\nPROJECT DESIGN 57 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 58 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Align with internationally recognized sampling practices (IBI / EBC guidance)\r\n1. Definition of Production Batch\r\nA Production Batch is defined as:\r\nContinuous reactor operation under stable temperature and feedstock conditions,\r\nWithin a maximum 24-hour production window, or\r\nMaximum 30 tonnes of biochar (reactor nominal output capacity).\r\nEach batch is uniquely identified by:\r\nDate and time interval\r\nFeedstock lot ID\r\nReactor operating parameters log\r\n2. Sampling Frequency\r\nSampling is conducted:\r\nAt least once per production batch\r\nAdditionally, whenever:\r\nFeedstock changes\r\nReactor temperature profile changes\r\nMaintenance intervention occurs\r\nProcess anomaly is detected\r\nMinimum annual laboratory analysis frequency:\r\n1 full contaminant analysis per 100 tonnes produced\r\n1 proximate/ultimate analysis per batch\r\n3. Sampling Methodology\r\nPROJECT DESIGN 58 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 59 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "3.1 Primary Sampling\r\nBiochar is sampled:\r\nAt the discharge point after cooling screw\r\nPrior to bagging into big-bags\r\nDuring continuous flow\r\nSub-samples are collected:\r\nAt equal time intervals (minimum 5 increments per batch)\r\nAcross different discharge moments\r\nThese increments are combined into a composite sample.\r\n4. Addressing Heterogeneity\r\nG-NP0D-0\r\nHeterogeneity may arise from:\r\nTemperature gradients inside the rotary kiln\r\nParticle size variation\r\nSlight variations in residence time\r\nTo mitigate this:\r\nMultiple incremental samples are taken across the production window.\r\nComposite sample is homogenized mechanically.\r\nQuartering method is applied until laboratory subsample size is achieved.\r\nThis ensures representativity of:\r\nCarbon fraction\r\nAsh content\r\nH/C ratio\r\nContaminants\r\nPROJECT DESIGN 59 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 60 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "5. Horizontal and Vertical Sampling (If Stored)\r\nG-VZQ0-0\r\nIf temporary storage occurs prior to dispatch:\r\nSampling is performed at:\r\nTop layer\r\nMid-layer\r\nBottom layer\r\nIf biochar is stored in bulk pile:\r\nSamples collected from at least 5 spatial points (center + corners).\r\nDepth sampling includes surface and ≥30 cm depth.\r\nThis addresses potential particle segregation during storage or transport.\r\n6. Laboratory Analysis\r\nSamples are analyzed for:\r\nFixed carbon\r\nVolatile matter\r\nAsh\r\nH/Corg ratio\r\nTotal carbon\r\nMoisture\r\nPAHs\r\nHeavy metals\r\npH\r\nLaboratories must:\r\nUse ISO-accredited methods where available.\r\nProvide documented analytical procedures.\r\nPROJECT DESIGN 60 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 61 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "7. Sample Preservation and Traceability\r\nEach composite sample is labeled with batch ID.\r\nRetention sample stored for minimum 12 months.\r\nDigital record includes:\r\nSampling date\r\nOperator\r\nReactor conditions\r\nLab report reference\r\n8. Justification of Sampling Design\r\nThe BST-30 is a continuous rotary reactor operating under:\r\nStable temperature control\r\nContinuous feed\r\nControlled residence time\r\nThis reduces large batch-to-batch variability compared to batch kilns.\r\nTherefore:\r\nTime-based incremental composite sampling is appropriate.\r\nStratified storage sampling is applied when relevant.\r\nFrequency is proportional to production scale and risk profile.\r\nBiochar characterization\r\nE.7\r\nProjects must provide a detailed bulleted list of the relevant standards that have been\r\nutilized in the biochar characterization.\r\nSUBMISSION\r\nPROJECT DESIGN 61 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 62 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "E.7 – Biochar Characterization Standards\r\nR-CXEP-0\r\nThe biochar produced in the BST-30 continuous rotary pyrolysis reactor is characterized using\r\ninternationally recognized analytical standards. All laboratory analyses are conducted by ISO/IEC\r\n17025 accredited laboratories.\r\nThe project applies the +200-year durability classification. Permanence is demonstrated through\r\nelemental composition and H/Corg ratio, without the use of reflectance (R₀) or inertinite fraction\r\nmeasurements.\r\nStandards Utilized for Measuring Biochar Physical Properties\r\nG-39F1-0\r\n• ASTM D1762-84 (Reapproved 2013) – Chemical analysis of wood charcoal (moisture, volatile matter,\r\nash, fixed carbon). • ASTM D3172 – Proximate analysis of carbonaceous materials. • ASTM D7582 –\r\nProximate analysis by thermogravimetric analysis (TGA). • EN 14774-1 – Determination of total moisture\r\ncontent. • EN 14775 – Determination of ash content. • ISO 10390 – Determination of pH. • ISO 11277 –\r\nParticle size distribution (where applicable).\r\nThese standards support determination of fixed carbon content, ash fraction, moisture, and other\r\nphysical parameters relevant to durability and soil application.\r\nStandards Utilized for Measuring Biochar Chemical Properties\r\nG-AK6B-0\r\nDurability-related parameters:\r\n• ASTM D5373 – Ultimate analysis (C, H, N). • EN 15104 – Determination of total carbon, hydrogen and\r\nnitrogen. • H/Corg ratio calculated from elemental analysis results.\r\nContaminant-related parameters (aligned with C.9):\r\nPROJECT DESIGN 62 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 63 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "• EPA Method 3050B / 3051A – Acid digestion for heavy metals. • EPA Method 6020B – ICP-MS\r\nquantification of heavy metals. • EPA Method 8270D – Determination of PAHs (Semi-Volatile Organic\r\nCompounds). • EN 16181 – Determination of PAHs in solid biofuels. • ASTM D4239 – Total sulfur\r\ndetermination (where applicable).\r\nThese chemical characterization standards ensure:\r\n• Demonstration of +200-year permanence via H/Corg. • Verification that heavy metals remain below\r\nregulatory and certification thresholds. • Quantification and control of PAHs prior to soil application.\r\nNo reflectance (R₀) analysis is conducted, as permanence classification relies exclusively on elemental\r\ncomposition and H/Corg ratio in accordance with the +200-year durability pathway.\r\nE.8\r\nProjects should provide the details of any measurements of biochar physical properties\r\nthat have been taken.\r\nSUBMISSION\r\nR-CXEP-0\r\nThe biochar produced by the BST-30 continuous rotary pyrolysis reactor is characterized using\r\ninternationally recognized analytical standards. All laboratory analyses are conducted by ISO/IEC\r\n17025 accredited laboratories.\r\nThe project applies the +200-year durability classification under the Isometric protocol. Permanence is\r\ntherefore demonstrated through H/Corg ratio and elemental composition analysis, without the use of\r\nreflectance (R₀) or inertinite fraction measurements.\r\nStandards Used for Measuring Physical Properties\r\nG-39F1-0\r\n• ASTM D1762-84 (Reapproved 2013) – Chemical analysis of wood charcoal (moisture, volatile matter,\r\nash, fixed carbon).\r\n• ASTM D3172 – Proximate analysis of carbonaceous materials.\r\n• ASTM D7582 – Proximate analysis by thermogravimetric analysis (TGA).\r\n• ASTM D5373 – Ultimate analysis (C, H, N).\r\nPROJECT DESIGN 63 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 64 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "• EN 14774-1 – Determination of total moisture content.\r\n• EN 14775 – Determination of ash content.\r\n• EN 15104 – Determination of total carbon, hydrogen and nitrogen.\r\n• ISO 10390 – Determination of pH.\r\n• H/Corg ratio calculated from elemental analysis results in accordance with European Biochar\r\nCertificate (EBC) and Isometric BiCRS requirements.\r\nThese parameters are used to demonstrate compliance with the +200-year durability class, based on\r\nH/Corg threshold values specified in the protocol.\r\nStandards Used for Measuring Chemical Properties\r\nG-AK6B-0\r\n• EPA Method 3050B / 3051A – Acid digestion for heavy metals analysis.\r\n• EPA Method 6020B – ICP-MS quantification of heavy metals (e.g., Cd, Pb, Cr, Ni, Hg, As).\r\n• EPA Method 8270D – Determination of Semi-Volatile Organic Compounds (including PAHs).\r\n• EN 16181 – Determination of PAHs in solid biofuels.\r\n• ASTM D4239 – Total sulfur determination.\r\n• DIN 38414-S4 – Leaching test for contaminant mobility (where applicable to soil application).\r\nAlignment with Section C.9 (Pollution Prevention)\r\nThe above analytical standards directly support compliance with C.9 by:\r\n• Quantifying total heavy metal concentrations in biochar prior to soil application. • Screening and\r\nquantifying PAHs using internationally recognized analytical methods. • Demonstrating that\r\ncontaminant concentrations remain below applicable regulatory and certification thresholds. •\r\nEnabling traceable laboratory evidence for contaminant control and environmental risk mitigation.\r\nPROJECT DESIGN 64 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 65 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "All contaminant testing results are archived and linked to production batches under the project MRV\r\nsystem.\r\nConsistency Statement\r\nNo reflectance (R₀) or inertinite fraction analysis is used in this project, as permanence classification\r\nrelies exclusively on H/Corg ratio and elemental carbon content consistent with the +200-year\r\ndurability pathway.\r\nE.9\r\nProjects should provide the details of any measurements of biochar chemical properties\r\nthat have been taken.\r\nSUBMISSION\r\nE.9 – Details of Biochar Chemical\r\nMeasurements\r\nR-VGXA-0\r\nAll chemical analyses are performed on biochar produced in the BST-30 continuous rotary pyrolysis\r\nreactor. Laboratory testing is conducted by ISO/IEC 17025 accredited laboratories. Each result is\r\nlinked to a unique production batch ID.\r\nThe project applies the +200-year durability pathway. Permanence is demonstrated through elemental\r\ncomposition and molar ratio analysis without reflectance (R₀) or inertinite fraction measurement.\r\nG-CAR5-0 – Carbon Content Analysis\r\nTotal carbon content is determined via ultimate analysis using:\r\n• ASTM D5373 • EN 15104\r\nMeasured parameter: Total Carbon (% dry basis)\r\nResults are used to quantify stable carbon mass and calculate H/Corg and O/Corg molar ratios.\r\nPROJECT DESIGN 65 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 66 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "G-KMFF-0 – Moisture Content Analysis\r\nMoisture content is determined using:\r\n• EN 14774-1 • ASTM D1762-84\r\nMeasured parameter: Total moisture (% as received)\r\nMoisture is used to convert values to dry basis for durability calculations.\r\nG-TY6S-0 – H/Corg Calculation and Analysis\r\nHydrogen and carbon are measured via elemental analysis.\r\nH/Corg is calculated on a molar basis:\r\nH/Corg = (H/1.008) / (C/12.011)\r\nThe project demonstrates compliance with the +200-year threshold as defined in the Isometric\r\nprotocol.\r\nNo reflectance (R₀) is used.\r\nG-27Y3-0 – O/Corg Calculation and Analysis\r\nOxygen is determined either:\r\n• Directly via elemental analysis, or • By difference (100 − C − H − N − Ash)\r\nO/Corg is calculated on a molar basis and reported for completeness and structural stability\r\nassessment.\r\nG-X6H2-0 – Volatile Matter Analysis\r\nPROJECT DESIGN 66 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 67 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Volatile matter is measured using:\r\n• ASTM D1762-84 • ASTM D7582\r\nMeasured parameter: Volatile matter (% dry basis)\r\nUsed to assess pyrolysis completeness and char stability.\r\nG-4G8C-0 – Fixed Carbon Content Analysis\r\nFixed carbon is determined by proximate analysis:\r\nFixed Carbon = 100 − (Moisture + Volatile Matter + Ash)\r\nMeasured via ASTM D1762-84.\r\nFixed carbon is reported for each batch.\r\nG-BSZP-0 – Ash Content Analysis\r\nAsh content is measured using:\r\n• EN 14775 • ASTM D1762-84\r\nMeasured parameter: Ash (% dry basis)\r\nAsh values are used in both durability and soil application assessment.\r\nG-K3Q0-0 – PAHs (USEPA 16) Analysis\r\nSum of PAH16 is measured using:\r\n• EPA 8270D • EN 16181\r\nTotal PAH concentration is compared against:\r\n• EBC limits • Applicable regulatory thresholds\r\nPROJECT DESIGN 67 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 68 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "This directly supports compliance with Section C.9.\r\nG-TDEA-0 – pH Analysis\r\npH is determined using:\r\n• ISO 10390\r\nMeasured parameter: pH (H₂O extraction)\r\npH is reported for soil application suitability.\r\nG-1Q5M-0 – Cation Exchange Capacity (CEC)\r\nCEC is determined using:\r\n• Ammonium acetate method (ISO 11260 or equivalent)\r\nCEC is reported as supporting soil health co-benefits.\r\nG-90WY-0 – Bulk Carbon Bonding State Analysis\r\nBulk carbon bonding state analysis (e.g., solid-state 13C NMR) is not performed.\r\nJustification:\r\nThe project applies the +200-year durability classification, which does not require bonding state\r\ncharacterization when H/Corg thresholds are met.\r\nDurability is demonstrated via elemental ratios in accordance with protocol requirements.\r\nG-GAM8-0 – External Surface Carbon Bonding State Composition\r\nPROJECT DESIGN 68 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 69 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "External surface carbon bonding state analysis (e.g., XPS) is not performed.\r\nJustification:\r\nSurface bonding state characterization is not required under the +200-year pathway when molar ratio\r\nthresholds are met and pyrolysis conditions are controlled.\r\nMeasurement Frequency\r\n• Elemental, proximate, ash, moisture: every production batch • PAHs and heavy metals: every batch\r\nprior to soil deployment • pH and CEC: representative batch testing per production campaign\r\nSampling is conducted according to E.6.\r\nConsistency Statement\r\nThe chemical measurements described above:\r\n• Fully support the +200-year durability pathway • Do not rely on reflectance (R₀) • Align with\r\ncontamination controls described in C.9 • Are batch-traceable within the MRV system\r\nE.10\r\nProjects must report the analytical laboratory/laboratories that have been utilized for the\r\nbiochar characterization.\r\nSUBMISSION\r\nR-VGXA-0\r\nThe Project measures and documents all relevant chemical properties of biochar produced by the BST￾30 continuous rotary pyrolysis reactor to demonstrate durability, environmental safety, and compliance\r\nwith Isometric BiCRS requirements.\r\nAll analyses are conducted by ISO/IEC 17025 accredited laboratories and are batch-linked through\r\nthe project MRV system.\r\nPROJECT DESIGN 69 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 70 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "1. Permanence-Related Chemical Properties (+200-Year Durability)\r\nThe Project targets the +200-year durability class. Permanence is demonstrated without reflectance\r\n(R₀) or inertinite fraction measurements.\r\nThe following parameters are measured for each production batch:\r\n• Total Carbon (C) • Hydrogen (H) • Nitrogen (N) • H/Corg ratio (calculated from elemental analysis) •\r\nVolatile Matter • Fixed Carbon • Ash content\r\nAnalytical methods:\r\n• ASTM D5373 – Ultimate analysis • ASTM D1762-84 – Proximate analysis • EN 15104 – Elemental\r\ncomposition\r\nDurability is demonstrated by:\r\n• H/Corg below the +200-year threshold defined in the protocol • High fixed carbon content •\r\nControlled volatile fraction\r\nNo reflectance (R₀) analysis is performed.\r\n2. Heavy Metals Analysis (Aligned with C.9)\r\nEach batch is tested for total heavy metal concentrations prior to soil application.\r\nMetals analyzed include:\r\n• Cadmium (Cd) • Lead (Pb) • Chromium (Cr) • Nickel (Ni) • Mercury (Hg) • Arsenic (As) • Copper (Cu) •\r\nZinc (Zn)\r\nAnalytical methods:\r\n• EPA 3050B / 3051A – Acid digestion • EPA 6020B – ICP-MS quantification\r\nResults are compared against:\r\n• Local regulatory thresholds (Brazilian CONAMA standards where applicable) • European Biochar\r\nCertificate upper bound limits • Isometric pathway safety criteria\r\nBiochar is not deployed if concentrations exceed applicable limits.\r\nPROJECT DESIGN 70 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 71 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "3. PAHs and Organic Contaminants (Aligned with C.9)\r\nThe following are measured:\r\n• Total PAH16 (EPA priority list) • Individual PAH species • Sulfur (where applicable)\r\nAnalytical methods:\r\n• EPA 8270D – Semi-volatile organic compounds • EN 16181 – PAH determination\r\nOperational mitigation:\r\nThe BST-30 reactor operates under controlled temperature ranges (typically 450–650°C), with\r\ncontinuous rotation and controlled residence time, minimizing incomplete pyrolysis and PAH formation.\r\nIf PAH concentrations exceed applicable thresholds, the batch is withheld from soil application and\r\ninvestigated.\r\n4. Batch Traceability and Documentation\r\nEach batch of biochar:\r\n• Is assigned a unique batch ID • Is linked to reactor operating parameters (temperature, residence\r\ntime) • Is linked to feedstock source documentation • Is archived with full laboratory certificate\r\nCertificates are retained for audit and MRV verification purposes.\r\n5. Measurement Frequency\r\n• Elemental and proximate analysis: every production batch • Heavy metals: every batch prior to\r\ndeployment • PAHs: every batch prior to deployment\r\nSampling follows the procedure described in E.6.\r\n6. Integration with Reactor Operation (BST-30)\r\nPROJECT DESIGN 71 / 72"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 72 / 72>"
+    },
+    {
+      "type": "text",
+      "text": "Chemical measurement data are cross-checked against:\r\n• Reactor temperature logs • Residence time • Feedstock type • System pressure\r\nThis ensures chemical properties are consistent with stable pyrolysis performance and durability\r\nclassification.\r\n7. Consistency Statement\r\nThe project:\r\n• Demonstrates +200-year permanence via H/Corg • Does not rely on R₀ or reflectance • Fully aligns\r\ncontaminant testing with C.9 • Maintains full batch traceability\r\nPROJECT DESIGN 72 / 72"
+    }
+  ],
+  "has_more": false,
+  "next_page": null
+}

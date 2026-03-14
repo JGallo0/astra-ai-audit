@@ -1,0 +1,275 @@
+{
+  "object": "vector_store.file_content.page",
+  "data": [
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 1 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "1\r\nCONTRATANTE: Astra Energia Solar LTDA\r\n12 DE DEZEMBRO DE 2025\r\nAVALIAÇÃO DO CICLO DE VIDA\r\nAvaliação do Ciclo de Vida (ACV) da produção de biochar\r\nREGISTRO 2025048\r\nwww.gron.com.br"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 1 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 2 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "1\r\nSUMÁRIO \r\nINFORMAÇÕES GERAIS ......................................................................................................... 2\r\ni. Contratante ............................................................................................................................ 2\r\nii. Contratada............................................................................................................................. 2\r\niii. Equipe técnica...................................................................................................................... 2\r\niv. Última atualização .............................................................................................................. 2\r\n1. INTRODUÇÃO....................................................................................................................... 3\r\n2. ETAPAS DA AVALIAÇÃO DO CICLO DE VIDA................................................................. 4\r\n2.1 Definição do Objetivo e Escopo...................................................................................... 5\r\n2.2 Inventário do Ciclo de Vida (ICV).................................................................................... 8\r\n2.3 Avaliação de Impacto de Ciclo de Vida (AICV) ............................................................ 9\r\n2.3.1 Resultados do estudo ................................................................................................... 9\r\n2.4 Interpretação....................................................................................................................11\r\n3. CONCLUSÃO.......................................................................................................................12\r\nREFERÊNCIAS ........................................................................................................................14\r\nANEXO 1 ..................................................................................................................................15\r\n "
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 3 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "2\r\nINFORMAÇÕES GERAIS \r\ni. Contratante\r\nNome: Astra Energia Solar LTDA\r\nCNPJ: 23.966.869/0001-90\r\nMunicípio | UF: Belo Horizonte | MG\r\nResponsável pelo contrato: Lucas Nogueira Mendes\r\nii. Contratada\r\nNome: Gron Assessoria e Consultoria em Mudancas Climaticas e Florestas LTDA\r\nCNPJ: 35.409.024/0001-83\r\nMunicípio | UF: Viçosa | MG\r\nResponsável pelo contrato: Eliana Boaventura Bernardes Moura Alves\r\niii. Equipe técnica\r\nEngenheira Florestal e DSc. Lauana Blenda Silva\r\nDiretora Técnica | Grön\r\nRegistro CREA: 357310MG | ART: MG20254434803\r\nEngenheira Florestal e DSc. Eliana Boaventura Bernardes Moura Alves\r\nDiretora Executiva | Grön\r\nRegistro CREA: 357247MG | ART: MG20254450419\r\niv. Última atualização\r\nViçosa, 12 de dezembro de 2025"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 4 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "3\r\n1. INTRODUÇÃO \r\nEste relatório apresenta os resultados do estudo de Avaliação do Ciclo de Vida \r\n(ACV) para determinar a pegada de carbono (remoção de carbono) do biochar \r\naplicado no solo, incluindo a embalagem, produzido a partir de um reator de pirólise \r\nde alta tecnologia. O estudo foi baseado nas Normas ISO 14040 e 14044 de ACV, \r\nalém da metodologia Puro Standard usada para o cálculo da quantidade de CO₂ \r\nestocada. Os dados utilizados neste estudo referem-se a projeções elaboradas a \r\npartir das informações disponibilizadas pela Astra Carbon, uma vez que o projeto \r\nainda não está em execução.\r\nO processo considera a utilização de um reator de pirólise contínuo e \r\ntotalmente automatizado (modelo BST-06 ou equivalente) para a conversão \r\ntermoquímica de 3.370 t/ano de biomassa triturada úmida em 860 t/ano de biochar \r\nseco. A operação é contínua (24 h/dia, 300 dias/ano) sob atmosfera controlada e é \r\nmonitorada via PLC. O rendimento médio é de 30% (m/m). O resfriamento ser feito \r\nem circuito fechado (consumo de make-up de ≈ 160 m3\r\n/ano) antes do peneiramento \r\ne estocagem em big bags.\r\nA unidade funcional do estudo foi a produção de 1 tonelada de biochar \r\nembalado com 0,82 de conteúdo orgânico de carbono em massa seca (Corg). Os \r\nresultados foram gerados para a categoria de impacto para o aquecimento global \r\nutilizando o método IPCC 2021 (ISO 14067).\r\nA modelagem dos inventários e a avaliação de impactos foram realizadas \r\nutilizado o software OpenLCA versão 2.4.1, juntamente com a base de dados \r\nEcoinvent versão 3.9, reconhecida em estudos internacionais de ACV. A escolha e \r\nutilização dessa base de dados seguiu critérios de representatividade geográfica, \r\nsetorial e tecnológica, respeitando os princípios metodológicos da ACV.\r\nEste estudo foi desenvolvido no segundo semestre de 2025 e representa \r\ninformações projetadas, abrangendo todas as etapas da cadeia de valor, tais como, \r\nprocesso de coleta e trituração da matéria-prima, processo de transporte da matéria￾prima, processo de fabricação do reator, processo de pirólise do biochar, processo \r\nde fabricação da embalagem, processo de pós-processamento do biochar, processo \r\nde transporte do biochar e processo de aplicação no solo."
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 5 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "4\r\nO escopo do estudo que representa o sistema de produto é cradle-to-grave (do \r\nberço ao túmulo), do tipo cut-off, ou seja, em que a matéria-prima para a produção \r\ndo biochar (resíduos da colheita de eucalipto) é considerado resíduo da produção \r\nmadeireira e que seus impactos estão associados ao produto de origem. Em relação \r\naos critérios de corte, foram excluídos processos e fluxos de massa e energia que \r\nrepresentaram <1% da massa total de produto, além de impactos relacionados às \r\ninstalações industriais (exceto o equipamento de pirólise que foi incluído no estudo).\r\n2. ETAPAS DA AVALIAÇÃO DO CICLO DE VIDA \r\nA Avaliação do Ciclo de Vida (ACV) foi conduzida com base nos princípios, \r\nrequisitos e orientações das normas internacionais ABNT NBR ISO 14040:2009 \r\n(Princípios e estrutura) e ABNT NBR ISO 14044:2009 (Requisitos e orientações).\r\nA metodologia seguiu as quatro fases estabelecidas pela ISO 14040, isto é, (i) \r\ndefinição do objetivo e escopo, (ii) análise de inventário, (iii) avaliação de impacto e \r\n(iv) interpretação, conforme a Figura 1, e conforme está detalhado nas próximas \r\nseções."
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 6 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "5\r\nFigura 1. Fases da Avaliação do Ciclo de Vida\r\nFonte: ABNT (2009)\r\n2.1 Definição do Objetivo e Escopo\r\nO objetivo e escopo representa a primeira fase de um estudo de ACV. O \r\nobjetivo principal deste estudo foi determinar o Potencial de Aquecimento Global \r\n(GWP), em CO₂eq., do ciclo de vida da produção de 1 tonelada de biochar com \r\nembalagem. A abordagem considerou toda a cadeia de valor do berço ao túmulo \r\n(cradle-to-grave) do biochar.\r\n● Em termos de escopo temporal, os resultados são apresentados tendo como\r\nreferência o ano-base de 2024, no entanto, as algumas atividades \r\nconsideraram dados de diferentes períodos, como:\r\no Coleta e transporte de matéria-prima: dados de 2025;\r\no Inventário da fabricação do reator: dados de 2025;\r\no Inventário das atividades de pirólise: projeção de dados para "
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 6 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 7 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "6\r\n2026.\r\n● O período de modelagem do sistema de produto e avaliação de impacto \r\nambiental ocorreu no segundo semestre de 2025.\r\n● Em termos do escopo geográfico foi levado em consideração dados primários \r\nlevantados no estado de Minas Gerais, Brasil.\r\n● Como público-alvo, este relatório técnico destina-se prioritariamente à Astra \r\nCarbon.\r\n● Para a definição das fronteiras do sistema, foi levado em consideração o \r\nprocesso de coleta e trituração da matéria-prima, processo de transporte da \r\nmatéria-prima, processo de fabricação do reator, processo de pirólise do \r\nbiochar, processo de fabricação da embalagem, processo de pós￾processamento do biochar, processo de transporte do biochar, processo de \r\naplicação no solo, como mostra a Figura 2. Foi utilizada uma abordagem do \r\ntipo cut-off, ou seja, o sistema que utiliza o resíduo como matéria-prima \r\ncontabiliza apenas os impactos ambientais a partir do momento em que \r\nassume a posse ou o controle do material.\r\nFigura 2. Sistema de produto e fronteira do sistema\r\n● A unidade funcional foi definida como sendo a produção de 1 tonelada de \r\nbiochar embalado com 0,82 de conteúdo orgânico de carbono em massa "
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 7 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 8 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "7\r\nseca (Corg), sendo o fluxo de referência de 1 tonelada de biochar.\r\n● Em termos dos critérios de corte, foram excluídos processos e fluxos de \r\nmassa e energia que representaram <1% da massa do produto.\r\n● Não houve necessidade de adotar procedimentos de alocação, já que a única \r\nsaída dos processos é o produto. Impactos do tratamento dos resíduos \r\ngerados foram atribuídos ao produto produzido nos processos.\r\n● Os impactos ambientais foram avaliados utilizando o software OpenLCA \r\n(versão 2.4.1), com a base de dados Ecoinvent (versão 3.9). O método \r\nadotado para avaliação da pegada de carbono (potencial de aquecimento \r\nglobal) foi o IPCC 2021 (ISO 14067), pois esse método considera a absorção \r\nde CO2 biogênico da atmosfera. O Quadro 1 mostra a categoria de impacto, o \r\nmétodo AICV, e a unidade de medida.\r\nQuadro 1. Categoria de Impacto, método de AICV e unidade de medida\r\nCategoria de Impacto Método de AICV Unidade de medida \r\nPotencial de \r\nAquecimento Global \r\n(GWP)\r\nIPCC 2021 (ISO 14067) kgCO2eq.\r\n● Como pressupostos, foram assumidos que:\r\no Os impactos ambientais da matéria-prima da produção madeireira \r\n(resíduos da colheita) são todos pertencentes ao sistema de origem \r\n(abordagem cut-off);\r\no O reator de pirólise possui uma vida útil de 20 anos;\r\no Não há perdas de embalagem;\r\no Há perdas de 1% nas etapas de coleta e trituração, pirólise e pós￾processamento do biochar. Em todos esses casos, o destino é \r\ntratamento por compostagem (treatment of biowaste, industrial \r\ncomposting | biowaste | Cutoff, S);\r\no Um terço das embalagens se tornam resíduo e são destinadas à \r\nreciclagem;\r\no Não há emissões relacionadas ao tratamento de efluentes devido à \r\nbaixa quantidade gerada;"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 9 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "8\r\no Perdas da absorção de carbono definidas por Eproject da equação 5.1 da \r\nmetodologia da Puro Earth foram assumidas como contabilizadas no \r\nestudo de ACV.\r\n● As seguintes limitações foram identificadas no estudo:\r\no Não foram inventariados os fluxos de material e energia da produção do \r\nreator e da embalagem diretamente com dados primários dos \r\nfornecedores. Os impactos da produção do reator de pirólise e das \r\nembalagens foram estimados a partir da composição dos materiais e \r\noutros insumos utilizados na produção desses produtos;\r\no Não foram contabilizados impactos do transporte da embalagem;\r\no Perdas da absorção de carbono definidas pelas equações Cbaseline e Closs\r\nna equação 5.1 da metodologia da Puro Earth não foram contabilizadas. \r\nFoi assumido que para apenas o ano de referência do estudo de ACV \r\nessas perdas seriam pouco significativas.\r\n2.2 Inventário do Ciclo de Vida (ICV)\r\nO Inventário do Ciclo de Vida (ICV) representa a segunda fase da ACV e mostra \r\nos dados de entradas e saídas em termos de material e energia. De acordo com a \r\nNBR ISO 14040 (2025), essa fase envolve a coleta de dados necessários para o \r\nalcance dos objetivos do estudo.\r\nA coleta de dados seguiu todas as etapas envolvidas no sistema de produto, \r\nou seja, da coleta e trituração da biomassa, passando pela produção e pós \r\nprocessamento do biochar, até a aplicação no solo, incluindo as etapas de transporte \r\nenvolvidas, e foi realizada de modo online, através do preenchimento da ficha de \r\ncoleta disponibilizada pela Grön, junto à empresa Astra Carbon.\r\nPara o cálculo das emissões de carbono derivadas do uso de diesel nos \r\nprocessos foi utilizada a ferramenta GHG Protocol v2025.0.1. Para o cálculo da \r\nabsorção de carbono pelo biochar, foi considerada a equação 6.1 (Cstored) da \r\nmetodologia para remoção de CO2 pelo biochar da Puro Standard, edição V1 de junho \r\nde 2025. Foi considerado um percentual de conteúdo de carbono orgânico em \r\nmassa seca (Corg) de 0,82. Não foram contabilizadas perdas na absorção de carbono "
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 10 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "9\r\n(Cbaseline e Closs), conforme descrito nas limitações do estudo na Seção 2.1 deste \r\nrelatório. As emissões de transporte foram contabilizadas a partir do cálculo da \r\ncarga transportada (ton) por frete de ida e volta (km) considerando um veículo Euro \r\n5 de carga entre 7,5 e 16 ton e o dataset “transport, freight, lorry 7.5-16 metric ton, \r\nEURO5”.\r\nA ficha de coleta de dados, assim como os dados coletados para cada etapa \r\ndo ciclo de vida do biochar, está disponível no Anexo 1.\r\n2.3 Avaliação de Impacto de Ciclo de Vida (AICV)\r\nA fase de Avaliação de Impacto do Ciclo de Vida (AICV) é a terceira etapa do \r\nestudo de ACV e tem como objetivo avaliar os impactos ambientais associados ao \r\nICV do sistema de produto, contribuindo para a compreensão desses impactos.\r\nOs resultados foram apresentados para a categoria de impacto de \r\naquecimento global - total, de acordo com o método IPCC 2021 (ISO 14067), na \r\nunidade de kgCO2eq. referente à produção de 1 tonelada de biochar com \r\nembalagem. Foi utilizado o software OpenLCA na versão 2.4.1. para a realização dos \r\ncálculos do potencial de aquecimento global do biochar.\r\n2.3.1 Resultados do estudo\r\nO estudo resultou em uma pegada de carbono negativa de -2.720,97 kgCO2eq. \r\npara a unidade funcional estabelecida. O processo de aplicação do biochar ao solo \r\napresentou o maior crédito de carbono, resultando em uma remoção de \r\naproximadamente 3.000,98 kgCO2eq., enquanto as etapas intermediárias do ciclo de \r\nvida contribuíram com um saldo de emissões de 280,01 kgCO2eq. por tonelada de \r\nbiochar. O Quadro 2 mostra as principais contribuições de impacto direto para o \r\nbiochar."
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 11 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "10\r\nQuadro 2. Principais contribuições do potencial de aquecimento global por etapas do \r\nciclo de vida\r\nProcesso kgCO2eq. \r\nColeta e trituração da matéria-prima 12,03\r\nTransporte da matéria-prima 21,39\r\nFabricação e transporte do reator 24,68\r\nPirólise 187,99\r\nPós-processamento 11,78\r\nEmbalagem 8,63\r\nTransporte do biochar 13,56\r\nAplicação do biochar no solo e sequestro de carbono -3.000,98\r\nTOTAL -2.720,97 \r\nA maior fonte de emissões diretas do sistema, está associada ao consumo \r\nde energia elétrica na operação do reator de pirólise (165,32 kgCO2eq.), \r\ncorrespondendo a 87,94% das emissões dessa fase do ciclo de vida do produto. \r\nOutras fases do ciclo de vida que representaram maiores emissões de carbono estão \r\nrelacionadas à fabricação e transporte do reator de pirólise e ao transporte de \r\nmatéria-prima (biomassa). A Figura 3 mostra uma síntese dos resultados da pegada \r\nde carbono do biochar.\r\nFigura 3. Resultados da pegada de carbono do biochar"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 11 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 12 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "11\r\n2.4 Interpretação\r\nA fase de Interpretação corresponde à etapa final do procedimento de ACV, \r\nna qual os resultados obtidos nas fases de ICV e AICV são integrados, analisados e \r\ndiscutidos, resultando em recomendações que apoiam a tomada de decisão.\r\nOs resultados obtidos indicam que o biochar apresenta uma pegada de \r\ncarbono negativa de -2.720,97 CO2eq. referente a produção de 1 tonelada do produto, \r\nevidenciando o seu potencial como tecnologia eficaz de remoção de carbono. Esse \r\nvalor evidencia a diferença entre as emissões das produtivas e a remoção de \r\ncarbono proveniente da aplicação do biochar no solo.\r\nAs principais oportunidades para melhorar o balanço final de carbono do \r\nbiochar avaliado neste relatório está em atuar nos principais hotspots identificados: \r\nminimizar o consumo energético na fase de pirólise, melhorar a eficiência energética \r\nna etapa de transportes da biomassa madeireira e a produtividade de modo a diluir \r\nas emissões relativas à fabricação e transporte do reator.\r\nRecomenda-se em estudos de ACV futuros do biochar da Astra Carbon a \r\nrealização dos cálculos do Cbaseline e Closs de acordo com a metodologia da Puro \r\nStandard, para melhor estabelecimento da remoção total de carbono pelo biochar. \r\nAlém disso, fazer a complementação do estudo por meio de análises de \r\nsensibilidade, comparando diferentes cenários.\r\nPor fim, a título de uma comparação ilustrativa, o resultado da pegada total \r\nde carbono do biochar deste estudo foi comparado com a literatura científica, \r\nconforme mostra o Quadro 3."
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 13 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "12\r\nQuadro 3. Comparação dos resultados com outros estudos da literatura\r\nReferência \r\nMétodo de AICV e \r\nCategoria de Impacto \r\nResultado \r\nBrassard et al. \r\n(2018) IPCC 2007, GWP\r\nCenário A (459 °C):\r\n-2.110 kgCO2eq./ton de biochar\r\nCenário B (591 °C):\r\n-2.561 kgCO2eq./ton de biochar\r\nFawzy et al. \r\n(2022) CML, GWP 100 anos -2.680 kgCO2eq./ton de biochar\r\n(a 650 °C por 15 minutos)\r\nMuñoz et al. \r\n(2017) GWP -2.740 kgCO2eq./ton de biochar\r\n(a 500 °C)\r\nHamedani et al. \r\n(2019) CML, GWP -2.089,65 kgCO2eq./ton de biochar\r\n(salgueiro)\r\nEste estudo IPCC 2021 (ISO 14067), \r\nGWP -2.720,97 kgCO2eq./ton de biochar\r\nDe modo geral, cada tonelada de biochar produzido apresenta uma variação \r\nentre -2.000 a -3.000 kgCO2eq. Essa variabilidade depende de muitos fatores como \r\no tipo da biomassa, o processo produtivo (pirólise), as distâncias dos transportes \r\nenvolvidos, o consumo de energia elétrica e outros fatores.\r\nVale ressaltar que essa análise de comparação possui um caráter ilustrativo. \r\nOs resultados da literatura científica servem como base para se ter uma noção da \r\nquantidade de remoção de carbono, e não uma comparação direta, pois cada estudo \r\nusa características diferentes, como tecnologia e temperatura de queima, método \r\nde AICV, forma de aplicação no solo, tipos de transportes, fontes de energia elétrica \r\ne outros\r\n3. CONCLUSÃO \r\nEste estudo teve o objetivo de determinar o Potencial de Aquecimento Global \r\n(GWP), em CO2eq., do ciclo de vida da produção de 1 tonelada de biochar embalado. \r\nOs resultados apresentados tem como referência o ano-base de 2024, mas com a \r\nutilização de dados de 2025 e projeções para 2026. Os resultados foram gerados "
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 13 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 14 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "13\r\nseguindo o método de AICV para o IPCC 2021 (ISO 14067). A modelagem foi \r\nrealizada no software OpenLCA 2.4.1 e o database do Ecoinvent 3.9, com base nas \r\nnormas ABNT NBR ISO 14040, 14044.\r\nA construção do ICV envolveu todas as etapas da cadeia de valor do biochar, \r\ntais como, processo de coleta e trituração da matéria-prima, processo de transporte \r\nda matéria-prima, processo de fabricação do reator, processo de pirólise do biochar, \r\nprocesso de fabricação da embalagem, processo de pós-processamento do biochar, \r\nprocesso de transporte do biochar e processo de aplicação do biochar no solo.\r\nOs resultados evidenciaram um aspecto positivo em termos de impacto \r\nambiental, principalmente sob a ótica da remoção de carbono. A captura de carbono \r\npelo biochar foi equivalente a -3.000,98 kgCO2eq., enquanto as etapas intermediárias \r\nao longo do ciclo de vida do produto contribuíram com uma emissão positiva de \r\n280,01 kgCO2eq. Portanto, a pegada de carbono resultou em um valor negativo de -\r\n2.720,97 kgCO2eq. referente a produção de 1 tonelada do produto.\r\nOportunidades para continuidade refletem a realização de estudos extensivos \r\nde longo prazo para explorar os efeitos sustentados do biochar na melhoria do solo \r\ne na mitigação de poluentes. Portanto, recomenda-se a revisão periódica do \r\ninventário, atualização dos dados para os próximos anos, permitindo ainda a \r\ncomparação dos resultados."
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 15 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "14\r\nREFERÊNCIAS \r\nBRASSARD, Patrick et al. Pyrolysis of switchgrass in an auger reactor for biochar \r\nproduction: a greenhouse gas and energy impacts assessment. Biomass and \r\nBioenergy, v. 116, p. 99-105, 2018.\r\nCARVALHO, Joana et al. Life cycle assessment (LCA) of biochar production from a \r\ncircular economy perspective. Processes, v. 10, n. 12, p. 2684, 2022.\r\nFAWZY, S. et al. Atmospheric carbon removal via industrial biochar systems: A \r\ntechno-economic- environmental study. Journal of Cleaner Production, 2022.\r\nHAMEDANI, S. R. et al. Life Cycle Assessment and Environmental Valuation of \r\nBiochar Production: Two Case Studies in Belgium. Energies, 12, 2166. 2019.\r\nISO 14040. ASSOCIAÇÃO BRASILEIRA DE NORMAS TÉCNICAS. ABNT NBR ISO \r\n14040: Gestão ambiental - Avaliação do ciclo de vida - Princípios e estrutura. Rio de \r\nJaneiro: Associação Brasileira de Normas Técnicas, 2025.\r\nISO 14044. ASSOCIAÇÃO BRASILEIRA DE NORMAS TÉCNICAS. ABNT NBR ISO \r\n14044: Gestão ambiental - Avaliação do ciclo de vida - Requisitos e orientações. Rio \r\nde Janeiro: Associação Brasileira de Normas Técnicas, 2009.\r\nLI, Jiao et al. Life cycle assessment of biochar for sustainable agricultural application: \r\nA review. Science of The Total Environment, v. 951, p. 175448, 2024.\r\nMUÑOZ, Edmundo et al. Environmental hotspots in the life cycle of a biochar-soil \r\nsystem. Journal of Cleaner Production, v. 158, p. 1-7, 2017.\r\nPURO STANDARD. Biochar Methodology. Methodology for CO2 Removal. Edition \r\n2025 V1, 2025.\r\nOPEN LCA. OpenLCA LCIA Method package 2.7.0 update: IPCC 2021 (ISO 14067), \r\n2024.\r\nOSMAN, Ahmed et al. Life cycle assessment of biochar as a green sorbent for soil \r\nremediation. Current Opinion in Green and Sustainable Chemistry, v. 46, p. 100882, \r\n2024."
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 16 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "15\r\nANEXO 1 "
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 17 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "Coleta de dados de atividade\r\nParceiro: Astra Carbon\r\nProjeto: Avaliação do Ciclo De Vida (ACV) da produção de biochar\r\nObjeto: Determinação do Potencial de Aquecimento Global (GWP), em CO₂e, do ciclo de vida da produção de 1 tonelada de biochar\r\nData limite para \r\npreenchimento: 17/10/2025"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 17 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 18 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "Processo de coleta e trituração da matéria-prima\r\nProcesso elementar: Coleta e trituração da matéria-prima\r\nPeríodo de tempo da coleta de dados: 1 ano Início: jan./25 Fim: dez./25\r\nPreenchido por: João Gallo\r\nDescrição do processo:\r\nA coleta é realizada por um trator agrícola Valtra BM110 (ano 2020), equipado com ancinho Stara RFA-12, responsável por arrastar o material lenhoso leve e formar leiras nas bordas dos talhões. Posteriormente, a \r\nbiomassa é carregada em caminhões basculantes e transportada até o pátio central da unidade de pirólise. A trituração acontece apenas na planta de pirólise em um triturador elétrico.\r\nEntradas\r\nMaterial/Energia Unidade Quantidade Origem dos dados\r\nMatéria-prima 1 (Resíduos da colheita) kg 3.370.000,00 Analise interna (Volumes, densidades, umidade amostrados em campo)\r\nMatéria-prima 2 (Resíduos da carvoaria (UPC)) kg 0,00\r\nEletricidade (da rede) kWh Sem eletricidade no local de coleta (talhões)\r\nDiesel para coleta litros 4.513,00 Analise interna (Ha total, Ha/h, L/Ha)\r\nDiesel para gerador litros 0,00\r\nDiesel para triturador litros 0,00\r\nÁgua (poço) m3 12,00\r\nLubrificantes e graxas kg 45,00 Consumo estimado (0,01 kg/L diesel)\r\nSaídas\r\nMaterial/Energia Unidade Quantidade Origem dos dados Processo de destino\r\nMatéria-prima 1 triturada - produto (Resíduos da colheita) kg 3.337.000,00 -1% de perda Transporte da matéria-prima\r\nMatéria-prima 2 triturada - produto (Resíduos da carvoaria (UPC)) kg 0,00 nota fiscal de saída Transporte da matéria-prima\r\nSobras da trituração - subproduto kg 33.000,00 Estimativa com base no LCA da CarbonFlex Destinado para compostagem\r\nEmissão de CO2 fossil trator kg 10.141,90 GHG Protocol 2025 Para o ar\r\nEmissão de CO2 biogenico trator kg 1.499,40 GHG Protocol 2025 Para o ar\r\nObservações:\r\n[Exemplo: Água de poço tratada com xx kg de cloro. \r\nColeta realizada por trator modelo AB, ano 2008. Todo diesel foi utilizado na coleta. \r\nCO2 das emissões não se referem à queima de combustivel, mas sim do processo.]"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 18 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 19 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "Processo de transporte da matéria-prima\r\nProcesso elementar: Transporte da matéria-prima\r\nPeríodo de tempo da coleta de dados: 1 ano Início: jan./25 Fim: dez./25\r\nPreenchido por: João Gallo\r\nDescrição do processo:\r\nO processo consiste em transportar a biomassa triturada das bordas dos talhões até a unidade de pirólise, localizada em média a 20 km de distância. O transporte é realizado por caminhões basculantes de médio porte, \r\ncom capacidade volumétrica de aproximadamente 27 m³, compatível com a densidade aparente da biomassa (185–285 kg/m³).\r\nCada viagem compreende um trajeto de ida carregado e retorno vazio, totalizando 40 km por ciclo. O consumo específico de combustível é de cerca de 0,40 L/km carregado e 0,30 L/km vazio, resultando em \r\naproximadamente 14 L de diesel B15 por viagem. Entradas\r\nMaterial/Energia Unidade Quantidade Origem dos dados\r\nMatéria-prima 1 triturada (Resíduos da colheita) kg 3.370.000,00 Conservação de massa\r\nMatéria-prima 2 triturada (Resíduos da carvoaria (UPC)) kg 0,00\r\nDiesel para transporte litros 6.745,00 Analise interna (Densidade, Distancia media, consumo, tamanho da caçamba, numero de viagens)\r\nkm\r\nSaídas\r\nMaterial/Energia Unidade Quantidade Origem dos dados Processo de destino\r\nMatéria-prima 1 transportada - produto (Resíduos da colheita) kg 3.370.000,00 nota fiscal de saída Pirólise do biochar\r\nMatéria-prima 2 transportada - produto (Resíduos da carvoaria (UPC)) kg nota fiscal de saída Pirólise do biochar\r\nObservações:\r\nA eficiência de transporte considera perda de 1 % em massa (finos)."
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 19 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 20 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "Processo de fabricação do reator\r\nProcesso elementar: Fabricação do reator\r\nPeríodo de tempo da coleta de dados: 1 ano Início: jan./25 Fim: dez./25\r\nPreenchido por: João Gallo\r\nDescrição do processo:\r\nReator de pirólise contínua modelo BST-50S, ano 2025, da marca Beston Group, fabricado na província de Henan, China, em aço carbono e inox, com revestimento refratário e sistema de queima secundária. O equipamento \r\nserá importado para o Brasil por via marítima (porto de Qingdao → porto de Santos) e posteriormente transportado por via rodoviária (Santos → Montes Claros/MG) até a instalação do Projeto Nova Esperança.\r\nO processo inclui as etapas de fabricação, montagem, testes de bancada e transporte internacional até o destino final, abrangendo o uso de aço, materiais refratários, cobre, componentes elétricos e consumo energético na \r\nfábrica.\r\nEntradas\r\nMaterial/Energia Unidade Quantidade Origem dos dados\r\nAço (carbono + inox) kg 80.000,00 Estimativa por classe de reator (estrutura, casco, dutos, frames)\r\nOutros materiais (refratários, lã cerâmica, cobre, cabos, painéis, tintas) kg 14.000,00 Estimativa (refratários ~12 t; cobre/cabos ~1,2 t; demais ~0,8 t)\r\nEletricidade (da rede) kWh 96.000,00 Fator proxy 1,2 kWh/kg de aço processado.\r\nÁgua m3 16,00 Fator proxy 0,2 m³/ton de aço processado.\r\nCombustível para processo de produção (diesel) litros 1.600,00 Fator proxy 0,02 L/kg de aço (empilhadeiras/geradores).\r\nCombustível para transporte do reator - marítimo (HFO, equivalente) litros 6.400,00 Cálculo por t·km: 80 t × 20.000 km × 0,004 L HFO/(t·km)\r\nCombustível para transporte do reator – rodoviário (diesel) litros 1.680,00 4 carretas de 20 t × 1.200 km (Santos→Montes Claros) × 0,35 L/km; substituir por CTe/frete\r\nSaídas\r\nMaterial/Energia Unidade Quantidade Origem dos dados Processo de destino\r\nReator - produto unidade 1,00 Pirólise do biochar\r\nResíduos Lançado no solo\r\nEfluentes Lançado na água\r\nEmissão de CO2 fossil diesel processo kg 3.634,20 GHG Protocol 2025 Lançado no ar\r\nEmissão de CO2 biogenico diesel processo kg 537,00 GHG Protocol 2025 Lançado no ar\r\nObservações:\r\nAssumido 20 anos de duração do reator. Não foi considerado o fim de vida do reator"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 20 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 21 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "Processo de pirólise do biochar\r\nProcesso elementar: Pirólise do biochar\r\nPeríodo de tempo da coleta de dados: 1 ano Início: jan./25 Fim: dez./25\r\nPreenchido por: João Gallo\r\nDescrição do processo:\r\nO processo consiste na conversão termoquímica da biomassa triturada em biochar, realizada em um reator de pirólise contínuo de alta tecnologia, modelo BST-06 (ou equivalente), operando sob atmosfera controlada e \r\nfluxo contínuo de biomassa seca. O reator é totalmente automatizado, com controle de temperatura, pressão e vazão via PLC, e equipado com sistema de limpeza de gases, torre de resfriamento e exaustores de tiragem \r\nforçada. O sistema opera 24 h por dia, 300 dias por ano, com potência elétrica efetiva de 150 kW × 0,7 = 105 kW, resultando em um consumo anual de 756 000 kWh provenientes da rede CEMIG (13,8 kV).\r\nO resfriamento do biochar é realizado em circuito fechado de água, com make-up de aproximadamente 160 m³/ano, garantindo que a descarga ocorra abaixo de 80 °C. Após o resfriamento, o biochar é descarregado \r\nmecanicamente, peneirado e estocado em big bags selados.\r\nO rendimento médio do processo é de 30 % (m/m), produzindo 860 t/ano de biochar seco a partir de 3 370 t/ano de biomassa úmida, com teor de carbono fixo superior a 82 % e relação H/C < 0,3, atendendo aos requisitos \r\nde permanência de longo prazo definidos pela metodologia Puro.Earth Biochar 2025.\r\nAs principais entradas do processo são biomassa triturada, eletricidade da rede, diesel B15 (start-up) e água (resfriamento), enquanto as saídas são biochar seco, gases de combustão tratados e pequenas quantidades de \r\ncinzas inertes.\r\nEntradas\r\nMaterial/Energia Unidade Quantidade Origem dos dados\r\nMatéria-prima 1 transportada (Resíduos da colheita) kg 3.370.000,00 Prognose de colheita Viena 2026\r\nMatéria-prima 2 transportada (Resíduos da carvoaria (UPC)) kg\r\nEletricidade (da rede) kWh 756.000,00 Estimativa com base no consumo de todos os componentes e soma das horas de operação anual. (105 kW × 24 h × 300 d)\r\nÁgua m3 460,00 300 para limpezas e lavagens, 160 para torre de resfriamento do biochar\r\nProdutos de limpeza kg 18,00 Detergente neutro, desengraxante\r\nQuimicos para higienização kg 61,00 Hipoclorito 2%\r\nDiesel B15 litros 1.200,00 Analise interna (ignições por ano, consumo por ignição)\r\nReator de pirólise Unidade 0,05\r\nSaídas\r\nMaterial/Energia Unidade Quantidade Origem dos dados Processo de destino\r\nBiochar - produto kg 860.000,00 Armazenamento\r\nPerdas de processo de pirolise kg 8.600,00 Cinzas 1% Destinado para compostagem\r\nEmissões de CH4 (reator) kg 25,80 0,03 kg CH₄/t biochar – reatorLançado no ar\r\nEmissões de CO2 (reator) kg 3.278,00 1.200 L × 2,732 kg CO₂/L (B15)Lançado no ar\r\nEmissões de CO2 biogênico (reator) kg 5.070.000,00 1,5 t CO₂ biogênico liberado/t biochar (LCA Puro.Earth) Lançado no ar\r\nEmissões de N2O (reator) kg 8,60 0,01 kg N₂O/t biochar (CarboFex 2023) Lançado no ar\r\nResíduos (embalagens) kg 120,00 Estimativa anual Coleta seletiva\r\nEfluentes m³ 4,6 1% da agua utilizada Tratado internamente e lançado na água \r\nObservações:\r\nConsumo elétrico corresponde à operação integral do sistema (reator + ventiladores + PLC + resfriamento)."
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 21 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 22 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "Processo de fabricação da embalagem\r\nProcesso elementar: Fabricação da embalagem\r\nPeríodo de tempo da coleta de dados: 1 ano Início: jan./25 Fim: dez./25\r\nPreenchido por: João Gallo\r\nDescrição do processo:\r\nSaco a granel de grande capacidade (FIBC), fabricado em tecido de polipropileno (PP) trançado, com revestimento interno de polietileno (PE).\r\nO material possui tratamento antieletrostático do tipo condutivo (Tipo C), exigindo aterramento durante o enchimento e esvaziamento.\r\nO processo de fabricação envolve as etapas de extrusão de filamentos, tecelagem, laminação, costura e instalação do revestimento interno.\r\nEntradas\r\nMaterial/Energia Unidade Quantidade Origem dos dados\r\nPolipropileno (PP) tecido kg 2.737,37\r\nPolietileno (PE) – liner interno kg 218,99\r\nAditivos condutivos (carbon black + masterbatch) kg 27,37\r\nLinha de Costura kg 2,11\r\nTinta de marcação Kg 3,16\r\nEletricidade (fabricação) kWh 2.200,00 1,5 kWh/kg de embalagem (extrusão + tecelagem + laminação)\r\nÁgua industrial m³ 2,50 Uso marginal (resfriamento e limpeza de tanques)\r\nSaídas\r\nMaterial/Energia Unidade Quantidade Origem dos dados Processo de destino\r\nEmbalagem (Big Bag tipo C) kg 2.839,00 Soma de todos os materiais utilizados (PP, PE, linha, tinta) Pós-processamento do biochar\r\nEmissões kg 6.200,00 2,2 t CO₂e/t PP (ecoinvent v3.9, fabricação de filme e tecelagem) Lançado no ar\r\nResíduos sólidos (retalhos, purgas, embalagens de insumos) kg 150,00 Lançado no solo\r\nEfluentes líquidos (lavagens, resfriamentos) m³ 2,5 Lançado na água\r\nObservações:\r\nO processo produtivo ocorre em planta têxtil industrial, com controle de emissões e reúso de água.\r\nA vida útil da embalagem é de 3 anos (reuso triplo); o inventário considera apenas 1/3 do total anual novo.\r\nAs emissões associadas à fabricação de PP e PE representam o maior impacto do ciclo de vida da embalagem (≈ 95 %)."
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 22 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 23 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "Processo de pós-processamento do biochar\r\nProcesso elementar: Pós-processamento do biochar\r\nPeríodo de tempo da coleta de dados: 1 ano Início: jan./25 Fim: dez./25\r\nPreenchido por: João Gallo\r\nDescrição do processo:\r\nBiochar sai do reator direto para big-bags, que são armazenadas no pátio ou galpão\r\nEntradas\r\nMaterial/Energia Unidade Quantidade Origem dos dados\r\nBiochar kg 860.000,00\r\nEletricidade (da rede) kWh 0,00\r\nÁgua m3 0,00\r\nProdutos de limpeza kg 0,00\r\nQuimicos para higienização kg 0,00\r\nDiesel litros 90,00\r\nEmbalagem (Big Bag tipo C) kg 2.839,00 2,7 kg/un × 1.050 un/ano (reuso 3 anos = 3.130 enchimentos)\r\ncavaco\r\nSaídas\r\nMaterial/Energia Unidade Quantidade Origem dos dados Processo de destino\r\nBiochar ensacado - produto kg 854.239,00 Transporte do biochar\r\nPerdas do pós-processamento kg 8.600,00 1% cinza Destinado para compostagem\r\nEmissões CO2 fóssil kg 246,00 90 L diesel × 2,73 kg CO₂/L (B15) Lançado no ar\r\nResíduos sólidos (plásticos, big bags danificadas) kg 60 Lançado no solo\r\nEfluentes m³ 0 Sem geração direta Lançado na água\r\nsaída vapor de agua kg Desprezível Evaporação residual na descarga a quente\r\nObservações:\r\nAs big-bags são reutilizadas por 3 anos, contabilizando-se apenas 1/3 como novas no inventário.\r\nSem uso de água ou produtos químicos, portanto sem efluentes líquidos."
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 23 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 24 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "Processo de transporte do biochar\r\nProcesso elementar: Transporte do biochar\r\nPeríodo de tempo da coleta de dados: 1 ano Início: jan./25 Fim: dez./25\r\nPreenchido por:\r\nDescrição do processo:\r\n[Exemplo: O processo consiste em transportar o biochar ensacado por um caminhão ano xx, modelo xx, até o local de aplicação no solo.]\r\nEntradas\r\nMaterial/Energia Unidade Quantidade Origem dos dados\r\nBiochar ensacado kg 854.239,00\r\nDiesel para transporte litros 3.440,00 Cálculo interno: 50 km média × 2 (ida + volta) × 0,34 L/km × (860 t ÷ 15 t/viagem ≈ 57 viagens)\r\nLubrificantes kg 6,00 Fator médio 0,0018 kg/L diesel (IPCC 2019\r\nSaídas\r\nMaterial/Energia Unidade Quantidade Origem dos dados Processo de destino\r\nBiochar transportado - produto kg 854.239,00 Total produzido Aplicação no solo\r\nEmissões de CH4 (transporte) Calculado | Equipe Grön Lançado no ar\r\nEmissões de CO2 (transporte) Calculado | Equipe Grön Lançado no ar\r\nEmissões de CO2 biogênico (transporte) Calculado | Equipe Grön Lançado no ar\r\nEmissões de N2O (transporte) Calculado | Equipe Grön Lançado no ar\r\nObservações:\r\nTransporte realizado por caminhões Mercedes-Benz Axor 3131 (ano 2022), capacidade 15 t.\r\nTodo o diesel B15 consumido refere-se exclusivamente ao transporte do biochar.\r\nDistância média de 50 km considerada representativa das rotas de aplicação próximas.\r\nNão há efluentes líquidos nesta etapa."
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 24 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 25 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "Processo de aplicação no solo\r\nProcesso elementar: Transporte do biochar\r\nPeríodo de tempo da coleta de dados: 1 ano Início: jan./25 Fim: dez./25\r\nPreenchido por:\r\nDescrição do processo:\r\n[Exemplo: O processo consiste em transportar o biochar ensacado por um caminhão ano xx, modelo xx, até o local de aplicação no solo.]\r\nEntradas\r\nMaterial/Energia Unidade Quantidade Origem dos dados\r\nBiochar transportado kg 854.239,00\r\nEletricidade (da rede) kWh 0,00\r\nDiesel para aplicação litros 1.320,00 0,4 L/t distribuída × 860 t)\r\nCaptura de CO2 kg 2.558.000,00\r\n851,4ton × 0,82 (Cf) × 3,67 (CO p/ CO2) - calculado a partir da equação Cstored da \r\nmetodologia da Puro.Earth 2025 \r\nfator de permanencia = 0,9 para 200 anos. Perda de 10%. Ver equação 6.3. Desconsiderar para 1 ano dos dados do projeto\r\nSaídas\r\nMaterial/Energia Unidade Quantidade Origem dos dados Processo de destino\r\nBiochar aplicado no solo kg 851.400,00 nota fiscal de saída Aplicação no solo\r\nEmissão de CO2 fossil - aplicação kg 2.966,40 GHG Protocol 2025 Lançado no ar\r\nEmissão de CO2 biogenico - aplicação kg 438,60 GHG Protocol 2025 Lançado no ar\r\nResíduo plástico da embalagem kg 946,33 Reciclagem\r\nObservações:\r\n[Exemplo: Aplicação realizada por equipamento AB, ano 2008. Todo diesel foi utilizado na aplicação.]"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 25 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 26 / 26>"
+    },
+    {
+      "type": "text",
+      "text": "16\r\nEQUIPE TÉCNICA RESPONSÁVEL\r\nDSc. Lauana B. Silva | Eng. Florestal\r\nDiretora Técnica Grön\r\nDSc. Eliana Boaventura B. M. Alves | Eng. Florestal\r\nDiretora Executiva Grön\r\nOBRIGADA!"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 26 / 26>"
+    }
+  ],
+  "has_more": false,
+  "next_page": null
+}

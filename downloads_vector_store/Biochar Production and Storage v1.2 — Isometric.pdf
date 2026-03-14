@@ -1,0 +1,943 @@
+{
+  "object": "vector_store.file_content.page",
+  "data": [
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 1 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "BiocharProduction and Storage\r\nThis protocol outlines the MRV and best practices for high-quality\r\ncarbon removal via biochar production and storage via a durable\r\nstorage pathway.\r\nView\r\nrequirements\r\nAbout Biochar Production\r\nand Storage\r\nAdoption deadline: 14\r\nNov 2026\r\nBiCRS\r\nProtocol\r\nv1.2\r\n->\r\n->\r\n->\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 1/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 2 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "1 Summary\r\n2 Sources and Reference Standards & Methodologies\r\n3 Future Versions\r\n4 Applicability\r\n5 Environmental & Social Safeguarding\r\n5.1 Overarching Principles\r\n5.1.1 Governance and Legal Framework\r\n5.2 Risk Mitigation Strategies\r\n5.2.1 Environmental Safeguards\r\n5.2.2 Social Safeguards\r\n5.2.2.1 Stakeholder Engagement\r\n5.2.3 Adaptive Management\r\n6 Relation to Isometric Standard\r\n6.1 Project Design Document\r\n6.2 Verification and Validation\r\n6.2.1 Verification Materiality\r\n6.2.2 Site Visits\r\n6.2.3 Verifier Qualifications & Requirements\r\n6.3 Ownership\r\n6.4 Additionality\r\n6.5 Uncertainty\r\n6.5.1 Reporting of Uncertainty\r\n6.6 Data Sharing\r\n7 System Boundary & Project Baseline\r\n7.1 System Boundary & GHG Emissions Scope\r\n7.1.1 Materiality\r\n7.2 Baseline\r\n8 Net CDR Calculation\r\n8.1 Calculation Approach and Reporting Period\r\nContents\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 2/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 3 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "8.2 Calculation of CO₂eRemoval, RP\r\n8.3 Calculation of CO₂eStored, RP\r\n8.3.1 Calculation of Cbiochar\r\n8.3.1.1 At the Production Batch\r\n8.3.1.2 At the Storage Batch\r\n8.3.2 Frequency of Measurement\r\n8.3.2.1 Method A: Sampling Every Batch\r\n8.3.2.1.1 Sampling Requirements\r\n8.3.2.2 Method B: Sampling a Production Process\r\n8.3.2.2.1 Conservative Estimation of Carbon in Unsampled Batches\r\n8.3.2.2.2 Treatment of Carbon Content Measurement Outliers\r\n8.3.2.2.3 Sampling Requirements\r\n8.3.3 Minimum Number of Samples per Batch\r\n8.3.4 Ensuring Representative Sampling\r\n8.4 Measurement of Mass of Biochar Stored\r\n8.4.1 Required Documentation - CO2eStored, RP\r\n8.4.1.1 Production and Storage Monitoring\r\n8.4.1.2 Loss Accounting\r\n8.5 Calculation of CO₂eCounterfactual, RP\r\n8.6 Calculation of CO2eEmissions,RP\r\n8.6.1 Calculation of CO₂eEstablishment, RP\r\n8.6.2 Calculation of CO₂eOperations, RP\r\n8.6.3 Calculation of CO₂eEnd-of-life, RP\r\n8.6.4 Calculation of CO₂eLeakage, RP\r\n8.6.5 Emissions Accounting Requirements\r\n8.6.5.1 General\r\n8.6.5.2 Data Collection\r\n8.6.5.3 Considerations for Waste Input Emissions\r\n8.6.5.4 Co-Product Allocation\r\n8.6.5.4.1 Emissions Allocation Based on Energy Content\r\n8.6.5.5 Energy Use Accounting\r\n8.6.5.6 Transport Emissions Accounting\r\n8.6.5.7 Embodied Emissions Accounting\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 3/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 4 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "9 Pyrolysis Reactor System Requirements\r\n9.1 Acceptable Technologies\r\n9.2 System Design Requirements\r\n9.2.1 Design Diagram Requirements\r\n9.2.2 Construction Considerations\r\n9.2.3 Reactor Maintenance\r\n10 Emissions Testing Requirements\r\n10.1 Operation Emissions\r\n10.1.1 Quantification of Emissions\r\n10.1.1.1 Option 1 - Direct Continuous Measurement CO2e, RP\r\n10.1.1.1.1 Measurement Requirements\r\n10.1.1.1.2 Required Records\r\n10.1.1.2 Option 2 - Regular Emissions Testing for CO2eOperations, RP\r\n10.1.1.2.1 Required Records\r\n10.1.2 Permissible Routes for Gaseous Emissions\r\n10.1.2.1 Venting\r\n10.1.2.2 Venting After an Emissions Control System\r\n10.1.2.3 Combustion of Pyrolysis Gasses for Energy Recovery\r\n10.1.2.4 Provision of Gasses to a Third Party Consumer\r\n10.1.3 Other Pathways of Gaseous Loss\r\n10.1.3.1 Leakage Monitoring Requirements\r\n10.1.3.2 Alternative Approaches to Leakage Verification\r\n10.1.3.2.1 Continuous System Pressure Monitoring\r\n10.1.3.2.2 Regular Leakage Testing\r\n11 Additional Guidance on the Condensable (bio-oil) Fraction\r\n12 Storage\r\n13 Appendix I: Risk of Reversal Questionnaire\r\n14 Appendix II: Monitoring Plan\r\n15 Acknowledgements\r\n16 Definitions and Acronyms\r\n17 Relevant Works\r\nFootnotes\r\nContributors\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 4/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 5 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Changelog\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 5/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 6 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "This Protocol provides the requirements and procedures for\r\nthe calculation of net carbon dioxide equivalent (CO e)\r\nRemoval from the atmosphere through the production of\r\nbiochar and its durable Storage.\r\nBiochar is a chemically durable, carbon-rich solid material\r\nproduced from the pyrolysis of biomass. Pyrolysis is a\r\nthermochemical conversion process, where biomass is\r\nheated in an oxygen free environment to produce a mixture\r\nof solid biochar as well as condensable and non￾condensable gasses. This process chemically stabilizes the\r\ncarbon in the biomass, originally captured by plants through\r\nphotosynthesis, preventing it from returning to the\r\natmosphere through natural decomposition, or combustion,\r\nand thereby contributing to long-term carbon removal.\r\nUpon production, all biochar consists of a reactive organic\r\ncarbon pool, the more easily degradable compounds, and a\r\nnon-reactive fraction, the stable polyaromatic structures.\r\nThe proportions of which are highly affected by the biomass\r\nfeedstock composition, as well as the pyrolysis conditions it\r\nis exposed to. There are a growing number of examples of\r\nbiochar being stable in the environment at centennial and\r\nmillennial scale. One of the most-cited and tangible\r\nexamples of this is Terra Preta - soil enriched with biochar in\r\nthe Amazon Basin, which has been radiocarbon-dated to up\r\nto 7,000 years . Demonstrating the remarkable durability of\r\nbiochar, even in some of the most extreme tropical soil\r\nenvironments that are known for their rapid breakdown and\r\ncycling of nutrients and organic matter. Alongside Terra\r\nPreta and other global analogues in Europe , Australia , and\r\nAfrica , there are numerous examples of char that persists\r\nfor millennia in soils, including that produced by wildfires\r\n.\r\n1.0\r\nSummary\r\n2\r\n1\r\n2 3\r\n4\r\n5, 6,\r\n7\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 6/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 6 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 7 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Biochar's chemical properties, dictate its durability by\r\ninfluencing its stability and how it interacts with its\r\nenvironment. Generally, feedstocks exposed to higher\r\ntemperature (> 500°C) pyrolysis conditions translate to\r\nincreased biochar stability, leading to the formation of a\r\nlarger volume of stable polyaromatic structures .\r\nPolyaromatic structures are highly recalcitrant to both biotic\r\n(through the action of marco- and micro- organisms and\r\nplants) and abiotic (UV, oxidation, temperature and\r\nmoisture) breakdown . A higher H/C ratio indicates less\r\nstable biochar, while a high degree of aromatic carbon (low\r\nH/C) and low oxygen content (low O/C ratio) signifies\r\ngreater chemical stability and durability, especially from\r\nbiochar produced at high temperature.\r\nIsometric offers several storage options for biochar, theses\r\ninclude application to soil, burial in the shallow subsurface,\r\nand incorporation into materials in the built environment. In\r\neach of these settings, a substantial fraction of the organic\r\ncarbon content can be stored durably. Nevertheless, this\r\nProtocol adopts a conservative approach to crediting, with\r\nonly the highly durable fraction of the organic carbon\r\ncontent of the biochar being eligible for the generation of\r\nCredits.\r\nAll quantification of biochar durability for carbon crediting\r\nto date are based on modeling studies using the initial\r\nbiochar characteristics, namely H:C ratios, or comparison to\r\ngeological (inertinite) proxies combined with the organic\r\ncarbon (C ) content. The production process through which\r\nthe biochar is created and the Module through which the\r\nbiochar is being stored will determine which method is most\r\nappropriate for quantifying durability and the associated\r\ncarbon crediting duration.\r\nThis Protocol sets out the requirements and methods for\r\nquantification of the gross amount of CO removed via the\r\n8\r\n9\r\norg\r\n2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 7/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 7 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 8 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "production and durable storage of biochar and all cradle￾to-grave life-cycle Greenhouse Gas (GHG) emissions\r\nassociated with the process, to determine the gross carbon\r\ndioxide equivalent (CO e) removal. It is developed to adhere\r\nto the requirements of ISO 14064-2: 2019 – Greenhouse\r\nGasses – Part 2: Specification with guidance at the Project\r\nlevel for quantification, monitoring, and reporting of\r\ngreenhouse gas emission reductions or removal\r\nenhancements. Ensuring that:\r\nConsistent, accurate procedures are used to measure\r\nand monitor all aspects of biochar production and\r\nstorage to enable accurate accounting of net CO e\r\nremovals;\r\nConsistent system boundaries and calculations are\r\nutilized to quantify net CO e removals;\r\nRequirements are met to ensure the CO e removals are\r\nadditional; and\r\nEvidence is provided and verified by independent third\r\nparties to support all net CO e removal claims.\r\n2\r\n2\r\n2\r\n2\r\n2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 8/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 8 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 9 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "This Protocol is compliant with the following standards and\r\nProtocols:\r\nThe Isometric Standard\r\nISO14064-2: 2019 - Greenhouse Gases - Part 2:\r\nSpecification with guidance at the Project level for\r\nquantification, monitoring, and reporting of greenhouse\r\ngas emission reductions or removal enhancements\r\nAdditional reference standards that inform the requirements\r\nand overall practices incorporated in this Protocol include:\r\nISO14064-3:2019 - Greenhouse Gases - Part 3:\r\nSpecification with Guidance for the verification and\r\nvalidation of greenhouse gas statements\r\nISO14040:2006 - Environmental Management -\r\nLifecycle Assessment - Principles & Framework\r\nISO14044:2006 - Environmental Management -\r\nLifecycle Assessment - Requirements & Guidelines\r\nAdditional principles that were considered in the\r\ndevelopment of this Protocol and aligned with, where\r\nfeasible, include:\r\nThe Core Carbon Principles (CCP), The Integrity Council\r\nfor the Voluntary Carbon Market (ICVCM).\r\nCriteria for High-Quality Carbon Dioxide Removal: 2025\r\nEdition, Carbon Direct and Microsoft.\r\nBS EN 15978:2011 Sustainability of construction works -\r\nAssessment of environmental performance of buildings -\r\n2.0\r\nSources and Reference\r\nStandards & Methodologies\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 9/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 10 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Calculation method.\r\nSupport to the development of methodologies for the\r\ncertification of industrial carbon removals with\r\npermanent storage - Review of carbon removals through\r\nbiochar, European Commission, 2024.\r\nEuropean Biochar Certificate Guidelines for a\r\nSustainable Production of Biochar, Version 10.3.\r\nWorld Biochar Certificate – Guidelines for a Sustainable\r\nProduction of Biochar and its Certification v1.1.\r\nProtocols and Methodologies that were assessed as part of\r\na literature review during the development of this Protocol\r\ninclude:\r\nA Manual for Biochar Carbon Removal: Comparative\r\nguide for the certification of biochar production as a\r\ncarbon sink (2024)\r\nGlobal Biochar C-Cink v3.1, Carbon Standard\r\nInternational\r\nGlobal Artisan C-Sink v2.1, Carbon Standards\r\nInternational\r\nBiochar Methodology for CO Removal Edition 2025 v1,\r\nPuro.earth\r\nVM0044 - Biochar Utilization in Soil and Non-Soil\r\nApplications, v1.2, Verra\r\n2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 10/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 11 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "This Protocol was developed based on the current state of\r\nthe art, publicly available science regarding biochar\r\nproduction and storage. Because biochar production and\r\nstorage is a novel Carbon Dioxide Removal (CDR) approach,\r\nthis Protocol incorporates requirements that may be more\r\nstringent than some current relevant regulations or other\r\nProtocols related to biochar for CDR. In particular,\r\nrequirements for demonstrating the Durability of biochar will\r\nbe updated as the stability of carbon captured by biochar\r\nbecomes better understood, and biochar degradation is\r\nproven to be limited. Nevertheless this Protocol adopts a\r\nconservative approach to crediting and risk to ensure the\r\nintegrity of carbon Credits issued against it.\r\nAdditionally, this Protocol will be reviewed when there is an\r\nupdate to published scientific literature, government\r\npolicies, or legal requirements which would affect net CO e\r\nremoval quantification or the monitoring guidelines outlined\r\nin this Protocol, or at a minimum of every 2 years.\r\n3.0\r\nFuture Versions\r\n2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 11/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 11 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 12 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "This project applies to projects or processes which:\r\nCapture CO through the utilization of biomass\r\nfeedstock to create biochar through pyrolysis.\r\nStores the biochar in a stable environment covered by\r\none of the associated biochar storage Modules.\r\nThis Protocol applies to projects and associated operations\r\nthat meet all of the following project conditions:\r\nThe Project provides a net-negative CO e impact (net\r\nCO e removal) as calculated in the GHG Statement, in\r\ncompliance with Sections 7 and 8 of this Protocol;\r\nThe Project does not disproportionately harm\r\nunderserved or marginalized communities, in\r\ncompliance with Section 3.7 of the Isometric Standard\r\nand Section 5 of this Protocol;\r\nThe Project is considered additional, in accordance with\r\nthe requirements of Section 6.4 of this Protocol; and\r\nThe Project provides long duration storage of CO (>\r\n200 years).\r\n4.0\r\nApplicability\r\n2\r\n2\r\n2\r\n2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 12/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 13 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "5.0\r\nEnvironmental & Social\r\nSafeguarding\r\nIn line with the Isometric Standard, the issuance of Credits\r\nunder this Protocol is contingent upon the implementation,\r\ntransparent reporting, and independent Verification of\r\ncomprehensive safeguards. These safeguards cover\r\nenvironmental protection, social equity, community\r\nengagement, and respect for cultural values. Safeguard\r\nplans must be integrated into all major phases of the Project,\r\nwith detailed reports made available to Stakeholders.\r\nAdherence to, and Verification of, these environmental and\r\nsocial safeguards is a mandatory condition for all Crediting\r\nProjects.\r\n5.1\r\nOverarching Principles\r\nProject Proponents must comply with national and local\r\nlaws, regulations, and policies in line with the Isometric\r\nStandard. Project Proponents are required to document all\r\nactivities conducted under the Project that necessitate\r\nenvironmental permits, including the permits obtained and\r\nthe authorities that issued them, in the Project Design\r\nDocument (PDD).\r\nWhere applicable, projects must also comply with\r\ninternational conventions and standards related to human\r\nrights and environmental protection, particularly when\r\nactivities occur within or have foreseeable impacts on\r\njurisdictions that are party to such agreements.\r\n5.1.1\r\nGovernance and Legal Framework\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 13/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 13 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 14 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "The Project must assess environmental and social impacts\r\nacross all project locations—including biomass sourcing\r\nareas, pyrolysis facilities, biochar deployment sites, and\r\nbiomass or biochar transportation routes.\r\nAppropriate measures must be in place to identify and\r\neliminate potential risks to terrestrial and aquatic\r\necosystems and biodiversity. Where risks cannot be\r\neliminated, the PDD must outline a project-specific\r\nmitigation plan that includes measures to monitor ecosystem\r\nhealth and address adverse effects. Refer to Section 3.7 of\r\nthe Isometric Standard for further guidelines on\r\nenvironmental and social impacts.\r\nEnvironmental and social risk assessment in adherence with\r\nSection 3.7 of the Isometric Standard must be completed to\r\nidentify potential risks, followed by the development of\r\ntailored mitigation plans. These plans must encompass\r\nspecific actions to avoid, minimize or rectify identified\r\nimpacts. Effective implementation of these measures must\r\nalso be accompanied by a robust monitoring plan to detect\r\nnegative impacts and stop projects when necessary.\r\nThe severity of risks depends on site-specific conditions and\r\non the intensity and duration of project activities. Each\r\nProject must conduct risk identification, assessment,\r\navoidance, and mitigation planning in a way that reflects its\r\nown technical, environmental, and social context. The risks\r\noutlined in this Protocol represent a minimum set of required\r\nconsiderations. Additional risks may be identified by\r\nIsometric or the Project Proponent on a case-by-case basis\r\nand must be included in the PDD.\r\n5.2\r\nRisk Mitigation Strategies\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 14/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 15 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "The Project Proponent must conduct an environmental risk\r\nassessment which adheres to Section 3.7.1 of the Isometric\r\nStandard. Biochar Production and storage has the potential\r\nto contaminate of soil, water, or surrounding ecosystems\r\nthrough improper use. The specific nature and magnitude of\r\nthese risks depend on factors such as feedstock\r\ncomposition, production technology, operating conditions,\r\nand storage practices and rates. Appropriate controls,\r\nmonitoring, and compliance with relevant environmental\r\nstandards are necessary to minimize potential impacts. For\r\nexample, there is more environmental risk associated with\r\nbiochar application to soils (particularly agricultural soils)\r\ndue to the potential impact on ecosystem service provision,\r\ncompared to biochar encapsulated in the built environment\r\nand low oxygen environments. All storage environments\r\nrequire at least a declaration of quantity of potential\r\npollutants contained within the biochar, with lower\r\nthresholds in soil storage environments to mitigate\r\nenvironmental risk. Potential pollutants of concern for\r\nenvironmental and human health are listed below.\r\nPolycyclic Aromatic Hydrocarbons (PAHs) and heavy metals\r\nare pollutants of concern that may be found in biochar :\r\nPAHs are organic molecules containing fused aromatic\r\nrings and are formed in biochar as a result of\r\nincomplete combustion or pyrolysis reactions. The type\r\nand concentration of PAHs may be dependent on\r\nfeedstock type, pyrolysis temperature, and carrier gas .\r\nPAHs are known carcinogens and exposure to PAHs\r\nmay be associated with other adverse health effects .\r\nProject Proponents must assess the potential\r\nenvironmental risks posed by polycyclic aromatic\r\nhydrocarbons (PAHs) from biochar application and\r\n5.2.1\r\nEnvironmental Safeguards\r\n10, 11\r\n10\r\n12\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 15/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 16 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "describe in the PDD how these risks are being mitigated.\r\nMitigation strategies may include adjusting the biomass\r\nfeedstock source, modifying pyrolysis conditions, or\r\napplying pretreatment methods to reduce PAH\r\nconcentrations in the biochar .\r\nHeavy metals are metallic elements with high density,\r\natomic weight, or atomic number that are often toxic at\r\nlow concentrations. Total heavy metals concentration in\r\nthe storage environment, following biochar application,\r\nmust not exceed the limits established by the local\r\nauthority where the Project is located. In the absence of\r\nlocal regulations, the Project Proponent must adhere to\r\nstandards set by the European Union (EU) or the United\r\nStates Environmental Protection Agency (US EPA).\r\nJustification behind the regulatory body selection must\r\nbe provided in the PDD.\r\nOther pollutants of concern that may be present in\r\nbiochar as a result of pyrolysis include polychlorinated\r\nbiphenyls (PCBs), dioxins, and furans. Project\r\nProponents must describe how potential environmental\r\nrisks from these pollutants are screened and mitigated.\r\nGuidance on threshold levels and requirements for these\r\nparameters is provided in the relevant storage Module.\r\nProjects must evidence that pollutants are within the upper\r\nbound limits for the associated pollutants set by World\r\nBiochar Certificate (WBC).\r\n10\r\nThe Project Proponent must conduct a social risk\r\nassessment which adheres to Section 3.7.2 of the Isometric\r\n5.2.2\r\nSocial Safeguards\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 16/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 17 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Standard on social impacts. In particular, this should include\r\nspecific risks to human health that may be associated with\r\nbiochar production, application and/or storage during the\r\nProject, for example risk of dust inhalation during transport\r\nand application.\r\nIn accordance with Section 3.5 of the Isometric Standard,\r\nProject Proponents must demonstrate active stakeholder\r\nengagement through a Stakeholder Input Process\r\nthroughout project planning and operation, ensuring that all\r\nrisk mitigation strategies contribute to sustainable project\r\noutcomes. Local stakeholders situated in the vicinity of the\r\nproject site may contribute an in-depth understanding of the\r\nlocal system and provide invaluable insights and\r\nrecommendations on the potential risks, necessary\r\nsafeguards and specific monitoring needs. The Stakeholder\r\nInput Process must adhere to requirements outlined in\r\nSection 3.5 of the Isometric Standard, and evidence of these\r\nmeetings must be submitted in the PDD.\r\nCommunity engagement is not required in biochar offtake\r\nlocations where biochar is sold or transferred through a\r\ncommercial transaction. However, where biochar is\r\ndistributed or applied without financial exchange (e.g.,\r\ndonated or provided free of charge), the Project Proponent\r\nmust conduct appropriate stakeholder consultation to\r\nensure that recipients and local communities are informed of\r\npotential impacts and consent to its use.\r\n5.2.2.1\r\nStakeholder Engagement\r\nProject Proponents must include in the PDD a plan for\r\ninformation sharing, emergency response and conditions for\r\n5.2.3\r\nAdaptive Management\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 17/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 18 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "stopping or pausing a deployment.\r\nPlans for pausing or stopping a deployment must be in place\r\nin instances where there may be:\r\nInstrument malfunctions leading to data-gaps in\r\nrequired monitoring;\r\nPollutants/metals of concern exceed thresholds outlined\r\nin the PDD;\r\nRegulatory non-compliance, e.g. danger to ecosystem\r\nhealth detected (such as by the local community or a\r\ngovernment agency); or\r\nCompromised health and/or safety of workers and/or\r\nlocal stakeholders.\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 18/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 19 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "The following topics are covered briefly in this Protocol due\r\nto their inclusion in the Isometric Standard, which governs all\r\nIsometric Protocols. See in-text references to the Isometric\r\nStandard for further guidance.\r\n6.0\r\nRelation to Isometric Standard\r\nFor each specific Project to be evaluated under this\r\nProtocol, the Project Proponent must document project\r\ncharacteristics in a PDD as outlined in Section 3.2 of the\r\nIsometric Standard. The PDD will form the basis for Project\r\nValidation and evaluation in accordance with this Protocol,\r\nand must include consideration of processes unique to\r\nbiomass such as:\r\nLocation information for biomass production, biomass\r\npyrolysis, and the storage area, including project\r\nboundaries of the project area\r\nConditions of biomass use prior to Project initiation\r\nDetails on technologies, products, and services relevant\r\nto biochar production, including production rates,\r\nprocess parameters, and volumes\r\nDetailed biochar characterization according to\r\nrequirements in one of the associated biochar storage\r\nModules (Section 12)\r\nDescription of any models used to quantify processes\r\nrelevant to the calculation of CO removal that are not\r\ndirectly measurable, and\r\nDescription of measurement methods for all required\r\nanalyses, cross-referenced with relevant standards\r\nwhere applicable.\r\n6.1\r\nProject Design Document\r\n2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 19/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 19 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 20 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Projects must be validated and net CO e removals verified\r\nby an independent third party, a Validation and Verification\r\nBody (VVB), consistent with the requirements described in\r\nthis Protocol and in Section 4 of the Isometric Standard.\r\nThe VVB must consider the following requisite components:\r\n1. Validate that feedstock adheres to the requirements\r\nlisted in the Biomass Feedstock Accounting Module v1.3\r\n2. Verify that storage sites adhere to the requirements\r\nlisted in the relevant storage Module (see Section 12)\r\n3. Verify that the quantification approach adheres to\r\nrequirements of Section 8 of this Protocol and the\r\nrelevant storage Module (see Section 12), including\r\nprovision of required records\r\n4. Verify that the Environmental & Social Safeguards\r\noutlined in Section 5 of this Protocol are met\r\n5. Verify that the Project is compliant with requirements\r\noutlined in the Isometric Standard\r\n6.2\r\nVerification and Validation\r\n2\r\nThe threshold for Materiality, considering the totality of all\r\nomissions, errors and mis-statements is 5%, in accordance\r\nwith Section 4.3 of the Isometric Standard.\r\nVerifiers must also verify the documentation of Uncertainty\r\nof the GHG Statement as required by Section 2.5.7 of the\r\nIsometric Standard. Qualitative Materiality issues may also\r\nbe identified and documented, such as:\r\n6.2.1\r\nVerification Materiality\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 20/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 20 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 21 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Control issues that erode the verifier’s confidence in the\r\nreported data\r\nPoorly managed documented information\r\nDifficulty in locating requested information\r\nNoncompliance with regulations indirectly related to\r\nGHG emissions removals or storage\r\nProject validation and verification must incorporate site\r\nvisits to project facilities in accordance with the\r\nrequirements of ISO 14064-3 (Section 6.1.4.2), including site\r\nvisits during validation and initial verification to the biomass\r\npyrolysis site and the biochar application site. A site visit\r\nmust occur at least once during each project validation.\r\nAdditional site visits may be required if there are substantial\r\nchanges to field operations over the course of a project's\r\nvalidation period, or if deemed necessary by Isometric or the\r\nVVB.\r\nIn the instance of multiple application sites under a single\r\nverification event, a representative number of application\r\nsites can be selected for the site visits. Validators should,\r\nwhenever possible, observe operation of the biochar\r\nprocessing and deployment to ensure full documentation of\r\nprocess inputs and outputs through visual observation.\r\n6.2.2\r\nSite Visits\r\nVerifiers and validators must comply with the requirements\r\ndefined in Section 4 of the Isometric Standard. In addition,\r\nteams must maintain and demonstrate expertise associated\r\nwith the specific technologies of interest, including biomass\r\n6.2.3\r\nVerifier Qualifications & Requirements\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 21/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 22 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "growth or production, biomass processing and pyrolysis,\r\nsampling, analysis, data processing, and material storage.\r\nCompetency must be demonstrated in accordance with\r\nIsometric's VVB policy, for example based on the relevant\r\nsectoral scope accreditations in IAF MD 14, or another\r\ndemonstration of relevant expertise for this Protocol and the\r\nselected storage Module(s).\r\nCDR via biochar is often a result of a multi-step process\r\n(such as biomass growth, harvesting, transport, pyrolysis,\r\nprocessing, and storage), with activities in each step\r\npotentially managed and operated by a different operator,\r\ncompany, or owner. When there are multiple parties involved\r\nin the process, and to avoid Double Counting of net CO e\r\nremovals, a single Project Proponent must be specified\r\ncontractually as the sole owner of the Credits. Contracts\r\nmust comply with all requirements defined in Section 3.1 of\r\nthe Isometric Standard.\r\n6.3\r\nOwnership\r\n2\r\nThe Project Proponent must be able to demonstrate\r\nAdditionality through compliance with Section 2.5.3 of the\r\nIsometric Standard. The baseline scenario and\r\ncounterfactual utilized to assess additionality must be\r\nproject-specific, and are described in Section 7.2 of this\r\nProtocol.\r\nAdditionality determinations should be reviewed and\r\ncompleted at the time of initial verification or whenever\r\nproject operating conditions change significantly, such as\r\nthe following:\r\n6.4\r\nAdditionality\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 22/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 22 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 23 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Regulatory requirements or other legal obligations for\r\nproject implementation change or new requirements are\r\nimplemented, or\r\nProject financials indicate Carbon Finance is no longer\r\nrequired to incentivize the use of biochar for carbon\r\nremoval, potentially due to, for example:\r\nIncreased tipping fees for waste feedstocks\r\nIncreased revenues from farmers paying for\r\nagronomic service\r\nReduced rates for capital access, or\r\nDecreases in the effective cost of producing\r\nbiochar due to increased revenue from co-product\r\nsales\r\nAny review and change in the determination of additionality\r\nshall not affect the availability of Carbon Finance and\r\nCredits for the current or past Crediting Periods. If the review\r\nindicates the Project has become non-additional, this shall\r\nmake The Project ineligible for future Credits .\r\n13\r\nThe uncertainty in the overall estimate of the net CO e\r\nremoval as a result of the Project must be accounted for. The\r\ntotal net CO e removed for a specific Reporting Period\r\nCO e , must be conservatively determined in\r\naccordance with the requirements outlined in Section 2.5.7\r\nof the Isometric Standard.\r\n6.5\r\nUncertainty\r\n2\r\n2\r\n2 Removal, RP\r\nProjects must detail and justify their uncertainty analysis\r\nand any uncertainty adjustments (e.g. %) applied in\r\n6.5.1\r\nReporting of Uncertainty\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 23/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 23 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 24 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "instances of high uncertainty.\r\nIncluding:\r\nEmission factors utilized, as published in public, or other\r\ndatabases, used\r\nValues of measured parameters from process\r\ninstrumentation, such as truck weights from weigh\r\nscales, flow rates from flow meters, electricity usage\r\nfrom utility power meters, and other similar equipment\r\nLaboratory analyses, including analysis of carbon\r\ncontent of biochar\r\nData used to model and estimate biochar degradation\r\nThe uncertainty information should at least include the\r\nminimum and maximum values of a variable. More detailed\r\nuncertainty information should be provided if available, as\r\noutlined in Section 2.5.7 of the Isometric Standard.\r\nIn addition, a sensitivity analysis that demonstrates the\r\nimpact of each input parameter’s uncertainty on the final net\r\nCO e uncertainty must be provided. Details of the sensitivity\r\nanalysis method must be provided such that a third party\r\ncan reproduce the results. Input variables may be omitted\r\nfrom an uncertainty analysis if they contribute to a < 1%\r\nchange in the net CO e removal. For all other parameters,\r\ninformation about uncertainty must be specified.\r\n2\r\n2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 24/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 24 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 25 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "In accordance with the Isometric Standard, all evidence and\r\ndata related to the underlying quantification of the net CO e\r\nremoval and environmental and social safeguards\r\nmonitoring will be available to the public through Isometric's\r\nplatform. This includes:\r\nProject Design Document\r\nGHG Statement\r\nMeasurements taken and supporting documentation,\r\nsuch as calibration certificates\r\nEmission factors used\r\nScientific literature used; and\r\nProof of necessary permits.\r\nThe Project Proponent can request certain information to be\r\nrestricted (only available to authorized Buyers, the Registry\r\nand VVBs where it is subject to confidentiality. This includes\r\nemissions factors from licensed databases. However, all\r\nother numerical data produced or used as part of the\r\nquantification of net CO e removal will be made available.\r\n6.6\r\nData Sharing\r\n2\r\n2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 25/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 26 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "7.0\r\nSystem Boundary & Project\r\nBaseline\r\nThe scope of this Protocol includes GHG sources, sinks and\r\nreservoirs (SSRs) associated with a biochar CDR project.\r\nA cradle-to-grave GHG Statement must be prepared\r\nencompassing the GHG emissions relating to the activities\r\noutlined within the system boundary.\r\nGHG emissions associated with The Project may be as direct\r\nemissions from a process or storage system or as indirect\r\nemissions from combustion of fuels, electricity generation, or\r\nother sources.\r\nEmissions must include all GHG SSRs within the system\r\nboundary, from the construction or manufacturing of each\r\nphysical site and associated equipment, closure and\r\ndisposal of each site and associated equipment, and\r\noperation of each process, including embodied emissions of\r\nequipment and consumables used in The Project. The\r\nProject Proponent is responsible for identifying all sources of\r\nemissions directly or indirectly related to project activities.\r\nAny emissions from sub-processes or process changes that\r\nwould not have taken place without the CDR Project must be\r\nfully considered in the system boundary.\r\nAny activity that ultimately leads to the issuance of Credits\r\nmust be included in the system boundary.\r\n7.1\r\nSystem Boundary & GHG Emissions\r\nScope\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 26/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 26 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 27 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "The system boundary must include all SSRs controlled by\r\nand related to The Project, including but not limited to the\r\nSSRs in Figure 1 and Table 1. If any GHG SSRs within Table 1\r\nare deemed not appropriate to include in the system\r\nboundary, they may be excluded provided that robust\r\njustification and appropriate evidence is provided in the\r\nPDD.\r\nFigure 1: Process flow diagram showing system boundary\r\nfor biochar projects\r\nTable 1. Scope of activities and GHG SSRs to be included in\r\nthe system boundary\r\nACTIVITY\r\nGHG SOURCE,\r\nSINK OR\r\nRESERVOIR GHG SCOPE\r\nTIMESCALE OF\r\nEMISSIONS AND\r\nACCOUNTING\r\nALLOCATION\r\nProject\r\nEstablishment\r\nEquipment\r\nand materials\r\nmanufacture\r\nAll\r\nGHGs\r\nEmbodied emissions associated\r\nwith equipment and materials\r\nmanufacture for project\r\nestablishment (lifecycle Modules\r\nA1-3 ). To include product\r\nmanufacture emissions for\r\nequipment, buildings,\r\ninfrastructure and temporary\r\nstructures.\r\nBefore project\r\noperations start -\r\nmust be accounted\r\nfor in the first\r\nReporting Period or\r\namortized in line\r\nwith allocation rules\r\n(See Section 8.6.1)\r\nEquipment\r\nand materials\r\ntransport to\r\nsite\r\nAll\r\nGHGs\r\nTransport emissions associated\r\nwith transporting materials and\r\nequipment to The Project site(s)\r\n(lifecycle Module A4 ).\r\n14\r\n14\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 27/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 27 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 28 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "ACTIVITY\r\nGHG SOURCE,\r\nSINK OR\r\nRESERVOIR GHG SCOPE\r\nTIMESCALE OF\r\nEMISSIONS AND\r\nACCOUNTING\r\nALLOCATION\r\nConstruction\r\nand\r\ninstallation\r\nAll\r\nGHGs\r\nEmissions related to construction\r\nand installation of the project\r\nsite(s) (lifecycle Module A5 ). To\r\ninclude energy use for\r\nconstruction, installation and\r\ngroundworks, as well as waste\r\nprocessing activities and\r\nemissions associated with land use\r\nchange.\r\nInitial surveys\r\nand feasibility\r\nstudies\r\nAll\r\nGHGs\r\nAny embodied, energy and\r\ntransport emissions associated\r\nwith surveys or feasibility studies\r\nrequired for establishment of the\r\nproject site.\r\nMisc.\r\nAll\r\nGHGs\r\nAny SSRs not captured by\r\ncategories above, for example staff\r\ntransport.\r\nOperations Biomass\r\nfeedstock\r\nsourcing\r\nAll\r\nGHGs\r\nAny embodied, energy and\r\ntransport emissions associated\r\nwith biomass cultivation and\r\nharvesting.\r\nOver each\r\nReporting Period -\r\nmust be accounted\r\nfor in the relevant\r\nReporting Period\r\n(See Section 8.6.2) Biomass\r\nfeedstock\r\ntransport\r\nAll\r\nGHGs\r\nTransport of biomass including to\r\nbiomass processing site and all\r\nother transport of biomass ahead\r\nof biochar production.\r\nBiomass\r\nfeedstock\r\nprocessing\r\nAll\r\nGHGs\r\nAny embodied, energy and\r\ntransport emissions associated\r\nwith biomass feedstock\r\nprocessing.\r\nPyrolysis\r\nAll\r\nGHGs\r\nEmissions associated with\r\npyrolysis including:\r\nenergy use\r\nmaintenance of the project\r\nsite(s), equipment, vehicles,\r\nbuildings and infrastructure\r\nincluding activities associated\r\nwith maintenance (lifecycle\r\nModule B2 ), repair (B3),\r\nreplacement (B4) and\r\nrefurbishment (B5)\r\nuse of consumables\r\nwaste processing, including\r\nthe environmentally\r\nresponsible disposal of non￾solid residues\r\n14\r\n14\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 28/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 28 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 29 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "ACTIVITY\r\nGHG SOURCE,\r\nSINK OR\r\nRESERVOIR GHG SCOPE\r\nTIMESCALE OF\r\nEMISSIONS AND\r\nACCOUNTING\r\nALLOCATION\r\nDirect\r\nemissions\r\nAll\r\nGHGs\r\nDirect emissions released during\r\npyrolysis. See Section 10.1.1 for\r\ncalculation details.\r\nBiochar\r\nprocessing\r\nAll\r\nGHGs\r\nEmissions associated with biochar\r\nprocessing and characterization\r\nincluding:\r\nenergy use\r\nmaintenance of the project\r\nsite(s), equipment, vehicles,\r\nbuildings and infrastructure\r\nincluding activities associated\r\nwith maintenance (lifecycle\r\nmodule B2 ), repair (B3),\r\nreplacement (B4) and\r\nrefurbishment (B5)\r\nuse of consumables\r\nwaste processing\r\nBiochar\r\ntransport\r\nAll\r\nGHGs\r\nAll transport of biochar including\r\nto biochar processing site and to\r\nthe biochar storage site.\r\nBiochar\r\nstorage\r\nAll\r\nGHGs\r\nEmissions associated with biochar\r\nstorage (e.g. spreading on\r\nagricultural fields) including:\r\nenergy use through electricity\r\nor fuel consumption\r\nmaintenance of the project\r\nsite(s), equipment, vehicles,\r\nbuildings and infrastructure\r\nincluding activities associated\r\nwith maintenance (lifecycle\r\nModule B2 ), repair (B3),\r\nreplacement (B4) and\r\nrefurbishment (B5)\r\nuse of consumables\r\nwaste processing\r\nland use change emissions\r\nassociated with application\r\nrequiring burial\r\nCO₂ Stored\r\nCO₂\r\nonly\r\nThe gross amount of CO₂ removed\r\nand durably stored from a biochar\r\nproject over a Reporting Period.\r\nSampling\r\nrequired for\r\nMRV\r\nAll\r\nGHGs\r\nAny embodied, energy and\r\ntransport emissions associated\r\nwith sampling for MRV purposes,\r\nincluding transportation to collect\r\nsamples, shipping of samples for\r\n14\r\n14\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 29/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 29 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 30 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "ACTIVITY\r\nGHG SOURCE,\r\nSINK OR\r\nRESERVOIR GHG SCOPE\r\nTIMESCALE OF\r\nEMISSIONS AND\r\nACCOUNTING\r\nALLOCATION\r\nlaboratory analysis and sample\r\nprocessing.\r\nStaff travel\r\nAll\r\nGHGs\r\nFlight, car, train or other travel\r\nrequired for The Project\r\noperations, including contractors\r\nand suppliers required on site.\r\nSurveys\r\nAll\r\nGHGs\r\nEquipment, energy use and\r\ntransport associated with surveys\r\ne.g. ecological surveys.\r\nMisc.\r\nAll\r\nGHGs\r\nAny SSRs not captured by\r\ncategories above.\r\nEnd-of-Life\r\nEnd-of-life of\r\nproject\r\nfacilities\r\nAll\r\nGHGs\r\nAnticipated end-of-life emissions\r\n(lifecycle Modules C1-4 ). To\r\ninclude deconstruction and\r\ndisposal of the project site(s),\r\nequipment, vehicles, buildings or\r\ninfrastructure.\r\nAfter Reporting\r\nPeriod - must be\r\naccounted for in the\r\nfirst Reporting\r\nPeriod or amortized\r\nin line with\r\nallocation rules (See\r\nMisc. Section 8.6.3)\r\nAll\r\nGHGs\r\nAny emissions SSR not captured\r\nby categories above.\r\nMiscellaneous GHG emissions are those that cannot be\r\ncategorized by the GHG SSR categories provided in Table 1.\r\nThe Project Proponent is responsible for identifying all\r\nsources of emissions directly or indirectly related to project\r\nactivities and must report any outside of the SSR categories\r\nidentified as miscellaneous emissions.\r\nEmissions associated with The Project's impact on activities\r\nthat fall outside of the system boundary of The Project must\r\nalso be considered. This is covered under Leakage in\r\nSection 8.6.4.\r\nIn some instances, the project activities may be integrated\r\ninto existing activities, such as biochar spreading while\r\ntilling. Activities that were already occurring, and would\r\ncontinue to occur in the absence of The Project, may be\r\n14\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 30/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 30 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 31 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "omitted from the system boundary of the GHG accounting if\r\nevidence of this is provided.\r\nIn line with the GHG Accounting Module v1.0, The Project\r\nmust:\r\nConsider all GHGs associated with SSRs, in alignment\r\nwith the United States Environmental Protection\r\nAgency’s definition of GHGs, which includes: carbon\r\ndioxide (CO ), methane (CH ), nitrous oxide (N 0) and\r\nfluorinated gasses such as hydrofluorocarbons (HFCs),\r\nperfluorocarbons (PFCs), sulfur hexafluoride (SF ) and\r\nnitrogen trifluoride (NF ). For CO stored, only CO shall\r\nbe included as part of the quantification.\r\nFor all other activities all GHGs must be considered. For\r\nexample, the release of CO , CH , and N O is expected\r\nduring diesel consumption;\r\nQuantify emissions in tonnes CO equivalent (t CO e)\r\nusing the 100-year Global Warming Potential (GWP) for\r\nthe GHG of interest, based on the most recent volume of\r\nthe IPCC Assessment Report (currently the Sixth\r\nAssessment Report); and\r\nConsider materiality of SSRs in line with Isometric\r\nrequirements.\r\n2 4 2\r\n6\r\n3 2 2\r\n2 4 2\r\n2 2\r\nProject Proponents may exclude SSRs where the total\r\nemissions for that SSR, and all excluded SSRs collectively,\r\nare expected to be negligible. Negligible SSRs are those\r\nwhich fall below a Materiality threshold based on\r\nenvironmental significance of < 1% of net CO e removals.\r\n7.1.1\r\nMateriality\r\n2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 31/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 31 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 32 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Project Proponents must follow the Materiality assessment\r\nrequirements set out in Section 5 of the GHG Accounting\r\nModule v1.0.\r\nThe baseline scenario for biochar projects assumes that the\r\nactivities associated with the biochar Project do not take\r\nplace and that any infrastructure associated with the\r\nbiochar Project is not built.\r\nCounterfactual storage assesses the CO that would have\r\nremained durable stored as biogenic carbon in the absence\r\nof The Project. This durably stored portion is ineligible for\r\ncrediting as it is not environmentally additional. The\r\ncounterfactual storage of all feedstocks must be quantified\r\naccording to the Biomass Feedstock Accounting Module\r\nv1.3.\r\nSee Section 3 of the Biomass Feedstock Accounting Module\r\nfor requirements.\r\n7.2\r\nBaseline\r\n2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 32/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 33 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "8.0\r\nNet CDR Calculation\r\nThe Reporting Period, RP, for biochar projects represents the\r\ninterval of time over which removals are calculated and\r\nreported for verification. The equations used to calculate net\r\nCO e removals will pertain to all GHG emissions and CO\r\nremovals occurring over a Reporting Period. In most cases,\r\nthe Reporting Period represents a timeframe covering a\r\ncomplete cycle of activities, including biomass feedstock\r\nsourcing, pyrolysis, biochar processing, and biochar storage.\r\nFor all storage pathways associated with biochar, it is\r\nnecessary to calculate the total carbon (as CO e) stored in\r\nthe biochar ( ). Guidelines for determining\r\nare provided in Section 8.3.1. These calculations depend on\r\nmethodologies outlined in the relevant Storage Module and\r\ntherefore must be applied in conjunction with the relevant\r\nstorage Module calculations.\r\nIn addition to quantification, an initial\r\ncharacterization is required to determine the amount of CO\r\ndurably removed through biochar production. The specific\r\nrequirements and methodologies for this assessment are\r\nprovided in the relevant Storage Module.\r\nGHG emission calculations must include all emissions\r\nrelated to the project activities that occur within the\r\nReporting Period. This includes: (a) any emissions\r\nassociated with project establishment allocated to the\r\nReporting Period (See Section 8.6.1) (b) any emissions that\r\noccur within the Reporting Period (See Section 8.6.2), (c) any\r\n8.1\r\nCalculation Approach and Reporting\r\nPeriod\r\n2 2\r\n2\r\nCbiochar Cbiochar\r\nCbiochar\r\n2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 33/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 34 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "anticipated emissions that would occur after the Reporting\r\nPeriod that have been allocated to the Reporting Period\r\n(See Section 8.6.3) and (d) leakage emissions that occur\r\noutside of the system boundary that are associated with the\r\nReporting Period (See Section 8.6.4).\r\nTotal net CO e removal is calculated for each Reporting\r\nPeriod, and is written hereafter as . The final\r\nnet CO e removal quantification must be conservatively\r\ndetermined, giving high confidence that at a minimum, the\r\nestimated amount of CO e was removed.\r\nIn line with the Isometric Standard, this Protocol requires\r\nthat Removal Credits are issued ex-post. Credits may be\r\nissued once CO has been durably stored in the identified\r\nstorage reservoir.\r\n2\r\nCO e2 Removal,RP\r\n2\r\n2\r\n2\r\nNet CO e removal for the production of biochar and its\r\ndurable storage for each Reporting Period, , can be\r\ncalculated by Equation 1.\r\n(Equation 1)\r\nWhere:\r\n- the total net CO e removal for the\r\nReporting Period, RP, in tonnes of CO e.\r\n- the total CO removed from the\r\natmosphere and stored as organic carbon in the\r\n8.2\r\nCalculation of CO₂eRemoval, RP\r\n2\r\nRP\r\nCO2eRemoval,RP = CO2eStored,RP − CO2eCounterfactual,RP − CO2eEmi\r\nCO e2 Removal,RP 2\r\n2\r\nCO e2 Stored,RP 2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 34/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 34 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 35 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "biochar for the RP, in tonnes of CO e.\r\n- the total counterfactual CO\r\nremoved from the atmosphere and stored as organic\r\ncarbon in the absence of The Project for the RP, in\r\ntonnes of CO e.\r\n- the total GHG emissions for the RP,\r\nin tonnes of CO e.\r\nReversals which occur after Credits have been issued are\r\nseparately accounted for by the Buffer Pool, and are\r\ntherefore not included in Equation 1. Risk of reversal\r\ninformation is given in Appendix 1: Risk of Reversal\r\nQuestionnaire, with further information provided in Section 5\r\nof the Biochar Storage in Agricultural Soils Module\r\n2\r\nCO e2 Counterfactual,RP 2\r\n2\r\nCO e2 Emissions,RP\r\n2\r\nThe method of calculation for will depend on\r\nthe method of storage. Refer to the relevant storage Module\r\nfor requirements (see Section 12).\r\n8.3\r\nCalculation of CO₂eStored, RP\r\nCO2eStored,RP\r\nThe process of biochar production can be divided into\r\nseveral units from which C can be calculated. These are:\r\nThe production batch, , which typically consists of\r\nutilizing a single type of biomass feedstock, or a\r\nconsistent blend of multiple feedstocks. This is\r\nsubsequently converted to biochar through pyrolysis,\r\nand transported to a storage site for storage. The\r\nunique characteristics of the biomass used, the pyrolysis\r\nprocess, the produced biochar characteristics,\r\ntransportation distances, and storage site\r\n8.3.1\r\nCalculation of Cbiochar\r\nbiochar\r\np\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 35/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 36 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "characteristics will be the same for all of the biochar\r\nwithin a Production Batch. The term “Production\r\nProcess” refers to the complete sequence of activities\r\nand operations that result in the creation of a\r\n“Production Batch”\r\n. The definition of a batch is project\r\nspecific but must be a period of less than one month,\r\neven if the production process is consistent.\r\nThe production process, this refers to the systematic\r\nand consistent sequence of steps and methods used to\r\nconvert biomass feedstock into biochar through\r\npyrolysis. It is a collective set of biochar production\r\nbatches generated using the same feedstock and under\r\nconsistent pyrolysis conditions producing a stable and\r\nconsistent output of biochar.\r\nStorage batch, this refers to biochar that is stored\r\ntogether, this may either be constituted of a single\r\nproduction batch, or multiple production batches ( )\r\nblended together prior to storage.\r\ncan be calculated for either at the production batch\r\nor storage batch (i.e. a blend of biochar) level\r\nProject Proponents must justify their intended approach for\r\ndefining a production batch in the PDD.\r\nThe two approaches are set out in the following sections:\r\nn\r\nCbiochar\r\nWhere biochar Production Batches are not blended prior to\r\nstorage, is calculated as follows:\r\n8.3.1.1\r\nAt the Production Batch\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 36/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 37 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "(Equation 2)\r\nWhere:\r\n- the total CO removed for batch , in\r\ntonnes of CO e\r\n- the concentration of C in the biochar stored\r\nin the production batch as weight percent\r\n- the total mass of biochar emplaced for\r\nstorage from the production batch , in tonnes\r\n- stoichiometric conversion factor from carbon\r\nmass to CO equivalent mass (molecular weight ratio)\r\nCO2eStored, RP, p = Cb ⋅ iochar, p mb ⋅ iochar, p 12.01\r\n44.01\r\nCO2eStored, p 2 p\r\n2\r\nCbiochar, p\r\np\r\nmbiochar, p\r\np\r\n12.01\r\n44.01\r\n2\r\nThe total amount of CO contained in the stored biochar can\r\nbe calculated as follows.\r\nWhere all biochar production batches are blended prior to\r\nstorage:\r\n(Equation 3)\r\n8.3.1.2\r\nAt the Storage Batch\r\n2\r\nCO2eStored, RP, n = ×\r\nall p in batch n\r\n∑ 100\r\nCbiochar, p\r\n⋅ mbiochar, p\r\n12.01\r\n44.01\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 37/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 37 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 38 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Where:\r\n- Storage Batch identifier\r\n- Production Batch identifier\r\n- the total CO equivalent removed for\r\nstorage batch n, in tonnes of CO e\r\n- the concentration of carbon in the biochar\r\nfrom production batch p, as weight percent\r\n- the total mass of biochar from production\r\nbatch included in storage batch , in tonnes\r\n- stoichiometric conversion factor from carbon\r\nmass to CO equivalent mass (molecular weight ratio)\r\nn\r\np\r\nCO2eStored, RP, n 2\r\n2\r\nCbiochar, p\r\nmbiochar, p\r\np n\r\n12.01\r\n44.01\r\n2\r\nThis Protocol provides two alternative methods for\r\nmeasuring and quantifying carbon content frequency.\r\nMethod A requires measuring the carbon content of every\r\nproduction batch. Method B involves sampling only a\r\nrepresentative proportion of production batches and\r\napplying conservative estimates to determine the carbon\r\ncontent of unsampled batches.\r\nThe Project Proponent must include all relevant details of\r\ntheir sampling plan, including the number and frequency of\r\nsampling and analysis and clear justification of their\r\nsampling choice, in the PPD document.\r\n8.3.2\r\nFrequency of Measurement\r\nFor a given Production Process using a specific feedstock,\r\nsamples must be collected from an agreed-upon number of\r\ninitial Production Batches, using Method A (Sampling every\r\n8.3.2.1\r\nMethod A: Sampling Every Batch\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 38/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 39 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "batch). This initial sampling is required to generate sufficient\r\ndata to estimate the carbon content of future Production\r\nBatches with an appropriate level of statistical confidence.\r\nThe sample size must be determined through consultation\r\nwith Isometric, with a minimum requirement of 30 samples,\r\nfor example three replicate samples from 10 batches. Until\r\nthis threshold is reached, Method A must be used.\r\nUsing this method, the organic carbon content of a\r\nProduction Batch must be determined through direct\r\nmeasurement, using one of the following approaches:\r\n1. Single-batch sampling\r\nFor unblended biochar, which by definition\r\noriginates from a single Production Batch, the\r\nbiochar is sampled directly, and no further\r\ncalculation is required.\r\n2. Multiple-batch sampling\r\nWhere a Storage Batch is formed by blending\r\nbiochar from multiple Production Batches, samples\r\nmust be collected from each constituent Production\r\nBatch.\r\nThe carbon content of the entire Storage Batch is\r\nthen determined using a mass-weighted average of\r\nthe carbon contents of the individual Production\r\nBatches, as calculated in Equation 3\r\nRefer to the section “Minimum Number of Samples per\r\nBatch” for requirements on the acceptable minimum number\r\nof samples per Production Batch.\r\nIf multiple samples are taken per Batch, the mean\r\nmust be used in calculations.\r\n8.3.2.1.1\r\nSampling Requirements\r\nCbiochar\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 39/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 40 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "All supporting data used to calculate averages must be\r\ndocumented and reported.\r\nOnce the required initial dataset has been established,\r\nongoing sampling (Method B) must occur at a minimum\r\nfrequency of one sample for every 10 Production Batches.\r\nIn exceptional cases, a different sampling frequency may be\r\nagreed upon with Isometric prior to verification, provided\r\nthat the Production Process conditions can be\r\ndemonstrated to remain stable throughout The Project.\r\nFor the acceptable minimum number of samples to take per\r\nBatch, see minimum number of samples per Batch below.\r\n8.3.2.2\r\nMethod B: Sampling a Production Process\r\nFor batches which are not sampled, carbon content must be\r\nconservatively estimated, as follows:\r\n(Equation 4)\r\n8.3.2.2.1\r\nConservative Estimation of Carbon in Unsampled\r\nBatches\r\nCBiochar = μCC − σCC\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 40/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 41 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "(Equation 5)\r\nWhere:\r\n- the standard error of the mean of carbon content,\r\nacross all eligible samples for this Production Process\r\n- the standard deviation of carbon content, across\r\nall eligible samples for this Production Process\r\n- the number of eligible samples for this\r\nProduction Process\r\n- the mean carbon content of all eligible samples\r\nfor this Production Process\r\nEligible samples are those taken in the previous 6 months\r\nbefore a specific Production Batch was produced. Older\r\nsamples may not be used. Samples must be from a\r\ndemonstrably stable production process, evidenced by\r\nconsistent production temperatures and residence times or\r\ndurations.\r\nσCC =\r\nnsamples\r\nσCC\r\nσCC\r\nσCC\r\nnsamples\r\nμCC\r\nThis process applies only when Method B is used to\r\ncalculate carbon content and must be applied to all carbon\r\ncontent measurements used in those calculations,\r\nregardless of which production batches were sampled.\r\n8.3.2.2.2\r\nTreatment of Carbon Content Measurement\r\nOutliers\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 41/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 42 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "For a given Production Process, an outlier is defined as any\r\nindividual carbon content measurement, , that lies more\r\nthan three standard deviations ( ) above or below the\r\nmean ( ):\r\nTo minimize the influence of extreme measurements, all\r\noutliers must be adjusted using winsorization, defined as\r\nfollows:\r\nIf , set .\r\nIf , set .\r\nThe winsorized measurement must then be used in all\r\ncarbon content calculations.\r\nCalculation of and :\r\nand must be calculated from all historical carbon\r\ncontent measurements from the same production\r\nprocess taken within the six months preceding the\r\nremoval date for which the carbon content is being\r\ncalculated.\r\nWhen estimating carbon content for a sampled batch,\r\nonly historical measurements should be used to\r\ncalculate and . Samples from the batch currently\r\nbeing calculated must not be included.\r\nmust be calculated using the sample standard\r\ndeviation formula.\r\nm\r\nσCC\r\nμ\r\nm > μ + 3σCC or m < μ − 3σCC\r\nm > μ + 3σCC mw = μ + 3σCC\r\nm < μ − 3σCC mw = μ − 3σCC\r\nmw\r\nμ σCC\r\nμ σCC\r\nμ σCC\r\nσCC\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 42/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 43 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Winsorization may only be applied after a minimum of 30\r\nmeasurements have been collected for the relevant\r\nproduction process to ensure statistical significance.\r\nThe Project Proponent must:\r\nTrack the frequency and distribution of outliers across\r\nProduction Batches.\r\nInvestigate if the number of outliers significantly exceeds\r\nthe statistically expected frequency, as this may\r\nindicate a systematic issue with the Production Process\r\nor measurement method.\r\nProvide supporting evidence and corrective actions if\r\nrequested during verification. Verification bodies (VVBs)\r\nmay review outlier monitoring at their discretion.\r\nSample Eligibility\r\nOnly samples collected within 6 months prior to a\r\nspecific Production Batch may be used for carbon\r\ncontent estimation. Samples older than 6 months\r\nare not eligible.\r\nRandom Sampling Protocol\r\nAll batches must undergo random sampling to\r\nensure representative carbon content\r\nmeasurements across production.\r\nThe random sampling approach requires agreement\r\nwith Isometric and documented in the PDD.\r\nCompliance Triggers\r\nA project review by Isometric will be triggered if\r\neither condition occurs within a 6-month period:\r\nProject Proponent fails to conduct required\r\nsampling on 3 or more occasions\r\n8.3.2.2.3\r\nSampling Requirements\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 43/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 44 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "More than 3 measurements fall below 3 standard\r\ndeviations from the mean\r\nProduction Process Changes\r\nIf a new Production Process is triggered, because of\r\na change in feedstock or pyrolysis conditions, as\r\nper the definition in Section 8.3.1\r\nOr their are significant deviations in carbon content\r\nare detected (as defined in compliance triggers\r\nabove)\r\nWhen a new Production Process is established,\r\nsampling must restart from zero with no historical\r\ndata carried forward.\r\nFor all measurements, samples must be collected from a\r\nwell-mixed and representative aliquot of the biochar. To\r\naccount for potential variation within a single Production\r\nBatch, one of the following approaches must be adopted:\r\n1. Multiple-Sample Approach (preferred)\r\nA minimum of three samples must be collected from\r\neach measured Production Batch.\r\nThese samples must be representative of the full\r\nrange of physical characteristics present in the\r\nbatch (e.g., particle size, color, texture).\r\n2. Justification of Minimal Within-Batch Variation (Must be\r\nagreed with Isometic in advance)\r\nWhere fewer than three samples are collected, The\r\nProject Proponent must provide justification and\r\nsupporting evidence demonstrating that within￾batch variability is likely to be minimal.\r\nAcceptable justification may include:\r\n8.3.3\r\nMinimum Number of Samples per Batch\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 44/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 45 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Documentation of the physical characteristics\r\nand consistency of the Production Process, or\r\nData demonstrating low variability in carbon\r\ncontent within the Production Batch.\r\nSamples must accurately represent materials designated for\r\nthe storage pathway that will form the basis for credit\r\nquantification. Biochar should be sampled in its final pre￾storage condition, i.e., post-processing and at typical\r\nmoisture levels. For storage in agricultural soils involving co￾application with other substances (such as compost),\r\nsampling should occur before the blending process is\r\nperformed.\r\n8.3.4\r\nEnsuring Representative Sampling\r\nThe measurement of mass stored will depend on the storage\r\nModule being used. As such, it is for The Project Proponent\r\nto describe and justify their stated method of measurement\r\nin the PDD. Below are examples of accepted methods.\r\nPreferred Method: Weighbridge Measurement\r\nThe mass of applied biochar is determined by weighing\r\ndelivery trucks using calibrated scales at the\r\napplication or delivery site. This measurement serves\r\ndual purposes:\r\nProof of delivery to the storage/application site\r\nAccurate mass determination via difference\r\nbetween loaded and unloaded truck weights\r\nScale Certification Requirements\r\n8.4\r\nMeasurement of Mass of Biochar Stored\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 45/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 46 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "All truck scales must maintain current certification\r\nunder applicable local, state, or federal legal-for￾trade regulations. Testing and calibration must:\r\nUse certified weights meeting NIST Handbook\r\n44 specifications\r\nBe performed by state-certified entities\r\nComply with all relevant local, state, and\r\nfederal regulations\r\nAlternative Method: Documentation-Based Verification\r\nWhen truck scales are unavailable at the application or\r\ndelivery site, Isometric may pre-approve alternative\r\nproof of delivery consisting of:\r\nSigned delivery receipt documents\r\nBills of lading\r\nPhotographic evidence of delivery\r\nWhen using this alternative method, the PDD must detail:\r\nAll weight measurement procedures to be conducted at\r\nthe production site\r\nTransportation Protocols and precautions to prevent\r\nmass loss during transit\r\nChain of custody documentation\r\n15\r\nThe Project Proponent must maintain the following records\r\nas evidence of gross CO e stored in applied biochar:\r\nDelivery Records:\r\nWeigh scale tickets showing arrival and departure\r\nweights for each biochar delivery, or equivalent\r\n8.4.1\r\nRequired Documentation - CO2eStored, RP\r\n2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 46/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 47 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "documentation\r\nCarbon Content Analysis:\r\nAnalytical results from ASTM D5291 (or equivalent)\r\ncarbon content analysis for each required batch\r\nIncident Documentation:\r\nRecords of any spills during application operations,\r\nincluding quantity estimates of material released\r\nAll carbon analysis results and application mass records\r\n(including weigh scale tickets) must be retained by The\r\nProject Proponent for verification purposes for a minimum of\r\nfive years.\r\nBiochar production, transportation, and storage processes\r\nmust be continuously monitored to identify and document:\r\nProcess upsets or equipment failures\r\nResulting biochar spills or losses\r\nQuantification of lost material\r\nAny deviations should be reported to Isometric as soon as\r\nreasonably possible after discovery.\r\n8.4.1.1\r\nProduction and Storage Monitoring\r\nWhen process upsets result in biochar loss:\r\n1. Quantify the Loss: Measure and document the amount\r\nof biochar lost from each affected batch\r\n2. Adjust Delivery Records: Deduct the quantified loss from\r\nthe delivered biochar amount recorded on delivery\r\nweigh tickets\r\n8.4.1.2\r\nLoss Accounting\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 47/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 48 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "3. Allocate to Applications: Apply loss deductions directly\r\nto the specific biochar applications affected by each\r\nbatch\r\n4. GHG Statement: Account for all documented losses in\r\nthe GHG Statement for the relevant Project batch\r\nThis ensures that only successfully delivered and stored\r\nbiochar is credited for carbon storage in The Project's GHG\r\naccounting.\r\nType: Counterfactual\r\nThe calculation of , is determined by\r\nthe requirements of the Biomass Feedstock Accounting\r\nModule v1.3.\r\nSee Section 3 of the Biomass Feedstock Accounting Module\r\n8.5\r\nCalculation of CO₂eCounterfactual, RP\r\nCO2eCounterfactual, n\r\nType: Emissions\r\nis the total quantity of GHG emissions\r\nfrom operations and allocated embodied emissions for each\r\nReporting Period . This can be calculated as:\r\n8.6\r\nCalculation of CO2eEmissions,RP\r\nCO2eEmissions, RP\r\nRP\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 48/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 49 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "(Equation 6)\r\nWhere:\r\n- the total GHG emissions for a\r\nReporting Period, RP, in tonnes of CO e.\r\n- the total GHG emissions\r\nassociated with project establishment for a RP, in\r\ntonnes of CO e, , see Section 8.6.1.\r\n- the total GHG emissions\r\nassociated with operational processes for a RP, in\r\ntonnes of CO e, see Section 8.6.2.\r\n- the total GHG emissions that\r\noccur after the RP and are allocated to the RP, in\r\ntonnes of CO e, see Section 8.6.3.\r\n- the GHG emissions associated with\r\nThe Project’s impact on activities that fall outside of the\r\nsystem boundary of a Project, over a given RP, in tonnes\r\nof CO e, see Section 8.6.4.\r\nThe following sections set out specific quantification\r\nrequirements for each variable.\r\nCO2eEmissions, RP = CO2eEstablishment, RP + CO2eOperations, RP\r\n+CO2eEnd−of−life, RP + CO2eLeakage,RP\r\nCO2eEmissions, RP\r\n2\r\nCO2eEstablishment, RP\r\n2\r\nCO2eOperations, RP\r\n2\r\nCO2eEnd−of−life, RP\r\n2\r\nCO2eLeakage, RP\r\n2\r\nGHG emissions associated with\r\nshould include all historic emissions incurred as a result of\r\nproject establishment, including but not limited to the SSRs\r\nset out in Table 1.\r\n8.6.1\r\nCalculation of CO₂eEstablishment, RP\r\nCO2eEstablishment, RP\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 49/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 50 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Project establishment emissions occur from the point of\r\nproject inception through to before the first removal activity\r\ntakes place. GHG emissions associated with project\r\nestablishment may be amortized over the anticipated\r\nproject lifetime, or per output of product. Rules on\r\namortization are outlined in Section 7 of the GHG\r\nAccounting Module v1.0.\r\nSee Section 7 of the GHG Accounting Module\r\nGHG emissions associated with should\r\ninclude all emissions associated with operational activities\r\nincluding but not limited to the SSRs set out in Table 1. This\r\nincludes direct emissions from pyrolysis, , for\r\nwhich calculation and measurement details are set out in\r\nSection 10.1.1.\r\nFor biochar projects, the Reporting Period begins when the\r\nactivity associated with a batch of Removals begins, and\r\nends upon application of biochar from that batch at the\r\nstorage site. As an example, for Projects storing biochar in\r\nagricultural soils, the Reporting Period begins with biomass\r\nfeedstock sourcing and ends with biochar application to\r\nagricultural soils. The Reporting Period may cover a set\r\nperiod of time, for example a one month period of activity,\r\ninclusive of biomass sourcing through to application on\r\nagricultural soils for batches of Removals that fall into that\r\nmonth.\r\n8.6.2\r\nCalculation of CO₂eOperations, RP\r\nCO2eOperations, RP\r\nCO2eDirect,RP\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 50/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 51 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "emissions must be attributed to the\r\nReporting Period in which they occur. Allocation may be\r\npermitted in certain instances, on a case by case basis, in\r\nagreement with Isometric.\r\nCO2eOperations, RP\r\nincludes all emissions associated with\r\nactivities that are anticipated to occur after the Reporting\r\nPeriod, but are directly or indirectly related to the Reporting\r\nPeriod. For example this could include end-of-life emissions\r\nfor project facilities (indirectly related to all deployments).\r\nGHG emissions associated with may\r\noccur from the end of the Reporting Period onward, and\r\ntypically through to completion of project site\r\ndeconstruction and any other end-of-life activities.\r\nGHG emissions associated with activities that are directly\r\nrelated to each deployment must be quantified as part of\r\nthat Reporting Period. GHG emissions associated with\r\nactivities that are indirectly related to all deployments may\r\nbe allocated in the same ways as set out in\r\n.\r\nGiven the uncertain nature of\r\nemissions, assumptions must be revisited at each Crediting\r\nPeriod and any necessary adjustments made. Furthermore, if\r\nthere are unexpected emissions\r\nassociated with a Reporting Period, or The Project as a\r\nwhole, that occur after The Project has ended, then the\r\nReversal process will be triggered to compensate for any\r\nemissions not accounted for.\r\n8.6.3\r\nCalculation of CO₂eEnd-of-life, RP\r\nCO2eEnd−of−life, RP\r\nCO2eEnd−of−life, RP\r\nCO2eEnd−of−life, RP\r\nCO2eEnd−of−life, RP\r\nCO2eEnd−of−life, RP\r\n8.6.4\r\nCalculation of CO₂eLeakage, RP\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 51/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 52 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "includes emissions associated with a\r\nProject's impact on activities that fall outside of the system\r\nboundary of a Project.\r\nIt includes increases in GHG emissions as a result of The\r\nProject displacing emissions or causing a knock on effect\r\nthat increases emissions elsewhere. This includes emissions\r\nassociated with activity-shifting, market leakage and\r\necological leakage.\r\nIt is The Project Proponent's responsibility to identify\r\npotential sources of leakage emissions. For a bio-oil project,\r\nreplacement emissions must be considered as a minimum.\r\ncalculations required for replacement emissions associated\r\nwith market leakage are set out in the Biomass Feedstock\r\nAccounting Module v1.3.\r\nemissions must be attributed to the\r\nReporting Period in which they occur. Allocation may be\r\npermitted in certain instances, on a case by case basis in\r\nagreement with Isometric.\r\nSee Section 4 of the Biomass Feedstock Accounting Module\r\nCO2eLeakage, RP\r\nCO2eLeakage, RP\r\n8.6.5\r\nEmissions Accounting Requirements\r\nGHG emissions accounting must be undertaken in alignment\r\nwith the GHG Accounting Module v1.0, which ensures a\r\n8.6.5.1\r\nGeneral\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 52/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 52 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 53 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "consistently rigorous standard in how GHG emissions are\r\nquantified and reported between different CDR Projects and\r\napproaches.\r\nProject Proponents must use the most representative,\r\naccurate and plausible data that is available at the time of\r\nassessment in the GHG Statement. Activity data used to\r\ninform GHG accounting may be primary data or secondary\r\ndata. Project Proponents must strive to use primary data in\r\nGHG accounting, but secondary data may be used where\r\nprimary data is either not available or not practical. More\r\ndetailed on data requirements, including data quality\r\nhierarchy and data quality principles, can be found in\r\nSection 3 of the GHG Accounting Module v1.0.\r\nSee Section 3 of the GHG Accounting Module\r\nAn example is emissions related to building the pyrolysys\r\nreactor. The Project Proponent should strive to obtain\r\nactivity data such as mass and type of materials used for\r\nthe reactor, as well as distanced travelled to transport the\r\nmaterials, and energy used during the construction process.\r\nIf such data is not available, it is acceptable to use an\r\nindustry average data and emission factors to estimate such\r\nemissions. Suitable emission factor sources are described in\r\nrelevant Modules.\r\n8.6.5.2\r\nData Collection\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 53/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 54 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Embodied emissions associated with system inputs\r\nconsidered to be waste products can be excluded from the\r\naccounting of the GHG Statement system boundary\r\nprovided the appropriate eligibility criteria are met.\r\nFor waste energy inputs, for example the use of waste heat,\r\nrefer to the Energy Use Accounting Module v1.2.\r\nRefer to Energy Use Accounting Module for the calculation\r\nguidelines.\r\nAll biomass feedstock must be eligible and accounted for\r\naccording to the Biomass Feedstock Accounting Module\r\nv1.3.\r\nSee Biomass Feedstock Accounting Module for eligibility\r\ncriteria.\r\nFor all other waste inputs, refer to Section 6.3 of the GHG\r\nAccounting Module v1.0.\r\nSee GHG Accounting Module for eligibility criteria.\r\n8.6.5.3\r\nConsiderations for Waste Input Emissions\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 54/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 54 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 55 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "The biomass pyrolysis process may result in the production\r\nof co-products, such as bio-oil, pyrolysis gas (bio-gas),\r\nelectricity and heat.\r\nProjects must follow the co-product allocation procedures\r\ndescribed in Section 6.1 of the GHG Accounting Module v1.0.\r\nFor projects where the CDR product(s) and co-products\r\nhave a measurable energy content, the optional procedure\r\noutlined in Section 8.6.5.2.1 may be applied instead of the\r\nProcedures outlined in Section 6.1 of the GHG Accounting\r\nModule v1.0.\r\n8.6.5.4\r\nCo-Product Allocation\r\nEmissions allocation may be undertaken based on energy\r\ncontent for shared processes in instances where all co￾products, including CDR products, have a measurable\r\nenergy content which can be expressed in Megajoules (MJ).\r\nShared processes are defined as processes for which the\r\nCDR product and all co-products are mutually dependent\r\non. Where this is not the case for all co-products, no\r\nallocation should be made based on energy content. In this\r\nsection Net Calorific Value is defined as the amount of\r\nenergy released by complete combustion, assuming the\r\nwater vapor produced during combustion is not condensed\r\nand used.\r\nEquation 7 sets out the calculation procedure to be followed\r\nto apply emissions allocation based on energy content.\r\nWhen this procedure is followed, the term\r\nin Equation 6 in Section 8.6 should be calculated based on\r\nEquation 7 for shared processes.\r\n8.6.5.4.1\r\nEmissions Allocation Based on Energy Content\r\nCO2eEmissions,RP\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 55/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 56 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "(Equation 7)\r\nWhere:\r\n, ,\r\nand are calculated\r\nas per the relevant sections of this Protocol.\r\nis the fraction of emissions assigned to the CDR\r\nproduct, represented as:\r\n(Equation 8)\r\nWhere:\r\nis the energy content of the CDR product,\r\nequal to the Net Calorific Value, expressed in MJ/kg.\r\nis the energy content of a specific output,\r\nexpressed in MJ. The sum of outputs for all co-products\r\nmust be considered in Equation 8:\r\nFor electricity outputs, this should be equal to the total\r\nquantity of electricity exported over the Reporting\r\nPeriod, converted to MJ;\r\nCO2eEmissions,RP = (FAllocation,RP ∗ (CO2eEstablishment,RP + CO2eO\r\nCO2eEstablishment,RP CO2eOperations,RP\r\nCO2eEnd−Of−Life,RP CO2eLeakage,RP\r\nFAllocation\r\nFAllocation =\r\n∑ MJ p=1\r\nn\r\nOutput,p\r\nMJOutput,CDR\r\nMJOutput,CDR\r\nMJOutput\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 56/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 56 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 57 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "For heat this should be equal to the Net Useful Thermal\r\nOutput exported over the Reporting Period, expressed in\r\nMJ; and\r\nFor all other outputs, this should be equal to the Net\r\nCalorific Value multiplied by the quantity of product\r\nproduced and exported over the Reporting Period,\r\nexpressed in MJ.\r\np represents the product\r\nThis section sets out specific requirements relating to\r\nquantification of energy use as part of the GHG Statement.\r\nEmissions associated with energy usage result from the\r\nconsumption of electricity or fuel.\r\nExamples of electricity usage may include, but are not\r\nlimited to:\r\nElectricity consumption for pyrolysis activities;\r\nProcessing equipment, motors, drives and\r\ninstrumentation;\r\nBiomass pre-treatment, drying, densification or particle\r\nsize reduction;\r\nFacility operations;\r\nPyrolysis system start up;\r\nElectricity for building operation & management; and\r\nElectricity consumption for any biochar processing\r\nactivities at the pyrolysis site or application site.\r\nExamples of fuel consumption may include, but are not\r\nlimited to:\r\nPyrolysis system start up;\r\n8.6.5.5\r\nEnergy Use Accounting\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 57/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 58 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Pyrolysis reactor heating;\r\nEmission control (e.g. propane for flare co-firing or pilot);\r\nHandling equipment, such as fork trucks or loaders; and\r\nFuel consumption of agricultural machinery for\r\nspreading.\r\nThe Energy Use Accounting Module v1.2 provides\r\nrequirements on how energy-related emissions must be\r\ncalculated in a CDR Project. It sets out the calculation\r\napproach to be followed and acceptable emissions factors.\r\nRefer to Energy Use Accounting Module for the calculation\r\nguidelines.\r\nThis section sets out specific requirements relating to\r\nquantification of emissions related to transportation.\r\nEmissions associated with transportation include\r\ntransportation of products and equipment as part of a\r\nReporting Period process. Examples may include, but are not\r\nlimited to:\r\nTransportation of biomass to pyrolysis facility;\r\nTransportation of pyrolyzed biochar to storage site; and\r\nTransportation and shipping related to collecting\r\nsamples for characterization.\r\n8.6.5.6\r\nTransport Emissions Accounting\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 58/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 59 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "The Transportation Emissions Accounting Module v1.1\r\nprovides requirements on how transportation-related\r\nemissions must be calculated in a CDR Project so that they\r\ncan be subtracted in the net CO e removal calculation. It\r\nsets out the calculation approach to be followed and\r\nacceptable emissions factors.\r\nRefer to Transportation Emissions Accounting Module for the\r\ncalculation guidelines.\r\n2\r\nThis section sets out specific requirements relating to\r\nquantification of embodied emissions as part of the GHG\r\nStatement. Embodied emissions are those related to the life\r\ncycle impact of equipment and consumables.\r\nExamples of project-specific materials and equipment that\r\nmust be considered as part of the embodied emission\r\ncalculation include but are not limited to:\r\nProcess inputs or consumables:\r\nCatalysts;\r\nWater (for biomass pre-treatment or reactor\r\ncooling, not to be used during pyrolysis);\r\nThermal oils used for heat transfer;\r\nCoolants used for biochar quench; and\r\nGasses such as nitrogen used for process or\r\ninstrumentation purges.\r\n8.6.5.7\r\nEmbodied Emissions Accounting\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 59/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 60 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Gasses, reagents or other materials used for operation\r\nof monitoring equipment and on-site analyzers; and\r\nEquipment:\r\nPyrolysis reactor;\r\nFeedstock conveyors, augers, feed bins, and related\r\nequipment;\r\nBiochar quench or condenser units, including any\r\nheat transfer equipment, such as glycol chillers and\r\npumps;\r\nOffgas emissions control systems, such as flares or\r\noxidizers;\r\nPreparation or mixing equipment;\r\nPumps, piping, and related equipment;\r\nStorage tanks;\r\nAll support structures, facilities, and infrastructure,\r\nincluding steel platforms, framing, supports,\r\nconcrete footings and building structures; and\r\nOn-line analyzers, measurement equipment, or other\r\nsuch devices.\r\nThe GHG Accounting Module v1.0 sets out the approach to\r\nbe followed to account for embodied emission, including life\r\ncycle stages to be considered (Section 4.1), data sources\r\nand emission factors (Section 3.4), and rules on amortization\r\n(Section 7).\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 60/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 60 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 61 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "9.0\r\nPyrolysis Reactor System\r\nRequirements\r\nThere are a wide range of technologies available for\r\nachieving pyrolysis of solid biomass. These may be\r\ncharacterized into \"slow pyrolysis\" and \"fast pyrolysis\" based\r\non the heating rate and residence time of biomass in the\r\npyrolysis chamber. Slow pyrolysis processes are ideal to\r\nmaximize the yield of pyrolysis towards the solid biochar\r\nproduct, and minimize the production of bio-oil and pyrolysis\r\ngasses, however both \"slow\" and \"fast\" pyrolysis processes\r\nmay be eligible under this Protocol. Technology may also be\r\ncharacterized by its technology level (low- mid or high￾technology) based on the reactor design, as well as the level\r\nof automation, and application of sensors and monitoring\r\nequipment. Equally, processes may be either continuous\r\n(ongoing with a regular flow of feedstock through the\r\nsystem), or batch (non-continuous) based.\r\nThis Protocol does not explicitly specify the type of reactor\r\nor technology level required, Project Proponents must be\r\nable to meet the monitoring requirements set out below and\r\nreactor designs, including the reactor type, expected\r\nmaterials specifications and engineering design diagrams\r\nmust be described in the PDD.\r\nBiochar can be produced using a wide range of\r\ntechnologies that vary in scale, level of automation, and\r\nintended outputs. Some reactor systems are specifically\r\ndesigned to produce biochar as the primary product of the\r\nprocess. These tend to be more centralized, higher￾technology solutions that allow for precise control of\r\n9.1\r\nAcceptable Technologies\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 61/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 62 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "operating parameters such as temperature, residence time,\r\nand oxygen levels, resulting in consistent product quality\r\nand higher levels of process monitoring. A summary of\r\ncommon reactor types is found in Table 5.\r\nTable 5: Overview of common reactor types\r\nREACTOR\r\nTYPE DESCRIPTION\r\nFixed￾bed\r\nreactor\r\nSolid biomass is loaded into a vessel. Heat is applied to the vessel to increase the\r\ntemperature of the biomass. Once the target pyrolysis temperature is reached, and\r\npotentially sustained for some period of time, the solid biochar product is collected in a\r\nbatch-mode. Gaseous and solid products self-separate within the reactor.\r\nAuger\r\nreactor\r\nSolid biomass is continuously fed to and transported through a cylindrical vessel using a\r\nscrew-type fitting. Heat is applied to the exterior of the vessel. As biomass is transported\r\nalong the length of the reactor, its temperature is increased. The target pyrolysis\r\ntemperature is reached at the product exit point from the reactor. Gaseous and solid\r\nproducts are collected and separated at the reactor outlet. The biochar product is\r\ncollected continuously.\r\nRotary\r\nkiln\r\nreactor\r\nSolid biomass is continuously loaded at the top of an inclined rotating drum. As more\r\nbiomass is added to the vessel, biomass inside the vessel is transported downwards.\r\nHeat is applied to the exterior of the vessel. As biomass is transported along the length of\r\nthe reactor, its temperature is increased. The target pyrolysis temperature is reached at\r\nthe product exit point from the reactor. Gaseous and solid products self-separate at the\r\nreactor outlet. The biochar product is collected continuously.\r\nThis Protocol recognizes the diversity of production\r\napproaches and establishes performance-based\r\nrequirements to ensure that, regardless of technology type\r\nor scale, environmental safeguards, product quality, and\r\nmonitoring standards are maintained.\r\nAdditional styles of project may also include:\r\nRefers to the Biochar Production in Distributed and Small Scale\r\nProjects for the additional MRV requirements.\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 62/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 63 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Refers to the Biochar Production in Combustion Co-product\r\nSystems for the additional MRV requirements.\r\n9.2\r\nSystem Design Requirements\r\nAn engineering design diagram of The Project pyrolysis\r\nreactor design(s) must be included in the PDD.\r\nThe diagram must clearly show:\r\nReactor dimensions and overall layout.\r\nLocations of material inflows and outflows.\r\nPositions of sensors used to monitor temperature and\r\npressure.\r\nDetails of internal equipment, such as agitators or\r\nheating/cooling coils.\r\nDetails of external heat transfer equipment, including\r\nheat exchange fluid entry and exit points, along with\r\ncorresponding sensors for flow rate and temperature.\r\nThe diagram must include sufficient viewpoints to illustrate\r\nthe placement of all key components.\r\n9.2.1\r\nDesign Diagram Requirements\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 63/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 64 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Additionally, any other process equipment essential for the\r\nsafe and effective operation of the pyrolyzer should also be\r\nincluded and clearly highlighted.\r\nIn instances where Project Proponents wish to expand an\r\nexisting Project, or to submit a new Project for validation,\r\nwhere the reactor vessels used to achieve pyrolysis of\r\nbiomass are manufactured according to the same design\r\ndiagrams as those submitted for initial project validation, it\r\nis not necessary to resubmit a new design diagram at each\r\nsubsequent validation event. In cases where the design of\r\nthe reactor vessel differs to that from the original project\r\nvalidation, submission of updated design diagram\r\ndocumentation is required.\r\nIt is anticipated that the pyrolyzer will operate at high\r\ntemperatures and may also operate at elevated pressures.\r\nTherefore, appropriate design considerations must be\r\nimplemented to ensure the mechanical integrity and safe\r\noperation of the reactor to mitigate potential adverse\r\noperational conditions.\r\nThe PDD must include detailed information on the selection\r\nof materials used for each reactor component, along with a\r\njustification of these choices from the perspectives of\r\nthermal and mechanical resilience.\r\nFor reactors operating at high pressure (>0.5 Bar above\r\nambient pressure), the design must address:\r\nThe operating pressure range and limits.\r\nThe shape and size of the pressure vessel.\r\nThe positioning of material inlets and outlets.\r\n9.2.2\r\nConstruction Considerations\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 64/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 65 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "These considerations are essential to ensure the mechanical\r\nintegrity and safe operation of the reactor.\r\nAll design measures must comply with an appropriate local\r\nstandard governing the design and fabrication of pressure\r\nvessels, such as 2014/68/EU (the Pressure Equipment\r\nDirective) or an equivalent regional standard applicable to\r\nThe Project’s location.\r\nIf no suitable regional standard exists, Project Proponents\r\nare required to follow the 2014/68/EU standard.\r\nAn appropriate reactor maintenance plan must be\r\nestablished and fully documented in the PDD.\r\nThe PDD should describe how The Project Proponent will\r\nensure the structural integrity of the reactor vessel in order\r\nto prevent potential material loss events, including:\r\nProcedures for monitoring mechanical and thermal\r\ndegradation of reactor components.\r\nMitigation measures to address identified risks that\r\ncould lead to vessel failure.\r\nPreventive maintenance schedules to reduce the\r\nlikelihood of material release into the environment.\r\nIf applicable, all maintenance activities must comply with an\r\napplicable local standard governing the inspection and\r\nmaintenance of pressure vessels, such as 2014/68/EU (the\r\nPressure Equipment Directive) or an equivalent regional\r\nstandard relevant to The Project’s location. If no such\r\nregional standard exists, the 2014/68/EU standard must be\r\napplied.\r\n9.2.3\r\nReactor Maintenance\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 65/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 66 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "This section sets out the permissible ultimate fate of\r\nrequirements for the measurement and quantification of\r\ngaseous pyrolysis gas loss from the reactor and the\r\ncalculation of the direct carbon emissions from pyrolysis.\r\nProject Proponents must evidence emissions monitoring by\r\neither regular emissions testing or direct continuous\r\nmeasurement.\r\n10.0\r\nEmissions Testing Requirements\r\nThe thermochemical conversion of solid biomass to produce\r\nbiochar through pyrolysis also produces gaseous co￾products. Depending on the pyrolysis conditions and\r\nfeedstock, the gaseous phase may contain both volatile\r\ncondensable components (bio-oil) and non-condensable\r\ncomponents (pyrolysis gasses; predominantly CH , with N O,\r\nCO, CO and light hydrocarbons). Depending on the specific\r\ntechnologies deployed by The Project, there are various\r\noptions for handling the gaseous co-product eluted from the\r\npyrolysis unit. Permissible options for the measurement and\r\nhandling the gaseous product and emissions accounting\r\nrequirements associated requirements are detailed in this\r\nSection.\r\nN O is a potent greenhouse gas, which may be formed\r\nduring pyrolysis of feedstocks with low C/N ratios. The\r\npresence of substantial reactive or labile N is a key\r\nprecursor to N O formation in the flue gas. While there is no\r\naccepted threshold in the scientific literature below which\r\nN O emissions from flue gas becomes a concern, typically\r\nthis is at C/N ratios under 30; examples of feedstock with\r\nthis ratio may include, but are not limited to; manure,\r\n10.1\r\nOperation Emissions\r\n4 2\r\n2\r\n2\r\n2\r\n2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 66/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 67 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "biosolids or seaweed. The Project Proponent must justify\r\nwhy N O is not a significant concern if they do not plan to\r\nmonitor its concentration in the flue gas.\r\nProject Proponents must secure and maintain all required\r\npermits and approvals related to air emissions, combustion\r\nequipment, and other applicable air quality regulations for\r\nbiochar production. They shall provide supporting\r\ndocumentation, such as permits, inspection reports, or\r\nemissions test results, demonstrating compliance with local,\r\nregional, and national air pollution control requirements.\r\nProjects must also ensure ongoing adherence to these\r\nregulations throughout the crediting period, updating\r\ndocumentation as permits are renewed or amended.\r\n2\r\nThis section details the two acceptable methods of\r\nquantifying the Direct Emissions from a\r\npyrolysis process, either through direct continuous\r\nmeasurement or regular emissions testing.\r\n10.1.1\r\nQuantification of Emissions\r\nCO2eOperations, RP\r\nDirect measurement is the primary and preferred method for\r\nquantifying .\r\nEmissions should be calculated as follows:\r\n10.1.1.1\r\nOption 1 - Direct Continuous Measurement CO2e\r\n,\r\nRP\r\nCO2eOperations, RP\r\nCO2eOperations, RP = m ⋅\r\nn=1\r\n∑\r\nnc\r\ni=1\r\n∑\r\nN\r\ni Cn\r\n⋅\r\n,i GWPn\r\n⋅ Δti\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 67/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 68 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "(Equation 9)\r\nWhere:\r\n- the total amount of non-CO GHG\r\nemissions associated with the release of pyrolysis\r\ngasses directly to the atmosphere, via combustion in an\r\nemissions control unit, or via combustion for the\r\nprovision of thermal energy within the process, during a\r\nReporting Period, , in tonnes of CO e, measured\r\ndirectly.\r\n- the total mass flow rate of gas emitted to the\r\natmosphere during time period , in tonnes per hour.\r\nMeasurement must be made immediately upstream of\r\nthe point of emission to the atmosphere.\r\n- the concentration of species in the emitted gas\r\nduring time period , expressed as a mass fraction.\r\nMeasurement must be made immediately upstream of\r\nthe point of emissions to the atmosphere.\r\n- the 100-year global warming potential of\r\nspecies .\r\n- the duration of time period , in hours.\r\n- the total number of species in the emitted gas\r\nstream.\r\n- the total number of time periods comprising the\r\nReporting Period, .\r\nNote: Direct emissions reported under this section include\r\nnon-CO greenhouse gases only, as CO emissions are\r\naccounted for separately to avoid double counting. CO\r\nreleased during pyrolysis is reflected in reductions to stored\r\ncarbon ( ), which determines net CO e removal\r\nand crediting.\r\nCO2eOperations, RP 2\r\nRP 2\r\nmi\r\ni\r\nCn,i n\r\ni\r\nGWPn\r\nn\r\nΔti i\r\nnc\r\nN\r\nRP\r\n2 2\r\n2\r\nCO2eStored,RP 2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 68/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 69 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Quantification of requires two primary\r\nmeasurements:\r\nGas Flow Rate ( )\r\nMeasured immediately upstream of the emission\r\npoint using a continuous inline meter (e.g., coriolis,\r\nthermal mass) which must be:\r\nFactory-calibrated for expected gas\r\ncomposition\r\nAccurate to ±2% full scale\r\nAble to record at a frequency of ≥ 1-minute\r\nintervals\r\nCalibrated at least annually, traceable to\r\nnational standards\r\nInstallation to manufacturer guidelines (e.g.,\r\nstraight-pipe distances)\r\nValues from analysis reports are acceptable but\r\nraw data must be retained and made available on\r\nrequest.\r\nGas Composition ( )\r\nCH , N O, CO, and CO measured immediately\r\nupstream of emission point using a continuous inline\r\nanalyzer (e.g., NDIR, TDL) which must be:\r\nAccurate to ±2% full scale\r\nAble to record at a frequency of ≥ 1-minute\r\nintervals\r\nCalibrated at least annually, traceable to\r\nnational standards\r\nValues from analysis reports are acceptable but\r\nraw data must be retained and made available on\r\nrequest.\r\n10.1.1.1.1\r\nMeasurement Requirements\r\nCO2eOperations, RP\r\nmi\r\nCn,i\r\n4 2 2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 69/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 70 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "The Project Proponent must retain for at least five years:\r\nRaw flow and composition measurement data for\r\nthe Reporting Period.\r\nCalibration records for all meters and analyzers.\r\nManufacturer manuals detailing calibration and\r\nmaintenance procedures.\r\n10.1.1.1.2\r\nRequired Records\r\nWhere direct measurement is not practically feasible (e.g.,\r\nhighly distributed pyrolysis reactors, remote locations),\r\nemissions testing may be used as an alternative method.\r\nThis measurement will then be applied to all subsequent\r\nbatches produced, until the next emissions test is performed\r\n(with the exception of distributed project, see Section 9.1.1.4).\r\nEmissions should be calculated as follows:\r\n(Equation 10)\r\nWhere:\r\nthe total amount of non-CO GHG\r\nemissions associated with the release of pyrolysis\r\n10.1.1.2\r\nOption 2 - Regular Emissions Testing for\r\nCO2eOperations, RP\r\nCO2eOperations, RP = (C ⋅\r\nn=1\r\n∑\r\nn\r\nn,test m\r\n˙\r\n⋅ test GWPn\r\n⋅ Hemit)\r\nCO2eOperations, RP 2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 70/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 71 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "gasses directly to the atmosphere, via combustion in an\r\nemissions control unit, or via combustion for the\r\nprovision of thermal energy within the process, during a\r\nReporting Period, , in tonnes of CO e, measured\r\nusing regular emissions testing.\r\n= measured concentration of species n from the\r\nspot test (mass fraction), corrected to the appropriate\r\nbasis (dry/wet, standard temperature and pressure).\r\n= gas mass flow rate during the spot test (t/hr),\r\ncorrected to the same basis.\r\n= total number of hours the reactor was emitting\r\nduring the Reporting Period.\r\nNote: Direct emissions reported under this section include\r\nnon-CO greenhouse gases only, as CO emissions are\r\naccounted for separately to avoid double counting. CO\r\nreleased during pyrolysis is reflected in reductions to stored\r\ncarbon ( ), which determines net CO e removal\r\nand crediting.\r\nEmissions testing must be conducted by an accredited\r\nprovider (e.g., ASTM D7036, ISO 17025, or approved by state\r\nor regional authority), or if using portable equipment a full\r\ncalibration certificate should be provided. These tests must\r\nbe performed at least annually on all reactors/kilns being\r\nused by The Project.\r\nRegular Emissions Testing should be representative of actual\r\noperations, including quenching if appropriate. Emissions\r\ntesting is considered representative only if:\r\nFeedstock Consistency\r\nFeedstock used in operations must be identical or\r\ndemonstrably similar to that used in emissions\r\ntesting.\r\nWhere the biomass feedstocks used during project\r\noperations and emissions testing are not the same,\r\nRP 2\r\nCn,test\r\nm\r\n˙\r\ntest\r\nHemit\r\n2 2\r\n2\r\nCO2eStored,RP 2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 71/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 72 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "analytical testing should be used to demonstrate\r\nthat they are similar. Analytical testing must follow\r\nASTM D5291 and demonstrate that, for each\r\nmeasured feedstock characteristic, the biomass\r\nused in actual project operations falls within ±10%\r\nof the corresponding value from the biomass used\r\nduring emissions testing.\r\nProcess Consistency\r\nPyrolysis temperature during operations must be\r\nwithin ±10% of emissions test values.\r\nTemperature must be measured using a calibrated sensor\r\nthat is:\r\nAccurate to ±2% full scale\r\nAble to record at a frequency of ≥ 1-minute intervals\r\nCalibrated at least annually, traceable to national\r\nstandards\r\nRaw data must be retained and made available on request.\r\nThe Project Proponent must retain for at least five years:\r\nEmissions testing reports from accredited entities.\r\nRaw temperature data for the Reporting Period.\r\nCalibration records for all measurement equipment.\r\nManufacturer manuals detailing calibration and\r\nmaintenance requirements.\r\n10.1.1.2.1\r\nRequired Records\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 72/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 73 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "All non-CO emissions to the atmosphere, via any of the\r\napproaches described in the following Sections, must be\r\nconverted to tonnes of CO e using their respective 100-year\r\nGlobal Warming Potential (GWP) for the relevant GHGs,\r\nbased on the most recent volume of the IPCC Assessment\r\nReport (presently the Sixth Assessment Report).\r\nProject Proponents must confirm which of the four\r\npermissible end-use emissions accounting approaches for\r\nthe produced pyrolysis gasses they plan to use.\r\nThese are:\r\n10.1.2\r\nPermissible Routes for Gaseous Emissions\r\n2\r\n2\r\nVenting of pyrolysis gasses directly to the atmosphere.\r\nRequired measurements directly before or at point of\r\nemission:\r\nGas flow rate\r\nComposition of the vented gas stream accounting\r\nfor at least CH , N O, CO, and CO .\r\n10.1.2.1\r\nVenting\r\n4 2 2\r\nVenting of pyrolysis gasses to the atmosphere via an\r\nemissions control system, such as a thermal oxidizer, wet\r\nscrubber, electrostatic precipitator or flare stack.\r\nRequired measurements directly before or at point of\r\nemission:\r\nFlow rate\r\n10.1.2.2\r\nVenting After an Emissions Control System\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 73/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 74 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Composition of the vented gas stream accounting\r\nfor at least CH4, N2O, CO, and CO2.\r\nCombustion of pyrolysis gasses within The Project gate\r\nto provide thermal energy for operation of the pyrolyzer.\r\nRequired measurements directly before or at point of\r\nemission:\r\nFlow rate\r\nComposition of the vented gas stream accounting\r\nfor at least CH , N O, CO, and CO .\r\nIt should be noted that the flue gas from the pyrolyzer\r\nheating source may also partially result from co-firing\r\nwith fuels obtained from outside sources. If the flue gas\r\nfrom the pyrolyzer heating source is directly monitored, it\r\nis not necessary to include fuel combustion for heating\r\nthe pyrolyzer in the calculation of , to\r\navoid double counting. However, the emissions\r\nassociated with the production and transportation of\r\nsuch fuels must still be accounted for. Bio-oil produced\r\nduring pyrolysis may also be co-fired using this\r\napproach, and can be accounted for in the same way as\r\nfor the co-firing of pyrolysis gasses.\r\n10.1.2.3\r\nCombustion of Pyrolysis Gasses for Energy\r\nRecovery\r\n4 2 2\r\nCO2eEnergy, RP\r\nProvision of pyrolysis gasses to a downstream consumer\r\nfor third-party use.\r\n10.1.2.4\r\nProvision of Gasses to a Third Party Consumer\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 74/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 75 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "In this case, The Project Proponent may follow emission\r\nallocation procedures (see Section 7.1.1 for allocation\r\ncalculation details).\r\nIf the reactor operates at above atmospheric pressure, the\r\nreactor design must incorporate appropriate sensors and\r\nmonitoring systems to detect and quantify any loss of\r\npyrolysis gases during operation.\r\n10.1.3\r\nOther Pathways of Gaseous Loss\r\nAt a minimum, the system must include:\r\nSensors at the flue gas outlet to measure the outflow of\r\npyrolysis gases.\r\nIntegration of these measurements with a validated\r\nreactor model to:\r\nEstimate the total pyrolysis gas production; and\r\nQuantify potential unmonitored or unintentional gas\r\nleakage to the environment.\r\nA chemical reactor model may be used to characterize\r\nreactor performance and estimate gas losses, and must:\r\nConsider all relevant physical and chemical\r\nmechanisms specific to the chosen reactor type.\r\nInclude a chemical kinetics model based on the latest\r\nscientific understanding for the reactor configuration.\r\nBe validated using empirical data.\r\nIncorporate a complete process mass balance,\r\naccounting for all product yields.\r\n10.1.3.1\r\nLeakage Monitoring Requirements\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 75/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 76 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Include detailed documentation of the model validation\r\nprocess in the PDD.\r\nIf it is not feasible to develop a high-quality mathematical\r\nreactor model, one of the following alternative verification\r\napproaches may be used to demonstrate that there is no\r\nsubstantial unintended leakage of pyrolysis gases:\r\n10.1.3.2\r\nAlternative Approaches to Leakage Verification\r\nDemonstrate that the reactor vessel pressure remains at\r\na consistent pressure during operations.\r\nUse a calibrated pressure sensor that meets the\r\nfollowing requirements:\r\nAccuracy: ±2% of full scale or better.\r\nRecording frequency: At least once every 1 minute.\r\nCalibration:\r\nMust meet or exceed manufacturer calibration\r\nrequirements.\r\nCalibration frequency must be no less than\r\nonce per year.\r\nData availability: Raw pressure data must be\r\nretained and made available upon request.\r\n10.1.3.2.1\r\nContinuous System Pressure Monitoring\r\nConduct periodic leakage testing in compliance with\r\nprevailing national, or international standards or by an\r\naccredited leakage testing authority.\r\n10.1.3.2.2\r\nRegular Leakage Testing\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 76/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 77 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Acceptable standards include, for example:\r\nASTM E1003-13(2022) (Standard Test Method for\r\nHydrostatic Leak Testing), or\r\nAn equivalent standard applicable in The Project\r\nregion.\r\nCalibration frequency must be no less than once per\r\nyear.\r\nRecordkeeping: Project Proponents must retain proof of\r\ntesting and results for a minimum of five years.\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 77/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 78 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Condensable fractions of the gaseous stream may be\r\nseparated from the using a condenser, or any other suitable\r\ngas-liquid separation unit. The resulting (condensable)\r\nliquid-phase is bio-oil, and the (non-condensable) gas￾phase is pyrolysis gasses. There are three permissible end￾use emissions accounting approaches for the produced bio￾oil:\r\nStorage of the produced bio-oil by injection into natural\r\nor engineered subsurface features or geologic storage\r\nformations which may include, but are not limited to,\r\nreservoirs, saline aquifers, caverns, or mines. Storage of\r\nproduced bio-oil must be conducted in compliance with\r\nthe requirements described in the Bio-Oil Geological\r\nStorage Protocol. In this case, The Project Proponent\r\nmay claim Credits for the storage of bio-oil, in addition\r\nto the Credits claimed for storage via biochar (as\r\ndetailed under this Protocol). Where Isometric Credits\r\nare generated for both bio-oil injection and biochar\r\nresulting from the same thermochemical conversion\r\nprocess, emissions associated with the thermochemical\r\nconversion of solid biomass to produce biochar and\r\nbio-oil will be allocated proportionately to each storage\r\npathway for the purposes of calculating net-CO e\r\nremoval for each (see Section 7.1.1 for allocation\r\ncalculation details); or\r\nProvision of produced bio-oil to a downstream\r\nconsumer for third-party use, such as combustion for\r\nheating. In this case, The Project Proponent may follow\r\nemission allocation procedures (see Section 7.1.1 of this\r\nProtocol for allocation calculation details).\r\n11.0\r\nAdditional Guidance on the\r\nCondensable (bio-oil) Fraction\r\n2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 78/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 79 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Treatment of the produced bio-oil downstream and\r\nenvironmental disposal as a waste stream or hazardous\r\nwaste, following methods compliant to relevant local\r\nlegislative frameworks. In this case, The Project\r\nProponent must account for all emissions relevant to\r\ntreatment and disposal of the waste stream (see Section\r\n7.1 of this Protocol).\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 79/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 80 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "For all information on what chemical and physical\r\ncharacterization of biochar must be carried out, and for\r\ncalculation of , please refer to the relevant\r\nstorage Module.\r\nDurability and monitoring requirements for Biochar Storage in\r\nSoils Environments.\r\nDurability and monitoring requirements for Biochar Storage in\r\nLow Oyxgen Burial Environments.\r\nDurability and monitoring requirements for Biochar Storage in\r\nthe Built Environment.\r\n12.0\r\nStorage\r\nCO e2 Stored\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 80/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 81 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "This risk assessment identifies the pathway specific risk\r\nfactors relevant to a carbon removal project. The relevant\r\nrisk factors identified as part of a risk assessment are\r\nincluded in the monitoring plan requirements for The Project,\r\nwith details included in the PDD. Project specific risk factors\r\ninform the required duration of monitoring along with the\r\nmonitoring requirements set out in the Protocol and the\r\nrequirements set out in the Monitoring Section of the\r\nIsometric Standard.\r\nThe risk score, as determined by the Risk of Reversal\r\nQuestionnaire, will determine a project’s buffer pool\r\ncontribution. Projects must re-assess their reversal risk at the\r\nrenewal of each crediting period, or if monitoring identifies a\r\nreversal-related risk, or if an actual reversal event takes\r\nplace. In any event, projects should reassess their reversal\r\nrisk at a minimum every 5 years.\r\nThe Risk of Reversal Questionnaire questions that pertain to\r\nthis Protocol, drawn from the programme-level Risk of\r\nReversal Questionnaire defined in Appendix B: Risk Reversal\r\nQuestionnaire of the Isometric Standard, include the\r\nfollowing:\r\n# IN ISOMETRIC\r\nSTANDARD\r\nQUESTIONNAIRE QUESTION\r\nIF ANSWERED\r\n“YES”\r\nIF ANSWERED\r\n“NO”\r\n1\r\nIs a reversal directly observable with a\r\nphysical or chemical measurement as\r\nopposed to a modeled result?\r\nProceed to\r\nquestions 2-\r\n9\r\nProceed to\r\nquestions 8-9\r\n13.0\r\nAppendix I: Risk of Reversal\r\nQuestionnaire\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 81/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 82 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "# IN ISOMETRIC\r\nSTANDARD\r\nQUESTIONNAIRE QUESTION\r\nIF ANSWERED\r\n“YES”\r\nIF ANSWERED\r\n“NO”\r\n2\r\nIs the carbon being stored in an impermeable\r\ngeologic system? (e.g., salt cavern)\r\nProceed to\r\nquestions 8-\r\n9\r\nAdd 1 to Risk\r\nScore and\r\nproceed to\r\nquestions 3-9\r\n3 Is the carbon being stored organic?\r\nAdd 1 to Risk\r\nScore\r\n5\r\nDoes this approach have a material risk of\r\nreversal due to natural disasters including,\r\nbut not limited to, floods, storms,\r\nearthquakes, fires, etc.?\r\nAdd 1 to Risk\r\nScore\r\n6\r\nDoes this approach have a material risk of\r\nreversal due to human-induced events from\r\noutside actors, such as change in farming\r\npractices, change in ownership and\r\nmanagement of project sites, or similar?\r\nAdd up to 2\r\nto Risk\r\nScore\r\n8\r\nIs there 10+ years of monitoring and/or lab\r\ndata demonstrating low project risk?\r\nMinus up to\r\n2 to Risk\r\nScore\r\n9\r\nDoes this pathway have a documented\r\nhistory of reversals?\r\nAdd 2 to\r\nRisk Score\r\n10\r\nIs there one or more project-specific factors\r\nthat merit a high risk level?\r\nAdd up to 2\r\nto Risk\r\nScore\r\nRisk Score Categories\r\n0: Very Low Risk Level (2% buffer)\r\n1-2: Low Risk Level (5% buffer)\r\n3-4: Medium Risk Level (7% buffer)\r\n5+: High Risk Level (10-20% buffer)\r\nProject specific risk factors will depend on the form of\r\ncarbon being stored (i.e., organic vs. inorganic), the method\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 82/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 82 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 83 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "of storage (e.g., mineralization, encapsulation), the location\r\nof carbon storage (e.g., subsurface, ocean), and the\r\nproximity of that carbon to potential agents of reversal.\r\nFor projects with carbon storage as organic carbon, the\r\npresence of the following risk factors must be reflected in\r\nthe risk score corresponding to question 10:\r\nHigh-potential oxidants\r\nTemperatures in excess of thermal stability\r\nFires\r\nMicrobial degradation\r\nFor projects with any form of subsurface carbon storage, the\r\npresence of the following risk factors must be reflected in\r\nthe risk score corresponding to question 10:\r\nSeismicity\r\nSubsurface migration\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 83/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 84 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Robust monitoring is essential to ensure the credibility,\r\ndurability, and traceability of carbon removals certified\r\nunder the Isometric Biochar Protocol. Monitoring provides\r\nthe data that allows third-party verifiers (VVBs), Project\r\nProponents, stakeholders and reviewers to evaluate whether\r\nprojects are implemented as designed, whether risks are\r\nappropriately managed, and whether outcomes meet the\r\nthresholds established in the Isometric Standard, Protocol\r\nand Module.\r\nProject Proponents must create a table that outlines all\r\nmonitored parameters as listed below.\r\nThe monitoring requirements outlined in this appendix are\r\ndesigned to:\r\nProvide transparency across the biochar value chain —\r\nfrom biomass sourcing, through pyrolysis and biochar\r\nproduction, to distribution, application, and long-term\r\nenvironmental impacts.\r\nEnable rigorous verification — ensuring that the\r\nquantities of carbon claimed, and the quality of biochar\r\nproduced, are validated against independent,\r\nrepeatable measurements.\r\nThe requirements are structured around key stages of the\r\nbiochar lifecycle. Each stage specifies the data that must be\r\ncollected, the frequency and methods of collection, the\r\ncalibration and quality assurance procedures, and the data\r\nmanagement Protocols that ensure records remain reliable,\r\nsecure, and accessible for verification. By integrating daily\r\noperational records with periodic laboratory analyses,\r\nemissions monitoring, environmental assessments, and\r\n14.0\r\nAppendix II: Monitoring Plan\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 84/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 85 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "social impact reporting, this monitoring framework creates a\r\ncomprehensive system of accountability. Together, these\r\nmeasures safeguard the environmental integrity of biochar\r\nprojects, ensure alignment with recognized international\r\nstandards (e.g., ISO, ASTM, WBC), and provide the evidence\r\nbase necessary for credit issuance under the Isometric\r\nStandard on the Isometric Registry. While the table below\r\noutlines the core monitoring plan applicable to all biochar\r\nprojects, each storage Module may impose additional\r\nrequirements. Further project-specific requirements may also\r\nbe identified by Isometric or The Project Proponent on a\r\ncase-by-case basis, and all such requirements must be\r\ndocumented in the PDD.\r\nMONITORING\r\nPARAMETER DESCRIPTION\r\nMETHOD /\r\nINSTRUMENT FREQUENCY\r\nREQUIRED /\r\nRECOMMENDED\r\nBiomass Feedstock Monitoring\r\nFeedstock\r\nWeight\r\nWeight of\r\nfeedstock\r\nresidues received\r\nWeighbridge /\r\ndigital scale\r\nDaily Required\r\nFeedstock\r\nMoisture\r\nMoisture content\r\nof feedstock\r\nCalibrated probe\r\nmoisture meter\r\nDaily\r\nRequired (for\r\nartisanal projects\r\nonly, otherwise\r\nrecommended)\r\nFeedstock\r\nSource\r\nSource location of\r\nfeedstock\r\nGPS logging Daily Required\r\nTransport\r\nDistance\r\nDistance from\r\nsource to facility\r\nTransport Logs Daily Required\r\nFeedstock data\r\ncompilation\r\nCollation of\r\nfeedstock records\r\nDigital records Weekly Required\r\nSustainable\r\nHarvest\r\nVerification\r\nVerification of\r\npartner practices\r\nPartner reports /\r\naudits\r\nMonthly Required\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 85/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 85 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 86 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "MONITORING\r\nPARAMETER DESCRIPTION\r\nMETHOD /\r\nINSTRUMENT FREQUENCY\r\nREQUIRED /\r\nRECOMMENDED\r\nPyrolysis Process Monitoring\r\nPyrolysis\r\nTemperature\r\nReactor operating\r\ntemperature\r\nInline\r\nthermocouples\r\nContinuous (5-min\r\nintervals)\r\nRequired\r\nResidence Time\r\nFeedstock\r\nresidence time in\r\nreactor\r\nProcess control\r\nsystem\r\nContinuous (5-min\r\nintervals)\r\nRequired for\r\ndistributed kilns\r\nonly, otherwise\r\nrecommended\r\nReactor\r\nPressure\r\nInternal pressure\r\nof pyrolysis\r\nreactor\r\nPressure sensor\r\n(2% accuracy)\r\nContinuous (1-min\r\nintervals)\r\nRequired, if the\r\nreactor operates\r\nat high pressure\r\nLeakage\r\nMonitoring\r\n(Option 1)\r\nOutflow sensors\r\ncombined with\r\nValidated Reactor\r\nModel\r\nMass balance &\r\nKinetics model\r\nverification\r\nContinuous\r\nRequired (if\r\nchosen as the\r\nmonitoring\r\nmethod)\r\nLeakage\r\nMonitoring\r\n(Option 2)\r\nContinuous\r\nreactor vessel\r\npressure stability\r\nmonitoring\r\nCalibrated\r\nSensor (±2%\r\naccuracy)\r\nContinuous (Every 1\r\nmin)\r\nRequired (if\r\nchosen as the\r\nmonitoring\r\nmethod)\r\nLeakage\r\nMonitoring\r\n(Option 3)\r\nPhysical leakage\r\ntesting\r\nAccredited test\r\n(ASTM E1003-13\r\nor equivalent)\r\nAnnual\r\nRequired (if\r\nchosen as the\r\nmonitoring\r\nmethod)\r\nGas Flow Rate &\r\nComposition\r\n(Option 1)\r\nMeasure gas flow\r\nplus CH , N O,\r\nCO, CO\r\ncomposition\r\nInline analyzer\r\nContinuous (1-min\r\nintervals)\r\nRequired (if\r\nchosen over\r\nemissions\r\ntesting)\r\nEmissions\r\nTesting (Option\r\n2)\r\nAccredited\r\nemissions testing\r\nAccredited\r\ntesting + flue\r\nstack temp\r\nPeriodic /\r\ncontinuous temp\r\nRequired (if\r\nchosen over flow\r\nrate &\r\n4 2\r\n2\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 86/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 86 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 87 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "MONITORING\r\nPARAMETER DESCRIPTION\r\nMETHOD /\r\nINSTRUMENT FREQUENCY\r\nREQUIRED /\r\nRECOMMENDED\r\nif continuous not\r\nfeasible\r\ncomposition\r\nmonitoring)\r\nBiochar Production Monitoring\r\nBiochar Output\r\nWeight of biochar\r\nproduced\r\nAutomated\r\nweighing system\r\n+ manual\r\ncalibration\r\nPer Production or\r\nStorage batch\r\nRequired\r\nBiochar Quality Monitoring\r\nBiochar\r\nSampling\r\nLab analysis for\r\nquality\r\nparameters; see\r\nstorage Module\r\nfor specific\r\nparameter\r\nrequirements\r\nComposite\r\nsampling, ≥3\r\nsubsamples, sent\r\nto ISO 17025\r\naccredited lab\r\nEvery batch per\r\nMethod A and every\r\nminimum 10th Batch\r\nfor Method B\r\nRequired\r\nBiochar Placement & Application Monitoring\r\nBiochar\r\nPlacement\r\nQuantity\r\nemplaced or sold,\r\nrecipient details,\r\nbatch IDs\r\nWeigh scale\r\ntickets, delivery\r\nrecords\r\nDaily Required\r\nSee Relevant\r\nModule for\r\nAdditional\r\nRequirements in\r\nthis Section\r\n- - - Required\r\nEnvironmental Impact Monitoring\r\nEnvironmental\r\nImpact\r\nAssessment\r\nIndependent\r\nenvironmental\r\nimpact review\r\nExternal\r\nconsultancy\r\nAnnual\r\nRequired (unless\r\notherwise\r\njustified)\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 87/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 87 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 88 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "MONITORING\r\nPARAMETER DESCRIPTION\r\nMETHOD /\r\nINSTRUMENT FREQUENCY\r\nREQUIRED /\r\nRECOMMENDED\r\nSee Relevant\r\nModule for\r\nAdditional\r\nRequirements in\r\nthis Section\r\n- - - Required\r\nSocial Impact Monitoring\r\nStakeholder\r\nEngagement\r\nLocal community\r\nengagement\r\nDocumented\r\nmeetings\r\nOngoing Required\r\nSocial Impact\r\nAssessment\r\nIndependent\r\nsocial impact\r\nreview\r\nExternal\r\nconsultancy\r\nAnnual\r\nRequired (unless\r\notherwise\r\njustified)\r\nQuality Assurance & Control Monitoring\r\nEquipment\r\nCalibration\r\nCalibration of\r\nscales, sensors,\r\nmeters\r\nDocumented\r\ncalibration\r\nAs per the\r\nmanufacturers\r\nrecommendation, or\r\nannually\r\nRequired\r\nLaboratory\r\nQA/QC\r\nAnalytical QA/QC\r\nincluding\r\nreplicates, blanks\r\nLaboratory\r\nQA/QC protocols\r\nOngoing Required\r\nData\r\nManagement\r\nStorage and\r\nretention of all\r\nrecords\r\nSecure cloud\r\ndatabase\r\nContinuous (≥5\r\nyears)\r\nRequired\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 88/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 88 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 89 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Isometric would like to thank the following external reviewers\r\nof this Protocol/Module:\r\nMeredith Barr, Ph.D.\r\nSegun Oladele, Ph.D.\r\nKonstantina Stamouli, Ph.D.\r\n15.0\r\nAcknowledgements\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 89/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 90 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Activity\r\nThe steps of a Project Proponent’s Removal process that\r\nresult in carbon fluxes. The carbon flux associated with an\r\nactivity is a component of the Project Proponent’s\r\nProtocol.\r\nAdditionality\r\nAn evaluation of the likelihood that an intervention—for\r\nexample, a CDR Project—causes a climate benefit above\r\nand beyond what would have happened in a no￾intervention Baseline scenario.\r\nAmerican Society for Testing and Materials (ASTM)\r\nA standards organization that develops and publishes\r\nvoluntary consensus international standards.\r\nAmortization\r\nThe term used to describe allocation of Project emissions\r\nto multiple Removals.\r\nBaseline\r\nA set of data describing pre-intervention or control\r\nconditions to be used as a reference scenario for\r\ncomparison.\r\nBio-oil\r\nA mixture of water, organic acids, aldehydes, ketones,\r\nsugars, phenols, and other organic compounds derived\r\nfrom the thermal breakdown of biomass. Thermal\r\nbreakdown of biomass is achieved via thermochemical\r\nprocesses, such as pyrolysis, which heat biomass in low￾or no-oxygen environments to high temperatures (~e.g.\r\n350-650°C). Bio-oil is often also referred to as pyrolysis\r\noil or bio-crude.\r\nBiodiversity\r\nThe diversity of life across taxonomic and spatial scales.\r\nBiodiversity can be measured within species (i.e. genetic\r\ndiversity and variations in allele frequencies across\r\npopulations), between species (i.e. the total number and\r\nabundance of species within and across defined regions),\r\n16.0\r\nDefinitions and Acronyms\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 90/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 91 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "within ecosystems (i.e. the variation in functional diversity,\r\nsuch as guilds, life-history traits, and food-webs), and\r\nbetween ecosystems (variation in the services of abiotic\r\nand biotic communities across large, landscape-level\r\nscales) that support ecoregions and biomes.\r\nBuffer Pool\r\nA common and recognized insurance mechanism among\r\nRegistries allowing Credits to be set aside (in this case by\r\nIsometric) to compensate for Reversals which may occur\r\nin the future.\r\nBuyer\r\nAn entity that purchases Removals, often with the\r\npurpose of Retiring Credits to make a Removal claim.\r\nCarbon Dioxide Equivalent Emissions (CO₂e)\r\nThe amount of CO₂ emissions that would cause the same\r\nintegrated radiative forcing or temperature change, over a\r\ngiven time horizon, as an emitted amount of GHG or a\r\nmixture of GHGs. One common metric of CO₂e is the 100-\r\nyear Global Warming Potential.\r\nCarbon Dioxide Removal (CDR)\r\nActivities that remove carbon dioxide (CO₂) from the\r\natmosphere and store it in products or geological,\r\nterrestrial, and oceanic Reservoirs. CDR includes the\r\nenhancement of biological or geochemical sinks and\r\ndirect air capture (DAC) and storage, but excludes natural\r\nCO₂ uptake not directly caused by human intervention.\r\nCarbon Finance\r\nResources provided to projects that are generating, or are\r\nexpected to generate, greenhouse gas (GHG) Emission\r\nReductions or Removals.\r\nCertification (of a Protocol)\r\nThe Isometric process which involves expert review and\r\nPublic Consultation in order to arrive at an approved\r\nversion of a Protocol, against which Projects will be\r\nValidated and Removals will be Verified.\r\nCo-product\r\nProducts that have a significant market value and are\r\nplanned for as part of production.\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 91/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 92 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Concrete\r\nA composite material composed of aggregate, cement,\r\nsand and water that cures to a solid over time.\r\nConservative\r\nPurposefully erring on the side of caution under\r\nconditions of Uncertainty by choosing input parameter\r\nvalues that will result in a lower net CO₂ Removal than if\r\nusing the median input values. This is done to increase\r\nthe likelihood that a given Removal calculation is an\r\nunderestimation rather than an overestimation.\r\nCounterfactual\r\nAn assessment of what would have happened in the\r\nabsence of a particular intervention – i.e., assuming the\r\nBaseline scenario.\r\nCradle-to-Grave\r\nConsidering impacts at each stage of a product's life\r\ncycle, from the time natural resources are extracted from\r\nthe ground and processed through each subsequent\r\nstage of manufacturing, transportation, product use, and\r\nultimately, disposal.\r\nCredit\r\nA publicly visible uniquely identifiable Credit Certificate\r\nIssued by a Registry that gives the owner of the Credit the\r\nright to account for one net metric tonne of Verified CO₂e\r\nRemoval. In the case of this Standard, the net tonne of\r\nCO₂e Removal comes from a Project Validated against a\r\nCertified Protocol.\r\nCrediting Period\r\nThe period of time over which a Project Design Document\r\nis valid, and over which Removals may be Verified,\r\nresulting in Issued Credits.\r\nDirect Emissions\r\nEmissions that are produced by a specific CDR process\r\nand are directly controllable.\r\nDouble Counting\r\nImproperly allocating the same Removal from a Project\r\nProponent more than once to multiple Buyers.\r\nDurability\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 92/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 93 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "The amount of time carbon removed from the atmosphere\r\nby an intervention – for example, a CDR project – is\r\nexpected to reside in a given Reservoir, taking into\r\naccount both physical risks and socioeconomic\r\nconstructs (such as contracts) to protect the Reservoir in\r\nquestion.\r\nEmbodied Emissions\r\nLife cycle GHG emissions associated with production of\r\nmaterials, transportation, and construction or other\r\nprocesses for goods or buildings.\r\nEmission Factor\r\nAn estimate of the emissions intensity per unit of an\r\nactivity.\r\nEmission Reductions\r\nLowering future GHG releases from a specific entity.\r\nEmissions\r\nThe term used to describe greenhouse gas emissions to\r\nthe atmosphere as a result of Project activities.\r\nEnvironmental Protection Agency (EPA)\r\nA United States Government agency that protects human\r\nhealth and the environment.\r\nEx-post Credits\r\nIssuance of Credits after removal took place. This is the\r\nmanner in which Isometric Delivers Credits.\r\nFeedstock\r\nRaw material which is used for CO₂ Removal.\r\nGHG Statement\r\nA document submitted alongside Claimed Removals that\r\ndetails the calculations associated with a Removal,\r\nincluding the Project's emissions, Removals and\r\nLeakages, presented together in net metric tonnes of\r\nCO₂e.\r\nGlobal Warming Potential\r\nA measure of how much energy the emissions of 1 tonne\r\nof a GHG will absorb over a given period of time, relative\r\nto the emissions of 1 ton of CO₂.\r\nGreenhouse Gas (GHG)\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 93/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 94 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Those gaseous constituents of the atmosphere, both\r\nnatural and anthropogenic (human-caused), that absorb\r\nand emit radiation at specific wavelengths within the\r\nspectrum of terrestrial radiation emitted by the Earth’s\r\nsurface, by the atmosphere itself, and by clouds. This\r\nproperty causes the greenhouse effect, whereby heat is\r\ntrapped in Earth’s atmosphere (CDR Primer, 2022).\r\nInternational Standards Organization (ISO)\r\nA worldwide federation (NGO) of national standards\r\nbodies from more than 160 countries, one from each\r\nmember country.\r\nIssuance (of a Credit)\r\nCredits are issued to the Credit Account of a Project\r\nProponent with whom Isometric has a Validated Protocol\r\nafter an Order for Verification and Credit Issuance\r\nservices from a Buyer and once a Verified Removal has\r\ntaken place.\r\nLeakage\r\nThe increase in GHG emissions outside the geographic or\r\ntemporal boundary of a project that results from that\r\nproject's activities.\r\nLosses\r\nfor open systems, biogeochemical and/or physical\r\ninteractions which occur during the removal process that\r\ndecrease the CO₂ removal .\r\nMateriality\r\nAn acceptable difference between reported\r\nRemovals/emissions and what an auditor determines is\r\nthe actual Removal/emissions.\r\nModel\r\nA calculation, series of calculations or simulations that\r\nuse input variables in order to generate values for\r\nvariables of interest that are not directly measured.\r\nModule\r\nIndependent components of Isometric Certified Protocols\r\nwhich are transferable between and applicable to\r\ndifferent Protocols.\r\nMonitoring, Reporting, and Verification (MRV)\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 94/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 95 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "The multi-step process to _monitor_ the Removals and\r\nimpacts of a Project, report the findings to an accredited\r\nthird party, and have this third party Verify the report so\r\nthat the results can be Certified.\r\nOfftake\r\nA contract in which a Buyer agrees to purchase a set\r\nRemoval at a set price.\r\nPathway\r\nA collection of Removal processes that have mechanisms\r\nin common.\r\nProject\r\nAn activity or process or group of activities or processes\r\nthat alter the condition of a Baseline and leads to\r\nRemovals.\r\nProject Design Document\r\nThe document, written by a Project Proponent, which\r\nrecords key characteristics of a Project and which forms\r\nthe basis for Project Validation and evaluation in\r\naccordance with the relevant Certified Protocol. (Also\r\nknown as “PDD”).\r\nProject Proponent\r\nThe organization that develops and/or has overall legal\r\nownership or control of a Removal Project.\r\nProject boundary\r\nThe defined temporal and geographical boundary of a\r\nProject.\r\nProtocol\r\nA document that describes how to quantitatively assess\r\nthe net amount of CO₂ removed by a process. To\r\nIsometric, a Protocol is specific to a Project Proponent's\r\nprocess and comprised of Modules representing the\r\nCarbon Fluxes involved in the CDR process. A Protocol\r\nmeasures the full carbon impact of a process against the\r\nBaseline of it not occurring.\r\nProxy\r\nA measurement which correlates with but is not a direct\r\nmeasurement of the variable of interest.\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 95/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 96 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "RP\r\nReporting Period\r\nRegistry\r\nA database that holds information on Verified Removals\r\nbased on Protocols. Registries Issue Credits, and track\r\ntheir ownership and Retirement.\r\nRemoval\r\nThe term used to represent the CO₂ taken out of the\r\natmosphere as a result of a CDR process.\r\nReplacement Emissions\r\nAny emissions that occur to compensate for biomass that\r\nwas previously serving another purpose and is now being\r\nused for carbon removal. For example, if agricultural waste\r\nwas previously left on a field to decompose - fertilizer\r\nproduction to replace those nutrients need to be\r\naccounted for.\r\nResidue\r\nA product that is not an economic driver of the process it\r\nis produced in.\r\nReversal\r\nThe escape of CO₂ to the atmosphere after it has been\r\nstored, and after a Credit has been Issued. A Reversal is\r\nclassified as avoidable if a Project Proponent has\r\ninfluence or control over it and it likely could have been\r\naverted through application of reasonable risk mitigation\r\nmeasures. Any other Reversals will be classified as\r\nunavoidable.\r\nSSRs\r\nSources, Sinks and Reservoirs\r\nSensitivity Analysis\r\nAn analysis of how much different components in a Model\r\ncontribute to the overall Uncertainty.\r\nSink\r\nAny process, activity, or mechanism that removes a\r\ngreenhouse gas, a precursor to a greenhouse gas, or an\r\naerosol from the atmosphere.\r\nSource\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 96/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 97 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Any process or activity that releases a greenhouse gas, an\r\naerosol, or a precursor of a greenhouse gas into the\r\natmosphere.\r\nStakeholder\r\nAny person or entity who can potentially affect or be\r\naffected by Isometric or an individual Project activity.\r\nStorage\r\nDescribes the addition of carbon dioxide removed from\r\nthe atmosphere to a reservoir, which serves as its ultimate\r\ndestination. This is also referred to as “sequestration”\r\n.\r\nSystem Boundary\r\nGHG sources, sinks and reservoirs (SSRs) associated with\r\nthe project boundary and included in the GHG Statement.\r\nUncertainty\r\nA lack of knowledge of the exact amount of CO₂ removed\r\nby a particular process, Uncertainty may be quantified\r\nusing probability distributions, confidence intervals, or\r\nvariance estimates.\r\nValidation\r\nA systematic and independent process for evaluating the\r\nreasonableness of the assumptions, limitations and\r\nmethods that support a Project and assessing whether\r\nthe Project conforms to the criteria set forth in the\r\nIsometric Standard and the Protocol by which the Project\r\nis governed. Validation must be completed by an\r\nIsometric approved third-party (VVB).\r\nValidation and Verification Bodies (VVBs)\r\nThird-party auditing organizations that are experts in their\r\nsector and used to determine if a project conforms to the\r\nrules, regulations, and standards set out by a governing\r\nbody. A VVB must be approved by Isometric prior to\r\nconducting validation and verification.\r\nVerification\r\nA process for evaluating and confirming the net Removals\r\nfor a Project, using data and information collected from\r\nthe Project and assessing conformity with the criteria set\r\nforth in the Isometric Standard and the Protocol by which\r\nit is governed. Verification must be completed by an\r\nIsometric approved third-party (VVB).\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 97/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 98 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Waste product\r\nAn output of a process that has no intended value to the\r\nproducer.\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 98/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 99 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "17.0\r\nRelevant Works\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 99/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 100 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "1. Neves, E. G., Petersen, J. B., Bartone, R. N., &\r\nHeckenberger, M. J. (2004). The timing of Terra Preta\r\nformation in the central Amazon: Archaeological data\r\nfrom three sites. In B. Glaser & W. I. Woods (Eds.),\r\nAmazonian dark earths: Explorations in space and time\r\n(pp. [page range]). Springer. https://doi.org/10.1007/978-\r\n3-662-05683-7_9 ↩\r\n2. Wiedner, K., Schneeweiß, J., Dippold, M. A., & Glaser, B.\r\n(2015). Anthropogenic dark earth in northern Germany—\r\nThe Nordic analogue to terra preta de Índio in\r\nAmazonia. CATENA, 132, 114-125.\r\nhttps://doi.org/10.1016/j.catena.2014.10.024 ↩\r\n3. Downie, A. E., Van Zwieten, L., Smernik, R. J., Morris, S., &\r\nMunroe, P. R. (2011). Terra Preta Australis: Reassessing\r\nthe carbon storage capacity of temperate soils.\r\nAgriculture, Ecosystems & Environment, 140(1-2), 137-147.\r\nhttps://doi.org/10.1016/j.agee.2010.11.020 ↩\r\n4. Solomon, D., Lehmann, J., Fraser, J. A., Leach, M.,\r\nAmanor, K., Frausin, V., Kristiansen, S. M., Millimouno, D.,\r\n& Fairhead, J. (2016). Indigenous African soil enrichment\r\nas a climate-smart sustainable agriculture alternative.\r\nFrontiers in Ecology and the Environment, 14(2), 71-76.\r\nhttps://doi.org/10.1002/fee.1226 ↩\r\n5. Singh, N., Abiven, S., Torn, M. S., & Schmidt, M. W. I.\r\n(2012). Fire-derived organic carbon in soil turns over on\r\na centennial scale. Biogeosciences, 9, 2847-2857.\r\nhttps://doi.org/10.5194/bg-9-2847-2012 ↩\r\n6. Reisser, M., Purves, R. S., Schmidt, M. W. I., & Abiven, S.\r\n(2016). Pyrogenic carbon in soils: A literature-based\r\ninventory and a global estimation of its content in soil\r\norganic carbon and stocks. Frontiers in Earth Science, 4,\r\n80. https://doi.org/10.3389/feart.2016.00080 ↩\r\n7. Schiedung, M., Ascough, P., Bellè, S.-L., Bird, M. I., Bröder,\r\nL., Haghipour, N., Hilton, R. G., Lattaud, J., & Abiven, S.\r\n(2024). Millennial-aged pyrogenic carbon in high￾03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 100/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 101 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "latitude mineral soils. Communications Earth &\r\nEnvironment, 5, 177. https://doi.org/10.1038/s43247-024-\r\n01343-5 ↩\r\n8. Zhang, X., Yang, X., Yuan, X., Cao, Y., Zhang, B., Cao, Y., &\r\nChen, Y. (2022). Effect of pyrolysis temperature on\r\ncomposition, carbon fraction and abiotic stability of\r\nstraw biochars: Correlation and quantitative analysis.\r\nCarbon Research, 1, 17. https://doi.org/10.1007/s44246-\r\n022-00017-1 ↩\r\n9. Howell, A., Helmkamp, S., & Belmont, E. (2022). Stable\r\npolycyclic aromatic carbon (SPAC) formation in wildfire\r\nchars and engineered biochars. Science of The Total\r\nEnvironment, 849, 157610.\r\nhttps://doi.org/10.1016/j.scitotenv.2022.157610 ↩\r\n10. Yao, C., Wang, B., Zhang, J., Faheem, M., Feng, Q.,\r\nHassan, M., ... & Wang, S. (2024). Formation mechanisms\r\nand degradation methods of polycyclic aromatic\r\nhydrocarbons in biochar: A review. Journal of\r\nEnvironmental Management, 357, 120610.↩ ↩ ↩\r\n11. Wang, J., Xia, K., Waigi, M. G., Gao, Y., Odinga, E. S., Ling,\r\nW., & Liu, J. (2018). Application of biochar to soils may\r\nresult in plant contamination and human cancer risk due\r\nto exposure of polycyclic aromatic hydrocarbons.\r\nEnvironment International, 121, 169-177.↩\r\n12. Human health effects of polycyclic aromatic\r\nhydrocarbons as ambient air pollutants: report of the\r\nWorking Group on Polycyclic Aromatic Hydrocarbons of\r\nthe Joint Task Force on the Health Aspects of Air\r\nPollution. Copenhagen: WHO Regional Office for\r\nEurope; 2021. Licence: CC BY-NC-SA 3.0 IGO.↩\r\n13. Schneider, L., Schallert, B., & Kizzier, K. (2022).\r\nMethodology for assessing the quality of carbon credits\r\n(Version 3.0). Carbon Credit Quality Initiative.\r\nhttps://carboncreditquality.org/download/Methodology\r\n/CCQI%20Methodology%20-%20Version%203.0.pdf ↩\r\n2 3\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 101/103"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 102 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "Robert Brown, Ph.D.\r\nRyan Penney, Ph.D.\r\nSophie Gill, Ph.D.\r\nEmma Marsland\r\nJasmin Kazazi\r\nChris Pollard\r\nMarya Matlin-Wainer\r\nv1.1\r\nUpdated site visit and sampling guidance, with reference added to new/updated storage modules.\r\n14. British Standards Institution. (2011). Sustainability of\r\nconstruction works — Assessment of environmental\r\nperformance of buildings — Calculation method (BS EN\r\n15978:2011). BSI.↩ ↩ ↩ ↩ ↩ ↩ ↩\r\n15. NIST. (2023). Specifications, Tolerances, and Other\r\nTechnical Requirements for Weighing and Measuring\r\nDevices - 2023 Edition. NIST.\r\nhttps://www.nist.gov/pml/owm/publications/nist￾handbooks/handbook-44-current-edition ↩\r\n2 3 4 5 6 7\r\nContributors\r\nChangelog\r\nCERTIFIED\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 102/103"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 102 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 103 / 103>"
+    },
+    {
+      "type": "text",
+      "text": "v1.0\r\nInitial Release\r\nBiochar Production and Storage © 2025 Isometric HQ Ltd is licensed under CC BY-NC-ND 4.0\r\nCERTIFIED\r\n03/02/2026, 10:56 Biochar Production and Storage v1.2 — Isometric\r\nhttps://registry.isometric.com/protocol/biochar/1.2 103/103"
+    }
+  ],
+  "has_more": false,
+  "next_page": null
+}

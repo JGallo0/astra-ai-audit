@@ -1,0 +1,187 @@
+{
+  "object": "vector_store.file_content.page",
+  "data": [
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 1 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "BiocharProduction in\r\nDistributed and Small Scale\r\nProjects\r\nThis module details durability and monitoring requirements\r\nfor biochar production in distributed and small scale\r\nprojects.\r\nCapture &\r\nConversion\r\nModule\r\nv1.0\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 1/20"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 2 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "1 Introduction\r\n2 Ineligible Projects\r\n3 Centralized Project Management\r\n4 Digital Measurement, Reporting, and Verification (dMRV) System\r\n5 Quantification and Monitoring\r\n6 Feedstock Eligibility and Traceability\r\n7 Feedstock Treatment and Moisture\r\n8 Biochar Characterization\r\n9 Financial Incentives for Biochar Production\r\n10 Training of Technicians\r\n11 Validation\r\n12 Definitions and Acronyms\r\n13 Relevant Works\r\nFootnotes\r\nContributors\r\nChangelog\r\nContents\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 2/20"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 3 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "The inclusion of distributed and small-scale projects allow\r\nprojects in rural and agricultural settings where biomass\r\nfeedstocks are often abundant, but the infrastructure for its\r\ntransport to large-scale, centralized facilities is often\r\nlacking, cost-prohibitive, or energy-intensive. Localized\r\nproduction of biochar facilitates the conversion of biomass\r\nresidues into a stable carbon material which may also be an\r\neffective soil amendment, which can improve soil health and\r\nincrease crop yields. This approach aligns with on-farm\r\ncircular economy principles, where feedstock is sourced\r\nfrom the land and the resulting biochar is deployed back\r\ninto the same soil, creating a closed-loop or short supply\r\nchain system that maximizes both carbon sequestration and\r\nlocal economic benefits.\r\nThis section outlines the specific requirements for projects\r\nthat employ distributed or artisan-scale biochar production\r\nunits. These projects are characterized by a decentralized\r\nnetwork of smaller production facilities, each with a nominal\r\nannual biochar production capacity of less than 500 metric\r\ntons, although this is not a binding definition of Projects that\r\nmay qualify under this project type. The primary aim of these\r\nprovisions is to ensure the same level of data integrity,\r\nverifiability, and environmental safeguards as large-scale\r\nprojects, while accounting for the unique operational\r\nchallenges of a distributed model.\r\nDue to the potential variability in biochar production\r\noperating conditions, which can lead to differences in the\r\nphysicochemical properties of the resulting biochar and\r\nconsequently its durability, these projects are only eligible\r\nfor crediting through the 200 year option of the Biochar\r\nStorage in Soil Environments Module.\r\n1.0\r\nIntroduction\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 3/20"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 3 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 4 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "Isometric will not credit Projects using unmodified pit, flame\r\ncurtain or Kon Tiki style kilns. These styles of kiln are\r\nineligible due to the difficulty in measurement and\r\nquantification of carbon losses through gaseous emission,\r\nnamely due to the lack of chimney or stack. The quality of the\r\nbiochar produced may also be influenced by the\r\nenvironmental conditions, such as relative humidity and\r\nrainfall. Additionally, the risk of high CH emissions,\r\nparticularly from the improperly prepared i.e. moist\r\nfeedstock or an inefficient pyrolysis event, is increased.\r\nAlthough CH has a GWP of 28 and is a relatively short￾lived GHG, it has a GWP of ~86 CO e, therefore its impact\r\non the total project on the carbon removal potential of a\r\nproject is likely to be considerable, and may even render a\r\nProject net-emitting.\r\n2.0\r\nIneligible Projects\r\n4\r\n4 100\r\n20 2\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 4/20"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 4 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 5 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "A single, legally-recognized entity (an individual or\r\norganization) must be designated as the Project Proponent.\r\nThis entity is responsible for all aspects of The Project,\r\nincluding:\r\nEnrollment of all participating distributed units.\r\nImplementation and management of the Digital\r\nMeasurement, Reporting, and Verification (dMRV)\r\nsystem.\r\nTraining of kiln operators and supervisors.\r\nAggregation and storage of all project data.\r\nPreparation and submission of all data and\r\ndocumentation for project validation and verification.\r\nEnsuring compliance with all Protocol requirements\r\nacross all units.\r\nMaintenance of an inventory of all approved biochar\r\nproducers and their units.\r\n3.0\r\nCentralized Project\r\nManagement\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 5/20"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 5 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 6 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "A robust dMRV system is required to ensure the traceability\r\nand integrity of data from each distributed unit. The system\r\nmust allow secure data collection, transfer and storage\r\naccessible only by Project Proponent and accredited\r\nverifiers (i.e., the Validation and Verification Body (VVB)) and\r\nIsometric. For example, this must involve:\r\nA secure, cloud-based platform for data collection and\r\nstorage. Each unit's data must be time-stamped upon\r\ntransmission to the central database to prevent\r\ntampering (encryption recommended). Data should be\r\ntransmitted from the user's device to a secure central\r\ndatabase. Access to the raw data must be restricted to\r\nThe Project Proponent and accredited VVBs and\r\nIsometric.\r\nAn application or a simple web interface for individual\r\nproducers to input data related to each biochar batch.\r\nThis interface should be designed for ease of use and\r\nprompt for all required data points.\r\nAutomatically flagging data anomalies, such as sensor\r\nreadings outside of expected ranges or incomplete\r\nbatch records.\r\nThe Project Proponent is responsible for checking data and\r\ninvestigating any anomalies and or flagged instances and\r\nproviding justification before data is submitted for\r\nverification.\r\n4.0\r\nDigital Measurement, Reporting,\r\nand Verification (dMRV) System\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 6/20"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 7 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "Each distributed unit must be equipped with sensors and\r\nhave an established monitoring framework to ensure\r\naccurate quantification of carbon removal, including:\r\nEach pyrolysis unit must be equipped with a reliable\r\ntemperature sensor, located in the pyrolysis chamber or\r\nflue stack, able to accurately monitor the temperature of\r\nproduction and capable of logging data throughout the\r\nentire production run.\r\nA timer or similar mechanism must track the production\r\nduration of each batch.\r\nReal time monitoring of both the flue gas flow and\r\ncomposition is recommended. In the absence of real\r\ntime data, each production unit is required to undergo\r\nannual emissions testing in accordance with Section\r\n10.1.1.2 of the Biochar Production and Storage Protocol,\r\nmeasuring gas flow and emissions. This emissions test\r\nshould be representative of the full pyrolysis operation\r\nof the kiln, including quenching, if appropriate.\r\nThe most conservative scenario for CO e emissions\r\n(i.e. highest emissions) and flue gas flow (i.e.,\r\nhighest flow rate) from emissions tests across The\r\nProject shall be used to calculate CO e losses per\r\nbatch, and this value must be applied for all\r\nbatches produced.\r\nIf a project contains more than 100 distributed kilns the\r\nmost conservative 5% results may be removed from the\r\ncalculation, providing they are classified as outliers\r\n5.0\r\nQuantification and Monitoring\r\n2\r\n2\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 7/20"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 8 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "using the Tukey method (i.e., > third quartile + 1.5 x the\r\ninterquartile range).\r\nThe mass of both the feedstock input and the resulting\r\nbiochar must be measured and recorded for each batch\r\nusing calibrated scales of an appropriate accuracy.\r\nThese records, along with the kiln sensor data, must be\r\nsubmitted to the dMRV system.\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 8/20"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 9 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "Only feedstock types from a pre-approved list are\r\neligible for use in these projects. This list shall be\r\nsubmitted alongside the Project Design Document PDD\r\nby The Project Proponent. Biomass feedstocks must\r\ncomply with the eligibility criteria of the Biomass\r\nFeedstock Accounting Module.\r\nEach feedstock batch must be documented, including\r\nits source, type, and weight. The Project Proponent\r\nshould limit the number of approved feedstock types to\r\nsimplify traceability. For on-farm circular models, a\r\ndetailed map and description of the feedstock source\r\narea and previous cropping patterns are required.\r\n6.0\r\nFeedstock Eligibility and\r\nTraceability\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 9/20"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 10 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "Feedstock moisture content is well documented to cause\r\ninefficient pyrolysis, leading to increases in CH emissions,\r\nwhile feedstock moisture below 15% is shown to significantly\r\nreduce CH emissions . Thus, to mitigate the risk of high CH\r\nemissions, feedstock preparation is critical. As such The\r\nProject Proponent must:\r\nEnsure that participating producers have a system for\r\nhomogenous drying of feedstock.\r\nEnsure the moisture of a feedstock is quantified, using a\r\ndigital moisture meter, ideally integrated into the dMRV\r\napplication, immediately before starting biochar\r\nproduction.\r\nMeasure a specified number of moisture be\r\nrandomly taken per production run to ensure\r\nmoisture homogeneity. A minimum ratio of 1 sample\r\nper 100 kg of feedstock must be used to account for\r\nheterogeneity, with a minimum total number of 15\r\nmeasurements per batch.\r\nEnsure production does not start if the average\r\nmoisture level of the feedstock for a given batch\r\nexceeds 15% (dry basis), and feedstock must be\r\nfurther dried to below this threshold. Batches that\r\nare produced from feedstock over 15% moisture will\r\nbe ineligible for crediting.\r\n7.0\r\nFeedstock Treatment and\r\nMoisture\r\n4\r\n4\r\n1\r\n4\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 10/20"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 11 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "A \"batch\" of biochar for a distributed unit in a single location\r\nmay be grouped from multiple production batches if they\r\nmeet the following criteria:\r\nProduction Parameters:\r\nA batch consists of biochar produced under\r\nconsistent pyrolysis conditions and single\r\nfeedstock, as evidenced by minimal variation (less\r\nthan 5 % variance) in logged temperature and\r\nduration (i.e., operating time) data.\r\nTemporal Limit:\r\nA batch cannot continue for more than a maximum\r\nof one month consecutive days of production from a\r\nsingle unit. This temporal limit is to simplify data\r\naggregation and verification and guarantee a\r\nminimum sampling frequency.\r\n8.0\r\nBiochar Characterization\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 11/20"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 12 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "If Project Proponents wish to operate a model whereby the\r\noperators receive money for the biochar produced then\r\nProject Proponents must clearly evidence how this does not\r\nincentivize biochar production volume, but instead the\r\noutcome of the production, e.g., the quality and durability of\r\nthe biochar created, for example only being paid for certified\r\ncarbon removal.\r\n9.0\r\nFinancial Incentives for Biochar\r\nProduction\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 12/20"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 13 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "To ensure the safe, efficient, and standardized production of\r\nbiochar, all kiln operators and supervisors must undergo\r\ncomprehensive training before engaging in production\r\nactivities. Training must be documented in the PDD and\r\ncover at minimum; safe operation of the kiln, health, safety\r\nand environmental standards, and measurement and record\r\nkeeping.\r\nAdditionally, to ensure the integrity, accuracy, and credibility\r\nof monitoring, reporting, and verification (MRV) data, there\r\nmust be a clear separation of responsibilities between\r\nindividuals involved in biochar production and those\r\nresponsible for data review and reporting. This separation\r\nhelps mitigate risks of conflicts of interest, intentional data\r\nmanipulation, and unintentional reporting errors.\r\nOperators:\r\nResponsible for the production of biochar\r\naccording to defined procedures.\r\nRecord operational notes (e.g., start/stop times,\r\nanomalies) in a local logbook for internal use only.\r\nDo not directly input data into the digital\r\nMonitoring, Reporting, and Verification (dMRV)\r\nsystem.\r\nSupervisors:\r\nResponsible for reviewing operators’ logbooks and\r\nverifying completeness.\r\nEnter operational data into the dMRV system,\r\nensuring accuracy and consistency with physical\r\nrecords, if applicable.\r\nApprove and sign off on all data before submission.\r\n10.0\r\nTraining of Technicians\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 13/20"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 13 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 14 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "Operators and supervisors should undergo refresher training\r\nat least during the duration of The Project, or whenever there\r\nare significant changes to kiln technology, data collection\r\ntools, or crediting methodologies.\r\n11.0\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 14/20"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 15 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "To ensure the integrity of the data and project operations,\r\nthe VVB will conduct on-site visits.\r\nA statistically valid sample of participating distributed\r\nsites must be selected for physical inspection by the\r\nVVB at validation. At minimum, this should be > 5 % of\r\nsites operating.\r\nAdditionally VVBs will inspect 10 % of net-new facilities\r\nper year\r\nOn-site validation activities shall include:\r\nReview of feedstock and biochar mass records.\r\nInspection of the production unit and monitoring\r\nequipment.\r\nOversight of a full, representative production run.\r\nCross-referencing of physical records with data in\r\nthe dMRV system, if applicable.\r\nInterviews with the biochar operator and supervisor\r\nto confirm operational procedures.\r\nValidation\r\n12.0\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 15/20"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 16 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "Activity\r\nThe steps of a Project Proponent’s Removal process that\r\nresult in carbon fluxes. The carbon flux associated with an\r\nactivity is a component of the Project Proponent’s\r\nProtocol.\r\nConservative\r\nPurposefully erring on the side of caution under\r\nconditions of Uncertainty by choosing input parameter\r\nvalues that will result in a lower net CO₂ Removal than if\r\nusing the median input values. This is done to increase\r\nthe likelihood that a given Removal calculation is an\r\nunderestimation rather than an overestimation.\r\nCredit\r\nA publicly visible uniquely identifiable Credit Certificate\r\nIssued by a Registry that gives the owner of the Credit the\r\nright to account for one net metric tonne of Verified CO₂e\r\nRemoval. In the case of this Standard, the net tonne of\r\nCO₂e Removal comes from a Project Validated against a\r\nCertified Protocol.\r\nDurability\r\nThe amount of time carbon removed from the atmosphere\r\nby an intervention – for example, a CDR project – is\r\nexpected to reside in a given Reservoir, taking into\r\naccount both physical risks and socioeconomic\r\nconstructs (such as contracts) to protect the Reservoir in\r\nquestion.\r\nEmissions\r\nThe term used to describe greenhouse gas emissions to\r\nthe atmosphere as a result of Project activities.\r\nFeedstock\r\nRaw material which is used for CO₂ Removal.\r\nGreenhouse Gas (GHG)\r\nThose gaseous constituents of the atmosphere, both\r\nnatural and anthropogenic (human-caused), that absorb\r\nand emit radiation at specific wavelengths within the\r\nspectrum of terrestrial radiation emitted by the Earth’s\r\nDefinitions and Acronyms\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 16/20"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 17 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "surface, by the atmosphere itself, and by clouds. This\r\nproperty causes the greenhouse effect, whereby heat is\r\ntrapped in Earth’s atmosphere (CDR Primer, 2022).\r\nLosses\r\nfor open systems, biogeochemical and/or physical\r\ninteractions which occur during the removal process that\r\ndecrease the CO₂ removal .\r\nMonitoring, Reporting, and Verification (MRV)\r\nThe multi-step process to _monitor_ the Removals and\r\nimpacts of a Project, report the findings to an accredited\r\nthird party, and have this third party Verify the report so\r\nthat the results can be Certified.\r\nProject\r\nAn activity or process or group of activities or processes\r\nthat alter the condition of a Baseline and leads to\r\nRemovals.\r\nProject Design Document (PDD)\r\nThe document that clearly outlines how a Project will\r\ngenerate rigorously quantifiable Additional high-quality\r\nRemovals.\r\nProject Proponent\r\nThe organization that develops and/or has overall legal\r\nownership or control of a Removal Project.\r\nRemoval\r\nThe term used to represent the CO₂ taken out of the\r\natmosphere as a result of a CDR process.\r\nResidue\r\nA product that is not an economic driver of the process it\r\nis produced in.\r\nValidation\r\nA systematic and independent process for evaluating the\r\nreasonableness of the assumptions, limitations and\r\nmethods that support a Project and assessing whether\r\nthe Project conforms to the criteria set forth in the\r\nIsometric Standard and the Protocol by which the Project\r\nis governed. Validation must be completed by an\r\nIsometric approved third-party (VVB).\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 17/20"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 18 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "Validation and Verification Bodies (VVBs)\r\nThird-party auditing organizations that are experts in their\r\nsector and used to determine if a project conforms to the\r\nrules, regulations, and standards set out by a governing\r\nbody. A VVB must be approved by Isometric prior to\r\nconducting validation and verification.\r\n13.0\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 18/20"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 19 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "Relevant Works\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 19/20"
+    },
+    {
+      "type": "text",
+      "text": "<PARSED TEXT FOR PAGE: 20 / 20>"
+    },
+    {
+      "type": "text",
+      "text": "Robert Brown, Ph.D.\r\nRyan Penney, Ph.D.\r\nv1.0\r\nInitial Release\r\nBiochar Production in Distributed and Small Scale Projects © 2025 Isometric HQ Ltd is licensed under CC\r\nBY-NC-ND 4.0\r\n1. Cornelissen, G., Sørmo, E., Anaya de la Rosa, R. K., &\r\nLadd, B. (2023). Flame curtain kilns produce biochar\r\nfrom dry biomass with minimal methane emissions.\r\nScience of The Total Environment, 903, 166547.\r\nhttps://doi.org/10.1016/j.scitotenv.2023.166547 ↩\r\nContributors\r\nChangelog\r\nCERTIFIED\r\n03/02/2026, 10:56 Biochar Production in Distributed and Small Scale Projects v1.0 — Isometric\r\nhttps://registry.isometric.com/module/biochar-production-distributed-small-scale/1.0 20/20"
+    },
+    {
+      "type": "text",
+      "text": "<IMAGE FOR PAGE: 20 / 20>"
+    }
+  ],
+  "has_more": false,
+  "next_page": null
+}
