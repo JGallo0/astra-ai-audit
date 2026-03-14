@@ -47,6 +47,41 @@ def get_config_value(name: str, default: Optional[str] = None) -> Optional[str]:
     return str(value)
 
 
+def get_bool_config(name: str, default: bool = False) -> bool:
+    value = get_config_value(name, str(default).lower())
+    return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def get_int_config(name: str, default: int) -> int:
+    try:
+        return int(get_config_value(name, str(default)))
+    except Exception:
+        return default
+
+
+def get_list_config(name: str, default: Optional[List[str]] = None) -> List[str]:
+    """
+    Lê listas tanto em formato CSV quanto em listas reais do st.secrets.
+    """
+    default = default or []
+
+    try:
+        if name in st.secrets:
+            value = st.secrets[name]
+            if isinstance(value, list):
+                return [str(x).strip().lower() for x in value if str(x).strip()]
+            if isinstance(value, str):
+                return [x.strip().lower() for x in value.split(",") if x.strip()]
+    except Exception:
+        pass
+
+    raw = os.getenv(name)
+    if raw:
+        return [x.strip().lower() for x in raw.split(",") if x.strip()]
+
+    return [str(x).strip().lower() for x in default if str(x).strip()]
+
+
 OPENAI_API_KEY = get_config_value("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY não encontrada em st.secrets nem no .env")
@@ -64,6 +99,42 @@ METHODOLOGY_VECTOR_STORE_ID = get_config_value(
 )
 
 LOGO_PATH = get_config_value("ASTRACARBON_LOGO_PATH", "assets/logo_astracarbon.jpg")
+
+# =========================
+# ACCESS / AUTH CONFIG
+# =========================
+
+AUTH_REQUIRED = get_bool_config("AUTH_REQUIRED", False)
+ALLOW_LOCAL_BYPASS = get_bool_config("ALLOW_LOCAL_BYPASS", True)
+
+ALLOWED_EMAILS = get_list_config("ALLOWED_EMAILS", [])
+ALLOWED_DOMAINS = get_list_config("ALLOWED_DOMAINS", [])
+ADMIN_EMAILS = get_list_config("ADMIN_EMAILS", [])
+INTERNAL_DOMAINS = get_list_config("INTERNAL_DOMAINS", [])
+
+DEFAULT_ROLE = get_config_value("DEFAULT_ROLE", "pilot_client")
+
+# Limites por sessão/mês (MVP)
+ADMIN_CHAT_LIMIT = get_int_config("ADMIN_CHAT_LIMIT", 9999)
+ADMIN_STRUCTURED_AUDIT_LIMIT = get_int_config("ADMIN_STRUCTURED_AUDIT_LIMIT", 9999)
+ADMIN_REPORT_LIMIT = get_int_config("ADMIN_REPORT_LIMIT", 9999)
+ADMIN_MATRIX_LIMIT = get_int_config("ADMIN_MATRIX_LIMIT", 9999)
+ADMIN_DEEP_DIVE_LIMIT = get_int_config("ADMIN_DEEP_DIVE_LIMIT", 9999)
+ADMIN_FULL_AUDIT_LIMIT = get_int_config("ADMIN_FULL_AUDIT_LIMIT", 9999)
+
+INTERNAL_CHAT_LIMIT = get_int_config("INTERNAL_CHAT_LIMIT", 500)
+INTERNAL_STRUCTURED_AUDIT_LIMIT = get_int_config("INTERNAL_STRUCTURED_AUDIT_LIMIT", 100)
+INTERNAL_REPORT_LIMIT = get_int_config("INTERNAL_REPORT_LIMIT", 100)
+INTERNAL_MATRIX_LIMIT = get_int_config("INTERNAL_MATRIX_LIMIT", 100)
+INTERNAL_DEEP_DIVE_LIMIT = get_int_config("INTERNAL_DEEP_DIVE_LIMIT", 100)
+INTERNAL_FULL_AUDIT_LIMIT = get_int_config("INTERNAL_FULL_AUDIT_LIMIT", 50)
+
+PILOT_CHAT_LIMIT = get_int_config("PILOT_CHAT_LIMIT", 50)
+PILOT_STRUCTURED_AUDIT_LIMIT = get_int_config("PILOT_STRUCTURED_AUDIT_LIMIT", 10)
+PILOT_REPORT_LIMIT = get_int_config("PILOT_REPORT_LIMIT", 10)
+PILOT_MATRIX_LIMIT = get_int_config("PILOT_MATRIX_LIMIT", 10)
+PILOT_DEEP_DIVE_LIMIT = get_int_config("PILOT_DEEP_DIVE_LIMIT", 10)
+PILOT_FULL_AUDIT_LIMIT = get_int_config("PILOT_FULL_AUDIT_LIMIT", 5)
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -281,57 +352,12 @@ DEFAULT_STATE = {
     "last_full_audit_summary": {},
     "last_full_audit_df": pd.DataFrame(),
     "last_full_audit_run_id": "",
+    "usage_counters": {},
 }
 
 for key, value in DEFAULT_STATE.items():
     if key not in st.session_state:
         st.session_state[key] = value
-
-# =========================================================
-# SIDEBAR
-# =========================================================
-
-with st.sidebar:
-    st.subheader("Modo da IA")
-
-    app_mode = st.radio(
-        "Modo de operação",
-        [
-            "Chat técnico",
-            "Auditoria completa Isometric",
-        ],
-        index=0
-    )
-
-    st.divider()
-
-    st.write("Bases consultadas:")
-    st.write("• PRJ_Nova_Esperanca")
-    st.write("• Isometric_Methodology")
-    st.write(f"**Modelo:** `{MODEL_NAME}`")
-
-    st.divider()
-
-    show_sources = st.checkbox("Mostrar fontes utilizadas", value=True)
-    show_snippets = st.checkbox("Mostrar trechos recuperados", value=True)
-    show_attributes = st.checkbox("Mostrar atributos técnicos", value=False)
-    show_raw_json = st.checkbox("Mostrar JSON bruto", value=False)
-
-    st.divider()
-
-    st.write("**Precisão fixa:** máxima")
-    st.write(f"Projeto: {PROJECT_MAX_RESULTS} trechos")
-    st.write(f"Metodologia: {METHODOLOGY_MAX_RESULTS} trechos")
-
-    st.divider()
-
-    st.write("**Logo configurada:**")
-    st.code(LOGO_PATH)
-
-    if st.button("Limpar conversa / sessão"):
-        for key, value in DEFAULT_STATE.items():
-            st.session_state[key] = value
-        st.rerun()
 
 # =========================================================
 # HELPERS
@@ -516,7 +542,7 @@ def try_parse_json(text: str) -> Optional[Dict[str, Any]]:
     return None
 
 
-def render_sources_block(title: str, sources: List[Dict[str, Any]]):
+def render_sources_block(title: str, sources: List[Dict[str, Any]], show_attributes: bool, show_snippets: bool):
     st.subheader(title)
 
     if not sources:
@@ -723,6 +749,243 @@ def build_full_audit_text(summary: Dict[str, Any], results: List[Dict[str, Any]]
         lines.append("")
 
     return "\n".join(lines)
+
+# =========================================================
+# AUTH / ACCESS / USAGE
+# =========================================================
+
+def auth_available() -> bool:
+    return hasattr(st, "login") and hasattr(st, "logout") and hasattr(st, "user")
+
+
+def running_localhost() -> bool:
+    return "localhost" in get_config_value("BASE_URL", "http://localhost:8501").lower() or \
+           os.getenv("STREAMLIT_SERVER_HEADLESS") != "true"
+
+
+def get_user_info() -> Dict[str, str]:
+    """
+    Normaliza identidade do usuário. Se auth não estiver configurado e o bypass local estiver ligado,
+    cria um usuário local de desenvolvimento.
+    """
+    if auth_available() and getattr(st.user, "is_logged_in", False):
+        email = safe_str(getattr(st.user, "email", "")).strip().lower()
+        name = safe_str(getattr(st.user, "name", "")).strip() or email or "Usuário autenticado"
+        return {
+            "is_logged_in": True,
+            "email": email,
+            "name": name,
+            "auth_mode": "oidc"
+        }
+
+    if not AUTH_REQUIRED and ALLOW_LOCAL_BYPASS:
+        return {
+            "is_logged_in": True,
+            "email": "local.dev@aia.local",
+            "name": "Local Dev",
+            "auth_mode": "local_bypass"
+        }
+
+    return {
+        "is_logged_in": False,
+        "email": "",
+        "name": "",
+        "auth_mode": "none"
+    }
+
+
+def email_domain(email: str) -> str:
+    email = (email or "").strip().lower()
+    if "@" not in email:
+        return ""
+    return email.split("@", 1)[1]
+
+
+def is_user_allowed(email: str) -> bool:
+    email = (email or "").strip().lower()
+    domain = email_domain(email)
+
+    if not email:
+        return False
+
+    if email in ADMIN_EMAILS:
+        return True
+
+    if ALLOWED_EMAILS and email in ALLOWED_EMAILS:
+        return True
+
+    if ALLOWED_DOMAINS and domain in ALLOWED_DOMAINS:
+        return True
+
+    if INTERNAL_DOMAINS and domain in INTERNAL_DOMAINS:
+        return True
+
+    if not ALLOWED_EMAILS and not ALLOWED_DOMAINS and not INTERNAL_DOMAINS and not ADMIN_EMAILS:
+        return True
+
+    return False
+
+
+def get_user_role(email: str) -> str:
+    email = (email or "").strip().lower()
+    domain = email_domain(email)
+
+    if not email:
+        return "blocked"
+
+    if email in ADMIN_EMAILS:
+        return "admin"
+
+    if domain in INTERNAL_DOMAINS:
+        return "internal"
+
+    if is_user_allowed(email):
+        return DEFAULT_ROLE
+
+    return "blocked"
+
+
+def get_role_limits(role: str) -> Dict[str, int]:
+    if role == "admin":
+        return {
+            "chat": ADMIN_CHAT_LIMIT,
+            "structured_audit": ADMIN_STRUCTURED_AUDIT_LIMIT,
+            "report": ADMIN_REPORT_LIMIT,
+            "matrix": ADMIN_MATRIX_LIMIT,
+            "deep_dive": ADMIN_DEEP_DIVE_LIMIT,
+            "full_audit": ADMIN_FULL_AUDIT_LIMIT,
+        }
+    if role == "internal":
+        return {
+            "chat": INTERNAL_CHAT_LIMIT,
+            "structured_audit": INTERNAL_STRUCTURED_AUDIT_LIMIT,
+            "report": INTERNAL_REPORT_LIMIT,
+            "matrix": INTERNAL_MATRIX_LIMIT,
+            "deep_dive": INTERNAL_DEEP_DIVE_LIMIT,
+            "full_audit": INTERNAL_FULL_AUDIT_LIMIT,
+        }
+    if role == "pilot_client":
+        return {
+            "chat": PILOT_CHAT_LIMIT,
+            "structured_audit": PILOT_STRUCTURED_AUDIT_LIMIT,
+            "report": PILOT_REPORT_LIMIT,
+            "matrix": PILOT_MATRIX_LIMIT,
+            "deep_dive": PILOT_DEEP_DIVE_LIMIT,
+            "full_audit": PILOT_FULL_AUDIT_LIMIT,
+        }
+    return {
+        "chat": 0,
+        "structured_audit": 0,
+        "report": 0,
+        "matrix": 0,
+        "deep_dive": 0,
+        "full_audit": 0,
+    }
+
+
+def get_usage_bucket_key(email: str) -> str:
+    month_key = datetime.now().strftime("%Y-%m")
+    return f"{email.lower()}::{month_key}"
+
+
+def init_usage_bucket(email: str):
+    key = get_usage_bucket_key(email)
+    if key not in st.session_state["usage_counters"]:
+        st.session_state["usage_counters"][key] = {
+            "chat": 0,
+            "structured_audit": 0,
+            "report": 0,
+            "matrix": 0,
+            "deep_dive": 0,
+            "full_audit": 0,
+        }
+
+
+def get_usage(email: str) -> Dict[str, int]:
+    init_usage_bucket(email)
+    key = get_usage_bucket_key(email)
+    return st.session_state["usage_counters"][key]
+
+
+def can_consume(email: str, role: str, action: str) -> bool:
+    limits = get_role_limits(role)
+    usage = get_usage(email)
+    return usage.get(action, 0) < limits.get(action, 0)
+
+
+def consume_usage(email: str, action: str):
+    init_usage_bucket(email)
+    key = get_usage_bucket_key(email)
+    st.session_state["usage_counters"][key][action] = st.session_state["usage_counters"][key].get(action, 0) + 1
+
+
+def render_login_gate():
+    user = get_user_info()
+
+    if user["is_logged_in"]:
+        return user
+
+    st.warning("Este app requer autenticação para acesso.")
+    st.markdown("Faça login para continuar.")
+
+    if auth_available():
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("Entrar com provedor padrão", use_container_width=True):
+                st.login()
+        with c2:
+            if st.button("Entrar com Microsoft", use_container_width=True):
+                st.login("microsoft")
+    else:
+        st.error(
+            "Autenticação não configurada no Streamlit. "
+            "Configure OIDC nos secrets ou desative AUTH_REQUIRED temporariamente."
+        )
+    st.stop()
+
+
+def render_access_denied(email: str):
+    st.error("Acesso não autorizado.")
+    st.markdown(f"O usuário **{safe_str(email)}** não está liberado para usar a AiA.")
+    if auth_available() and getattr(st.user, "is_logged_in", False):
+        if st.button("Sair"):
+            st.logout()
+    st.stop()
+
+
+def render_usage_overview_in_sidebar(user: Dict[str, str], role: str):
+    email = user["email"]
+    usage = get_usage(email)
+    limits = get_role_limits(role)
+
+    with st.sidebar:
+        st.divider()
+        st.subheader("Acesso")
+
+        st.write(f"**Usuário:** {safe_str(user['name'])}")
+        st.write(f"**Email:** `{safe_str(email)}`")
+        st.write(f"**Perfil:** `{safe_str(role)}`")
+        st.write(f"**Modo de autenticação:** `{safe_str(user['auth_mode'])}`")
+
+        if auth_available() and getattr(st.user, "is_logged_in", False):
+            if st.button("Sair da AiA", use_container_width=True):
+                st.logout()
+
+        st.divider()
+        st.subheader("Uso do mês (sessão atual)")
+
+        usage_df = pd.DataFrame([
+            {"Ação": "Chat", "Usado": usage["chat"], "Limite": limits["chat"]},
+            {"Ação": "Auditoria estruturada", "Usado": usage["structured_audit"], "Limite": limits["structured_audit"]},
+            {"Ação": "Relatório", "Usado": usage["report"], "Limite": limits["report"]},
+            {"Ação": "Matriz", "Usado": usage["matrix"], "Limite": limits["matrix"]},
+            {"Ação": "Aprofundamento", "Usado": usage["deep_dive"], "Limite": limits["deep_dive"]},
+            {"Ação": "Auditoria completa", "Usado": usage["full_audit"], "Limite": limits["full_audit"]},
+        ])
+        st.dataframe(usage_df, use_container_width=True, hide_index=True)
+
+        st.caption("Observação: nesta V1 os limites são controlados por sessão/mês no app. "
+                   "Para persistência real entre sessões e auditoria comercial, o próximo passo é conectar um banco externo.")
 
 # =========================================================
 # DOCX / PDF SIMPLE EXPORTS
@@ -1246,6 +1509,68 @@ def build_professional_audit_docx(
     return bio.getvalue()
 
 # =========================================================
+# AUTH GATE
+# =========================================================
+
+current_user = get_user_info()
+
+if AUTH_REQUIRED:
+    current_user = render_login_gate()
+
+current_role = get_user_role(current_user["email"])
+
+if current_role == "blocked":
+    render_access_denied(current_user["email"])
+
+# =========================================================
+# SIDEBAR
+# =========================================================
+
+with st.sidebar:
+    st.subheader("Modo da IA")
+
+    app_mode = st.radio(
+        "Modo de operação",
+        [
+            "Chat técnico",
+            "Auditoria completa Isometric",
+        ],
+        index=0
+    )
+
+    st.divider()
+
+    st.write("Bases consultadas:")
+    st.write("• PRJ_Nova_Esperanca")
+    st.write("• Isometric_Methodology")
+    st.write(f"**Modelo:** `{MODEL_NAME}`")
+
+    st.divider()
+
+    show_sources = st.checkbox("Mostrar fontes utilizadas", value=True)
+    show_snippets = st.checkbox("Mostrar trechos recuperados", value=True)
+    show_attributes = st.checkbox("Mostrar atributos técnicos", value=False)
+    show_raw_json = st.checkbox("Mostrar JSON bruto", value=False)
+
+    st.divider()
+
+    st.write("**Precisão fixa:** máxima")
+    st.write(f"Projeto: {PROJECT_MAX_RESULTS} trechos")
+    st.write(f"Metodologia: {METHODOLOGY_MAX_RESULTS} trechos")
+
+    st.divider()
+
+    st.write("**Logo configurada:**")
+    st.code(LOGO_PATH)
+
+    if st.button("Limpar conversa / sessão"):
+        for key, value in DEFAULT_STATE.items():
+            st.session_state[key] = value
+        st.rerun()
+
+render_usage_overview_in_sidebar(current_user, current_role)
+
+# =========================================================
 # API CALLS
 # =========================================================
 
@@ -1392,6 +1717,12 @@ def render_chat_mode():
     user_input = st.chat_input("Faça uma pergunta sobre o projeto ou solicite uma análise documental...")
 
     if user_input:
+        if not can_consume(current_user["email"], current_role, "chat"):
+            st.error("Limite de uso do chat atingido para o período atual.")
+            return
+
+        consume_usage(current_user["email"], "chat")
+
         st.session_state.messages.append({"role": "user", "content": sanitize_xml_text(user_input)})
         st.session_state.last_user_question = sanitize_xml_text(user_input)
 
@@ -1438,8 +1769,8 @@ def render_chat_mode():
 
                     if show_sources:
                         st.markdown("---")
-                        render_sources_block("Fontes do Projeto", project_sources)
-                        render_sources_block("Fontes da Metodologia", methodology_sources)
+                        render_sources_block("Fontes do Projeto", project_sources, show_attributes, show_snippets)
+                        render_sources_block("Fontes da Metodologia", methodology_sources, show_attributes, show_snippets)
 
                     st.session_state.last_answer_text = answer_text
                     st.session_state.last_sources_project = project_sources
@@ -1474,30 +1805,35 @@ def render_chat_mode():
     if not has_question:
         st.info("Envie uma pergunta no chat para habilitar as ações de auditoria.")
 
+    can_audit = has_question and can_consume(current_user["email"], current_role, "structured_audit")
+    can_report = has_question and can_consume(current_user["email"], current_role, "report")
+    can_matrix = has_question and can_consume(current_user["email"], current_role, "matrix")
+
     col_a, col_b, col_c = st.columns(3)
 
     with col_a:
         generate_audit = st.button(
             "Gerar auditoria estruturada",
             use_container_width=True,
-            disabled=not has_question
+            disabled=not can_audit
         )
 
     with col_b:
         generate_report = st.button(
             "Gerar relatório consolidado",
             use_container_width=True,
-            disabled=not has_question
+            disabled=not can_report
         )
 
     with col_c:
         generate_matrix = st.button(
             "Gerar matriz de conformidade",
             use_container_width=True,
-            disabled=not has_question
+            disabled=not can_matrix
         )
 
     if generate_audit:
+        consume_usage(current_user["email"], "structured_audit")
         with st.spinner("Gerando auditoria estruturada..."):
             try:
                 audit_prompt = build_combined_context_prompt(
@@ -1531,6 +1867,7 @@ def render_chat_mode():
             st.json(st.session_state.last_audit_json)
 
     if generate_report:
+        consume_usage(current_user["email"], "report")
         with st.spinner("Gerando relatório consolidado..."):
             try:
                 report_prompt = build_combined_context_prompt(
@@ -1564,6 +1901,7 @@ def render_chat_mode():
         st.markdown(st.session_state.last_report_text)
 
     if generate_matrix:
+        consume_usage(current_user["email"], "matrix")
         with st.spinner("Gerando matriz de conformidade..."):
             try:
                 matrix_prompt = build_combined_context_prompt(
@@ -1632,10 +1970,12 @@ def render_chat_mode():
 
         generate_deep_dive = st.button(
             "Aprofundar item selecionado",
-            use_container_width=False
+            use_container_width=False,
+            disabled=not can_consume(current_user["email"], current_role, "deep_dive")
         )
 
         if generate_deep_dive:
+            consume_usage(current_user["email"], "deep_dive")
             with st.spinner("Aprofundando item selecionado..."):
                 try:
                     deep_prompt = build_deep_dive_prompt(
@@ -1919,7 +2259,13 @@ def render_full_audit_mode():
             key="show_trails_full_audit"
         )
 
-    if st.button("Executar auditoria completa", type="primary", use_container_width=True):
+    if st.button(
+        "Executar auditoria completa",
+        type="primary",
+        use_container_width=True,
+        disabled=not can_consume(current_user["email"], current_role, "full_audit")
+    ):
+        consume_usage(current_user["email"], "full_audit")
         with st.spinner("Executando auditoria requisito por requisito..."):
             try:
                 engine = AuditEngine(
