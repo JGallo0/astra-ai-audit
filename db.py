@@ -60,3 +60,19 @@ ensure_user(user_email, user_name)
 from db import log_usage
 
 log_usage(user_email, "chat", project_name)
+def execute(query, params=None):
+
+    conn = get_connection()
+
+    try:
+
+        cur = conn.cursor()
+
+        cur.execute(query, params)
+
+        conn.commit()
+
+    finally:
+
+        cur.close()
+        conn.close()
