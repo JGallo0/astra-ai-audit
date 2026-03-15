@@ -38,9 +38,6 @@ load_dotenv()
 
 
 def get_config_value(name: str, default: Optional[str] = None) -> Optional[str]:
-    """
-    Busca configuração primeiro em st.secrets e depois em variáveis de ambiente.
-    """
     try:
         if name in st.secrets:
             value = st.secrets[name]
@@ -68,9 +65,6 @@ def get_int_config(name: str, default: int) -> int:
 
 
 def get_list_config(name: str, default: Optional[List[str]] = None) -> List[str]:
-    """
-    Lê listas tanto em formato CSV quanto em listas reais do st.secrets.
-    """
     default = default or []
 
     try:
@@ -108,10 +102,6 @@ METHODOLOGY_VECTOR_STORE_ID = get_config_value(
 
 LOGO_PATH = get_config_value("ASTRACARBON_LOGO_PATH", "assets/logo_astracarbon.jpg")
 
-# =========================
-# ACCESS / AUTH CONFIG
-# =========================
-
 AUTH_REQUIRED = get_bool_config("AUTH_REQUIRED", False)
 ALLOW_LOCAL_BYPASS = get_bool_config("ALLOW_LOCAL_BYPASS", True)
 
@@ -122,7 +112,6 @@ INTERNAL_DOMAINS = get_list_config("INTERNAL_DOMAINS", [])
 
 DEFAULT_ROLE = get_config_value("DEFAULT_ROLE", "pilot_client")
 
-# Limites por sessão/mês (MVP)
 ADMIN_CHAT_LIMIT = get_int_config("ADMIN_CHAT_LIMIT", 9999)
 ADMIN_STRUCTURED_AUDIT_LIMIT = get_int_config("ADMIN_STRUCTURED_AUDIT_LIMIT", 9999)
 ADMIN_REPORT_LIMIT = get_int_config("ADMIN_REPORT_LIMIT", 9999)
@@ -144,13 +133,16 @@ PILOT_MATRIX_LIMIT = get_int_config("PILOT_MATRIX_LIMIT", 10)
 PILOT_DEEP_DIVE_LIMIT = get_int_config("PILOT_DEEP_DIVE_LIMIT", 10)
 PILOT_FULL_AUDIT_LIMIT = get_int_config("PILOT_FULL_AUDIT_LIMIT", 5)
 
+APP_NAME = "AuditorIA"
+APP_SUBTITLE = "Auditor técnico documental de projetos de biochar e créditos de carbono"
+
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 PROJECT_MAX_RESULTS = 12
 METHODOLOGY_MAX_RESULTS = 12
 
 SYSTEM_PROMPT = """
-Você é a AiA, auditora técnica da AstraCarbon especializada em projetos de remoção de carbono via biochar.
+Você é a AuditorIA, auditora técnica da AstraCarbon especializada em projetos de remoção de carbono via biochar.
 
 Seu objetivo é analisar EXCLUSIVAMENTE os documentos disponíveis na base de conhecimento.
 
@@ -332,13 +324,13 @@ REGRAS:
 # =========================================================
 
 st.set_page_config(
-    page_title="AiA — AstraCarbon",
+    page_title=APP_NAME,
     page_icon="🔥",
     layout="wide"
 )
 
-st.title("🔥 AiA — AstraCarbon Auditor")
-st.caption("Auditor técnico documental de projetos de biochar e créditos de carbono")
+st.title(f"🔥 {APP_NAME}")
+st.caption(APP_SUBTITLE)
 
 # =========================================================
 # SESSION
@@ -723,7 +715,7 @@ def convert_json_to_bytes(data: Any) -> bytes:
 
 def build_full_audit_text(summary: Dict[str, Any], results: List[Dict[str, Any]]) -> str:
     lines = []
-    lines.append("AUDITORIA COMPLETA ISOMETRIC")
+    lines.append("AUDITORIA RESUMIDA ISOMETRIC")
     lines.append("")
     lines.append(f"Total de requisitos avaliados: {summary.get('total_requirements', 0)}")
     lines.append(f"Score geral: {summary.get('overall_score', 0)}%")
@@ -757,6 +749,146 @@ def build_full_audit_text(summary: Dict[str, Any], results: List[Dict[str, Any]]
         if item.get("notes"):
             lines.append(f"Notas: {safe_str(item.get('notes', ''))}")
         lines.append("")
+
+    return "\n".join(lines)
+
+
+def build_full_eligibility_dossier_text(
+    project_name: str,
+    summary: Dict[str, Any],
+    results: List[Dict[str, Any]],
+    trails: List[Dict[str, Any]],
+) -> str:
+    lines = []
+    lines.append("# Dossiê de Elegibilidade Metodológica")
+    lines.append("")
+    lines.append(f"## Projeto analisado")
+    lines.append(safe_str(project_name))
+    lines.append("")
+    lines.append("## 1. Objetivo do dossiê")
+    lines.append(
+        "Este documento consolida a avaliação de elegibilidade metodológica do projeto com base na auditoria completa "
+        "requisito por requisito. O objetivo é apoiar diagnóstico, priorização de correções, preparação documental e "
+        "tomada de decisão para submissão e auditoria externa."
+    )
+    lines.append("")
+    lines.append("## 2. Síntese executiva")
+    lines.append(f"- Total de requisitos avaliados: {summary.get('total_requirements', 0)}")
+    lines.append(f"- Score geral: {summary.get('overall_score', 0)}%")
+    for k, v in (summary.get("status_counts", {}) or {}).items():
+        lines.append(f"- Status {safe_str(k)}: {safe_str(v)}")
+    for k, v in (summary.get("risk_counts", {}) or {}).items():
+        lines.append(f"- Risco {safe_str(k)}: {safe_str(v)}")
+    lines.append("")
+    lines.append("## 3. Score por módulo")
+    for k, v in (summary.get("module_scores", {}) or {}).items():
+        lines.append(f"- {safe_str(k)}: {safe_str(v)}")
+    lines.append("")
+
+    lines.append("## 4. Avaliação detalhada de elegibilidade")
+    lines.append("")
+
+    grouped: Dict[str, List[Dict[str, Any]]] = {}
+    for item in results:
+        module = safe_str(item.get("module", "Sem módulo"))
+        grouped.setdefault(module, []).append(item)
+
+    for module, items in grouped.items():
+        lines.append(f"### Módulo: {module}")
+        lines.append("")
+        for item in items:
+            req_id = safe_str(item.get("requirement_id", ""))
+            title = safe_str(item.get("title", ""))
+            status = safe_str(item.get("status", ""))
+            risk = safe_str(item.get("risk", ""))
+            score = safe_str(item.get("score", ""))
+            confidence = safe_str(item.get("confidence", ""))
+            project_evidence = safe_str(item.get("project_evidence", ""))
+            methodology_basis = safe_str(item.get("methodology_basis", ""))
+            gap = safe_str(item.get("gap", ""))
+            recommendation = safe_str(item.get("recommendation", ""))
+            notes = safe_str(item.get("notes", ""))
+
+            lines.append(f"#### {req_id} — {title}")
+            lines.append(f"- Status: {status}")
+            lines.append(f"- Risco: {risk}")
+            lines.append(f"- Score: {score}")
+            lines.append(f"- Confiança: {confidence}")
+            lines.append("")
+            lines.append("**Base metodológica**")
+            lines.append(methodology_basis or "Não identificado.")
+            lines.append("")
+            lines.append("**Evidência do projeto**")
+            lines.append(project_evidence or "Não identificado.")
+            lines.append("")
+            lines.append("**Lacuna / restrição identificada**")
+            lines.append(gap or "Não identificado.")
+            lines.append("")
+            lines.append("**Recomendação de elegibilidade**")
+            lines.append(recommendation or "Não identificado.")
+            lines.append("")
+            if notes:
+                lines.append("**Notas adicionais**")
+                lines.append(notes)
+                lines.append("")
+
+    lines.append("## 5. Trilha técnica da auditoria")
+    lines.append("")
+
+    for i, trail in enumerate(trails, start=1):
+        lines.append(f"### Item {i} — {safe_str(trail.get('requirement_id', ''))} — {safe_str(trail.get('title', ''))}")
+        lines.append("")
+        lines.append("**Query do projeto**")
+        lines.append(safe_str(trail.get("project_query", "")) or "Não identificado.")
+        lines.append("")
+        lines.append("**Query da metodologia**")
+        lines.append(safe_str(trail.get("methodology_query", "")) or "Não identificado.")
+        lines.append("")
+        lines.append("**Trechos recuperados do projeto**")
+        lines.append(safe_str(trail.get("project_context", "")) or "Não identificado.")
+        lines.append("")
+        lines.append("**Trechos recuperados da metodologia**")
+        lines.append(safe_str(trail.get("methodology_context", "")) or "Não identificado.")
+        lines.append("")
+        lines.append("**Resultado interpretado**")
+        parsed = trail.get("parsed_result", {})
+        if parsed:
+            lines.append(sanitize_xml_text(json.dumps(parsed, ensure_ascii=False, indent=2)))
+        else:
+            lines.append("Não identificado.")
+        lines.append("")
+
+    lines.append("## 6. Priorização de ações")
+    high_risk = [r for r in results if safe_str(r.get("risk", "")).lower() == "alto"]
+    medium_risk = [r for r in results if safe_str(r.get("risk", "")).lower() == "medio"]
+
+    lines.append("### Ações prioritárias de curto prazo")
+    if high_risk:
+        for item in high_risk:
+            lines.append(
+                f"- {safe_str(item.get('requirement_id', ''))} — {safe_str(item.get('title', ''))}: {safe_str(item.get('recommendation', ''))}"
+            )
+    else:
+        lines.append("- Não identificado.")
+
+    lines.append("")
+    lines.append("### Ações prioritárias de médio prazo")
+    if medium_risk:
+        for item in medium_risk:
+            lines.append(
+                f"- {safe_str(item.get('requirement_id', ''))} — {safe_str(item.get('title', ''))}: {safe_str(item.get('recommendation', ''))}"
+            )
+    else:
+        lines.append("- Não identificado.")
+
+    lines.append("")
+    lines.append("## 7. Conclusão de elegibilidade")
+    lines.append(
+        "A elegibilidade metodológica do projeto deve ser interpretada com base na combinação entre evidência já existente, "
+        "lacunas identificadas, robustez das bases metodológicas citadas e capacidade de saneamento das não conformidades "
+        "antes de eventual validação externa."
+    )
+    lines.append("")
 
     return "\n".join(lines)
 
@@ -965,7 +1097,6 @@ def log_usage_db(email: str, action: str, project_name: str = ""):
         (email, action, project_name)
     )
 
-
 # =========================================================
 # AUTH / ACCESS / USAGE
 # =========================================================
@@ -974,16 +1105,7 @@ def auth_available() -> bool:
     return hasattr(st, "login") and hasattr(st, "logout") and hasattr(st, "user")
 
 
-def running_localhost() -> bool:
-    return "localhost" in get_config_value("BASE_URL", "http://localhost:8501").lower() or \
-           os.getenv("STREAMLIT_SERVER_HEADLESS") != "true"
-
-
 def get_user_info() -> Dict[str, str]:
-    """
-    Normaliza identidade do usuário. Se auth não estiver configurado e o bypass local estiver ligado,
-    cria um usuário local de desenvolvimento.
-    """
     if auth_available() and getattr(st.user, "is_logged_in", False):
         email = safe_str(getattr(st.user, "email", "")).strip().lower()
         name = safe_str(getattr(st.user, "name", "")).strip() or email or "Usuário autenticado"
@@ -1026,16 +1148,12 @@ def is_user_allowed(email: str) -> bool:
 
     if email in ADMIN_EMAILS:
         return True
-
     if ALLOWED_EMAILS and email in ALLOWED_EMAILS:
         return True
-
     if ALLOWED_DOMAINS and domain in ALLOWED_DOMAINS:
         return True
-
     if INTERNAL_DOMAINS and domain in INTERNAL_DOMAINS:
         return True
-
     if not ALLOWED_EMAILS and not ALLOWED_DOMAINS and not INTERNAL_DOMAINS and not ADMIN_EMAILS:
         return True
 
@@ -1060,10 +1178,8 @@ def get_user_role(email: str) -> str:
 
     if email in ADMIN_EMAILS:
         return "admin"
-
     if domain in INTERNAL_DOMAINS:
         return "internal"
-
     if is_user_allowed(email):
         return DEFAULT_ROLE
 
@@ -1184,16 +1300,13 @@ def render_login_gate():
             if st.button("Entrar com Microsoft", use_container_width=True):
                 st.login("microsoft")
     else:
-        st.error(
-            "Autenticação não configurada no Streamlit. "
-            "Configure OIDC nos secrets ou desative AUTH_REQUIRED temporariamente."
-        )
+        st.error("Autenticação não configurada no Streamlit.")
     st.stop()
 
 
 def render_access_denied(email: str):
     st.error("Acesso não autorizado.")
-    st.markdown(f"O usuário **{safe_str(email)}** não está liberado para usar a AiA.")
+    st.markdown(f"O usuário **{safe_str(email)}** não está liberado para usar a {APP_NAME}.")
     if auth_available() and getattr(st.user, "is_logged_in", False):
         if st.button("Sair"):
             st.logout()
@@ -1208,14 +1321,13 @@ def render_usage_overview_in_sidebar(user: Dict[str, str], role: str):
     with st.sidebar:
         st.divider()
         st.subheader("Acesso")
-
         st.write(f"**Usuário:** {safe_str(user['name'])}")
         st.write(f"**Email:** `{safe_str(email)}`")
         st.write(f"**Perfil:** `{safe_str(role)}`")
         st.write(f"**Modo de autenticação:** `{safe_str(user['auth_mode'])}`")
 
         if auth_available() and getattr(st.user, "is_logged_in", False):
-            if st.button("Sair da AiA", use_container_width=True):
+            if st.button(f"Sair da {APP_NAME}", use_container_width=True):
                 st.logout()
 
         st.divider()
@@ -1231,19 +1343,8 @@ def render_usage_overview_in_sidebar(user: Dict[str, str], role: str):
         ])
         st.dataframe(usage_df, use_container_width=True, hide_index=True)
 
-        if db_is_configured():
-            st.success("Persistência ativa: usuários, planos e logs estão sendo lidos/grava­dos no Supabase.")
-        else:
-            st.caption(
-                "Persistência em banco ainda não ativa. Nesta V1 os limites continuam sendo "
-                "controlados por sessão local do app."
-            )
-
-        if st.session_state.get("db_status_message"):
-            st.caption(f"Status DB: {safe_str(st.session_state['db_status_message'])}")
-
 # =========================================================
-# DOCX / PDF SIMPLE EXPORTS
+# DOCX / PDF
 # =========================================================
 
 def docx_from_text(title: str, text: str) -> bytes:
@@ -1327,7 +1428,6 @@ def pdf_from_text(title: str, text: str) -> bytes:
         return lines
 
     c.setTitle(safe_str(title))
-
     c.setFont("Helvetica-Bold", 16)
     c.drawString(left, y, safe_str(title))
     y -= 28
@@ -1437,333 +1537,6 @@ def matrix_to_pdf_bytes(df: pd.DataFrame, title: str) -> bytes:
     return pdf_from_text(title, "\n".join(text))
 
 # =========================================================
-# PROFESSIONAL DOCX EXPORT
-# =========================================================
-
-def set_document_margins(section, top=2.2, bottom=2.0, left=2.2, right=2.0):
-    section.top_margin = Cm(top)
-    section.bottom_margin = Cm(bottom)
-    section.left_margin = Cm(left)
-    section.right_margin = Cm(right)
-
-
-def set_cell_shading(cell, fill: str):
-    tc_pr = cell._tc.get_or_add_tcPr()
-    shd = OxmlElement("w:shd")
-    shd.set(qn("w:fill"), fill)
-    tc_pr.append(shd)
-
-
-def set_page_number_footer(section):
-    footer = section.footer
-    p = footer.paragraphs[0]
-    p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-
-    run = p.add_run("Página ")
-    fld = OxmlElement("w:fldSimple")
-    fld.set(qn("w:instr"), "PAGE")
-    run._r.append(fld)
-
-
-def add_paragraph_md(doc, line: str):
-    stripped = sanitize_xml_text(line).strip()
-
-    if not stripped:
-        doc.add_paragraph("")
-        return
-
-    if stripped.startswith("# "):
-        p = doc.add_paragraph()
-        p.style = "Heading 1"
-        p.add_run(sanitize_xml_text(stripped[2:].strip()))
-        return
-
-    if stripped.startswith("## "):
-        p = doc.add_paragraph()
-        p.style = "Heading 2"
-        p.add_run(sanitize_xml_text(stripped[3:].strip()))
-        return
-
-    if stripped.startswith("### "):
-        p = doc.add_paragraph()
-        p.style = "Heading 3"
-        p.add_run(sanitize_xml_text(stripped[4:].strip()))
-        return
-
-    if stripped.startswith("- "):
-        doc.add_paragraph(sanitize_xml_text(stripped[2:].strip()), style="List Bullet")
-        return
-
-    doc.add_paragraph(sanitize_xml_text(stripped))
-
-
-def add_logo_and_cover(doc, logo_path: str, question: str):
-    section = doc.sections[0]
-    set_document_margins(section)
-
-    doc.add_paragraph("")
-
-    if os.path.exists(logo_path):
-        p_logo = doc.add_paragraph()
-        p_logo.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        run_logo = p_logo.add_run()
-        run_logo.add_picture(logo_path, width=Inches(3.4))
-
-    doc.add_paragraph("")
-
-    p_title = doc.add_paragraph()
-    p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p_title.add_run("Dossiê de Auditoria Metodológica")
-    r.bold = True
-    r.font.size = Pt(20)
-    r.font.color.rgb = RGBColor(14, 47, 94)
-
-    p_sub = doc.add_paragraph()
-    p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r2 = p_sub.add_run("AiA — AstraCarbon Inteligência Artificial")
-    r2.bold = True
-    r2.font.size = Pt(13)
-    r2.font.color.rgb = RGBColor(8, 90, 214)
-
-    doc.add_paragraph("")
-
-    meta = doc.add_paragraph()
-    meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    meta.add_run("Projeto: Biochar / Auditoria Documental\n").bold = True
-    meta.add_run(f"Data de geração: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n")
-    meta.add_run("Base consultada: documentação interna do projeto + documentação metodológica\n")
-    meta.add_run("Uso: pré-auditoria, diagnóstico documental e apoio à conformidade metodológica")
-
-    doc.add_paragraph("")
-    doc.add_paragraph("")
-
-    p_q = doc.add_paragraph()
-    p_q.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    rq1 = p_q.add_run("Pergunta auditada\n")
-    rq1.bold = True
-    rq1.font.size = Pt(12)
-    rq2 = p_q.add_run(safe_str(question or "Não identificada"))
-    rq2.font.size = Pt(11)
-
-    doc.add_page_break()
-
-
-def add_identification_table(doc, question: str):
-    doc.add_paragraph("1. Identificação da análise", style="Heading 1")
-
-    table = doc.add_table(rows=5, cols=2)
-    table.style = "Table Grid"
-    table.alignment = WD_TABLE_ALIGNMENT.CENTER
-
-    rows = [
-        ("Ferramenta", "AiA — AstraCarbon Inteligência Artificial"),
-        ("Tipo de análise", "Auditoria documental metodológica"),
-        ("Escopo", "Projeto × Metodologia"),
-        ("Data/hora", datetime.now().strftime("%d/%m/%Y %H:%M")),
-        ("Pergunta auditada", safe_str(question or "Não identificada")),
-    ]
-
-    for i, (k, v) in enumerate(rows):
-        table.cell(i, 0).text = safe_str(k)
-        table.cell(i, 1).text = safe_str(v)
-        set_cell_shading(table.cell(i, 0), "D9EAF7")
-
-    doc.add_paragraph("")
-
-
-def add_audit_summary_table(doc, audit_json: Optional[Dict[str, Any]]):
-    doc.add_paragraph("2. Sumário executivo da auditoria", style="Heading 1")
-
-    table = doc.add_table(rows=1, cols=2)
-    table.style = "Table Grid"
-    table.alignment = WD_TABLE_ALIGNMENT.CENTER
-
-    hdr = table.rows[0].cells
-    hdr[0].text = "Campo"
-    hdr[1].text = "Síntese"
-    set_cell_shading(hdr[0], "0E2F5E")
-    set_cell_shading(hdr[1], "0E2F5E")
-
-    for cell in hdr:
-        for p in cell.paragraphs:
-            for run in p.runs:
-                run.font.color.rgb = RGBColor(255, 255, 255)
-                run.bold = True
-
-    if audit_json:
-        rows = [
-            ("Nível de risco", safe_str(audit_json.get("nivel_risco", "não identificado"))),
-            ("Qtd. lacunas documentais", safe_str(len(audit_json.get("lacunas_documentais", []) or []))),
-            ("Qtd. inconsistências", safe_str(len(audit_json.get("inconsistencias_documentais", []) or []))),
-            ("Qtd. potenciais não conformidades", safe_str(len(audit_json.get("potenciais_nao_conformidades", []) or []))),
-            ("Qtd. recomendações", safe_str(len(audit_json.get("recomendacoes_tecnicas", []) or []))),
-        ]
-    else:
-        rows = [
-            ("Nível de risco", "não identificado"),
-            ("Qtd. lacunas documentais", "0"),
-            ("Qtd. inconsistências", "0"),
-            ("Qtd. potenciais não conformidades", "0"),
-            ("Qtd. recomendações", "0"),
-        ]
-
-    for k, v in rows:
-        row = table.add_row().cells
-        row[0].text = safe_str(k)
-        row[1].text = safe_str(v)
-        set_cell_shading(row[0], "EAF3F9")
-
-    doc.add_paragraph("")
-
-
-def add_matrix_table(doc, matrix_json: Optional[Dict[str, Any]]):
-    doc.add_paragraph("7. Matriz de conformidade", style="Heading 1")
-
-    df = matrix_json_to_dataframe(matrix_json)
-
-    if df.empty:
-        doc.add_paragraph("Nenhum item de matriz de conformidade foi gerado.")
-        return
-
-    cols = [
-        "requisito",
-        "status",
-        "risco",
-        "documento_metodologia",
-        "documento_projeto",
-        "recomendacao",
-    ]
-
-    df = df[[c for c in cols if c in df.columns]]
-
-    table = doc.add_table(rows=1, cols=len(df.columns))
-    table.style = "Table Grid"
-    table.alignment = WD_TABLE_ALIGNMENT.CENTER
-
-    hdr = table.rows[0].cells
-    for i, col in enumerate(df.columns):
-        hdr[i].text = safe_str(col)
-        set_cell_shading(hdr[i], "0E2F5E")
-        for p in hdr[i].paragraphs:
-            for run in p.runs:
-                run.font.color.rgb = RGBColor(255, 255, 255)
-                run.bold = True
-
-    for _, row_data in df.iterrows():
-        row = table.add_row().cells
-        for i, col in enumerate(df.columns):
-            row[i].text = safe_str(row_data.get(col, ""))
-
-    doc.add_paragraph("")
-
-
-def add_sources_appendix(doc, sources: List[Dict[str, Any]]):
-    doc.add_paragraph("9. Fontes utilizadas", style="Heading 1")
-
-    if not sources:
-        doc.add_paragraph("Nenhuma fonte registrada.")
-        return
-
-    for src in sources:
-        filename = safe_str(src.get("filename", "Documento sem nome"))
-        source_group = safe_str(src.get("source_group", ""))
-        page = safe_str(src.get("page") or "não identificada")
-        score = safe_str(src.get("score"))
-        trecho = sanitize_xml_text((src.get("text") or "").strip())
-
-        p = doc.add_paragraph(style="List Number")
-        r = p.add_run(filename)
-        r.bold = True
-
-        meta = doc.add_paragraph()
-        meta.add_run("Grupo: ").bold = True
-        meta.add_run(source_group)
-        meta.add_run(" | Página/Seção: ").bold = True
-        meta.add_run(page)
-        meta.add_run(" | Score: ").bold = True
-        meta.add_run(score)
-
-        if trecho:
-            doc.add_paragraph("Trecho recuperado:")
-            for line in flatten_markdown_to_lines(trecho):
-                clean_line = sanitize_xml_text(line)
-                if clean_line.strip():
-                    doc.add_paragraph(clean_line)
-
-        doc.add_paragraph("")
-
-
-def build_professional_audit_docx(
-    question: str,
-    answer_text: str,
-    audit_json: Optional[Dict[str, Any]],
-    report_text: str,
-    matrix_json: Optional[Dict[str, Any]],
-    deep_dive_text: str,
-    sources: List[Dict[str, Any]],
-    logo_path: str
-) -> bytes:
-    doc = Document()
-
-    normal = doc.styles["Normal"]
-    normal.font.name = "Calibri"
-    normal.font.size = Pt(10.5)
-
-    for section in doc.sections:
-        set_document_margins(section)
-        set_page_number_footer(section)
-
-    add_logo_and_cover(doc, logo_path, safe_str(question))
-    add_identification_table(doc, safe_str(question))
-    add_audit_summary_table(doc, audit_json)
-
-    doc.add_paragraph("3. Resposta técnica da AiA", style="Heading 1")
-    if answer_text:
-        for line in flatten_markdown_to_lines(sanitize_xml_text(answer_text)):
-            add_paragraph_md(doc, line)
-    else:
-        doc.add_paragraph("Não disponível.")
-
-    doc.add_paragraph("4. Auditoria estruturada", style="Heading 1")
-    if audit_json:
-        audit_md = sanitize_xml_text(render_audit_json(audit_json))
-        for line in flatten_markdown_to_lines(audit_md):
-            add_paragraph_md(doc, line)
-    else:
-        doc.add_paragraph("Auditoria estruturada não gerada.")
-
-    doc.add_paragraph("5. Relatório consolidado", style="Heading 1")
-    if report_text:
-        for line in flatten_markdown_to_lines(sanitize_xml_text(report_text)):
-            add_paragraph_md(doc, line)
-    else:
-        doc.add_paragraph("Relatório consolidado não gerado.")
-
-    doc.add_paragraph("6. Aprofundamento técnico", style="Heading 1")
-    if deep_dive_text:
-        for line in flatten_markdown_to_lines(sanitize_xml_text(deep_dive_text)):
-            add_paragraph_md(doc, line)
-    else:
-        doc.add_paragraph("Aprofundamento técnico não gerado.")
-
-    add_matrix_table(doc, matrix_json)
-    add_sources_appendix(doc, sources)
-
-    doc.add_paragraph("10. Observação metodológica", style="Heading 1")
-    doc.add_paragraph(
-        sanitize_xml_text(
-            "Este documento foi gerado pela AiA com base exclusivamente na documentação interna recuperada "
-            "na base do projeto e na base metodológica. Ausência de evidência documental não deve ser "
-            "interpretada automaticamente como descumprimento definitivo, mas como lacuna a ser confirmada."
-        )
-    )
-
-    bio = io.BytesIO()
-    doc.save(bio)
-    bio.seek(0)
-    return bio.getvalue()
-
-# =========================================================
 # AUTH GATE
 # =========================================================
 
@@ -1820,11 +1593,6 @@ with st.sidebar:
 
     st.write("**Logo configurada:**")
     st.code(LOGO_PATH)
-
-    if db_is_configured():
-        st.write("**Persistência:** `Supabase ativa`")
-    else:
-        st.write("**Persistência:** `Sessão local`")
 
     if st.button("Limpar conversa / sessão"):
         for key, value in DEFAULT_STATE.items():
@@ -2033,7 +1801,6 @@ def render_chat_mode():
                         answer_text = "A base de conhecimento não contém informação suficiente para responder com segurança."
 
                     answer_text = sanitize_xml_text(answer_text)
-
                     st.markdown(answer_text)
 
                     if show_sources:
@@ -2053,7 +1820,7 @@ def render_chat_mode():
                     final_answer_for_history = answer_text
 
                 except Exception as e:
-                    final_answer_for_history = f"Erro ao consultar a AiA: {str(e)}"
+                    final_answer_for_history = f"Erro ao consultar a {APP_NAME}: {str(e)}"
                     st.error(final_answer_for_history)
                     st.session_state.last_answer_text = final_answer_for_history
                     st.session_state.last_sources_project = []
@@ -2081,25 +1848,11 @@ def render_chat_mode():
     col_a, col_b, col_c = st.columns(3)
 
     with col_a:
-        generate_audit = st.button(
-            "Gerar auditoria estruturada",
-            use_container_width=True,
-            disabled=not can_audit
-        )
-
+        generate_audit = st.button("Gerar auditoria estruturada", use_container_width=True, disabled=not can_audit)
     with col_b:
-        generate_report = st.button(
-            "Gerar relatório consolidado",
-            use_container_width=True,
-            disabled=not can_report
-        )
-
+        generate_report = st.button("Gerar relatório consolidado", use_container_width=True, disabled=not can_report)
     with col_c:
-        generate_matrix = st.button(
-            "Gerar matriz de conformidade",
-            use_container_width=True,
-            disabled=not can_matrix
-        )
+        generate_matrix = st.button("Gerar matriz de conformidade", use_container_width=True, disabled=not can_matrix)
 
     if generate_audit:
         consume_usage(current_user["email"], "structured_audit", project_name)
@@ -2111,10 +1864,7 @@ def render_chat_mode():
                     methodology_sources=st.session_state.last_sources_methodology,
                     output_mode="audit_json"
                 )
-                audit_response = call_reasoning_over_context(
-                    user_content=audit_prompt,
-                    extra_system_prompt=JSON_AUDIT_PROMPT
-                )
+                audit_response = call_reasoning_over_context(user_content=audit_prompt, extra_system_prompt=JSON_AUDIT_PROMPT)
                 audit_text = get_response_text(audit_response).strip()
                 audit_json = try_parse_json(audit_text)
 
@@ -2122,7 +1872,6 @@ def render_chat_mode():
                     st.session_state.last_audit_json = audit_json
                 else:
                     st.error("Não foi possível converter a auditoria em JSON válido.")
-
             except Exception as e:
                 st.error(f"Erro ao gerar auditoria estruturada: {str(e)}")
 
@@ -2150,17 +1899,13 @@ def render_chat_mode():
                     report_prompt += "\n\nAUDITORIA JSON JÁ PRODUZIDA:\n"
                     report_prompt += sanitize_xml_text(json.dumps(st.session_state.last_audit_json, ensure_ascii=False, indent=2))
 
-                report_response = call_reasoning_over_context(
-                    user_content=report_prompt,
-                    extra_system_prompt=REPORT_PROMPT
-                )
+                report_response = call_reasoning_over_context(user_content=report_prompt, extra_system_prompt=REPORT_PROMPT)
                 report_text = get_response_text(report_response).strip()
 
                 if not report_text:
                     report_text = "A base de conhecimento não contém informação suficiente para responder com segurança."
 
                 st.session_state.last_report_text = sanitize_xml_text(report_text)
-
             except Exception as e:
                 st.error(f"Erro ao gerar relatório consolidado: {str(e)}")
 
@@ -2180,10 +1925,7 @@ def render_chat_mode():
                     output_mode="matrix"
                 )
 
-                matrix_response = call_reasoning_over_context(
-                    user_content=matrix_prompt,
-                    extra_system_prompt=COMPLIANCE_MATRIX_PROMPT
-                )
+                matrix_response = call_reasoning_over_context(user_content=matrix_prompt, extra_system_prompt=COMPLIANCE_MATRIX_PROMPT)
                 matrix_text = get_response_text(matrix_response).strip()
                 matrix_json = try_parse_json(matrix_text)
 
@@ -2191,7 +1933,6 @@ def render_chat_mode():
                     st.session_state.last_compliance_matrix_json = matrix_json
                 else:
                     st.error("Não foi possível converter a matriz de conformidade em JSON válido.")
-
             except Exception as e:
                 st.error(f"Erro ao gerar matriz de conformidade: {str(e)}")
 
@@ -2200,7 +1941,6 @@ def render_chat_mode():
     if st.session_state.last_compliance_matrix_json:
         st.markdown("---")
         st.markdown("## Matriz de conformidade")
-
         matrix_df = matrix_json_to_dataframe(st.session_state.last_compliance_matrix_json)
         st.dataframe(matrix_df, use_container_width=True, hide_index=True)
 
@@ -2232,10 +1972,7 @@ def render_chat_mode():
     deep_dive_candidates = list(dict.fromkeys(deep_dive_candidates))
 
     if deep_dive_candidates:
-        selected_issue = st.selectbox(
-            "Selecione o item para aprofundamento",
-            options=deep_dive_candidates
-        )
+        selected_issue = st.selectbox("Selecione o item para aprofundamento", options=deep_dive_candidates)
 
         generate_deep_dive = st.button(
             "Aprofundar item selecionado",
@@ -2256,20 +1993,15 @@ def render_chat_mode():
                         matrix_json=st.session_state.last_compliance_matrix_json,
                     )
 
-                    deep_response = call_reasoning_over_context(
-                        user_content=deep_prompt,
-                        extra_system_prompt=DEEP_DIVE_PROMPT
-                    )
+                    deep_response = call_reasoning_over_context(user_content=deep_prompt, extra_system_prompt=DEEP_DIVE_PROMPT)
                     deep_text = get_response_text(deep_response).strip()
 
                     if not deep_text:
                         deep_text = "A base de conhecimento não contém informação suficiente para responder com segurança."
 
                     st.session_state.last_deep_dive_text = sanitize_xml_text(deep_text)
-
                 except Exception as e:
                     st.error(f"Erro ao aprofundar item: {str(e)}")
-
     else:
         st.info("Gere a auditoria estruturada e/ou a matriz de conformidade para habilitar o aprofundamento.")
 
@@ -2277,256 +2009,20 @@ def render_chat_mode():
         st.markdown("## Aprofundamento técnico")
         st.markdown(st.session_state.last_deep_dive_text)
 
-    st.markdown("---")
-    st.subheader("Dossiê principal")
-
-    if (
-        st.session_state.last_answer_text
-        or st.session_state.last_audit_json
-        or st.session_state.last_report_text
-        or st.session_state.last_compliance_matrix_json
-        or st.session_state.last_deep_dive_text
-    ):
-        professional_docx = build_professional_audit_docx(
-            question=st.session_state.last_user_question,
-            answer_text=st.session_state.last_answer_text,
-            audit_json=st.session_state.last_audit_json,
-            report_text=st.session_state.last_report_text,
-            matrix_json=st.session_state.last_compliance_matrix_json,
-            deep_dive_text=st.session_state.last_deep_dive_text,
-            sources=st.session_state.last_sources_all,
-            logo_path=LOGO_PATH
-        )
-
-        st.download_button(
-            "Baixar dossiê profissional (.docx)",
-            data=professional_docx,
-            file_name="aia_dossie_auditoria_astracarbon.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            use_container_width=True
-        )
-
-    st.markdown("---")
-    st.subheader("Downloads auxiliares")
-
-    if st.session_state.last_answer_text:
-        answer_docx = docx_from_text("Resposta da AiA", st.session_state.last_answer_text)
-        answer_pdf = pdf_from_text("Resposta da AiA", st.session_state.last_answer_text)
-
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            st.download_button(
-                "Resposta (.md)",
-                data=st.session_state.last_answer_text,
-                file_name="aia_resposta.md",
-                mime="text/markdown",
-                use_container_width=True
-            )
-        with c2:
-            st.download_button(
-                "Resposta (.docx)",
-                data=answer_docx,
-                file_name="aia_resposta.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                use_container_width=True
-            )
-        with c3:
-            st.download_button(
-                "Resposta (.pdf)",
-                data=answer_pdf,
-                file_name="aia_resposta.pdf",
-                mime="application/pdf",
-                use_container_width=True
-            )
-
-    if st.session_state.last_sources_all:
-        src_md = export_sources_markdown(st.session_state.last_sources_all)
-        src_docx = docx_from_text("Fontes utilizadas", src_md)
-        src_pdf = pdf_from_text("Fontes utilizadas", src_md)
-
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            st.download_button(
-                "Fontes (.md)",
-                data=src_md,
-                file_name="aia_fontes.md",
-                mime="text/markdown",
-                use_container_width=True
-            )
-        with c2:
-            st.download_button(
-                "Fontes (.docx)",
-                data=src_docx,
-                file_name="aia_fontes.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                use_container_width=True
-            )
-        with c3:
-            st.download_button(
-                "Fontes (.pdf)",
-                data=src_pdf,
-                file_name="aia_fontes.pdf",
-                mime="application/pdf",
-                use_container_width=True
-            )
-
-    if st.session_state.last_audit_json:
-        audit_md = render_audit_json(st.session_state.last_audit_json)
-        audit_docx = docx_from_text("Auditoria estruturada", audit_md)
-        audit_pdf = pdf_from_text("Auditoria estruturada", audit_md)
-
-        c1, c2, c3, c4 = st.columns(4)
-        with c1:
-            st.download_button(
-                "Auditoria (.json)",
-                data=json.dumps(st.session_state.last_audit_json, ensure_ascii=False, indent=2),
-                file_name="aia_auditoria.json",
-                mime="application/json",
-                use_container_width=True
-            )
-        with c2:
-            st.download_button(
-                "Auditoria (.md)",
-                data=audit_md,
-                file_name="aia_auditoria.md",
-                mime="text/markdown",
-                use_container_width=True
-            )
-        with c3:
-            st.download_button(
-                "Auditoria (.docx)",
-                data=audit_docx,
-                file_name="aia_auditoria.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                use_container_width=True
-            )
-        with c4:
-            st.download_button(
-                "Auditoria (.pdf)",
-                data=audit_pdf,
-                file_name="aia_auditoria.pdf",
-                mime="application/pdf",
-                use_container_width=True
-            )
-
-    if st.session_state.last_report_text:
-        report_docx = docx_from_text("Relatório consolidado", st.session_state.last_report_text)
-        report_pdf = pdf_from_text("Relatório consolidado", st.session_state.last_report_text)
-
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            st.download_button(
-                "Relatório (.md)",
-                data=st.session_state.last_report_text,
-                file_name="aia_relatorio.md",
-                mime="text/markdown",
-                use_container_width=True
-            )
-        with c2:
-            st.download_button(
-                "Relatório (.docx)",
-                data=report_docx,
-                file_name="aia_relatorio.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                use_container_width=True
-            )
-        with c3:
-            st.download_button(
-                "Relatório (.pdf)",
-                data=report_pdf,
-                file_name="aia_relatorio.pdf",
-                mime="application/pdf",
-                use_container_width=True
-            )
-
-    if st.session_state.last_compliance_matrix_json:
-        matrix_df = matrix_json_to_dataframe(st.session_state.last_compliance_matrix_json)
-        matrix_docx = matrix_to_docx_bytes(matrix_df, "Matriz de conformidade")
-        matrix_pdf = matrix_to_pdf_bytes(matrix_df, "Matriz de conformidade")
-
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            st.download_button(
-                "Matriz (.json)",
-                data=json.dumps(st.session_state.last_compliance_matrix_json, ensure_ascii=False, indent=2),
-                file_name="aia_matriz_conformidade.json",
-                mime="application/json",
-                use_container_width=True
-            )
-        with c2:
-            st.download_button(
-                "Matriz (.docx)",
-                data=matrix_docx,
-                file_name="aia_matriz_conformidade.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                use_container_width=True
-            )
-        with c3:
-            st.download_button(
-                "Matriz (.pdf)",
-                data=matrix_pdf,
-                file_name="aia_matriz_conformidade.pdf",
-                mime="application/pdf",
-                use_container_width=True
-            )
-
-    if st.session_state.last_deep_dive_text:
-        deep_docx = docx_from_text("Aprofundamento técnico", st.session_state.last_deep_dive_text)
-        deep_pdf = pdf_from_text("Aprofundamento técnico", st.session_state.last_deep_dive_text)
-
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            st.download_button(
-                "Aprofundamento (.md)",
-                data=st.session_state.last_deep_dive_text,
-                file_name="aia_aprofundamento.md",
-                mime="text/markdown",
-                use_container_width=True
-            )
-        with c2:
-            st.download_button(
-                "Aprofundamento (.docx)",
-                data=deep_docx,
-                file_name="aia_aprofundamento.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                use_container_width=True
-            )
-        with c3:
-            st.download_button(
-                "Aprofundamento (.pdf)",
-                data=deep_pdf,
-                file_name="aia_aprofundamento.pdf",
-                mime="application/pdf",
-                use_container_width=True
-            )
-
 # =========================================================
 # FULL AUDIT MODE
 # =========================================================
 
 def render_full_audit_mode():
     st.subheader("Auditoria completa da metodologia Isometric")
-    st.caption("Matriz automática de conformidade requisito por requisito.")
+    st.caption("Agora com duas saídas: auditoria resumida e dossiê de elegibilidade completo.")
 
     all_modules = sorted(list({r["module"] for r in ISOMETRIC_REQUIREMENTS}))
 
     with st.expander("Configuração da auditoria", expanded=True):
-        project_name = st.text_input(
-            "Nome do projeto",
-            value=st.session_state.get("current_project_name", "Projeto Nova Esperança")
-        )
-
-        selected_modules = st.multiselect(
-            "Módulos a auditar",
-            options=all_modules,
-            default=all_modules
-        )
-
-        show_trails = st.checkbox(
-            "Exibir trilha de auditoria detalhada",
-            value=False,
-            key="show_trails_full_audit"
-        )
+        project_name = st.text_input("Nome do projeto", value=st.session_state.get("current_project_name", "Projeto Nova Esperança"))
+        selected_modules = st.multiselect("Módulos a auditar", options=all_modules, default=all_modules)
+        show_trails = st.checkbox("Exibir trilha de auditoria detalhada", value=False, key="show_trails_full_audit")
 
     st.session_state["current_project_name"] = project_name
 
@@ -2554,7 +2050,6 @@ def render_full_audit_mode():
                 results = audit_output["results"]
                 trails = audit_output["trails"]
                 summary = engine.summarize_results(results)
-
                 df = build_audit_dataframe(results)
 
                 st.session_state["last_full_audit_results"] = results
@@ -2564,7 +2059,6 @@ def render_full_audit_mode():
                 st.session_state["last_full_audit_run_id"] = audit_output["run_id"]
 
                 st.success("Auditoria concluída com sucesso.")
-
             except Exception as e:
                 st.error(f"Erro ao executar auditoria completa: {str(e)}")
 
@@ -2616,62 +2110,87 @@ def render_full_audit_mode():
         }
         json_bytes = convert_json_to_bytes(json_payload)
 
-        c1, c2 = st.columns(2)
-        with c1:
-            st.download_button(
-                "Baixar matriz em CSV",
-                data=csv_bytes,
-                file_name=f"matriz_conformidade_isometric_{run_id}.csv",
-                mime="text/csv",
-                use_container_width=True
-            )
-        with c2:
-            st.download_button(
-                "Baixar trilha de auditoria em JSON",
-                data=json_bytes,
-                file_name=f"auditoria_isometric_{run_id}.json",
-                mime="application/json",
-                use_container_width=True
-            )
+        full_audit_text = build_full_audit_text(summary, st.session_state["last_full_audit_results"])
+        full_audit_docx = docx_from_text("Auditoria Resumida Isometric", full_audit_text)
+        full_audit_pdf = pdf_from_text("Auditoria Resumida Isometric", full_audit_text)
 
-        st.markdown("---")
-        st.subheader("Downloads auxiliares da auditoria completa")
-
-        full_audit_text = build_full_audit_text(
-            st.session_state["last_full_audit_summary"],
-            st.session_state["last_full_audit_results"]
+        eligibility_dossier_text = build_full_eligibility_dossier_text(
+            project_name=project_name,
+            summary=summary,
+            results=st.session_state["last_full_audit_results"],
+            trails=st.session_state["last_full_audit_trails"],
         )
-        full_audit_docx = docx_from_text("Auditoria Completa Isometric", full_audit_text)
-        full_audit_pdf = pdf_from_text("Auditoria Completa Isometric", full_audit_text)
+        eligibility_docx = docx_from_text("Dossiê de Elegibilidade Metodológica", eligibility_dossier_text)
+        eligibility_pdf = pdf_from_text("Dossiê de Elegibilidade Metodológica", eligibility_dossier_text)
+
         matrix_docx = matrix_to_docx_bytes(df, "Matriz de Conformidade Isometric")
         matrix_pdf = matrix_to_pdf_bytes(df, "Matriz de Conformidade Isometric")
 
-        c1, c2, c3, c4 = st.columns(4)
+        st.markdown("---")
+        st.subheader("Downloads da auditoria")
+
+        c1, c2, c3 = st.columns(3)
         with c1:
             st.download_button(
-                "Relatório completo (.md)",
+                "Auditoria resumida (.md)",
                 data=full_audit_text,
-                file_name=f"auditoria_completa_isometric_{run_id}.md",
+                file_name=f"auditoria_resumida_isometric_{run_id}.md",
                 mime="text/markdown",
                 use_container_width=True
             )
         with c2:
             st.download_button(
-                "Relatório completo (.docx)",
+                "Auditoria resumida (.docx)",
                 data=full_audit_docx,
-                file_name=f"auditoria_completa_isometric_{run_id}.docx",
+                file_name=f"auditoria_resumida_isometric_{run_id}.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 use_container_width=True
             )
         with c3:
             st.download_button(
-                "Relatório completo (.pdf)",
+                "Auditoria resumida (.pdf)",
                 data=full_audit_pdf,
-                file_name=f"auditoria_completa_isometric_{run_id}.pdf",
+                file_name=f"auditoria_resumida_isometric_{run_id}.pdf",
                 mime="application/pdf",
                 use_container_width=True
             )
+
+        c4, c5, c6 = st.columns(3)
         with c4:
+            st.download_button(
+                "Dossiê de elegibilidade (.md)",
+                data=eligibility_dossier_text,
+                file_name=f"dossie_elegibilidade_{run_id}.md",
+                mime="text/markdown",
+                use_container_width=True
+            )
+        with c5:
+            st.download_button(
+                "Dossiê de elegibilidade (.docx)",
+                data=eligibility_docx,
+                file_name=f"dossie_elegibilidade_{run_id}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                use_container_width=True
+            )
+        with c6:
+            st.download_button(
+                "Dossiê de elegibilidade (.pdf)",
+                data=eligibility_pdf,
+                file_name=f"dossie_elegibilidade_{run_id}.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
+
+        c7, c8, c9, c10 = st.columns(4)
+        with c7:
+            st.download_button(
+                "Matriz (.csv)",
+                data=csv_bytes,
+                file_name=f"matriz_conformidade_isometric_{run_id}.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+        with c8:
             st.download_button(
                 "Matriz (.docx)",
                 data=matrix_docx,
@@ -2679,9 +2198,7 @@ def render_full_audit_mode():
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 use_container_width=True
             )
-
-        c5, c6 = st.columns(2)
-        with c5:
+        with c9:
             st.download_button(
                 "Matriz (.pdf)",
                 data=matrix_pdf,
@@ -2689,11 +2206,11 @@ def render_full_audit_mode():
                 mime="application/pdf",
                 use_container_width=True
             )
-        with c6:
+        with c10:
             st.download_button(
-                "Matriz (.json)",
-                data=json.dumps(st.session_state["last_full_audit_results"], ensure_ascii=False, indent=2),
-                file_name=f"matriz_conformidade_isometric_{run_id}.json",
+                "Trilha / auditoria (.json)",
+                data=json_bytes,
+                file_name=f"auditoria_isometric_{run_id}.json",
                 mime="application/json",
                 use_container_width=True
             )
