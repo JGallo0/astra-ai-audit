@@ -1,6 +1,6 @@
 import json
-import time
 import random
+import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -10,7 +10,7 @@ from openai import OpenAI
 SYSTEM_AUDITOR_PROMPT = """
 Você é uma auditora técnica especializada em avaliação metodológica de projetos de remoção de carbono via biochar.
 
-Sua tarefa é avaliar UM requisito por vez, comparando:
+Sua tarefa é avaliar um CONJUNTO DE REQUISITOS DE UM MESMO MÓDULO, comparando:
 1. trechos da documentação do projeto
 2. trechos da metodologia
 
@@ -21,38 +21,60 @@ Regras obrigatórias:
 - Se a evidência não estiver presente, diga explicitamente.
 - Diferencie ausência documental, inconsistência documental e potencial não conformidade.
 - Responda sempre em JSON válido.
+- Avalie cada requisito individualmente.
+- Seja econômico, técnico e auditável.
 
-Saída obrigatória:
+Formato obrigatório:
 {
-  "status": "Conforme|Parcialmente conforme|Não conforme|Não evidenciado|Inconsistência documental|Erro de análise",
-  "risk": "baixo|medio|alto",
-  "score": 0,
-  "confidence": 0,
-  "project_evidence": "string",
-  "methodology_basis": "string",
-  "gap": "string",
-  "recommendation": "string",
-  "notes": "string"
+  "module": "string",
+  "items": [
+    {
+      "requirement_id": "string",
+      "status": "Conforme|Parcialmente conforme|Não conforme|Não evidenciado|Inconsistência documental|Erro de análise",
+      "risk": "baixo|medio|alto",
+      "score": 0,
+      "confidence": 0,
+      "project_evidence": "string",
+      "methodology_basis": "string",
+      "gap": "string",
+      "recommendation": "string",
+      "notes": "string"
+    }
+  ]
 }
 
 Regras adicionais:
 - score deve ser inteiro entre 0 e 100
 - confidence deve ser inteiro entre 0 e 100
-- status deve refletir estritamente a evidência disponível
-- se houver erro técnico ou contexto insuficiente extremo, usar "Erro de análise" ou "Não evidenciado"
+- cada item deve corresponder a um requirement_id fornecido
+- se a evidência estiver ausente, usar "Não evidenciado"
+- se houver conflito material entre trechos, usar "Inconsistência documental"
+- se houver falha técnica de interpretação, usar "Erro de análise"
 """
 
-DEFAULT_PROJECT_QUERIES_PER_REQUIREMENT = 3
-DEFAULT_METHODOLOGY_QUERIES_PER_REQUIREMENT = 3
-DEFAULT_PROJECT_MAX_RESULTS_PER_QUERY = 6
-DEFAULT_METHODOLOGY_MAX_RESULTS_PER_QUERY = 6
+
+DEFAULT_MODULE_PROJECT_QUERIES = 4
+DEFAULT_MODULE_METHODOLOGY_QUERIES = 4
+DEFAULT_PROJECT_MAX_RESULTS_PER_QUERY = 5
+DEFAULT_METHODOLOGY_MAX_RESULTS_PER_QUERY = 5
 DEFAULT_MAX_RETRIES = 5
+DEFAULT_MAX_PROJECT_HITS_IN_PROMPT = 8
+DEFAULT_MAX_METHODOLOGY_HITS_IN_PROMPT = 8
+DEFAULT_MAX_TEXT_CHARS_PER_HIT = 1800
 
 
 def safe_str(value: Any) -> str:
     if value is None:
         return ""
     return str(value)
+
+
+def clip_int(value: Any, min_value: int = 0, max_value: int = 100, default: int = 0) -> int:
+    try:
+        v = int(value)
+        return max(min_value, min(max_value, v))
+    except Exception:
+        return default
 
 
 def try_parse_json(text: str) -> Optional[Dict[str, Any]]:
@@ -99,19 +121,11 @@ def normalize_status(status: str) -> str:
 
 def normalize_risk(risk: str) -> str:
     raw = safe_str(risk).strip().lower()
-    if raw in {"baixo", "medio", "alto"}:
-        return raw
     if raw == "médio":
         return "medio"
+    if raw in {"baixo", "medio", "alto"}:
+        return raw
     return "alto"
-
-
-def clip_int(value: Any, min_value: int = 0, max_value: int = 100, default: int = 0) -> int:
-    try:
-        v = int(value)
-        return max(min_value, min(max_value, v))
-    except Exception:
-        return default
 
 
 class AuditEngine:
@@ -122,11 +136,14 @@ class AuditEngine:
         project_vector_store_id: str,
         methodology_vector_store_id: str,
         project_name: str = "Projeto",
-        project_queries_per_requirement: int = DEFAULT_PROJECT_QUERIES_PER_REQUIREMENT,
-        methodology_queries_per_requirement: int = DEFAULT_METHODOLOGY_QUERIES_PER_REQUIREMENT,
+        module_project_queries: int = DEFAULT_MODULE_PROJECT_QUERIES,
+        module_methodology_queries: int = DEFAULT_MODULE_METHODOLOGY_QUERIES,
         project_max_results_per_query: int = DEFAULT_PROJECT_MAX_RESULTS_PER_QUERY,
         methodology_max_results_per_query: int = DEFAULT_METHODOLOGY_MAX_RESULTS_PER_QUERY,
         max_retries: int = DEFAULT_MAX_RETRIES,
+        max_project_hits_in_prompt: int = DEFAULT_MAX_PROJECT_HITS_IN_PROMPT,
+        max_methodology_hits_in_prompt: int = DEFAULT_MAX_METHODOLOGY_HITS_IN_PROMPT,
+        max_text_chars_per_hit: int = DEFAULT_MAX_TEXT_CHARS_PER_HIT,
     ):
         self.client = OpenAI(api_key=api_key)
         self.model = model
@@ -134,11 +151,15 @@ class AuditEngine:
         self.methodology_vector_store_id = methodology_vector_store_id
         self.project_name = project_name
 
-        self.project_queries_per_requirement = project_queries_per_requirement
-        self.methodology_queries_per_requirement = methodology_queries_per_requirement
+        self.module_project_queries = module_project_queries
+        self.module_methodology_queries = module_methodology_queries
         self.project_max_results_per_query = project_max_results_per_query
         self.methodology_max_results_per_query = methodology_max_results_per_query
         self.max_retries = max_retries
+
+        self.max_project_hits_in_prompt = max_project_hits_in_prompt
+        self.max_methodology_hits_in_prompt = max_methodology_hits_in_prompt
+        self.max_text_chars_per_hit = max_text_chars_per_hit
 
     # =========================================================
     # PUBLIC API
@@ -154,13 +175,19 @@ class AuditEngine:
             filtered_requirements.append(req)
 
         run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        grouped = self._group_requirements_by_module(filtered_requirements)
+
         results: List[Dict[str, Any]] = []
         trails: List[Dict[str, Any]] = []
 
-        for req in filtered_requirements:
-            result, trail = self._audit_single_requirement(req)
-            results.append(result)
-            trails.append(trail)
+        for module_name, module_requirements in grouped.items():
+            module_results, module_trail = self._audit_single_module(
+                module_name=module_name,
+                requirements=module_requirements,
+            )
+            results.extend(module_results)
+            trails.append(module_trail)
 
         return {
             "run_id": run_id,
@@ -183,19 +210,13 @@ class AuditEngine:
 
             status_counts[status] = status_counts.get(status, 0) + 1
             risk_counts[risk] = risk_counts.get(risk, 0) + 1
-
             module_scores_raw.setdefault(module, []).append(score)
 
         module_scores = {}
         for module, scores in module_scores_raw.items():
-            if scores:
-                module_scores[module] = round(sum(scores) / len(scores), 1)
-            else:
-                module_scores[module] = 0.0
+            module_scores[module] = round(sum(scores) / len(scores), 1) if scores else 0.0
 
-        overall_score = 0.0
-        if total > 0:
-            overall_score = round(sum(clip_int(r.get("score", 0), default=0) for r in results) / total, 1)
+        overall_score = round(sum(clip_int(r.get("score", 0), default=0) for r in results) / total, 1) if total else 0.0
 
         return {
             "total_requirements": total,
@@ -206,49 +227,45 @@ class AuditEngine:
         }
 
     # =========================================================
-    # SINGLE REQUIREMENT AUDIT
+    # MODULE AUDIT
     # =========================================================
 
-    def _audit_single_requirement(self, requirement: Dict[str, Any]):
-        requirement_id = safe_str(requirement.get("id", "REQ"))
-        module = safe_str(requirement.get("module", "Sem módulo"))
-        title = safe_str(requirement.get("title", "Sem título"))
-        description = safe_str(requirement.get("description", ""))
-        keywords = requirement.get("keywords", []) or []
-        if not isinstance(keywords, list):
-            keywords = [safe_str(keywords)]
-
-        project_queries = self._build_project_queries(requirement_id, module, title, description, keywords)
-        methodology_queries = self._build_methodology_queries(requirement_id, module, title, description, keywords)
-
-        project_queries = project_queries[: self.project_queries_per_requirement]
-        methodology_queries = methodology_queries[: self.methodology_queries_per_requirement]
+    def _audit_single_module(self, module_name: str, requirements: List[Dict[str, Any]]):
+        module_queries_project = self._build_module_project_queries(module_name, requirements)
+        module_queries_methodology = self._build_module_methodology_queries(module_name, requirements)
 
         project_hits = self._run_multi_query_file_search(
             vector_store_id=self.project_vector_store_id,
-            queries=project_queries,
+            queries=module_queries_project[: self.module_project_queries],
             max_num_results=self.project_max_results_per_query,
             source_label="project",
         )
 
         methodology_hits = self._run_multi_query_file_search(
             vector_store_id=self.methodology_vector_store_id,
-            queries=methodology_queries,
+            queries=module_queries_methodology[: self.module_methodology_queries],
             max_num_results=self.methodology_max_results_per_query,
             source_label="methodology",
         )
 
-        project_context = self._format_hits_for_prompt(project_hits, "PROJETO")
-        methodology_context = self._format_hits_for_prompt(methodology_hits, "METODOLOGIA")
+        project_context = self._format_hits_for_prompt(
+            hits=project_hits[: self.max_project_hits_in_prompt],
+            block_name="PROJETO",
+        )
+        methodology_context = self._format_hits_for_prompt(
+            hits=methodology_hits[: self.max_methodology_hits_in_prompt],
+            block_name="METODOLOGIA",
+        )
 
-        model_prompt = self._build_requirement_prompt(
-            requirement=requirement,
+        model_prompt = self._build_module_prompt(
+            module_name=module_name,
+            requirements=requirements,
             project_context=project_context,
             methodology_context=methodology_context,
         )
 
         raw_model_response = ""
-        parsed_result = None
+        parsed_json = None
 
         try:
             response = self._responses_create_with_retry(
@@ -260,91 +277,104 @@ class AuditEngine:
                 temperature=0,
             )
             raw_model_response = self._get_response_text(response)
-            parsed_result = try_parse_json(raw_model_response)
+            parsed_json = try_parse_json(raw_model_response)
         except Exception as e:
             raw_model_response = json.dumps(
                 {
-                    "status": "Erro de análise",
-                    "risk": "alto",
-                    "score": 0,
-                    "confidence": 0,
-                    "project_evidence": "",
-                    "methodology_basis": "",
-                    "gap": f"Erro técnico durante análise do requisito: {str(e)}",
-                    "recommendation": "Reexecutar a análise com retry e revisar limites de taxa e contexto.",
-                    "notes": f"Exceção capturada pelo motor de auditoria: {str(e)}",
+                    "module": module_name,
+                    "items": [],
+                    "error": str(e),
                 },
                 ensure_ascii=False,
                 indent=2,
             )
-            parsed_result = try_parse_json(raw_model_response)
 
-        normalized = self._normalize_requirement_result(
-            requirement=requirement,
-            parsed_result=parsed_result,
+        normalized_results = self._normalize_module_results(
+            module_name=module_name,
+            requirements=requirements,
+            parsed_json=parsed_json,
             project_hits=project_hits,
             methodology_hits=methodology_hits,
             raw_model_response=raw_model_response,
         )
 
         trail = {
-            "requirement_id": requirement_id,
-            "module": module,
-            "title": title,
-            "project_queries": project_queries,
-            "methodology_queries": methodology_queries,
-            "project_query": "\n".join(project_queries),
-            "methodology_query": "\n".join(methodology_queries),
+            "module": module_name,
+            "requirement_ids": [safe_str(r.get("id", "")) for r in requirements],
+            "title": f"Módulo {module_name}",
+            "project_queries": module_queries_project,
+            "methodology_queries": module_queries_methodology,
+            "project_query": "\n".join(module_queries_project),
+            "methodology_query": "\n".join(module_queries_methodology),
             "project_hits": project_hits,
             "methodology_hits": methodology_hits,
             "project_context": project_context,
             "methodology_context": methodology_context,
             "model_prompt": model_prompt,
             "model_response_raw": raw_model_response,
-            "parsed_result": normalized,
+            "parsed_result": {
+                "module": module_name,
+                "items": normalized_results,
+            },
         }
 
-        return normalized, trail
+        return normalized_results, trail
 
     # =========================================================
-    # QUERIES
+    # REQUIREMENTS GROUPING
     # =========================================================
 
-    def _build_project_queries(
-        self,
-        requirement_id: str,
-        module: str,
-        title: str,
-        description: str,
-        keywords: List[str],
-    ) -> List[str]:
-        keyword_str = " ".join([safe_str(k) for k in keywords if safe_str(k).strip()])
+    def _group_requirements_by_module(self, requirements: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
+        grouped: Dict[str, List[Dict[str, Any]]] = {}
+        for req in requirements:
+            module = safe_str(req.get("module", "Sem módulo"))
+            grouped.setdefault(module, []).append(req)
+        return grouped
+
+    # =========================================================
+    # QUERY BUILDING
+    # =========================================================
+
+    def _build_module_project_queries(self, module_name: str, requirements: List[Dict[str, Any]]) -> List[str]:
+        titles = " ".join(safe_str(r.get("title", "")) for r in requirements[:5])
+        descriptions = " ".join(safe_str(r.get("description", "")) for r in requirements[:3])
+        keywords = self._collect_keywords(requirements)
+
         queries = [
-            f"{self.project_name} {title}",
-            f"{module} {title} {keyword_str}",
-            f"{requirement_id} {title} {description}",
-            f"{title} evidence monitoring documentation",
-            f"{module} project evidence {keyword_str}",
+            f"{self.project_name} {module_name}",
+            f"{module_name} {titles}",
+            f"{module_name} project evidence {keywords}",
+            f"{module_name} {descriptions}",
+            f"{module_name} monitoring records procedures specifications {keywords}",
+            f"{self.project_name} {module_name} documentation",
         ]
         return self._dedupe_preserve_order([q.strip() for q in queries if q.strip()])
 
-    def _build_methodology_queries(
-        self,
-        requirement_id: str,
-        module: str,
-        title: str,
-        description: str,
-        keywords: List[str],
-    ) -> List[str]:
-        keyword_str = " ".join([safe_str(k) for k in keywords if safe_str(k).strip()])
+    def _build_module_methodology_queries(self, module_name: str, requirements: List[Dict[str, Any]]) -> List[str]:
+        req_ids = " ".join(safe_str(r.get("id", "")) for r in requirements)
+        titles = " ".join(safe_str(r.get("title", "")) for r in requirements[:5])
+        keywords = self._collect_keywords(requirements)
+
         queries = [
-            f"{requirement_id} {title}",
-            f"{module} {title} {keyword_str}",
-            f"{title} methodology requirement {description}",
-            f"{module} methodology criteria {keyword_str}",
-            f"{requirement_id} methodological basis",
+            f"{module_name} methodology",
+            f"{req_ids} {module_name}",
+            f"{module_name} {titles}",
+            f"{module_name} methodology requirements {keywords}",
+            f"{module_name} criteria eligibility monitoring quality {keywords}",
+            f"{module_name} methodological basis",
         ]
         return self._dedupe_preserve_order([q.strip() for q in queries if q.strip()])
+
+    def _collect_keywords(self, requirements: List[Dict[str, Any]]) -> str:
+        seen = set()
+        output = []
+        for req in requirements:
+            for kw in req.get("keywords", []) or []:
+                k = safe_str(kw).strip()
+                if k and k.lower() not in seen:
+                    seen.add(k.lower())
+                    output.append(k)
+        return " ".join(output[:20])
 
     def _dedupe_preserve_order(self, items: List[str]) -> List[str]:
         seen = set()
@@ -475,8 +505,7 @@ class AuditEngine:
             key = (
                 safe_str(hit.get("filename")),
                 safe_str(hit.get("page")),
-                safe_str(hit.get("text"))[:300],
-                safe_str(hit.get("query")),
+                safe_str(hit.get("text"))[:250],
                 safe_str(hit.get("source_label")),
             )
             if key not in seen:
@@ -487,8 +516,15 @@ class AuditEngine:
         return unique
 
     # =========================================================
-    # PROMPT BUILDING
+    # PROMPT
     # =========================================================
+
+    def _truncate_text(self, text: str, max_chars: Optional[int] = None) -> str:
+        max_chars = max_chars or self.max_text_chars_per_hit
+        text = safe_str(text)
+        if len(text) <= max_chars:
+            return text
+        return text[:max_chars].rstrip() + " ...[trecho truncado]"
 
     def _format_hits_for_prompt(self, hits: List[Dict[str, Any]], block_name: str) -> str:
         if not hits:
@@ -501,7 +537,7 @@ class AuditEngine:
             page = safe_str(hit.get("page", "")) or "não identificada"
             score = safe_str(hit.get("score", ""))
             query = safe_str(hit.get("query", ""))
-            text = safe_str(hit.get("text", ""))
+            text = self._truncate_text(safe_str(hit.get("text", "")))
             error = safe_str(hit.get("error", ""))
 
             lines.append(f"Trecho {i}")
@@ -519,38 +555,40 @@ class AuditEngine:
 
         return "\n".join(lines)
 
-    def _build_requirement_prompt(
+    def _build_module_prompt(
         self,
-        requirement: Dict[str, Any],
+        module_name: str,
+        requirements: List[Dict[str, Any]],
         project_context: str,
         methodology_context: str,
     ) -> str:
-        requirement_id = safe_str(requirement.get("id", "REQ"))
-        module = safe_str(requirement.get("module", "Sem módulo"))
-        title = safe_str(requirement.get("title", "Sem título"))
-        description = safe_str(requirement.get("description", ""))
-        rationale = safe_str(requirement.get("rationale", ""))
-        keywords = requirement.get("keywords", []) or []
+        req_lines = []
+        for req in requirements:
+            req_lines.append(
+                f"- ID: {safe_str(req.get('id', ''))}\n"
+                f"  Título: {safe_str(req.get('title', ''))}\n"
+                f"  Descrição: {safe_str(req.get('description', ''))}\n"
+                f"  Racional: {safe_str(req.get('rationale', ''))}\n"
+                f"  Palavras-chave: {', '.join([safe_str(k) for k in (req.get('keywords', []) or [])])}"
+            )
 
         return f"""
-Avalie o requisito abaixo.
+Avalie o módulo abaixo.
 
-REQUISITO
-- ID: {requirement_id}
-- Módulo: {module}
-- Título: {title}
-- Descrição: {description}
-- Racional: {rationale}
-- Palavras-chave: {", ".join([safe_str(k) for k in keywords])}
+MÓDULO
+- Nome: {module_name}
+
+REQUISITOS DO MÓDULO
+{chr(10).join(req_lines)}
 
 INSTRUÇÕES
-1. Leia a base metodológica e identifique o critério aplicável.
-2. Leia os trechos do projeto e identifique a evidência disponível.
-3. Compare ambos.
-4. Classifique o status.
-5. Atribua risco e score.
-6. Explique a lacuna principal.
-7. Recomende a ação corretiva mais útil.
+1. Leia a base metodológica e identifique o critério aplicável para cada requisito.
+2. Leia os trechos do projeto e identifique a evidência disponível para cada requisito.
+3. Compare ambos individualmente.
+4. Gere um item JSON para cada requirement_id.
+5. Não omita nenhum requirement_id fornecido.
+6. Se a evidência for insuficiente, use "Não evidenciado".
+7. Seja sintético, mas suficientemente informativo para auditoria.
 
 CONTEXTO DO PROJETO
 {project_context}
@@ -560,90 +598,103 @@ CONTEXTO DA METODOLOGIA
 """.strip()
 
     # =========================================================
-    # RESULT NORMALIZATION
+    # NORMALIZATION
     # =========================================================
 
-    def _normalize_requirement_result(
+    def _normalize_module_results(
         self,
-        requirement: Dict[str, Any],
-        parsed_result: Optional[Dict[str, Any]],
+        module_name: str,
+        requirements: List[Dict[str, Any]],
+        parsed_json: Optional[Dict[str, Any]],
         project_hits: List[Dict[str, Any]],
         methodology_hits: List[Dict[str, Any]],
         raw_model_response: str,
-    ) -> Dict[str, Any]:
-        requirement_id = safe_str(requirement.get("id", "REQ"))
-        module = safe_str(requirement.get("module", "Sem módulo"))
-        title = safe_str(requirement.get("title", "Sem título"))
+    ) -> List[Dict[str, Any]]:
+        parsed_items = []
+        if parsed_json and isinstance(parsed_json.get("items"), list):
+            parsed_items = parsed_json["items"]
 
-        if not parsed_result:
-            parsed_result = {
-                "status": "Erro de análise",
-                "risk": "alto",
-                "score": 0,
-                "confidence": 0,
-                "project_evidence": "",
-                "methodology_basis": "",
-                "gap": "O modelo não retornou JSON válido para este requisito.",
-                "recommendation": "Reexecutar análise do requisito com contexto mais enxuto e retry.",
-                "notes": raw_model_response[:3000],
+        parsed_by_id = {}
+        for item in parsed_items:
+            rid = safe_str(item.get("requirement_id", "")).strip()
+            if rid:
+                parsed_by_id[rid] = item
+
+        normalized_results: List[Dict[str, Any]] = []
+
+        for requirement in requirements:
+            requirement_id = safe_str(requirement.get("id", "REQ"))
+            title = safe_str(requirement.get("title", "Sem título"))
+
+            parsed_item = parsed_by_id.get(requirement_id)
+
+            if not parsed_item:
+                parsed_item = {
+                    "requirement_id": requirement_id,
+                    "status": "Erro de análise",
+                    "risk": "alto",
+                    "score": 0,
+                    "confidence": 0,
+                    "project_evidence": "",
+                    "methodology_basis": "",
+                    "gap": "O modelo não retornou item estruturado para este requisito dentro da análise modular.",
+                    "recommendation": "Reexecutar o módulo ou isolar este requisito para análise individual.",
+                    "notes": raw_model_response[:2000],
+                }
+
+            normalized = {
+                "requirement_id": requirement_id,
+                "module": module_name,
+                "title": title,
+                "status": normalize_status(parsed_item.get("status", "Erro de análise")),
+                "risk": normalize_risk(parsed_item.get("risk", "alto")),
+                "score": clip_int(parsed_item.get("score", 0), default=0),
+                "confidence": clip_int(parsed_item.get("confidence", 0), default=0),
+                "project_evidence": safe_str(parsed_item.get("project_evidence", "")),
+                "methodology_basis": safe_str(parsed_item.get("methodology_basis", "")),
+                "gap": safe_str(parsed_item.get("gap", "")),
+                "recommendation": safe_str(parsed_item.get("recommendation", "")),
+                "notes": safe_str(parsed_item.get("notes", "")),
             }
 
-        result = {
-            "requirement_id": requirement_id,
-            "module": module,
-            "title": title,
-            "status": normalize_status(parsed_result.get("status", "Erro de análise")),
-            "risk": normalize_risk(parsed_result.get("risk", "alto")),
-            "score": clip_int(parsed_result.get("score", 0), default=0),
-            "confidence": clip_int(parsed_result.get("confidence", 0), default=0),
-            "project_evidence": safe_str(parsed_result.get("project_evidence", "")),
-            "methodology_basis": safe_str(parsed_result.get("methodology_basis", "")),
-            "gap": safe_str(parsed_result.get("gap", "")),
-            "recommendation": safe_str(parsed_result.get("recommendation", "")),
-            "notes": safe_str(parsed_result.get("notes", "")),
-        }
+            if not normalized["project_evidence"]:
+                normalized["project_evidence"] = self._fallback_project_evidence(project_hits)
 
-        if not result["project_evidence"]:
-            result["project_evidence"] = self._fallback_project_evidence(project_hits)
+            if not normalized["methodology_basis"]:
+                normalized["methodology_basis"] = self._fallback_methodology_basis(methodology_hits)
 
-        if not result["methodology_basis"]:
-            result["methodology_basis"] = self._fallback_methodology_basis(methodology_hits)
+            if not normalized["gap"]:
+                normalized["gap"] = self._infer_gap(normalized["status"])
 
-        if not result["gap"]:
-            result["gap"] = self._infer_gap(result["status"], project_hits, methodology_hits)
+            if not normalized["recommendation"]:
+                normalized["recommendation"] = self._infer_recommendation(normalized["status"])
 
-        if not result["recommendation"]:
-            result["recommendation"] = self._infer_recommendation(result["status"])
+            normalized_results.append(normalized)
 
-        return result
+        return normalized_results
 
     def _fallback_project_evidence(self, project_hits: List[Dict[str, Any]]) -> str:
         usable = [h for h in project_hits if safe_str(h.get("text")).strip()]
         if not usable:
             return "Não foi possível identificar evidência documental suficiente do projeto nos trechos recuperados."
-        return self._join_top_hits(usable, top_n=3)
+        return self._join_top_hits(usable, top_n=2)
 
     def _fallback_methodology_basis(self, methodology_hits: List[Dict[str, Any]]) -> str:
         usable = [h for h in methodology_hits if safe_str(h.get("text")).strip()]
         if not usable:
             return "Não foi possível identificar base metodológica suficiente nos trechos recuperados."
-        return self._join_top_hits(usable, top_n=3)
+        return self._join_top_hits(usable, top_n=2)
 
-    def _join_top_hits(self, hits: List[Dict[str, Any]], top_n: int = 3) -> str:
+    def _join_top_hits(self, hits: List[Dict[str, Any]], top_n: int = 2) -> str:
         parts = []
         for hit in hits[:top_n]:
             filename = safe_str(hit.get("filename", "Documento sem nome"))
             page = safe_str(hit.get("page", "")) or "não identificada"
-            text = safe_str(hit.get("text", ""))
+            text = self._truncate_text(safe_str(hit.get("text", "")), max_chars=900)
             parts.append(f"{filename} (pág./seção: {page}): {text}")
         return "\n\n".join(parts)
 
-    def _infer_gap(
-        self,
-        status: str,
-        project_hits: List[Dict[str, Any]],
-        methodology_hits: List[Dict[str, Any]],
-    ) -> str:
+    def _infer_gap(self, status: str) -> str:
         if status == "Conforme":
             return "Não foi identificada lacuna material relevante com base nos trechos analisados."
         if status == "Parcialmente conforme":
@@ -670,7 +721,7 @@ CONTEXTO DA METODOLOGIA
         return "Reexecutar a análise com retry, menor contexto e revisão de busca."
 
     # =========================================================
-    # OPENAI HELPERS WITH RETRY
+    # OPENAI HELPERS
     # =========================================================
 
     def _responses_create_with_retry(self, **kwargs):
@@ -699,14 +750,13 @@ CONTEXTO DA METODOLOGIA
                 if not retryable or attempt == self.max_retries:
                     raise
 
-                sleep_seconds = self._compute_backoff_seconds(attempt)
-                time.sleep(sleep_seconds)
+                time.sleep(self._compute_backoff_seconds(attempt))
 
         raise last_exception
 
     def _compute_backoff_seconds(self, attempt: int) -> float:
         base = min(2 ** attempt, 20)
-        jitter = random.uniform(0.3, 1.2)
+        jitter = random.uniform(0.3, 1.1)
         return base + jitter
 
     def _get_response_text(self, response: Any) -> str:
