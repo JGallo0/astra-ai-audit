@@ -22,6 +22,14 @@ from reportlab.pdfgen import canvas
 from audit_engine import AuditEngine
 from isometric_requirements import ISOMETRIC_REQUIREMENTS
 
+try:
+    from db import execute as db_execute, fetch as db_fetch
+    DB_MODULE_AVAILABLE = True
+except Exception:
+    db_execute = None
+    db_fetch = None
+    DB_MODULE_AVAILABLE = False
+
 # =========================================================
 # CONFIG
 # =========================================================
@@ -353,6 +361,8 @@ DEFAULT_STATE = {
     "last_full_audit_df": pd.DataFrame(),
     "last_full_audit_run_id": "",
     "usage_counters": {},
+    "current_project_name": "Projeto Nova Esperança",
+    "db_status_message": "",
 }
 
 for key, value in DEFAULT_STATE.items():
@@ -751,6 +761,212 @@ def build_full_audit_text(summary: Dict[str, Any], results: List[Dict[str, Any]]
     return "\n".join(lines)
 
 # =========================================================
+# DB / PERSISTENCE HELPERS
+# =========================================================
+
+def db_is_configured() -> bool:
+    required = ["DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD"]
+    for key in required:
+        value = get_config_value(key)
+        if not value or not str(value).strip():
+            return False
+    return DB_MODULE_AVAILABLE
+
+
+def db_execute_safe(query: str, params=None) -> bool:
+    if not db_is_configured() or db_execute is None:
+        return False
+
+    try:
+        db_execute(query, params)
+        return True
+    except Exception as e:
+        st.session_state["db_status_message"] = f"DB execute error: {str(e)}"
+        return False
+
+
+def db_fetch_safe(query: str, params=None) -> List[Any]:
+    if not db_is_configured() or db_fetch is None:
+        return []
+
+    try:
+        return db_fetch(query, params) or []
+    except Exception as e:
+        st.session_state["db_status_message"] = f"DB fetch error: {str(e)}"
+        return []
+
+
+def get_db_user_record(email: str) -> Optional[Dict[str, Any]]:
+    email = safe_str(email).strip().lower()
+    if not email:
+        return None
+
+    rows = db_fetch_safe(
+        """
+        SELECT email, name, role, status, created_at, last_login
+        FROM users
+        WHERE lower(email) = %s
+        LIMIT 1
+        """,
+        (email,)
+    )
+    if not rows:
+        return None
+
+    row = rows[0]
+    if isinstance(row, dict):
+        return row
+
+    return {
+        "email": row[0] if len(row) > 0 else "",
+        "name": row[1] if len(row) > 1 else "",
+        "role": row[2] if len(row) > 2 else "",
+        "status": row[3] if len(row) > 3 else "",
+        "created_at": row[4] if len(row) > 4 else None,
+        "last_login": row[5] if len(row) > 5 else None,
+    }
+
+
+def sync_user_to_db(user: Dict[str, str], role: str):
+    email = safe_str(user.get("email", "")).strip().lower()
+    name = safe_str(user.get("name", "")).strip()
+    if not email:
+        return
+
+    db_execute_safe(
+        """
+        INSERT INTO users (email, name, role, status, last_login)
+        VALUES (%s, %s, %s, %s, NOW())
+        ON CONFLICT (email)
+        DO UPDATE SET
+            name = EXCLUDED.name,
+            role = EXCLUDED.role,
+            status = EXCLUDED.status,
+            last_login = NOW()
+        """,
+        (email, name, role, "active")
+    )
+
+
+def ensure_project_record(owner_email: str, project_name: str):
+    owner_email = safe_str(owner_email).strip().lower()
+    project_name = safe_str(project_name).strip()
+    if not owner_email or not project_name:
+        return
+
+    existing = db_fetch_safe(
+        """
+        SELECT id
+        FROM projects
+        WHERE lower(owner_email) = %s
+          AND lower(project_name) = %s
+        LIMIT 1
+        """,
+        (owner_email, project_name.lower())
+    )
+
+    if existing:
+        return
+
+    db_execute_safe(
+        """
+        INSERT INTO projects (owner_email, project_name, created_at)
+        VALUES (%s, %s, NOW())
+        """,
+        (owner_email, project_name)
+    )
+
+
+def get_plan_record(email: str) -> Optional[Dict[str, Any]]:
+    email = safe_str(email).strip().lower()
+    if not email:
+        return None
+
+    rows = db_fetch_safe(
+        """
+        SELECT plan_name, chat_limit, audit_limit, report_limit
+        FROM plans
+        WHERE lower(user_email) = %s
+        ORDER BY id DESC
+        LIMIT 1
+        """,
+        (email,)
+    )
+    if not rows:
+        return None
+
+    row = rows[0]
+    if isinstance(row, dict):
+        return row
+
+    return {
+        "plan_name": row[0] if len(row) > 0 else "",
+        "chat_limit": row[1] if len(row) > 1 else None,
+        "audit_limit": row[2] if len(row) > 2 else None,
+        "report_limit": row[3] if len(row) > 3 else None,
+    }
+
+
+def get_db_monthly_usage(email: str) -> Optional[Dict[str, int]]:
+    email = safe_str(email).strip().lower()
+    if not email:
+        return None
+
+    rows = db_fetch_safe(
+        """
+        SELECT action_type, COUNT(*)::int
+        FROM usage_logs
+        WHERE lower(user_email) = %s
+          AND timestamp >= date_trunc('month', NOW())
+          AND timestamp < date_trunc('month', NOW()) + interval '1 month'
+        GROUP BY action_type
+        """,
+        (email,)
+    )
+
+    usage = {
+        "chat": 0,
+        "structured_audit": 0,
+        "report": 0,
+        "matrix": 0,
+        "deep_dive": 0,
+        "full_audit": 0,
+    }
+
+    if rows is None:
+        return None
+
+    for row in rows:
+        if isinstance(row, dict):
+            action = safe_str(row.get("action_type", "")).strip()
+            count = int(row.get("count", 0) or 0)
+        else:
+            action = safe_str(row[0] if len(row) > 0 else "").strip()
+            count = int(row[1] if len(row) > 1 else 0)
+        if action in usage:
+            usage[action] = count
+
+    return usage
+
+
+def log_usage_db(email: str, action: str, project_name: str = ""):
+    email = safe_str(email).strip().lower()
+    action = safe_str(action).strip()
+    project_name = safe_str(project_name).strip()
+
+    if not email or not action:
+        return
+
+    db_execute_safe(
+        """
+        INSERT INTO usage_logs (user_email, action_type, project_name, timestamp)
+        VALUES (%s, %s, %s, NOW())
+        """,
+        (email, action, project_name)
+    )
+
+
+# =========================================================
 # AUTH / ACCESS / USAGE
 # =========================================================
 
@@ -833,6 +1049,15 @@ def get_user_role(email: str) -> str:
     if not email:
         return "blocked"
 
+    persisted = get_db_user_record(email)
+    if persisted:
+        persisted_status = safe_str(persisted.get("status", "active")).strip().lower()
+        persisted_role = safe_str(persisted.get("role", "")).strip().lower()
+        if persisted_status in {"blocked", "inactive", "disabled"}:
+            return "blocked"
+        if persisted_role:
+            return persisted_role
+
     if email in ADMIN_EMAILS:
         return "admin"
 
@@ -847,7 +1072,7 @@ def get_user_role(email: str) -> str:
 
 def get_role_limits(role: str) -> Dict[str, int]:
     if role == "admin":
-        return {
+        base_limits = {
             "chat": ADMIN_CHAT_LIMIT,
             "structured_audit": ADMIN_STRUCTURED_AUDIT_LIMIT,
             "report": ADMIN_REPORT_LIMIT,
@@ -855,8 +1080,8 @@ def get_role_limits(role: str) -> Dict[str, int]:
             "deep_dive": ADMIN_DEEP_DIVE_LIMIT,
             "full_audit": ADMIN_FULL_AUDIT_LIMIT,
         }
-    if role == "internal":
-        return {
+    elif role == "internal":
+        base_limits = {
             "chat": INTERNAL_CHAT_LIMIT,
             "structured_audit": INTERNAL_STRUCTURED_AUDIT_LIMIT,
             "report": INTERNAL_REPORT_LIMIT,
@@ -864,8 +1089,8 @@ def get_role_limits(role: str) -> Dict[str, int]:
             "deep_dive": INTERNAL_DEEP_DIVE_LIMIT,
             "full_audit": INTERNAL_FULL_AUDIT_LIMIT,
         }
-    if role == "pilot_client":
-        return {
+    elif role == "pilot_client":
+        base_limits = {
             "chat": PILOT_CHAT_LIMIT,
             "structured_audit": PILOT_STRUCTURED_AUDIT_LIMIT,
             "report": PILOT_REPORT_LIMIT,
@@ -873,14 +1098,29 @@ def get_role_limits(role: str) -> Dict[str, int]:
             "deep_dive": PILOT_DEEP_DIVE_LIMIT,
             "full_audit": PILOT_FULL_AUDIT_LIMIT,
         }
-    return {
-        "chat": 0,
-        "structured_audit": 0,
-        "report": 0,
-        "matrix": 0,
-        "deep_dive": 0,
-        "full_audit": 0,
-    }
+    else:
+        base_limits = {
+            "chat": 0,
+            "structured_audit": 0,
+            "report": 0,
+            "matrix": 0,
+            "deep_dive": 0,
+            "full_audit": 0,
+        }
+
+    plan = get_plan_record(current_user["email"]) if "current_user" in globals() else None
+    if plan:
+        if plan.get("chat_limit") is not None:
+            base_limits["chat"] = int(plan["chat_limit"])
+        if plan.get("audit_limit") is not None:
+            base_limits["structured_audit"] = int(plan["audit_limit"])
+            base_limits["matrix"] = int(plan["audit_limit"])
+            base_limits["deep_dive"] = int(plan["audit_limit"])
+            base_limits["full_audit"] = int(plan["audit_limit"])
+        if plan.get("report_limit") is not None:
+            base_limits["report"] = int(plan["report_limit"])
+
+    return base_limits
 
 
 def get_usage_bucket_key(email: str) -> str:
@@ -902,6 +1142,10 @@ def init_usage_bucket(email: str):
 
 
 def get_usage(email: str) -> Dict[str, int]:
+    db_usage = get_db_monthly_usage(email)
+    if db_usage is not None:
+        return db_usage
+
     init_usage_bucket(email)
     key = get_usage_bucket_key(email)
     return st.session_state["usage_counters"][key]
@@ -913,10 +1157,13 @@ def can_consume(email: str, role: str, action: str) -> bool:
     return usage.get(action, 0) < limits.get(action, 0)
 
 
-def consume_usage(email: str, action: str):
+def consume_usage(email: str, action: str, project_name: str = ""):
     init_usage_bucket(email)
     key = get_usage_bucket_key(email)
     st.session_state["usage_counters"][key][action] = st.session_state["usage_counters"][key].get(action, 0) + 1
+
+    if db_is_configured():
+        log_usage_db(email, action, project_name)
 
 
 def render_login_gate():
@@ -972,7 +1219,7 @@ def render_usage_overview_in_sidebar(user: Dict[str, str], role: str):
                 st.logout()
 
         st.divider()
-        st.subheader("Uso do mês (sessão atual)")
+        st.subheader("Uso do mês")
 
         usage_df = pd.DataFrame([
             {"Ação": "Chat", "Usado": usage["chat"], "Limite": limits["chat"]},
@@ -984,8 +1231,16 @@ def render_usage_overview_in_sidebar(user: Dict[str, str], role: str):
         ])
         st.dataframe(usage_df, use_container_width=True, hide_index=True)
 
-        st.caption("Observação: nesta V1 os limites são controlados por sessão/mês no app. "
-                   "Para persistência real entre sessões e auditoria comercial, o próximo passo é conectar um banco externo.")
+        if db_is_configured():
+            st.success("Persistência ativa: usuários, planos e logs estão sendo lidos/grava­dos no Supabase.")
+        else:
+            st.caption(
+                "Persistência em banco ainda não ativa. Nesta V1 os limites continuam sendo "
+                "controlados por sessão local do app."
+            )
+
+        if st.session_state.get("db_status_message"):
+            st.caption(f"Status DB: {safe_str(st.session_state['db_status_message'])}")
 
 # =========================================================
 # DOCX / PDF SIMPLE EXPORTS
@@ -1522,6 +1777,9 @@ current_role = get_user_role(current_user["email"])
 if current_role == "blocked":
     render_access_denied(current_user["email"])
 
+if db_is_configured():
+    sync_user_to_db(current_user, current_role)
+
 # =========================================================
 # SIDEBAR
 # =========================================================
@@ -1562,6 +1820,11 @@ with st.sidebar:
 
     st.write("**Logo configurada:**")
     st.code(LOGO_PATH)
+
+    if db_is_configured():
+        st.write("**Persistência:** `Supabase ativa`")
+    else:
+        st.write("**Persistência:** `Sessão local`")
 
     if st.button("Limpar conversa / sessão"):
         for key, value in DEFAULT_STATE.items():
@@ -1710,6 +1973,12 @@ ITEM SELECIONADO PARA APROFUNDAMENTO:
 # =========================================================
 
 def render_chat_mode():
+    project_name = "Projeto Nova Esperança"
+    st.session_state["current_project_name"] = project_name
+
+    if db_is_configured():
+        ensure_project_record(current_user["email"], project_name)
+
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
@@ -1721,7 +1990,7 @@ def render_chat_mode():
             st.error("Limite de uso do chat atingido para o período atual.")
             return
 
-        consume_usage(current_user["email"], "chat")
+        consume_usage(current_user["email"], "chat", project_name)
 
         st.session_state.messages.append({"role": "user", "content": sanitize_xml_text(user_input)})
         st.session_state.last_user_question = sanitize_xml_text(user_input)
@@ -1833,7 +2102,7 @@ def render_chat_mode():
         )
 
     if generate_audit:
-        consume_usage(current_user["email"], "structured_audit")
+        consume_usage(current_user["email"], "structured_audit", project_name)
         with st.spinner("Gerando auditoria estruturada..."):
             try:
                 audit_prompt = build_combined_context_prompt(
@@ -1867,7 +2136,7 @@ def render_chat_mode():
             st.json(st.session_state.last_audit_json)
 
     if generate_report:
-        consume_usage(current_user["email"], "report")
+        consume_usage(current_user["email"], "report", project_name)
         with st.spinner("Gerando relatório consolidado..."):
             try:
                 report_prompt = build_combined_context_prompt(
@@ -1901,7 +2170,7 @@ def render_chat_mode():
         st.markdown(st.session_state.last_report_text)
 
     if generate_matrix:
-        consume_usage(current_user["email"], "matrix")
+        consume_usage(current_user["email"], "matrix", project_name)
         with st.spinner("Gerando matriz de conformidade..."):
             try:
                 matrix_prompt = build_combined_context_prompt(
@@ -1975,7 +2244,7 @@ def render_chat_mode():
         )
 
         if generate_deep_dive:
-            consume_usage(current_user["email"], "deep_dive")
+            consume_usage(current_user["email"], "deep_dive", project_name)
             with st.spinner("Aprofundando item selecionado..."):
                 try:
                     deep_prompt = build_deep_dive_prompt(
@@ -2244,7 +2513,7 @@ def render_full_audit_mode():
     with st.expander("Configuração da auditoria", expanded=True):
         project_name = st.text_input(
             "Nome do projeto",
-            value="Projeto Nova Esperança"
+            value=st.session_state.get("current_project_name", "Projeto Nova Esperança")
         )
 
         selected_modules = st.multiselect(
@@ -2259,13 +2528,18 @@ def render_full_audit_mode():
             key="show_trails_full_audit"
         )
 
+    st.session_state["current_project_name"] = project_name
+
+    if db_is_configured():
+        ensure_project_record(current_user["email"], project_name)
+
     if st.button(
         "Executar auditoria completa",
         type="primary",
         use_container_width=True,
         disabled=not can_consume(current_user["email"], current_role, "full_audit")
     ):
-        consume_usage(current_user["email"], "full_audit")
+        consume_usage(current_user["email"], "full_audit", project_name)
         with st.spinner("Executando auditoria requisito por requisito..."):
             try:
                 engine = AuditEngine(
