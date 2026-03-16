@@ -713,11 +713,11 @@ def inject_custom_css():
         --danger: {THEME["danger"]};
         --warning: {THEME["warning"]};
         --success: {THEME["success"]};
-        --background: {THEME["background"]};
+        --background: #EEF4F1;
         --card: {THEME["card"]};
         --text: {THEME["text"]};
-        --text-secondary: {THEME["text_secondary"]};
-        --border: {THEME["border"]};
+        --text-secondary: #5B6B7A;
+        --border: #D8E3DD;
         --hover: {THEME["hover"]};
         --info: {THEME["info"]};
         --critical: {THEME["critical"]};
@@ -735,11 +735,19 @@ def inject_custom_css():
         background: var(--background);
     }}
 
+    [data-testid="stAppViewContainer"] {{
+        background: var(--background);
+    }}
+
+    [data-testid="stHeader"] {{
+        background: transparent;
+    }}
+
     .auditoria-header {{
         display: flex;
         align-items: center;
         gap: 1rem;
-        background: linear-gradient(135deg, rgba(26,77,78,1) 0%, rgba(76,175,80,0.92) 100%);
+        background: linear-gradient(135deg, #1A4D4E 0%, #2D6A4F 100%);
         padding: 1.2rem 1.4rem;
         border-radius: 18px;
         margin-bottom: 1rem;
@@ -785,8 +793,8 @@ def inject_custom_css():
     }}
 
     .badge-warning {{
-        background: rgba(249,199,79,0.20);
-        color: #9a6700;
+        background: rgba(249,199,79,0.22);
+        color: #8A5A00;
     }}
 
     .badge-danger {{
@@ -805,6 +813,15 @@ def inject_custom_css():
         border-radius: 18px;
         padding: 0.8rem;
         box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+    }}
+
+    div[data-testid="stMetric"] label,
+    div[data-testid="stMetric"] [data-testid="stMetricLabel"] {{
+        color: var(--text-secondary) !important;
+    }}
+
+    div[data-testid="stMetric"] [data-testid="stMetricValue"] {{
+        color: var(--primary) !important;
     }}
 
     div.stButton > button {{
@@ -838,6 +855,38 @@ def inject_custom_css():
         font-size: 1.4rem;
         font-weight: 700;
         color: var(--primary);
+    }}
+
+    section[data-testid="stSidebar"] {{
+        background: #F7FBF8;
+        border-right: 1px solid var(--border);
+    }}
+
+    input, textarea, [data-baseweb="select"] > div {{
+        background-color: #FFFFFF !important;
+        color: var(--text) !important;
+        border-radius: 10px !important;
+    }}
+
+    h1, h2, h3, h4 {{
+        color: var(--primary);
+    }}
+
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 0.5rem;
+    }}
+
+    .stTabs [data-baseweb="tab"] {{
+        background: #FFFFFF;
+        border-radius: 12px 12px 0 0;
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 0.5rem 0.9rem;
+    }}
+
+    .stTabs [aria-selected="true"] {{
+        background: #E8F3EC !important;
+        color: var(--primary) !important;
     }}
     </style>
     """
