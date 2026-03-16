@@ -705,6 +705,71 @@ def render_sources_block(title: str, sources: List[Dict[str, Any]], show_attribu
 
 def inject_custom_css():
     css = f"""
+        /* corrigir selectbox e multiselect */
+    [data-baseweb="select"] > div {{
+        background: #FFFFFF !important;
+        color: #1E293B !important;
+        border: 1px solid #D8E3DD !important;
+    }}
+
+    [data-baseweb="select"] span {{
+        color: #1E293B !important;
+    }}
+
+    [data-baseweb="select"] input {{
+        color: #1E293B !important;
+    }}
+
+    /* corrigir tags/chips do multiselect */
+    [data-baseweb="tag"] {{
+        background: #E8F3EC !important;
+        color: #1A4D4E !important;
+        border: 1px solid #D8E3DD !important;
+    }}
+
+    [data-baseweb="tag"] * {{
+        color: #1A4D4E !important;
+    }}
+
+    /* corrigir checkbox e radio */
+    .stCheckbox label,
+    .stRadio label {{
+        color: #1E293B !important;
+    }}
+
+    .stCheckbox div[data-testid="stMarkdownContainer"] p,
+    .stRadio div[data-testid="stMarkdownContainer"] p {{
+        color: #1E293B !important;
+    }}
+
+    /* corrigir campo de chat inferior */
+    [data-testid="stChatInput"] {{
+        background: transparent !important;
+    }}
+
+    [data-testid="stChatInput"] > div {{
+        background: #EEF4F1 !important;
+        border-top: 1px solid #D8E3DD !important;
+    }}
+
+    [data-testid="stChatInput"] textarea,
+    [data-testid="stChatInput"] input {{
+        background: #FFFFFF !important;
+        color: #1E293B !important;
+        border: 1px solid #D8E3DD !important;
+        border-radius: 12px !important;
+    }}
+
+    [data-testid="stChatInput"] button {{
+        background: #1A4D4E !important;
+        color: #FFFFFF !important;
+        border: none !important;
+    }}
+
+    [data-testid="stChatInput"] button:hover {{
+        background: #8BBD1E !important;
+        color: #1E293B !important;
+    }}
     <style>
     :root {{
         --primary: {THEME["primary"]};
