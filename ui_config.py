@@ -1,8 +1,10 @@
 APP_NAME = "AuditorIA"
+
 APP_TAGLINE = {
     "pt": "Auditoria inteligente para projetos de carbono",
     "en": "Smart audit for carbon projects",
 }
+
 APP_SUBTITLE = {
     "pt": "Auditor técnico documental de projetos de biochar e créditos de carbono",
     "en": "Technical document auditor for biochar and carbon credit projects",
@@ -11,21 +13,21 @@ APP_SUBTITLE = {
 LOGO_DEFAULT_PATH = "assets/auditoria_logo.png"
 
 THEME = {
-    "primary": "#1A4D4E",        # Deep Forest
-    "secondary": "#4CAF50",      # Bio Green
-    "accent": "#A2D729",         # Digital Lime
-    "danger": "#D90429",         # Alert Red
-    "warning": "#F9C74F",        # Caution Amber
-    "success": "#2D6A4F",        # Veridiano Safe
-    "background": "#EEF4F1",,     # Soft Slate
-    "card": "#FFFFFF",           # Pure White
-    "text": "#1E293B",           # Dark Slate
-    "text_secondary": "#64748B", # Slate Gray
-    "border": "#E2E8F0",         # Light Border
-    "hover": "#8BBD1E",          # Lime Darken
-    "info": "#3B82F6",           # Logic Blue
-    "critical": "#B91C1C",       # Deep Red
-    "progress": "#4CAF50",       # Growth Green
+    "primary": "#1A4D4E",
+    "secondary": "#4CAF50",
+    "accent": "#A2D729",
+    "danger": "#D90429",
+    "warning": "#F9C74F",
+    "success": "#2D6A4F",
+    "background": "#EEF4F1",
+    "card": "#FFFFFF",
+    "text": "#1E293B",
+    "text_secondary": "#64748B",
+    "border": "#E2E8F0",
+    "hover": "#8BBD1E",
+    "info": "#3B82F6",
+    "critical": "#B91C1C",
+    "progress": "#4CAF50",
     "font_primary": "Inter, sans-serif",
     "font_secondary": "'IBM Plex Sans', sans-serif",
 }
