@@ -720,19 +720,17 @@ def inject_custom_css():
         --border: #D8E3DD;
         --hover: {THEME["hover"]};
         --info: {THEME["info"]};
-        --critical: {THEME["critical"]};
         --progress: {THEME["progress"]};
         --font-primary: {THEME["font_primary"]};
-        --font-secondary: {THEME["font_secondary"]};
     }}
 
     html, body, [class*="css"] {{
         font-family: var(--font-primary);
-        color: var(--text);
     }}
 
     .stApp {{
         background: var(--background);
+        color: var(--text);
     }}
 
     [data-testid="stAppViewContainer"] {{
@@ -743,6 +741,12 @@ def inject_custom_css():
         background: transparent;
     }}
 
+    section[data-testid="stSidebar"] {{
+        background: #F7FBF8;
+        border-right: 1px solid var(--border);
+    }}
+
+    /* Header próprio */
     .auditoria-header {{
         display: flex;
         align-items: center;
@@ -768,13 +772,28 @@ def inject_custom_css():
         font-size: 0.98rem;
     }}
 
+    /* Cards customizados */
     .auditoria-card {{
         background: var(--card);
         border: 1px solid var(--border);
         border-radius: 18px;
-        padding: 1rem 1rem;
+        padding: 1rem;
         box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
         margin-bottom: 0.75rem;
+        color: var(--text);
+    }}
+
+    .auditoria-small {{
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+    }}
+
+    .auditoria-section-title {{
+        color: var(--primary);
+        font-weight: 700;
+        margin-top: 0.4rem;
+        margin-bottom: 0.5rem;
+        font-size: 1.05rem;
     }}
 
     .auditoria-badge {{
@@ -807,6 +826,7 @@ def inject_custom_css():
         color: var(--info);
     }}
 
+    /* Métricas */
     div[data-testid="stMetric"] {{
         background: var(--card);
         border: 1px solid var(--border);
@@ -815,15 +835,7 @@ def inject_custom_css():
         box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
     }}
 
-    div[data-testid="stMetric"] label,
-    div[data-testid="stMetric"] [data-testid="stMetricLabel"] {{
-        color: var(--text-secondary) !important;
-    }}
-
-    div[data-testid="stMetric"] [data-testid="stMetricValue"] {{
-        color: var(--primary) !important;
-    }}
-
+    /* Botões */
     div.stButton > button {{
         border-radius: 12px;
         border: 1px solid var(--primary);
@@ -838,40 +850,7 @@ def inject_custom_css():
         border-color: var(--hover);
     }}
 
-    .auditoria-small {{
-        color: var(--text-secondary);
-        font-size: 0.88rem;
-    }}
-
-    .auditoria-section-title {{
-        color: var(--primary);
-        font-weight: 700;
-        margin-top: 0.4rem;
-        margin-bottom: 0.5rem;
-        font-size: 1.05rem;
-    }}
-
-    .auditoria-kpi {{
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: var(--primary);
-    }}
-
-    section[data-testid="stSidebar"] {{
-        background: #F7FBF8;
-        border-right: 1px solid var(--border);
-    }}
-
-    input, textarea, [data-baseweb="select"] > div {{
-        background-color: #FFFFFF !important;
-        color: var(--text) !important;
-        border-radius: 10px !important;
-    }}
-
-    h1, h2, h3, h4 {{
-        color: var(--primary);
-    }}
-
+    /* Tabs */
     .stTabs [data-baseweb="tab-list"] {{
         gap: 0.5rem;
     }}
@@ -888,10 +867,14 @@ def inject_custom_css():
         background: #E8F3EC !important;
         color: var(--primary) !important;
     }}
+
+    /* Títulos */
+    h1, h2, h3, h4 {{
+        color: var(--primary);
+    }}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
-
 
 def render_header(lang: str):
     logo_html = ""
