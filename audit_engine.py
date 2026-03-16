@@ -2,7 +2,7 @@ import json
 import random
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Callable
 
 from openai import OpenAI
 
@@ -52,7 +52,6 @@ Regras adicionais:
 - se houver falha técnica de interpretação, usar "Erro de análise"
 """
 
-
 DEFAULT_MODULE_PROJECT_QUERIES = 4
 DEFAULT_MODULE_METHODOLOGY_QUERIES = 4
 DEFAULT_PROJECT_MAX_RESULTS_PER_QUERY = 5
@@ -61,6 +60,13 @@ DEFAULT_MAX_RETRIES = 5
 DEFAULT_MAX_PROJECT_HITS_IN_PROMPT = 8
 DEFAULT_MAX_METHODOLOGY_HITS_IN_PROMPT = 8
 DEFAULT_MAX_TEXT_CHARS_PER_HIT = 1800
+
+DEFAULT_LOW_CONFIDENCE_THRESHOLD = 45
+DEFAULT_REANALYZE_STATUSES = {
+    "Não evidenciado",
+    "Erro de análise",
+    "Inconsistência documental",
+}
 
 
 def safe_str(value: Any) -> str:
@@ -144,6 +150,8 @@ class AuditEngine:
         max_project_hits_in_prompt: int = DEFAULT_MAX_PROJECT_HITS_IN_PROMPT,
         max_methodology_hits_in_prompt: int = DEFAULT_MAX_METHODOLOGY_HITS_IN_PROMPT,
         max_text_chars_per_hit: int = DEFAULT_MAX_TEXT_CHARS_PER_HIT,
+        low_confidence_threshold: int = DEFAULT_LOW_CONFIDENCE_THRESHOLD,
+        progress_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
     ):
         self.client = OpenAI(api_key=api_key)
         self.model = model
@@ -160,12 +168,22 @@ class AuditEngine:
         self.max_project_hits_in_prompt = max_project_hits_in_prompt
         self.max_methodology_hits_in_prompt = max_methodology_hits_in_prompt
         self.max_text_chars_per_hit = max_text_chars_per_hit
+        self.low_confidence_threshold = low_confidence_threshold
+        self.progress_callback = progress_callback
+
+        self.session_cost_estimate = 0.0
+        self.last_execution_cost_estimate = 0.0
+        self.last_run_stats: Dict[str, Any] = {}
 
     # =========================================================
     # PUBLIC API
     # =========================================================
 
-    def run_full_audit(self, selected_modules: Optional[List[str]] = None) -> Dict[str, Any]:
+    def run_full_audit(
+        self,
+        selected_modules: Optional[List[str]] = None,
+        enable_auto_reanalysis: bool = True,
+    ) -> Dict[str, Any]:
         from isometric_requirements import ISOMETRIC_REQUIREMENTS
 
         filtered_requirements = []
@@ -174,25 +192,193 @@ class AuditEngine:
                 continue
             filtered_requirements.append(req)
 
-        run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-
         grouped = self._group_requirements_by_module(filtered_requirements)
+        modules = list(grouped.keys())
 
+        run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         results: List[Dict[str, Any]] = []
         trails: List[Dict[str, Any]] = []
 
-        for module_name, module_requirements in grouped.items():
+        initial_modules = len(modules)
+        current_module_index = 0
+
+        self.last_execution_cost_estimate = 0.0
+
+        for module_name in modules:
+            current_module_index += 1
+
+            self._emit_progress(
+                stage="module_start",
+                module=module_name,
+                current=current_module_index,
+                total=initial_modules,
+                percent=self._compute_percent(current_module_index - 1, initial_modules),
+                message=f"Iniciando módulo {module_name}",
+            )
+
             module_results, module_trail = self._audit_single_module(
                 module_name=module_name,
-                requirements=module_requirements,
+                requirements=grouped[module_name],
+                analysis_label="primary",
+                current=current_module_index,
+                total=initial_modules,
             )
+
             results.extend(module_results)
             trails.append(module_trail)
+
+            if enable_auto_reanalysis and self._module_needs_reanalysis(module_results):
+                self._emit_progress(
+                    stage="module_reanalysis",
+                    module=module_name,
+                    current=current_module_index,
+                    total=initial_modules,
+                    percent=self._compute_percent(current_module_index - 0.5, initial_modules),
+                    message=f"Reanalisando módulo {module_name} por baixa robustez",
+                )
+
+                refined_results, refined_trail = self._audit_single_module(
+                    module_name=module_name,
+                    requirements=grouped[module_name],
+                    analysis_label="reanalysis",
+                    current=current_module_index,
+                    total=initial_modules,
+                    query_boost=True,
+                )
+
+                merged_results = self._merge_module_results(module_results, refined_results)
+                results = [r for r in results if r.get("module") != module_name] + merged_results
+                trails.append(refined_trail)
+
+            self._emit_progress(
+                stage="module_complete",
+                module=module_name,
+                current=current_module_index,
+                total=initial_modules,
+                percent=self._compute_percent(current_module_index, initial_modules),
+                message=f"Módulo {module_name} concluído",
+            )
+
+        self.last_execution_cost_estimate = round(self.last_execution_cost_estimate, 4)
+        self.session_cost_estimate = round(self.session_cost_estimate, 4)
+
+        self.last_run_stats = {
+            "run_id": run_id,
+            "modules": modules,
+            "module_count": len(modules),
+            "requirement_count": len(filtered_requirements),
+            "estimated_cost": self.last_execution_cost_estimate,
+        }
+
+        self._emit_progress(
+            stage="run_complete",
+            module="",
+            current=initial_modules,
+            total=initial_modules,
+            percent=100,
+            message="Auditoria concluída",
+        )
 
         return {
             "run_id": run_id,
             "results": results,
             "trails": trails,
+            "estimated_cost": self.last_execution_cost_estimate,
+            "session_estimated_cost": self.session_cost_estimate,
+            "stats": self.last_run_stats,
+        }
+
+    def rerun_failed_items(
+        self,
+        previous_results: List[Dict[str, Any]],
+        selected_modules: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
+        from isometric_requirements import ISOMETRIC_REQUIREMENTS
+
+        previous_by_id = {
+            safe_str(item.get("requirement_id", "")): item
+            for item in previous_results
+        }
+
+        requirements_to_retry = []
+        for req in ISOMETRIC_REQUIREMENTS:
+            if selected_modules and req.get("module") not in selected_modules:
+                continue
+
+            rid = safe_str(req.get("id", ""))
+            prev = previous_by_id.get(rid)
+            if not prev:
+                continue
+
+            status = safe_str(prev.get("status", ""))
+            confidence = clip_int(prev.get("confidence", 0), default=0)
+
+            if status in DEFAULT_REANALYZE_STATUSES or confidence < self.low_confidence_threshold:
+                requirements_to_retry.append(req)
+
+        grouped = self._group_requirements_by_module(requirements_to_retry)
+        modules = list(grouped.keys())
+
+        run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+        results: List[Dict[str, Any]] = []
+        trails: List[Dict[str, Any]] = []
+
+        total_modules = len(modules)
+        idx = 0
+
+        self.last_execution_cost_estimate = 0.0
+
+        for module_name in modules:
+            idx += 1
+
+            self._emit_progress(
+                stage="rerun_start",
+                module=module_name,
+                current=idx,
+                total=total_modules,
+                percent=self._compute_percent(idx - 1, total_modules),
+                message=f"Reanalisando falhas do módulo {module_name}",
+            )
+
+            module_results, module_trail = self._audit_single_module(
+                module_name=module_name,
+                requirements=grouped[module_name],
+                analysis_label="rerun_failed_items",
+                current=idx,
+                total=total_modules,
+                query_boost=True,
+            )
+            results.extend(module_results)
+            trails.append(module_trail)
+
+            self._emit_progress(
+                stage="rerun_complete_module",
+                module=module_name,
+                current=idx,
+                total=total_modules,
+                percent=self._compute_percent(idx, total_modules),
+                message=f"Falhas do módulo {module_name} reanalisadas",
+            )
+
+        self.last_execution_cost_estimate = round(self.last_execution_cost_estimate, 4)
+        self.session_cost_estimate = round(self.session_cost_estimate, 4)
+
+        self.last_run_stats = {
+            "run_id": run_id,
+            "modules": modules,
+            "module_count": len(modules),
+            "requirement_count": len(requirements_to_retry),
+            "estimated_cost": self.last_execution_cost_estimate,
+            "mode": "rerun_failed_items",
+        }
+
+        return {
+            "run_id": run_id,
+            "results": results,
+            "trails": trails,
+            "estimated_cost": self.last_execution_cost_estimate,
+            "session_estimated_cost": self.session_cost_estimate,
+            "stats": self.last_run_stats,
         }
 
     def summarize_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -201,44 +387,125 @@ class AuditEngine:
         status_counts: Dict[str, int] = {}
         risk_counts: Dict[str, int] = {}
         module_scores_raw: Dict[str, List[int]] = {}
+        module_confidence_raw: Dict[str, List[int]] = {}
 
         for item in results:
             status = safe_str(item.get("status", "Erro de análise"))
             risk = safe_str(item.get("risk", "alto"))
             module = safe_str(item.get("module", "Sem módulo"))
             score = clip_int(item.get("score", 0), default=0)
+            confidence = clip_int(item.get("confidence", 0), default=0)
 
             status_counts[status] = status_counts.get(status, 0) + 1
             risk_counts[risk] = risk_counts.get(risk, 0) + 1
             module_scores_raw.setdefault(module, []).append(score)
+            module_confidence_raw.setdefault(module, []).append(confidence)
 
-        module_scores = {}
-        for module, scores in module_scores_raw.items():
-            module_scores[module] = round(sum(scores) / len(scores), 1) if scores else 0.0
+        module_scores = {
+            module: round(sum(scores) / len(scores), 1) if scores else 0.0
+            for module, scores in module_scores_raw.items()
+        }
 
-        overall_score = round(sum(clip_int(r.get("score", 0), default=0) for r in results) / total, 1) if total else 0.0
+        module_confidence = {
+            module: round(sum(scores) / len(scores), 1) if scores else 0.0
+            for module, scores in module_confidence_raw.items()
+        }
+
+        overall_score = round(
+            sum(clip_int(r.get("score", 0), default=0) for r in results) / total, 1
+        ) if total else 0.0
+
+        overall_confidence = round(
+            sum(clip_int(r.get("confidence", 0), default=0) for r in results) / total, 1
+        ) if total else 0.0
 
         return {
             "total_requirements": total,
             "overall_score": overall_score,
+            "overall_confidence": overall_confidence,
             "status_counts": status_counts,
             "risk_counts": risk_counts,
             "module_scores": module_scores,
+            "module_confidence": module_confidence,
+        }
+
+    def estimate_run_cost(
+        self,
+        selected_modules: Optional[List[str]] = None,
+        execution_mode: str = "Rápido",
+    ) -> Dict[str, Any]:
+        from isometric_requirements import ISOMETRIC_REQUIREMENTS
+
+        requirements = [
+            r for r in ISOMETRIC_REQUIREMENTS
+            if not selected_modules or r.get("module") in selected_modules
+        ]
+        grouped = self._group_requirements_by_module(requirements)
+        module_count = len(grouped)
+        requirement_count = len(requirements)
+
+        if execution_mode.lower().startswith("ráp"):
+            base_per_module = 0.035
+            min_factor = 0.8
+            max_factor = 1.15
+        else:
+            base_per_module = 0.085
+            min_factor = 0.9
+            max_factor = 1.35
+
+        min_cost = round(module_count * base_per_module * min_factor, 4)
+        max_cost = round(module_count * base_per_module * max_factor, 4)
+        est_cost = round((min_cost + max_cost) / 2, 4)
+
+        return {
+            "module_count": module_count,
+            "requirement_count": requirement_count,
+            "estimated_min_cost": min_cost,
+            "estimated_max_cost": max_cost,
+            "estimated_cost": est_cost,
         }
 
     # =========================================================
     # MODULE AUDIT
     # =========================================================
 
-    def _audit_single_module(self, module_name: str, requirements: List[Dict[str, Any]]):
-        module_queries_project = self._build_module_project_queries(module_name, requirements)
-        module_queries_methodology = self._build_module_methodology_queries(module_name, requirements)
+    def _audit_single_module(
+        self,
+        module_name: str,
+        requirements: List[Dict[str, Any]],
+        analysis_label: str,
+        current: int,
+        total: int,
+        query_boost: bool = False,
+    ):
+        module_queries_project = self._build_module_project_queries(module_name, requirements, query_boost=query_boost)
+        module_queries_methodology = self._build_module_methodology_queries(module_name, requirements, query_boost=query_boost)
+
+        self._register_cost_estimate(analysis_label)
+
+        self._emit_progress(
+            stage="project_search",
+            module=module_name,
+            current=current,
+            total=total,
+            percent=self._compute_percent(current - 0.66, total),
+            message=f"{module_name}: buscando evidências do projeto",
+        )
 
         project_hits = self._run_multi_query_file_search(
             vector_store_id=self.project_vector_store_id,
             queries=module_queries_project[: self.module_project_queries],
             max_num_results=self.project_max_results_per_query,
             source_label="project",
+        )
+
+        self._emit_progress(
+            stage="methodology_search",
+            module=module_name,
+            current=current,
+            total=total,
+            percent=self._compute_percent(current - 0.33, total),
+            message=f"{module_name}: buscando base metodológica",
         )
 
         methodology_hits = self._run_multi_query_file_search(
@@ -262,6 +529,16 @@ class AuditEngine:
             requirements=requirements,
             project_context=project_context,
             methodology_context=methodology_context,
+            analysis_label=analysis_label,
+        )
+
+        self._emit_progress(
+            stage="model_analysis",
+            module=module_name,
+            current=current,
+            total=total,
+            percent=self._compute_percent(current - 0.1, total),
+            message=f"{module_name}: analisando módulo",
         )
 
         raw_model_response = ""
@@ -300,6 +577,7 @@ class AuditEngine:
 
         trail = {
             "module": module_name,
+            "analysis_label": analysis_label,
             "requirement_ids": [safe_str(r.get("id", "")) for r in requirements],
             "title": f"Módulo {module_name}",
             "project_queries": module_queries_project,
@@ -321,6 +599,61 @@ class AuditEngine:
         return normalized_results, trail
 
     # =========================================================
+    # MODULE HEALTH / REANALYSIS
+    # =========================================================
+
+    def _module_needs_reanalysis(self, module_results: List[Dict[str, Any]]) -> bool:
+        if not module_results:
+            return True
+
+        weak_count = 0
+        for item in module_results:
+            status = safe_str(item.get("status", ""))
+            confidence = clip_int(item.get("confidence", 0), default=0)
+
+            if status in DEFAULT_REANALYZE_STATUSES or confidence < self.low_confidence_threshold:
+                weak_count += 1
+
+        ratio = weak_count / max(len(module_results), 1)
+        return ratio >= 0.4
+
+    def _merge_module_results(
+        self,
+        original_results: List[Dict[str, Any]],
+        refined_results: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        refined_by_id = {
+            safe_str(r.get("requirement_id", "")): r
+            for r in refined_results
+        }
+
+        merged = []
+        for item in original_results:
+            rid = safe_str(item.get("requirement_id", ""))
+            refined = refined_by_id.get(rid)
+
+            if not refined:
+                merged.append(item)
+                continue
+
+            original_status = safe_str(item.get("status", ""))
+            refined_status = safe_str(refined.get("status", ""))
+            original_conf = clip_int(item.get("confidence", 0), default=0)
+            refined_conf = clip_int(refined.get("confidence", 0), default=0)
+
+            if (
+                refined_status not in {"Erro de análise", "Não evidenciado"}
+                and refined_conf >= original_conf
+            ):
+                merged.append(refined)
+            elif refined_conf > original_conf + 10:
+                merged.append(refined)
+            else:
+                merged.append(item)
+
+        return merged
+
+    # =========================================================
     # REQUIREMENTS GROUPING
     # =========================================================
 
@@ -335,22 +668,39 @@ class AuditEngine:
     # QUERY BUILDING
     # =========================================================
 
-    def _build_module_project_queries(self, module_name: str, requirements: List[Dict[str, Any]]) -> List[str]:
+    def _build_module_project_queries(
+        self,
+        module_name: str,
+        requirements: List[Dict[str, Any]],
+        query_boost: bool = False,
+    ) -> List[str]:
         titles = " ".join(safe_str(r.get("title", "")) for r in requirements[:5])
         descriptions = " ".join(safe_str(r.get("description", "")) for r in requirements[:3])
         keywords = self._collect_keywords(requirements)
+        req_ids = " ".join(safe_str(r.get("id", "")) for r in requirements)
 
         queries = [
             f"{self.project_name} {module_name}",
             f"{module_name} {titles}",
             f"{module_name} project evidence {keywords}",
             f"{module_name} {descriptions}",
-            f"{module_name} monitoring records procedures specifications {keywords}",
             f"{self.project_name} {module_name} documentation",
         ]
+
+        if query_boost:
+            queries.extend([
+                f"{module_name} {req_ids} monitoring records procedures evidence",
+                f"{self.project_name} {module_name} batch traceability QAQC evidence {keywords}",
+            ])
+
         return self._dedupe_preserve_order([q.strip() for q in queries if q.strip()])
 
-    def _build_module_methodology_queries(self, module_name: str, requirements: List[Dict[str, Any]]) -> List[str]:
+    def _build_module_methodology_queries(
+        self,
+        module_name: str,
+        requirements: List[Dict[str, Any]],
+        query_boost: bool = False,
+    ) -> List[str]:
         req_ids = " ".join(safe_str(r.get("id", "")) for r in requirements)
         titles = " ".join(safe_str(r.get("title", "")) for r in requirements[:5])
         keywords = self._collect_keywords(requirements)
@@ -360,9 +710,15 @@ class AuditEngine:
             f"{req_ids} {module_name}",
             f"{module_name} {titles}",
             f"{module_name} methodology requirements {keywords}",
-            f"{module_name} criteria eligibility monitoring quality {keywords}",
             f"{module_name} methodological basis",
         ]
+
+        if query_boost:
+            queries.extend([
+                f"{module_name} criteria eligibility monitoring quality permanence {keywords}",
+                f"{req_ids} requirement criteria evidence methodological basis",
+            ])
+
         return self._dedupe_preserve_order([q.strip() for q in queries if q.strip()])
 
     def _collect_keywords(self, requirements: List[Dict[str, Any]]) -> str:
@@ -561,6 +917,7 @@ class AuditEngine:
         requirements: List[Dict[str, Any]],
         project_context: str,
         methodology_context: str,
+        analysis_label: str,
     ) -> str:
         req_lines = []
         for req in requirements:
@@ -577,6 +934,7 @@ Avalie o módulo abaixo.
 
 MÓDULO
 - Nome: {module_name}
+- Tipo de análise: {analysis_label}
 
 REQUISITOS DO MÓDULO
 {chr(10).join(req_lines)}
@@ -589,6 +947,7 @@ INSTRUÇÕES
 5. Não omita nenhum requirement_id fornecido.
 6. Se a evidência for insuficiente, use "Não evidenciado".
 7. Seja sintético, mas suficientemente informativo para auditoria.
+8. Se a primeira leitura parecer fraca, dê preferência aos trechos mais objetivos, específicos e auditáveis.
 
 CONTEXTO DO PROJETO
 {project_context}
@@ -719,6 +1078,57 @@ CONTEXTO DA METODOLOGIA
         if status == "Inconsistência documental":
             return "Reconciliar as fontes conflitantes e consolidar uma versão documental única e auditável."
         return "Reexecutar a análise com retry, menor contexto e revisão de busca."
+
+    # =========================================================
+    # COST / PROGRESS
+    # =========================================================
+
+    def _register_cost_estimate(self, analysis_label: str):
+        if analysis_label == "primary":
+            cost = 0.055
+        elif analysis_label == "reanalysis":
+            cost = 0.035
+        elif analysis_label == "rerun_failed_items":
+            cost = 0.03
+        else:
+            cost = 0.04
+
+        self.last_execution_cost_estimate += cost
+        self.session_cost_estimate += cost
+
+    def _compute_percent(self, current: float, total: int) -> int:
+        if total <= 0:
+            return 0
+        pct = int(round((current / total) * 100))
+        return max(0, min(100, pct))
+
+    def _emit_progress(
+        self,
+        stage: str,
+        module: str,
+        current: int,
+        total: int,
+        percent: int,
+        message: str,
+    ):
+        if self.progress_callback is None:
+            return
+
+        payload = {
+            "stage": stage,
+            "module": module,
+            "current": current,
+            "total": total,
+            "percent": max(0, min(100, int(percent))),
+            "message": message,
+            "execution_estimated_cost": round(self.last_execution_cost_estimate, 4),
+            "session_estimated_cost": round(self.session_cost_estimate, 4),
+        }
+
+        try:
+            self.progress_callback(payload)
+        except Exception:
+            pass
 
     # =========================================================
     # OPENAI HELPERS
