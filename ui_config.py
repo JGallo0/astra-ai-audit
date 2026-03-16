@@ -17,7 +17,7 @@ THEME = {
     "danger": "#D90429",         # Alert Red
     "warning": "#F9C74F",        # Caution Amber
     "success": "#2D6A4F",        # Veridiano Safe
-    "background": "#F1F5F9",     # Soft Slate
+    "background": "#EEF4F1",,     # Soft Slate
     "card": "#FFFFFF",           # Pure White
     "text": "#1E293B",           # Dark Slate
     "text_secondary": "#64748B", # Slate Gray
