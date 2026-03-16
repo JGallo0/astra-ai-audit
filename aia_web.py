@@ -985,6 +985,67 @@ def inject_custom_css():
         background: #8BBD1E !important;
         color: #1E293B !important;
     }}
+        /* dropdown aberto do selectbox */
+    [role="listbox"] {{
+        background: #FFFFFF !important;
+        color: #1E293B !important;
+        border: 1px solid #D8E3DD !important;
+    }}
+
+    [role="option"] {{
+        background: #FFFFFF !important;
+        color: #1E293B !important;
+    }}
+
+    [role="option"]:hover {{
+        background: #E8F3EC !important;
+        color: #1A4D4E !important;
+    }}
+
+    /* menu popover do baseweb */
+    [data-baseweb="popover"] {{
+        background: #FFFFFF !important;
+        color: #1E293B !important;
+    }}
+
+    [data-baseweb="popover"] * {{
+        color: #1E293B !important;
+    }}
+
+    /* badges pequenos escuros que continuam aparecendo */
+    code {{
+        background: #E8F3EC !important;
+        color: #1A4D4E !important;
+        border: 1px solid #D8E3DD !important;
+        border-radius: 8px !important;
+        padding: 0.12rem 0.35rem !important;
+    }}
+
+    .stMarkdown code {{
+        background: #E8F3EC !important;
+        color: #1A4D4E !important;
+        border: 1px solid #D8E3DD !important;
+    }}
+
+    /* entorno inferior do chat */
+    [data-testid="stBottomBlockContainer"] {{
+        background: #EEF4F1 !important;
+        border-top: 1px solid #D8E3DD !important;
+    }}
+
+    [data-testid="stChatInput"] {{
+        background: #EEF4F1 !important;
+    }}
+
+    [data-testid="stChatInput"] > div {{
+        background: #EEF4F1 !important;
+        border-top: none !important;
+    }}
+
+    /* remove fundo escuro residual perto do chat */
+    footer {{
+        background: #EEF4F1 !important;
+    }}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
