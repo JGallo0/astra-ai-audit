@@ -714,8 +714,8 @@ def inject_custom_css():
         --warning: {THEME["warning"]};
         --success: {THEME["success"]};
         --background: #EEF4F1;
-        --card: {THEME["card"]};
-        --text: {THEME["text"]};
+        --card: #FFFFFF;
+        --text: #1E293B;
         --text-secondary: #5B6B7A;
         --border: #D8E3DD;
         --hover: {THEME["hover"]};
@@ -726,6 +726,7 @@ def inject_custom_css():
 
     html, body, [class*="css"] {{
         font-family: var(--font-primary);
+        color: var(--text);
     }}
 
     .stApp {{
@@ -735,6 +736,7 @@ def inject_custom_css():
 
     [data-testid="stAppViewContainer"] {{
         background: var(--background);
+        color: var(--text);
     }}
 
     [data-testid="stHeader"] {{
@@ -746,7 +748,22 @@ def inject_custom_css():
         border-right: 1px solid var(--border);
     }}
 
-    /* Header próprio */
+    /* força cor escura na sidebar */
+    section[data-testid="stSidebar"] * {{
+        color: #1E293B !important;
+    }}
+
+    /* textos gerais */
+    p, span, label, div, li {{
+        color: #1E293B;
+    }}
+
+    /* títulos */
+    h1, h2, h3, h4 {{
+        color: var(--primary) !important;
+    }}
+
+    /* header próprio */
     .auditoria-header {{
         display: flex;
         align-items: center;
@@ -763,16 +780,16 @@ def inject_custom_css():
         margin: 0;
         font-size: 2rem;
         line-height: 1.1;
-        color: white;
+        color: white !important;
     }}
 
     .auditoria-header-text p {{
         margin: 0.25rem 0 0 0;
-        color: rgba(255,255,255,0.92);
+        color: rgba(255,255,255,0.92) !important;
         font-size: 0.98rem;
     }}
 
-    /* Cards customizados */
+    /* cards */
     .auditoria-card {{
         background: var(--card);
         border: 1px solid var(--border);
@@ -780,22 +797,19 @@ def inject_custom_css():
         padding: 1rem;
         box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
         margin-bottom: 0.75rem;
-        color: var(--text);
+        color: var(--text) !important;
+    }}
+
+    .auditoria-card * {{
+        color: #1E293B !important;
     }}
 
     .auditoria-small {{
-        color: var(--text-secondary);
+        color: var(--text-secondary) !important;
         font-size: 0.88rem;
     }}
 
-    .auditoria-section-title {{
-        color: var(--primary);
-        font-weight: 700;
-        margin-top: 0.4rem;
-        margin-bottom: 0.5rem;
-        font-size: 1.05rem;
-    }}
-
+    /* badges */
     .auditoria-badge {{
         display: inline-block;
         padding: 0.22rem 0.6rem;
@@ -808,49 +822,58 @@ def inject_custom_css():
 
     .badge-success {{
         background: rgba(45,106,79,0.12);
-        color: var(--success);
+        color: #2D6A4F !important;
     }}
 
     .badge-warning {{
         background: rgba(249,199,79,0.22);
-        color: #8A5A00;
+        color: #8A5A00 !important;
     }}
 
     .badge-danger {{
         background: rgba(217,4,41,0.12);
-        color: var(--danger);
+        color: #D90429 !important;
     }}
 
     .badge-info {{
         background: rgba(59,130,246,0.12);
-        color: var(--info);
+        color: #3B82F6 !important;
     }}
 
-    /* Métricas */
+    /* métricas */
     div[data-testid="stMetric"] {{
-        background: var(--card);
+        background: #FFFFFF;
         border: 1px solid var(--border);
         border-radius: 18px;
         padding: 0.8rem;
         box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
     }}
 
-    /* Botões */
+    div[data-testid="stMetric"] * {{
+        color: #1E293B !important;
+    }}
+
+    div[data-testid="stMetricValue"] {{
+        color: #1A4D4E !important;
+        font-weight: 700 !important;
+    }}
+
+    /* botões */
     div.stButton > button {{
         border-radius: 12px;
         border: 1px solid var(--primary);
         background: var(--primary);
-        color: white;
+        color: white !important;
         font-weight: 600;
     }}
 
     div.stButton > button:hover {{
         background: var(--hover);
-        color: var(--text);
+        color: #1E293B !important;
         border-color: var(--hover);
     }}
 
-    /* Tabs */
+    /* tabs */
     .stTabs [data-baseweb="tab-list"] {{
         gap: 0.5rem;
     }}
@@ -859,18 +882,43 @@ def inject_custom_css():
         background: #FFFFFF;
         border-radius: 12px 12px 0 0;
         border: 1px solid var(--border);
-        color: var(--text);
+        color: #1E293B !important;
         padding: 0.5rem 0.9rem;
     }}
 
     .stTabs [aria-selected="true"] {{
         background: #E8F3EC !important;
-        color: var(--primary) !important;
+        color: #1A4D4E !important;
     }}
 
-    /* Títulos */
-    h1, h2, h3, h4 {{
-        color: var(--primary);
+    /* selectbox / multiselect / inputs */
+    .stSelectbox label,
+    .stMultiSelect label,
+    .stTextInput label,
+    .stTextArea label,
+    .stRadio label,
+    .stCheckbox label {{
+        color: #1E293B !important;
+        font-weight: 600;
+    }}
+
+    input, textarea {{
+        color: #1E293B !important;
+    }}
+
+    [data-baseweb="select"] * {{
+        color: #1E293B !important;
+    }}
+
+    /* dataframe */
+    .stDataFrame, .stTable {{
+        background: #FFFFFF;
+        color: #1E293B !important;
+    }}
+
+    /* chat */
+    [data-testid="stChatInput"] * {{
+        color: #1E293B !important;
     }}
     </style>
     """
