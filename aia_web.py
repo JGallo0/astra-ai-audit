@@ -10,11 +10,7 @@ import streamlit as st
 from dotenv import load_dotenv
 from openai import OpenAI
 from docx import Document
-from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.oxml import OxmlElement
-from docx.oxml.ns import qn
-from docx.shared import Cm, Inches, Pt, RGBColor
+from docx.shared import Pt
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
@@ -136,10 +132,10 @@ PILOT_FULL_AUDIT_LIMIT = get_int_config("PILOT_FULL_AUDIT_LIMIT", 5)
 APP_NAME = "AuditorIA"
 APP_SUBTITLE = "Auditor técnico documental de projetos de biochar e créditos de carbono"
 
-client = OpenAI(api_key=OPENAI_API_KEY)
-
 PROJECT_MAX_RESULTS = 12
 METHODOLOGY_MAX_RESULTS = 12
+
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 SYSTEM_PROMPT = """
 Você é a AuditorIA, auditora técnica da AstraCarbon especializada em projetos de remoção de carbono via biochar.
@@ -185,138 +181,6 @@ FORMATO OBRIGATÓRIO DA RESPOSTA:
 5. Potenciais não conformidades
 6. Recomendações técnicas
 7. Nível de risco
-
-Se algum item não tiver conteúdo, escreva:
-"Não identificado na base consultada."
-"""
-
-JSON_AUDIT_PROMPT = """
-Você deve responder em JSON VÁLIDO, sem texto antes ou depois.
-
-Use exclusivamente os documentos recuperados da base.
-
-Estrutura obrigatória:
-{
-  "pergunta": "string",
-  "evidencias_encontradas": [
-    {
-      "documento": "string",
-      "pagina": "string",
-      "trecho": "string"
-    }
-  ],
-  "requisitos_metodologicos": [
-    {
-      "documento": "string",
-      "pagina_ou_secao": "string",
-      "trecho": "string"
-    }
-  ],
-  "lacunas_documentais": ["string"],
-  "inconsistencias_documentais": ["string"],
-  "potenciais_nao_conformidades": ["string"],
-  "recomendacoes_tecnicas": ["string"],
-  "nivel_risco": "baixo|medio|alto"
-}
-
-REGRAS:
-- Se não houver evidência suficiente, registre isso explicitamente.
-- Não invente páginas.
-- Se a página não estiver disponível, use "não identificada".
-- Não use markdown.
-- Não use conhecimento externo.
-"""
-
-REPORT_PROMPT = """
-Você deve produzir um RELATÓRIO CONSOLIDADO DE AUDITORIA, em texto claro e estruturado.
-
-Use exclusivamente os documentos recuperados e, quando disponível, a auditoria JSON já produzida.
-
-Objetivo do relatório:
-- sintetizar as evidências do projeto
-- sintetizar os requisitos metodológicos relevantes
-- destacar lacunas documentais
-- destacar inconsistências documentais
-- destacar potenciais não conformidades
-- priorizar recomendações técnicas
-- apresentar uma conclusão executiva com o nível de risco
-
-FORMATO OBRIGATÓRIO:
-# Relatório Consolidado de Auditoria
-
-## 1. Escopo analisado
-## 2. Evidências documentais do projeto
-## 3. Requisitos metodológicos relevantes
-## 4. Lacunas documentais
-## 5. Inconsistências documentais
-## 6. Potenciais não conformidades
-## 7. Recomendações priorizadas
-## 8. Conclusão executiva
-
-REGRAS:
-- Não use conhecimento externo.
-- Não invente fatos.
-- Se faltar evidência, declare isso explicitamente.
-- Seja objetivo, técnico e auditável.
-"""
-
-COMPLIANCE_MATRIX_PROMPT = """
-Você deve responder em JSON VÁLIDO, sem texto antes ou depois.
-
-Objetivo:
-Construir uma MATRIZ DE CONFORMIDADE comparando evidências do projeto com requisitos metodológicos.
-
-Use exclusivamente os documentos recuperados.
-
-Estrutura obrigatória:
-{
-  "pergunta": "string",
-  "matriz_conformidade": [
-    {
-      "requisito": "string",
-      "documento_metodologia": "string",
-      "pagina_ou_secao_metodologia": "string",
-      "evidencia_projeto": "string",
-      "documento_projeto": "string",
-      "pagina_projeto": "string",
-      "status": "atende|atende_parcialmente|nao_identificado|potencial_nao_conformidade|inconsistencia",
-      "risco": "baixo|medio|alto",
-      "recomendacao": "string"
-    }
-  ]
-}
-"""
-
-DEEP_DIVE_PROMPT = """
-Você deve realizar um APROFUNDAMENTO TÉCNICO de uma não conformidade, lacuna documental ou inconsistência.
-
-Use exclusivamente:
-- os trechos do projeto
-- os trechos da metodologia
-- a auditoria já produzida
-- a matriz de conformidade já produzida
-
-Objetivo:
-explicar como o projeto pode evoluir até a plena conformidade metodológica.
-
-FORMATO OBRIGATÓRIO:
-# Aprofundamento Técnico da Não Conformidade
-
-## 1. Item analisado
-## 2. Por que esse item representa risco metodológico
-## 3. Evidências atualmente existentes
-## 4. O que está faltando para plena conformidade
-## 5. Melhorias documentais necessárias
-## 6. Melhorias técnicas / operacionais / MRV necessárias
-## 7. Evidências adicionais recomendadas para auditoria
-## 8. Plano de ação prioritário
-## 9. Condição mínima para considerar o item metodologicamente robusto
-
-REGRAS:
-- Não use conhecimento externo.
-- Não invente fatos.
-- Se faltar informação, declare isso explicitamente.
-- Seja específico e corretivo, não genérico.
 """
 
 # =========================================================
@@ -380,10 +244,8 @@ def _is_valid_xml_char(ch: str) -> bool:
 def sanitize_xml_text(text: Any) -> str:
     if text is None:
         return ""
-
     if not isinstance(text, str):
         text = str(text)
-
     text = unicodedata.normalize("NFKC", text)
     text = text.replace("\x00", "")
     text = "".join(ch for ch in text if _is_valid_xml_char(ch))
@@ -440,17 +302,8 @@ def get_response_text(response: Any) -> str:
 def extract_page_from_result(result: Any) -> Optional[str]:
     attrs = safe_get(result, "attributes", {}) or {}
     possible_keys = [
-        "page",
-        "page_number",
-        "page_index",
-        "start_page",
-        "end_page",
-        "pagina",
-        "página",
-        "section",
-        "secao",
-        "seção",
-        "heading",
+        "page", "page_number", "page_index", "start_page", "end_page",
+        "pagina", "página", "section", "secao", "seção", "heading",
     ]
     for key in possible_keys:
         if key in attrs and attrs[key] is not None:
@@ -480,7 +333,6 @@ def extract_result_text(result: Any) -> str:
 
 def extract_file_search_results(response: Any, source_group: str) -> List[Dict[str, Any]]:
     extracted = []
-
     for item in getattr(response, "output", []) or []:
         if getattr(item, "type", None) != "file_search_call":
             continue
@@ -501,7 +353,6 @@ def extract_file_search_results(response: Any, source_group: str) -> List[Dict[s
                     "page": extract_page_from_result(result),
                 }
             )
-
     return extracted
 
 
@@ -524,156 +375,6 @@ def deduplicate_sources(sources: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return unique
 
 
-def try_parse_json(text: str) -> Optional[Dict[str, Any]]:
-    text = sanitize_xml_text(text).strip()
-
-    try:
-        return json.loads(text)
-    except Exception:
-        pass
-
-    start = text.find("{")
-    end = text.rfind("}")
-    if start != -1 and end != -1 and end > start:
-        snippet = text[start:end + 1]
-        try:
-            return json.loads(snippet)
-        except Exception:
-            return None
-
-    return None
-
-
-def render_sources_block(title: str, sources: List[Dict[str, Any]], show_attributes: bool, show_snippets: bool):
-    st.subheader(title)
-
-    if not sources:
-        st.info("Nenhuma fonte foi retornada.")
-        return
-
-    for i, src in enumerate(sources, start=1):
-        page_display = src.get("page") or "não identificada"
-        label = f"{i}. {src['filename']} — pág./seção: {page_display}"
-
-        with st.expander(label):
-            st.write(f"**Grupo:** {src.get('source_group')}")
-            st.write(f"**Score:** {src.get('score')}")
-            st.write(f"**File ID:** {src.get('file_id')}")
-            if show_attributes and src.get("attributes"):
-                st.json(src["attributes"])
-            if show_snippets and src.get("text"):
-                st.markdown("**Trecho recuperado:**")
-                st.code(src["text"])
-
-
-def export_sources_markdown(sources: List[Dict[str, Any]]) -> str:
-    lines = ["# Fontes utilizadas", ""]
-    for i, src in enumerate(sources, start=1):
-        lines.append(f"## {i}. {safe_str(src['filename'])}")
-        lines.append(f"- grupo: {safe_str(src.get('source_group'))}")
-        lines.append(f"- file_id: {safe_str(src.get('file_id'))}")
-        lines.append(f"- score: {safe_str(src.get('score'))}")
-        lines.append(f"- página/seção: {safe_str(src.get('page') or 'não identificada')}")
-        if src.get("attributes"):
-            lines.append(f"- attributes: `{sanitize_xml_text(json.dumps(src['attributes'], ensure_ascii=False))}`")
-        lines.append("")
-        if src.get("text"):
-            lines.append("### Trecho recuperado")
-            lines.append(sanitize_xml_text(src["text"]))
-            lines.append("")
-    return "\n".join(lines)
-
-
-def render_audit_json(audit: Dict[str, Any]) -> str:
-    pergunta = safe_str(audit.get("pergunta", "Não identificada"))
-    evidencias = audit.get("evidencias_encontradas", []) or []
-    requisitos = audit.get("requisitos_metodologicos", []) or []
-    lacunas = audit.get("lacunas_documentais", []) or []
-    inconsistencias = audit.get("inconsistencias_documentais", []) or []
-    nao_conformidades = audit.get("potenciais_nao_conformidades", []) or []
-    recomendacoes = audit.get("recomendacoes_tecnicas", []) or []
-    nivel_risco = safe_str(audit.get("nivel_risco", "não identificado"))
-
-    lines = [
-        "## Pergunta analisada",
-        pergunta,
-        "",
-        "## 1. Evidências encontradas nos documentos",
-    ]
-
-    if evidencias:
-        for ev in evidencias:
-            lines.append(
-                f"- **{safe_str(ev.get('documento', 'Documento não identificado'))}** — pág./seção: {safe_str(ev.get('pagina', 'não identificada'))}"
-            )
-            lines.append(f"  - {safe_str(ev.get('trecho', 'Não identificado na base consultada.'))}")
-    else:
-        lines.append("- Não identificado na base consultada.")
-
-    lines += ["", "## 2. Requisitos metodológicos relevantes"]
-    if requisitos:
-        for req in requisitos:
-            lines.append(
-                f"- **{safe_str(req.get('documento', 'Documento não identificado'))}** — pág./seção: {safe_str(req.get('pagina_ou_secao', 'não identificada'))}"
-            )
-            lines.append(f"  - {safe_str(req.get('trecho', 'Não identificado na base consultada.'))}")
-    else:
-        lines.append("- Não identificado na base consultada.")
-
-    lines += ["", "## 3. Lacunas documentais"]
-    if lacunas:
-        for item in lacunas:
-            lines.append(f"- {safe_str(item)}")
-    else:
-        lines.append("- Não identificado na base consultada.")
-
-    lines += ["", "## 4. Inconsistências documentais"]
-    if inconsistencias:
-        for item in inconsistencias:
-            lines.append(f"- {safe_str(item)}")
-    else:
-        lines.append("- Não identificado na base consultada.")
-
-    lines += ["", "## 5. Potenciais não conformidades"]
-    if nao_conformidades:
-        for item in nao_conformidades:
-            lines.append(f"- {safe_str(item)}")
-    else:
-        lines.append("- Não identificado na base consultada.")
-
-    lines += ["", "## 6. Recomendações técnicas"]
-    if recomendacoes:
-        for item in recomendacoes:
-            lines.append(f"- {safe_str(item)}")
-    else:
-        lines.append("- Não identificado na base consultada.")
-
-    lines += ["", "## 7. Nível de risco", f"**{nivel_risco}**"]
-
-    return "\n".join(lines)
-
-
-def matrix_json_to_dataframe(matrix_json: Optional[Dict[str, Any]]) -> pd.DataFrame:
-    rows = (matrix_json or {}).get("matriz_conformidade", []) or []
-    if not rows:
-        return pd.DataFrame(columns=[
-            "requisito",
-            "documento_metodologia",
-            "pagina_ou_secao_metodologia",
-            "evidencia_projeto",
-            "documento_projeto",
-            "pagina_projeto",
-            "status",
-            "risco",
-            "recomendacao",
-        ])
-
-    safe_rows = []
-    for row in rows:
-        safe_rows.append({k: safe_str(v) for k, v in row.items()})
-    return pd.DataFrame(safe_rows)
-
-
 def flatten_markdown_to_lines(text: str) -> List[str]:
     text = sanitize_xml_text(text)
     return [sanitize_xml_text(line).rstrip() for line in text.replace("\r", "").split("\n")]
@@ -681,20 +382,10 @@ def flatten_markdown_to_lines(text: str) -> List[str]:
 
 def build_audit_dataframe(results: List[Dict[str, Any]]) -> pd.DataFrame:
     df = pd.DataFrame(results)
-
     preferred_order = [
-        "requirement_id",
-        "module",
-        "title",
-        "status",
-        "risk",
-        "score",
-        "confidence",
-        "project_evidence",
-        "methodology_basis",
-        "gap",
-        "recommendation",
-        "notes",
+        "requirement_id", "module", "title", "status", "risk", "score",
+        "confidence", "project_evidence", "methodology_basis",
+        "gap", "recommendation", "notes",
     ]
 
     if df.empty:
@@ -711,6 +402,194 @@ def convert_df_to_csv_bytes(df: pd.DataFrame) -> bytes:
 
 def convert_json_to_bytes(data: Any) -> bytes:
     return json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")
+
+
+def docx_from_text(title: str, text: str) -> bytes:
+    doc = Document()
+    style = doc.styles["Normal"]
+    style.font.name = "Calibri"
+    style.font.size = Pt(10.5)
+
+    h = doc.add_paragraph()
+    run = h.add_run(safe_str(title))
+    run.bold = True
+    run.font.size = Pt(16)
+
+    doc.add_paragraph("")
+
+    for line in flatten_markdown_to_lines(text):
+        stripped = sanitize_xml_text(line).strip()
+
+        if not stripped:
+            doc.add_paragraph("")
+            continue
+
+        if stripped.startswith("# "):
+            p = doc.add_paragraph()
+            r = p.add_run(sanitize_xml_text(stripped[2:].strip()))
+            r.bold = True
+            r.font.size = Pt(15)
+        elif stripped.startswith("## "):
+            p = doc.add_paragraph()
+            r = p.add_run(sanitize_xml_text(stripped[3:].strip()))
+            r.bold = True
+            r.font.size = Pt(13)
+        elif stripped.startswith("### "):
+            p = doc.add_paragraph()
+            r = p.add_run(sanitize_xml_text(stripped[4:].strip()))
+            r.bold = True
+            r.font.size = Pt(11.5)
+        elif stripped.startswith("- "):
+            doc.add_paragraph(sanitize_xml_text(stripped[2:].strip()), style="List Bullet")
+        else:
+            doc.add_paragraph(sanitize_xml_text(stripped))
+
+    bio = io.BytesIO()
+    doc.save(bio)
+    bio.seek(0)
+    return bio.getvalue()
+
+
+def pdf_from_text(title: str, text: str) -> bytes:
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+    left = 50
+    right = 50
+    top = height - 50
+    bottom = 50
+    usable_width = width - left - right
+    y = top
+
+    def new_page():
+        nonlocal y
+        c.showPage()
+        y = top
+
+    def wrap_line(line: str, font_name: str, font_size: int) -> List[str]:
+        words = line.split()
+        if not words:
+            return [""]
+        lines = []
+        current = words[0]
+        for word in words[1:]:
+            test = current + " " + word
+            if stringWidth(test, font_name, font_size) <= usable_width:
+                current = test
+            else:
+                lines.append(current)
+                current = word
+        lines.append(current)
+        return lines
+
+    c.setTitle(safe_str(title))
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(left, y, safe_str(title))
+    y -= 28
+
+    for raw_line in flatten_markdown_to_lines(text):
+        if y < bottom + 30:
+            new_page()
+
+        line = sanitize_xml_text(raw_line).strip()
+
+        if not line:
+            y -= 10
+            continue
+
+        if line.startswith("# "):
+            c.setFont("Helvetica-Bold", 15)
+            chunks = wrap_line(line[2:].strip(), "Helvetica-Bold", 15)
+            for ch in chunks:
+                if y < bottom + 25:
+                    new_page()
+                c.drawString(left, y, sanitize_xml_text(ch))
+                y -= 20
+        elif line.startswith("## "):
+            c.setFont("Helvetica-Bold", 13)
+            chunks = wrap_line(line[3:].strip(), "Helvetica-Bold", 13)
+            for ch in chunks:
+                if y < bottom + 22:
+                    new_page()
+                c.drawString(left, y, sanitize_xml_text(ch))
+                y -= 18
+        elif line.startswith("### "):
+            c.setFont("Helvetica-Bold", 11)
+            chunks = wrap_line(line[4:].strip(), "Helvetica-Bold", 11)
+            for ch in chunks:
+                if y < bottom + 20:
+                    new_page()
+                c.drawString(left, y, sanitize_xml_text(ch))
+                y -= 16
+        elif line.startswith("- "):
+            c.setFont("Helvetica", 10)
+            bullet_text = "• " + line[2:].strip()
+            chunks = wrap_line(bullet_text, "Helvetica", 10)
+            for ch in chunks:
+                if y < bottom + 18:
+                    new_page()
+                c.drawString(left + 8, y, sanitize_xml_text(ch))
+                y -= 14
+        else:
+            c.setFont("Helvetica", 10)
+            chunks = wrap_line(line, "Helvetica", 10)
+            for ch in chunks:
+                if y < bottom + 18:
+                    new_page()
+                c.drawString(left, y, sanitize_xml_text(ch))
+                y -= 14
+
+    c.save()
+    buffer.seek(0)
+    return buffer.getvalue()
+
+
+def matrix_to_docx_bytes(df: pd.DataFrame, title: str) -> bytes:
+    doc = Document()
+    style = doc.styles["Normal"]
+    style.font.name = "Calibri"
+    style.font.size = Pt(10)
+
+    p = doc.add_paragraph()
+    r = p.add_run(safe_str(title))
+    r.bold = True
+    r.font.size = Pt(15)
+
+    doc.add_paragraph("")
+
+    if df.empty:
+        doc.add_paragraph("Nenhum item de matriz de conformidade foi gerado.")
+    else:
+        cols = list(df.columns)
+        table = doc.add_table(rows=1, cols=len(cols))
+        table.style = "Table Grid"
+
+        hdr = table.rows[0].cells
+        for i, col in enumerate(cols):
+            hdr[i].text = safe_str(col)
+
+        for _, row in df.iterrows():
+            cells = table.add_row().cells
+            for i, col in enumerate(cols):
+                cells[i].text = safe_str(row.get(col, ""))
+
+    bio = io.BytesIO()
+    doc.save(bio)
+    bio.seek(0)
+    return bio.getvalue()
+
+
+def matrix_to_pdf_bytes(df: pd.DataFrame, title: str) -> bytes:
+    text = [f"# {safe_str(title)}", ""]
+    if df.empty:
+        text.append("Nenhum item de matriz de conformidade foi gerado.")
+    else:
+        for i, row in df.iterrows():
+            text.append(f"## Item {i + 1}")
+            for col in df.columns:
+                text.append(f"- {safe_str(col)}: {safe_str(row.get(col, ''))}")
+            text.append("")
+    return pdf_from_text(title, "\n".join(text))
 
 
 def build_full_audit_text(summary: Dict[str, Any], results: List[Dict[str, Any]]) -> str:
@@ -762,13 +641,13 @@ def build_full_eligibility_dossier_text(
     lines = []
     lines.append("# Dossiê de Elegibilidade Metodológica")
     lines.append("")
-    lines.append(f"## Projeto analisado")
+    lines.append("## Projeto analisado")
     lines.append(safe_str(project_name))
     lines.append("")
     lines.append("## 1. Objetivo do dossiê")
     lines.append(
         "Este documento consolida a avaliação de elegibilidade metodológica do projeto com base na auditoria completa "
-        "requisito por requisito. O objetivo é apoiar diagnóstico, priorização de correções, preparação documental e "
+        "por módulo e requisito. O objetivo é apoiar diagnóstico, priorização de correções, preparação documental e "
         "tomada de decisão para submissão e auditoria externa."
     )
     lines.append("")
@@ -785,63 +664,48 @@ def build_full_eligibility_dossier_text(
         lines.append(f"- {safe_str(k)}: {safe_str(v)}")
     lines.append("")
 
-    lines.append("## 4. Avaliação detalhada de elegibilidade")
-    lines.append("")
-
     grouped: Dict[str, List[Dict[str, Any]]] = {}
     for item in results:
-        module = safe_str(item.get("module", "Sem módulo"))
-        grouped.setdefault(module, []).append(item)
+        grouped.setdefault(safe_str(item.get("module", "Sem módulo")), []).append(item)
 
+    lines.append("## 4. Avaliação detalhada de elegibilidade")
+    lines.append("")
     for module, items in grouped.items():
         lines.append(f"### Módulo: {module}")
         lines.append("")
         for item in items:
-            req_id = safe_str(item.get("requirement_id", ""))
-            title = safe_str(item.get("title", ""))
-            status = safe_str(item.get("status", ""))
-            risk = safe_str(item.get("risk", ""))
-            score = safe_str(item.get("score", ""))
-            confidence = safe_str(item.get("confidence", ""))
-            project_evidence = safe_str(item.get("project_evidence", ""))
-            methodology_basis = safe_str(item.get("methodology_basis", ""))
-            gap = safe_str(item.get("gap", ""))
-            recommendation = safe_str(item.get("recommendation", ""))
-            notes = safe_str(item.get("notes", ""))
-
-            lines.append(f"#### {req_id} — {title}")
-            lines.append(f"- Status: {status}")
-            lines.append(f"- Risco: {risk}")
-            lines.append(f"- Score: {score}")
-            lines.append(f"- Confiança: {confidence}")
+            lines.append(f"#### {safe_str(item.get('requirement_id', ''))} — {safe_str(item.get('title', ''))}")
+            lines.append(f"- Status: {safe_str(item.get('status', ''))}")
+            lines.append(f"- Risco: {safe_str(item.get('risk', ''))}")
+            lines.append(f"- Score: {safe_str(item.get('score', ''))}")
+            lines.append(f"- Confiança: {safe_str(item.get('confidence', ''))}")
             lines.append("")
             lines.append("**Base metodológica**")
-            lines.append(methodology_basis or "Não identificado.")
+            lines.append(safe_str(item.get("methodology_basis", "")) or "Não identificado.")
             lines.append("")
             lines.append("**Evidência do projeto**")
-            lines.append(project_evidence or "Não identificado.")
+            lines.append(safe_str(item.get("project_evidence", "")) or "Não identificado.")
             lines.append("")
             lines.append("**Lacuna / restrição identificada**")
-            lines.append(gap or "Não identificado.")
+            lines.append(safe_str(item.get("gap", "")) or "Não identificado.")
             lines.append("")
             lines.append("**Recomendação de elegibilidade**")
-            lines.append(recommendation or "Não identificado.")
+            lines.append(safe_str(item.get("recommendation", "")) or "Não identificado.")
             lines.append("")
-            if notes:
+            if item.get("notes"):
                 lines.append("**Notas adicionais**")
-                lines.append(notes)
+                lines.append(safe_str(item.get("notes", "")))
                 lines.append("")
 
     lines.append("## 5. Trilha técnica da auditoria")
     lines.append("")
-
     for i, trail in enumerate(trails, start=1):
-        lines.append(f"### Item {i} — {safe_str(trail.get('requirement_id', ''))} — {safe_str(trail.get('title', ''))}")
+        lines.append(f"### Item {i} — {safe_str(trail.get('module', ''))}")
         lines.append("")
-        lines.append("**Query do projeto**")
+        lines.append("**Queries do projeto**")
         lines.append(safe_str(trail.get("project_query", "")) or "Não identificado.")
         lines.append("")
-        lines.append("**Query da metodologia**")
+        lines.append("**Queries da metodologia**")
         lines.append(safe_str(trail.get("methodology_query", "")) or "Não identificado.")
         lines.append("")
         lines.append("**Trechos recuperados do projeto**")
@@ -889,11 +753,10 @@ def build_full_eligibility_dossier_text(
         "antes de eventual validação externa."
     )
     lines.append("")
-
     return "\n".join(lines)
 
 # =========================================================
-# DB / PERSISTENCE HELPERS
+# DB HELPERS
 # =========================================================
 
 def db_is_configured() -> bool:
@@ -908,7 +771,6 @@ def db_is_configured() -> bool:
 def db_execute_safe(query: str, params=None) -> bool:
     if not db_is_configured() or db_execute is None:
         return False
-
     try:
         db_execute(query, params)
         return True
@@ -920,7 +782,6 @@ def db_execute_safe(query: str, params=None) -> bool:
 def db_fetch_safe(query: str, params=None) -> List[Any]:
     if not db_is_configured() or db_fetch is None:
         return []
-
     try:
         return db_fetch(query, params) or []
     except Exception as e:
@@ -1145,7 +1006,6 @@ def is_user_allowed(email: str) -> bool:
 
     if not email:
         return False
-
     if email in ADMIN_EMAILS:
         return True
     if ALLOWED_EMAILS and email in ALLOWED_EMAILS:
@@ -1156,7 +1016,6 @@ def is_user_allowed(email: str) -> bool:
         return True
     if not ALLOWED_EMAILS and not ALLOWED_DOMAINS and not INTERNAL_DOMAINS and not ADMIN_EMAILS:
         return True
-
     return False
 
 
@@ -1182,7 +1041,6 @@ def get_user_role(email: str) -> str:
         return "internal"
     if is_user_allowed(email):
         return DEFAULT_ROLE
-
     return "blocked"
 
 
@@ -1261,7 +1119,6 @@ def get_usage(email: str) -> Dict[str, int]:
     db_usage = get_db_monthly_usage(email)
     if db_usage is not None:
         return db_usage
-
     init_usage_bucket(email)
     key = get_usage_bucket_key(email)
     return st.session_state["usage_counters"][key]
@@ -1277,7 +1134,6 @@ def consume_usage(email: str, action: str, project_name: str = ""):
     init_usage_bucket(email)
     key = get_usage_bucket_key(email)
     st.session_state["usage_counters"][key][action] = st.session_state["usage_counters"][key].get(action, 0) + 1
-
     if db_is_configured():
         log_usage_db(email, action, project_name)
 
@@ -1344,199 +1200,6 @@ def render_usage_overview_in_sidebar(user: Dict[str, str], role: str):
         st.dataframe(usage_df, use_container_width=True, hide_index=True)
 
 # =========================================================
-# DOCX / PDF
-# =========================================================
-
-def docx_from_text(title: str, text: str) -> bytes:
-    doc = Document()
-
-    style = doc.styles["Normal"]
-    style.font.name = "Calibri"
-    style.font.size = Pt(10.5)
-
-    h = doc.add_paragraph()
-    run = h.add_run(safe_str(title))
-    run.bold = True
-    run.font.size = Pt(16)
-
-    doc.add_paragraph("")
-
-    for line in flatten_markdown_to_lines(text):
-        stripped = sanitize_xml_text(line).strip()
-
-        if not stripped:
-            doc.add_paragraph("")
-            continue
-
-        if stripped.startswith("# "):
-            p = doc.add_paragraph()
-            r = p.add_run(sanitize_xml_text(stripped[2:].strip()))
-            r.bold = True
-            r.font.size = Pt(15)
-        elif stripped.startswith("## "):
-            p = doc.add_paragraph()
-            r = p.add_run(sanitize_xml_text(stripped[3:].strip()))
-            r.bold = True
-            r.font.size = Pt(13)
-        elif stripped.startswith("### "):
-            p = doc.add_paragraph()
-            r = p.add_run(sanitize_xml_text(stripped[4:].strip()))
-            r.bold = True
-            r.font.size = Pt(11.5)
-        elif stripped.startswith("- "):
-            doc.add_paragraph(sanitize_xml_text(stripped[2:].strip()), style="List Bullet")
-        else:
-            doc.add_paragraph(sanitize_xml_text(stripped))
-
-    bio = io.BytesIO()
-    doc.save(bio)
-    bio.seek(0)
-    return bio.getvalue()
-
-
-def pdf_from_text(title: str, text: str) -> bytes:
-    buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=A4)
-    width, height = A4
-
-    left = 50
-    right = 50
-    top = height - 50
-    bottom = 50
-    usable_width = width - left - right
-    y = top
-
-    def new_page():
-        nonlocal y
-        c.showPage()
-        y = top
-
-    def wrap_line(line: str, font_name: str, font_size: int) -> List[str]:
-        words = line.split()
-        if not words:
-            return [""]
-        lines = []
-        current = words[0]
-        for word in words[1:]:
-            test = current + " " + word
-            if stringWidth(test, font_name, font_size) <= usable_width:
-                current = test
-            else:
-                lines.append(current)
-                current = word
-        lines.append(current)
-        return lines
-
-    c.setTitle(safe_str(title))
-    c.setFont("Helvetica-Bold", 16)
-    c.drawString(left, y, safe_str(title))
-    y -= 28
-
-    for raw_line in flatten_markdown_to_lines(text):
-        if y < bottom + 30:
-            new_page()
-
-        line = sanitize_xml_text(raw_line).strip()
-
-        if not line:
-            y -= 10
-            continue
-
-        if line.startswith("# "):
-            c.setFont("Helvetica-Bold", 15)
-            chunks = wrap_line(line[2:].strip(), "Helvetica-Bold", 15)
-            for ch in chunks:
-                if y < bottom + 25:
-                    new_page()
-                c.drawString(left, y, sanitize_xml_text(ch))
-                y -= 20
-        elif line.startswith("## "):
-            c.setFont("Helvetica-Bold", 13)
-            chunks = wrap_line(line[3:].strip(), "Helvetica-Bold", 13)
-            for ch in chunks:
-                if y < bottom + 22:
-                    new_page()
-                c.drawString(left, y, sanitize_xml_text(ch))
-                y -= 18
-        elif line.startswith("### "):
-            c.setFont("Helvetica-Bold", 11)
-            chunks = wrap_line(line[4:].strip(), "Helvetica-Bold", 11)
-            for ch in chunks:
-                if y < bottom + 20:
-                    new_page()
-                c.drawString(left, y, sanitize_xml_text(ch))
-                y -= 16
-        elif line.startswith("- "):
-            c.setFont("Helvetica", 10)
-            bullet_text = "• " + line[2:].strip()
-            chunks = wrap_line(bullet_text, "Helvetica", 10)
-            for ch in chunks:
-                if y < bottom + 18:
-                    new_page()
-                c.drawString(left + 8, y, sanitize_xml_text(ch))
-                y -= 14
-        else:
-            c.setFont("Helvetica", 10)
-            chunks = wrap_line(line, "Helvetica", 10)
-            for ch in chunks:
-                if y < bottom + 18:
-                    new_page()
-                c.drawString(left, y, sanitize_xml_text(ch))
-                y -= 14
-
-    c.save()
-    buffer.seek(0)
-    return buffer.getvalue()
-
-
-def matrix_to_docx_bytes(df: pd.DataFrame, title: str) -> bytes:
-    doc = Document()
-    style = doc.styles["Normal"]
-    style.font.name = "Calibri"
-    style.font.size = Pt(10)
-
-    p = doc.add_paragraph()
-    r = p.add_run(safe_str(title))
-    r.bold = True
-    r.font.size = Pt(15)
-
-    doc.add_paragraph("")
-
-    if df.empty:
-        doc.add_paragraph("Nenhum item de matriz de conformidade foi gerado.")
-    else:
-        cols = list(df.columns)
-        table = doc.add_table(rows=1, cols=len(cols))
-        table.style = "Table Grid"
-
-        hdr = table.rows[0].cells
-        for i, col in enumerate(cols):
-            hdr[i].text = safe_str(col)
-
-        for _, row in df.iterrows():
-            cells = table.add_row().cells
-            for i, col in enumerate(cols):
-                cells[i].text = safe_str(row.get(col, ""))
-
-    bio = io.BytesIO()
-    doc.save(bio)
-    bio.seek(0)
-    return bio.getvalue()
-
-
-def matrix_to_pdf_bytes(df: pd.DataFrame, title: str) -> bytes:
-    text = [f"# {safe_str(title)}", ""]
-    if df.empty:
-        text.append("Nenhum item de matriz de conformidade foi gerado.")
-    else:
-        for i, row in df.iterrows():
-            text.append(f"## Item {i+1}")
-            for col in df.columns:
-                text.append(f"- {safe_str(col)}: {safe_str(row.get(col, ''))}")
-            text.append("")
-    return pdf_from_text(title, "\n".join(text))
-
-# =========================================================
 # AUTH GATE
 # =========================================================
 
@@ -1562,10 +1225,7 @@ with st.sidebar:
 
     app_mode = st.radio(
         "Modo de operação",
-        [
-            "Chat técnico",
-            "Auditoria completa Isometric",
-        ],
+        ["Chat técnico", "Auditoria completa Isometric"],
         index=0
     )
 
@@ -1581,13 +1241,6 @@ with st.sidebar:
     show_sources = st.checkbox("Mostrar fontes utilizadas", value=True)
     show_snippets = st.checkbox("Mostrar trechos recuperados", value=True)
     show_attributes = st.checkbox("Mostrar atributos técnicos", value=False)
-    show_raw_json = st.checkbox("Mostrar JSON bruto", value=False)
-
-    st.divider()
-
-    st.write("**Precisão fixa:** máxima")
-    st.write(f"Projeto: {PROJECT_MAX_RESULTS} trechos")
-    st.write(f"Metodologia: {METHODOLOGY_MAX_RESULTS} trechos")
 
     st.divider()
 
@@ -1630,15 +1283,11 @@ def call_file_search_for_store(
     )
 
 
-def call_reasoning_over_context(user_content: str, extra_system_prompt: Optional[str] = None):
-    system_text = SYSTEM_PROMPT
-    if extra_system_prompt:
-        system_text += "\n\n" + extra_system_prompt
-
+def call_reasoning_over_context(user_content: str):
     return client.responses.create(
         model=MODEL_NAME,
         input=[
-            {"role": "system", "content": system_text},
+            {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_content},
         ],
         temperature=0,
@@ -1649,7 +1298,6 @@ def build_combined_context_prompt(
     user_question: str,
     project_sources: List[Dict[str, Any]],
     methodology_sources: List[Dict[str, Any]],
-    output_mode: str = "answer"
 ) -> str:
     project_block = []
     for i, src in enumerate(project_sources, start=1):
@@ -1663,35 +1311,13 @@ def build_combined_context_prompt(
             f"[METODOLOGIA {i}] Documento: {safe_str(src['filename'])} | Página/Seção: {safe_str(src.get('page') or 'não identificada')}\nTrecho:\n{sanitize_xml_text(src.get('text') or '')}\n"
         )
 
-    instruction_by_mode = {
-        "answer": """
-Responda à pergunta do usuário usando EXCLUSIVAMENTE os trechos abaixo.
-Compare explicitamente Projeto × Metodologia quando aplicável.
-Não use conhecimento externo.
-Siga o formato obrigatório definido no system prompt.
-""",
-        "audit_json": """
-Produza uma auditoria estruturada em JSON VÁLIDO.
-Use EXCLUSIVAMENTE os trechos abaixo.
-Não use conhecimento externo.
-""",
-        "report": """
-Produza um relatório consolidado de auditoria.
-Use EXCLUSIVAMENTE os trechos abaixo.
-Não use conhecimento externo.
-""",
-        "matrix": """
-Produza uma matriz de conformidade em JSON VÁLIDO.
-Use EXCLUSIVAMENTE os trechos abaixo.
-Não use conhecimento externo.
-""",
-    }
-
     return sanitize_xml_text(f"""
 Pergunta do usuário:
 {safe_str(user_question)}
 
-{instruction_by_mode[output_mode]}
+Responda à pergunta usando EXCLUSIVAMENTE os trechos abaixo.
+Compare explicitamente Projeto × Metodologia quando aplicável.
+Não use conhecimento externo.
 
 ======================
 TRECHOS DO PROJETO
@@ -1704,40 +1330,8 @@ TRECHOS DA METODOLOGIA
 {chr(10).join(methodology_block) if methodology_block else "Nenhum trecho metodológico recuperado."}
 """)
 
-
-def build_deep_dive_prompt(
-    selected_item: str,
-    user_question: str,
-    project_sources: List[Dict[str, Any]],
-    methodology_sources: List[Dict[str, Any]],
-    audit_json: Optional[Dict[str, Any]],
-    matrix_json: Optional[Dict[str, Any]],
-) -> str:
-    base = build_combined_context_prompt(
-        user_question=user_question,
-        project_sources=project_sources,
-        methodology_sources=methodology_sources,
-        output_mode="report"
-    )
-
-    extra = f"""
-
-ITEM SELECIONADO PARA APROFUNDAMENTO:
-{safe_str(selected_item)}
-"""
-
-    if audit_json:
-        extra += "\nAUDITORIA JSON DISPONÍVEL:\n"
-        extra += sanitize_xml_text(json.dumps(audit_json, ensure_ascii=False, indent=2))
-
-    if matrix_json:
-        extra += "\n\nMATRIZ DE CONFORMIDADE DISPONÍVEL:\n"
-        extra += sanitize_xml_text(json.dumps(matrix_json, ensure_ascii=False, indent=2))
-
-    return sanitize_xml_text(base + "\n\n" + extra)
-
 # =========================================================
-# CHAT TÉCNICO MODE
+# CHAT MODE
 # =========================================================
 
 def render_chat_mode():
@@ -1767,7 +1361,7 @@ def render_chat_mode():
             st.markdown(user_input)
 
         with st.chat_message("assistant"):
-            with st.spinner("Executando busca documental de máxima precisão..."):
+            with st.spinner("Executando busca documental..."):
                 try:
                     project_search_response = call_file_search_for_store(
                         messages=st.session_state.messages,
@@ -1791,7 +1385,6 @@ def render_chat_mode():
                         user_question=user_input,
                         project_sources=project_sources,
                         methodology_sources=methodology_sources,
-                        output_mode="answer"
                     )
 
                     answer_response = call_reasoning_over_context(user_content=combined_prompt)
@@ -1800,7 +1393,6 @@ def render_chat_mode():
                     if not answer_text:
                         answer_text = "A base de conhecimento não contém informação suficiente para responder com segurança."
 
-                    answer_text = sanitize_xml_text(answer_text)
                     st.markdown(answer_text)
 
                     if show_sources:
@@ -1808,235 +1400,191 @@ def render_chat_mode():
                         render_sources_block("Fontes do Projeto", project_sources, show_attributes, show_snippets)
                         render_sources_block("Fontes da Metodologia", methodology_sources, show_attributes, show_snippets)
 
-                    st.session_state.last_answer_text = answer_text
+                    st.session_state.last_answer_text = sanitize_xml_text(answer_text)
                     st.session_state.last_sources_project = project_sources
                     st.session_state.last_sources_methodology = methodology_sources
                     st.session_state.last_sources_all = all_sources
-                    st.session_state.last_audit_json = None
-                    st.session_state.last_report_text = ""
-                    st.session_state.last_compliance_matrix_json = None
-                    st.session_state.last_deep_dive_text = ""
-
-                    final_answer_for_history = answer_text
+                    final_answer = answer_text
 
                 except Exception as e:
-                    final_answer_for_history = f"Erro ao consultar a {APP_NAME}: {str(e)}"
-                    st.error(final_answer_for_history)
-                    st.session_state.last_answer_text = final_answer_for_history
-                    st.session_state.last_sources_project = []
-                    st.session_state.last_sources_methodology = []
-                    st.session_state.last_sources_all = []
-                    st.session_state.last_audit_json = None
-                    st.session_state.last_report_text = ""
-                    st.session_state.last_compliance_matrix_json = None
-                    st.session_state.last_deep_dive_text = ""
+                    final_answer = f"Erro ao consultar a {APP_NAME}: {str(e)}"
+                    st.error(final_answer)
 
-        st.session_state.messages.append({"role": "assistant", "content": sanitize_xml_text(final_answer_for_history)})
+        st.session_state.messages.append({"role": "assistant", "content": sanitize_xml_text(final_answer)})
 
-    st.markdown("---")
-    st.subheader("Ações de auditoria")
+# =========================================================
+# FULL AUDIT MODE - COST / TIME CONTROL
+# =========================================================
 
-    has_question = bool(st.session_state.last_user_question)
+def get_engine_params_for_mode(execution_mode: str) -> Dict[str, int]:
+    if execution_mode == "Rápido":
+        return {
+            "module_project_queries": 2,
+            "module_methodology_queries": 2,
+            "project_max_results_per_query": 3,
+            "methodology_max_results_per_query": 3,
+            "max_project_hits_in_prompt": 4,
+            "max_methodology_hits_in_prompt": 4,
+            "max_text_chars_per_hit": 900,
+        }
+    return {
+        "module_project_queries": 4,
+        "module_methodology_queries": 4,
+        "project_max_results_per_query": 5,
+        "methodology_max_results_per_query": 5,
+        "max_project_hits_in_prompt": 8,
+        "max_methodology_hits_in_prompt": 8,
+        "max_text_chars_per_hit": 1800,
+    }
 
-    if not has_question:
-        st.info("Envie uma pergunta no chat para habilitar as ações de auditoria.")
 
-    can_audit = has_question and can_consume(current_user["email"], current_role, "structured_audit")
-    can_report = has_question and can_consume(current_user["email"], current_role, "report")
-    can_matrix = has_question and can_consume(current_user["email"], current_role, "matrix")
+def estimate_audit_effort(execution_mode: str, selected_modules: List[str], selected_requirements_count: int) -> Dict[str, Any]:
+    module_count = len(selected_modules)
 
-    col_a, col_b, col_c = st.columns(3)
-
-    with col_a:
-        generate_audit = st.button("Gerar auditoria estruturada", use_container_width=True, disabled=not can_audit)
-    with col_b:
-        generate_report = st.button("Gerar relatório consolidado", use_container_width=True, disabled=not can_report)
-    with col_c:
-        generate_matrix = st.button("Gerar matriz de conformidade", use_container_width=True, disabled=not can_matrix)
-
-    if generate_audit:
-        consume_usage(current_user["email"], "structured_audit", project_name)
-        with st.spinner("Gerando auditoria estruturada..."):
-            try:
-                audit_prompt = build_combined_context_prompt(
-                    user_question=st.session_state.last_user_question,
-                    project_sources=st.session_state.last_sources_project,
-                    methodology_sources=st.session_state.last_sources_methodology,
-                    output_mode="audit_json"
-                )
-                audit_response = call_reasoning_over_context(user_content=audit_prompt, extra_system_prompt=JSON_AUDIT_PROMPT)
-                audit_text = get_response_text(audit_response).strip()
-                audit_json = try_parse_json(audit_text)
-
-                if audit_json:
-                    st.session_state.last_audit_json = audit_json
-                else:
-                    st.error("Não foi possível converter a auditoria em JSON válido.")
-            except Exception as e:
-                st.error(f"Erro ao gerar auditoria estruturada: {str(e)}")
-
-    if st.session_state.last_audit_json:
-        st.markdown("---")
-        st.markdown("## Auditoria estruturada")
-        st.markdown(render_audit_json(st.session_state.last_audit_json))
-
-        if show_raw_json:
-            st.markdown("### JSON da auditoria")
-            st.json(st.session_state.last_audit_json)
-
-    if generate_report:
-        consume_usage(current_user["email"], "report", project_name)
-        with st.spinner("Gerando relatório consolidado..."):
-            try:
-                report_prompt = build_combined_context_prompt(
-                    user_question=st.session_state.last_user_question,
-                    project_sources=st.session_state.last_sources_project,
-                    methodology_sources=st.session_state.last_sources_methodology,
-                    output_mode="report"
-                )
-
-                if st.session_state.last_audit_json:
-                    report_prompt += "\n\nAUDITORIA JSON JÁ PRODUZIDA:\n"
-                    report_prompt += sanitize_xml_text(json.dumps(st.session_state.last_audit_json, ensure_ascii=False, indent=2))
-
-                report_response = call_reasoning_over_context(user_content=report_prompt, extra_system_prompt=REPORT_PROMPT)
-                report_text = get_response_text(report_response).strip()
-
-                if not report_text:
-                    report_text = "A base de conhecimento não contém informação suficiente para responder com segurança."
-
-                st.session_state.last_report_text = sanitize_xml_text(report_text)
-            except Exception as e:
-                st.error(f"Erro ao gerar relatório consolidado: {str(e)}")
-
-    if st.session_state.last_report_text:
-        st.markdown("---")
-        st.markdown("## Relatório consolidado")
-        st.markdown(st.session_state.last_report_text)
-
-    if generate_matrix:
-        consume_usage(current_user["email"], "matrix", project_name)
-        with st.spinner("Gerando matriz de conformidade..."):
-            try:
-                matrix_prompt = build_combined_context_prompt(
-                    user_question=st.session_state.last_user_question,
-                    project_sources=st.session_state.last_sources_project,
-                    methodology_sources=st.session_state.last_sources_methodology,
-                    output_mode="matrix"
-                )
-
-                matrix_response = call_reasoning_over_context(user_content=matrix_prompt, extra_system_prompt=COMPLIANCE_MATRIX_PROMPT)
-                matrix_text = get_response_text(matrix_response).strip()
-                matrix_json = try_parse_json(matrix_text)
-
-                if matrix_json:
-                    st.session_state.last_compliance_matrix_json = matrix_json
-                else:
-                    st.error("Não foi possível converter a matriz de conformidade em JSON válido.")
-            except Exception as e:
-                st.error(f"Erro ao gerar matriz de conformidade: {str(e)}")
-
-    matrix_df = pd.DataFrame()
-
-    if st.session_state.last_compliance_matrix_json:
-        st.markdown("---")
-        st.markdown("## Matriz de conformidade")
-        matrix_df = matrix_json_to_dataframe(st.session_state.last_compliance_matrix_json)
-        st.dataframe(matrix_df, use_container_width=True, hide_index=True)
-
-        if show_raw_json:
-            st.markdown("### JSON da matriz")
-            st.json(st.session_state.last_compliance_matrix_json)
-
-    st.markdown("---")
-    st.subheader("Aprofundamento de não conformidade")
-
-    deep_dive_candidates = []
-
-    if st.session_state.last_audit_json:
-        for item in st.session_state.last_audit_json.get("potenciais_nao_conformidades", []) or []:
-            deep_dive_candidates.append(f"[Potencial não conformidade] {safe_str(item)}")
-        for item in st.session_state.last_audit_json.get("lacunas_documentais", []) or []:
-            deep_dive_candidates.append(f"[Lacuna documental] {safe_str(item)}")
-        for item in st.session_state.last_audit_json.get("inconsistencias_documentais", []) or []:
-            deep_dive_candidates.append(f"[Inconsistência] {safe_str(item)}")
-
-    if not matrix_df.empty:
-        for _, row in matrix_df.iterrows():
-            status = safe_str(row.get("status", ""))
-            if status in {"atende_parcialmente", "nao_identificado", "potencial_nao_conformidade", "inconsistencia"}:
-                deep_dive_candidates.append(
-                    f"[Matriz | {status}] Requisito: {safe_str(row.get('requisito', ''))} | Recomendação: {safe_str(row.get('recomendacao', ''))}"
-                )
-
-    deep_dive_candidates = list(dict.fromkeys(deep_dive_candidates))
-
-    if deep_dive_candidates:
-        selected_issue = st.selectbox("Selecione o item para aprofundamento", options=deep_dive_candidates)
-
-        generate_deep_dive = st.button(
-            "Aprofundar item selecionado",
-            use_container_width=False,
-            disabled=not can_consume(current_user["email"], current_role, "deep_dive")
-        )
-
-        if generate_deep_dive:
-            consume_usage(current_user["email"], "deep_dive", project_name)
-            with st.spinner("Aprofundando item selecionado..."):
-                try:
-                    deep_prompt = build_deep_dive_prompt(
-                        selected_item=selected_issue,
-                        user_question=st.session_state.last_user_question,
-                        project_sources=st.session_state.last_sources_project,
-                        methodology_sources=st.session_state.last_sources_methodology,
-                        audit_json=st.session_state.last_audit_json,
-                        matrix_json=st.session_state.last_compliance_matrix_json,
-                    )
-
-                    deep_response = call_reasoning_over_context(user_content=deep_prompt, extra_system_prompt=DEEP_DIVE_PROMPT)
-                    deep_text = get_response_text(deep_response).strip()
-
-                    if not deep_text:
-                        deep_text = "A base de conhecimento não contém informação suficiente para responder com segurança."
-
-                    st.session_state.last_deep_dive_text = sanitize_xml_text(deep_text)
-                except Exception as e:
-                    st.error(f"Erro ao aprofundar item: {str(e)}")
+    if execution_mode == "Rápido":
+        estimated_calls = module_count * 3
+        if module_count <= 2 and selected_requirements_count <= 10:
+            level = "baixo"
+            cost_hint = "baixo"
+            duration_hint = "rápido"
+        elif module_count <= 4 and selected_requirements_count <= 18:
+            level = "médio"
+            cost_hint = "moderado"
+            duration_hint = "moderado"
+        else:
+            level = "alto"
+            cost_hint = "moderado a alto"
+            duration_hint = "mais demorado"
     else:
-        st.info("Gere a auditoria estruturada e/ou a matriz de conformidade para habilitar o aprofundamento.")
+        estimated_calls = module_count * 3
+        if module_count <= 2 and selected_requirements_count <= 10:
+            level = "médio"
+            cost_hint = "moderado"
+            duration_hint = "moderado"
+        elif module_count <= 4 and selected_requirements_count <= 18:
+            level = "alto"
+            cost_hint = "alto"
+            duration_hint = "demorado"
+        else:
+            level = "muito alto"
+            cost_hint = "muito alto"
+            duration_hint = "bem demorado"
 
-    if st.session_state.last_deep_dive_text:
-        st.markdown("## Aprofundamento técnico")
-        st.markdown(st.session_state.last_deep_dive_text)
+    hard_stop = execution_mode == "Completo" and (module_count >= 5 or selected_requirements_count >= 20)
+    needs_confirmation = level in {"alto", "muito alto"}
 
-# =========================================================
-# FULL AUDIT MODE
-# =========================================================
+    return {
+        "level": level,
+        "estimated_calls": estimated_calls,
+        "cost_hint": cost_hint,
+        "duration_hint": duration_hint,
+        "hard_stop": hard_stop,
+        "needs_confirmation": needs_confirmation,
+    }
+
+
+def render_effort_box(effort: Dict[str, Any], selected_modules: List[str], selected_requirements_count: int):
+    st.markdown("### Estimativa pré-execução")
+
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Nível", safe_str(effort["level"]).upper())
+    col2.metric("Módulos", len(selected_modules))
+    col3.metric("Requisitos", selected_requirements_count)
+    col4.metric("Chamadas estimadas", effort["estimated_calls"])
+
+    if effort["level"] == "baixo":
+        st.success(f"Execução de baixo esforço. Custo esperado: {effort['cost_hint']}. Tempo esperado: {effort['duration_hint']}.")
+    elif effort["level"] == "médio":
+        st.info(f"Execução de esforço médio. Custo esperado: {effort['cost_hint']}. Tempo esperado: {effort['duration_hint']}.")
+    elif effort["level"] == "alto":
+        st.warning(f"Execução de esforço alto. Custo esperado: {effort['cost_hint']}. Tempo esperado: {effort['duration_hint']}.")
+    else:
+        st.error(f"Execução de esforço muito alto. Custo esperado: {effort['cost_hint']}. Tempo esperado: {effort['duration_hint']}.")
+
 
 def render_full_audit_mode():
     st.subheader("Auditoria completa da metodologia Isometric")
-    st.caption("Agora com duas saídas: auditoria resumida e dossiê de elegibilidade completo.")
+    st.caption("Com controle explícito de custo e tempo, incluindo bloqueio preventivo para execuções pesadas.")
 
     all_modules = sorted(list({r["module"] for r in ISOMETRIC_REQUIREMENTS}))
 
     with st.expander("Configuração da auditoria", expanded=True):
-        project_name = st.text_input("Nome do projeto", value=st.session_state.get("current_project_name", "Projeto Nova Esperança"))
-        selected_modules = st.multiselect("Módulos a auditar", options=all_modules, default=all_modules)
-        show_trails = st.checkbox("Exibir trilha de auditoria detalhada", value=False, key="show_trails_full_audit")
+        project_name = st.text_input(
+            "Nome do projeto",
+            value=st.session_state.get("current_project_name", "Projeto Nova Esperança")
+        )
+
+        selected_modules = st.multiselect(
+            "Módulos a auditar",
+            options=all_modules,
+            default=all_modules[:2] if len(all_modules) >= 2 else all_modules
+        )
+
+        execution_mode = st.radio(
+            "Modo de execução",
+            ["Rápido", "Completo"],
+            horizontal=True,
+            index=0
+        )
+
+        show_trails = st.checkbox(
+            "Exibir trilha de auditoria detalhada",
+            value=False,
+            key="show_trails_full_audit"
+        )
 
     st.session_state["current_project_name"] = project_name
 
     if db_is_configured():
         ensure_project_record(current_user["email"], project_name)
 
+    if not selected_modules:
+        st.warning("Selecione pelo menos um módulo para auditar.")
+        return
+
+    selected_requirements_count = len([r for r in ISOMETRIC_REQUIREMENTS if r["module"] in selected_modules])
+    effort = estimate_audit_effort(execution_mode, selected_modules, selected_requirements_count)
+    render_effort_box(effort, selected_modules, selected_requirements_count)
+
+    engine_params = get_engine_params_for_mode(execution_mode)
+
+    st.caption(
+        f"Parâmetros ativos — Queries por módulo: proj {engine_params['module_project_queries']} | "
+        f"met {engine_params['module_methodology_queries']} | "
+        f"Resultados por query: proj {engine_params['project_max_results_per_query']} | "
+        f"met {engine_params['methodology_max_results_per_query']}"
+    )
+
+    allow_run = True
+
+    if effort["hard_stop"]:
+        allow_run = False
+        st.error(
+            "Execução bloqueada preventivamente: todos ou quase todos os módulos em modo Completo podem gerar custo e tempo excessivos. "
+            "Reduza o número de módulos ou troque para o modo Rápido."
+        )
+
+    confirm_run = True
+    if effort["needs_confirmation"] and not effort["hard_stop"]:
+        confirm_run = st.checkbox(
+            "Confirmo que desejo executar esta auditoria mesmo com esforço/custo estimado elevado."
+        )
+
+    run_disabled = (
+        not can_consume(current_user["email"], current_role, "full_audit")
+        or not allow_run
+        or not confirm_run
+    )
+
     if st.button(
         "Executar auditoria completa",
         type="primary",
         use_container_width=True,
-        disabled=not can_consume(current_user["email"], current_role, "full_audit")
+        disabled=run_disabled
     ):
         consume_usage(current_user["email"], "full_audit", project_name)
-        with st.spinner("Executando auditoria requisito por requisito..."):
+
+        with st.spinner(f"Executando auditoria {execution_mode.lower()}..."):
             try:
                 engine = AuditEngine(
                     api_key=OPENAI_API_KEY,
@@ -2044,6 +1592,13 @@ def render_full_audit_mode():
                     project_vector_store_id=PROJECT_VECTOR_STORE_ID,
                     methodology_vector_store_id=METHODOLOGY_VECTOR_STORE_ID,
                     project_name=project_name,
+                    module_project_queries=engine_params["module_project_queries"],
+                    module_methodology_queries=engine_params["module_methodology_queries"],
+                    project_max_results_per_query=engine_params["project_max_results_per_query"],
+                    methodology_max_results_per_query=engine_params["methodology_max_results_per_query"],
+                    max_project_hits_in_prompt=engine_params["max_project_hits_in_prompt"],
+                    max_methodology_hits_in_prompt=engine_params["max_methodology_hits_in_prompt"],
+                    max_text_chars_per_hit=engine_params["max_text_chars_per_hit"],
                 )
 
                 audit_output = engine.run_full_audit(selected_modules=selected_modules)
@@ -2059,6 +1614,7 @@ def render_full_audit_mode():
                 st.session_state["last_full_audit_run_id"] = audit_output["run_id"]
 
                 st.success("Auditoria concluída com sucesso.")
+
             except Exception as e:
                 st.error(f"Erro ao executar auditoria completa: {str(e)}")
 
@@ -2219,11 +1775,11 @@ def render_full_audit_mode():
             st.markdown("---")
             st.subheader("Trilha de auditoria detalhada")
             for i, trail in enumerate(trails, start=1):
-                with st.expander(f"[{i}] {trail.get('requirement_id')} — {trail.get('title')}"):
-                    st.markdown("**Query do projeto**")
+                with st.expander(f"[{i}] {trail.get('module', '')}"):
+                    st.markdown("**Queries do projeto**")
                     st.code(trail.get("project_query", ""), language="text")
 
-                    st.markdown("**Query da metodologia**")
+                    st.markdown("**Queries da metodologia**")
                     st.code(trail.get("methodology_query", ""), language="text")
 
                     st.markdown("**Trechos recuperados do projeto**")
