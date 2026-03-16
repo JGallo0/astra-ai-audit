@@ -1125,6 +1125,24 @@ def inject_custom_css():
     .stCheckbox * {{
         color: #1E293B !important;
     }}
+        /* corrigir botões de download */
+    div[data-testid="stDownloadButton"] > button {{
+        background: #FFFFFF !important;
+        color: #1E293B !important;
+        border: 1px solid #D8E3DD !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+    }}
+
+    div[data-testid="stDownloadButton"] > button:hover {{
+        background: #E8F3EC !important;
+        color: #1A4D4E !important;
+        border: 1px solid #A2D729 !important;
+    }}
+
+    div[data-testid="stDownloadButton"] > button * {{
+        color: #1E293B !important;
+    }}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
