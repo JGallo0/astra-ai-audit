@@ -1046,6 +1046,85 @@ def inject_custom_css():
     footer {{
         background: #EEF4F1 !important;
     }}
+        /* expander / accordion da auditoria */
+    [data-testid="stExpander"] {{
+        background: #FFFFFF !important;
+        border: 1px solid #D8E3DD !important;
+        border-radius: 14px !important;
+        overflow: hidden !important;
+    }}
+
+    [data-testid="stExpander"] details {{
+        background: #FFFFFF !important;
+    }}
+
+    [data-testid="stExpander"] summary {{
+        background: #F7FBF8 !important;
+        color: #1A4D4E !important;
+        border-bottom: 1px solid #D8E3DD !important;
+    }}
+
+    [data-testid="stExpander"] summary * {{
+        color: #1A4D4E !important;
+    }}
+
+    [data-testid="stExpanderDetails"] {{
+        background: #FFFFFF !important;
+        color: #1E293B !important;
+    }}
+
+    [data-testid="stExpanderDetails"] * {{
+        color: #1E293B !important;
+    }}
+
+    /* campo Nome do projeto e text inputs */
+    .stTextInput > div > div > input {{
+        background: #FFFFFF !important;
+        color: #1E293B !important;
+        border: 1px solid #D8E3DD !important;
+        border-radius: 10px !important;
+    }}
+
+    .stTextInput label {{
+        color: #1E293B !important;
+        font-weight: 600 !important;
+    }}
+
+    /* multiselect container completo */
+    .stMultiSelect > div > div {{
+        background: #FFFFFF !important;
+        color: #1E293B !important;
+        border-radius: 10px !important;
+        border: 1px solid #D8E3DD !important;
+    }}
+
+    .stMultiSelect * {{
+        color: #1E293B !important;
+    }}
+
+    /* chips do multiselect */
+    [data-baseweb="tag"] {{
+        background: #E8F3EC !important;
+        color: #1A4D4E !important;
+        border: 1px solid #D8E3DD !important;
+        border-radius: 8px !important;
+    }}
+
+    [data-baseweb="tag"] * {{
+        color: #1A4D4E !important;
+    }}
+
+    /* radio e checkbox na área da auditoria */
+    .stRadio > label,
+    .stCheckbox > label {{
+        color: #1E293B !important;
+        font-weight: 600 !important;
+    }}
+
+    .stRadio div[role="radiogroup"] *,
+    .stCheckbox * {{
+        color: #1E293B !important;
+    }}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
