@@ -748,22 +748,18 @@ def inject_custom_css():
         border-right: 1px solid var(--border);
     }}
 
-    /* força cor escura na sidebar */
     section[data-testid="stSidebar"] * {{
         color: #1E293B !important;
     }}
 
-    /* textos gerais */
     p, span, label, div, li {{
         color: #1E293B;
     }}
 
-    /* títulos */
     h1, h2, h3, h4 {{
         color: var(--primary) !important;
     }}
 
-    /* header próprio */
     .auditoria-header {{
         display: flex;
         align-items: center;
@@ -789,7 +785,6 @@ def inject_custom_css():
         font-size: 0.98rem;
     }}
 
-    /* cards */
     .auditoria-card {{
         background: var(--card);
         border: 1px solid var(--border);
@@ -809,7 +804,6 @@ def inject_custom_css():
         font-size: 0.88rem;
     }}
 
-    /* badges */
     .auditoria-badge {{
         display: inline-block;
         padding: 0.22rem 0.6rem;
@@ -840,7 +834,6 @@ def inject_custom_css():
         color: #3B82F6 !important;
     }}
 
-    /* métricas */
     div[data-testid="stMetric"] {{
         background: #FFFFFF;
         border: 1px solid var(--border);
@@ -858,7 +851,6 @@ def inject_custom_css():
         font-weight: 700 !important;
     }}
 
-    /* botões */
     div.stButton > button {{
         border-radius: 12px;
         border: 1px solid var(--primary);
@@ -873,7 +865,6 @@ def inject_custom_css():
         border-color: var(--hover);
     }}
 
-    /* tabs */
     .stTabs [data-baseweb="tab-list"] {{
         gap: 0.5rem;
     }}
@@ -891,7 +882,6 @@ def inject_custom_css():
         color: #1A4D4E !important;
     }}
 
-    /* selectbox / multiselect / inputs */
     .stSelectbox label,
     .stMultiSelect label,
     .stTextInput label,
@@ -910,17 +900,15 @@ def inject_custom_css():
         color: #1E293B !important;
     }}
 
-    /* dataframe */
     .stDataFrame, .stTable {{
         background: #FFFFFF;
         color: #1E293B !important;
     }}
 
-    /* chat */
     [data-testid="stChatInput"] * {{
         color: #1E293B !important;
     }}
-     /* corrigir selectbox e multiselect */
+
     [data-baseweb="select"] > div {{
         background: #FFFFFF !important;
         color: #1E293B !important;
@@ -935,7 +923,6 @@ def inject_custom_css():
         color: #1E293B !important;
     }}
 
-    /* corrigir tags/chips do multiselect */
     [data-baseweb="tag"] {{
         background: #E8F3EC !important;
         color: #1A4D4E !important;
@@ -946,7 +933,6 @@ def inject_custom_css():
         color: #1A4D4E !important;
     }}
 
-    /* corrigir checkbox e radio */
     .stCheckbox label,
     .stRadio label {{
         color: #1E293B !important;
@@ -957,7 +943,6 @@ def inject_custom_css():
         color: #1E293B !important;
     }}
 
-    /* corrigir campo de chat inferior */
     [data-testid="stChatInput"] {{
         background: transparent !important;
     }}
@@ -985,7 +970,7 @@ def inject_custom_css():
         background: #8BBD1E !important;
         color: #1E293B !important;
     }}
-        /* dropdown aberto do selectbox */
+
     [role="listbox"] {{
         background: #FFFFFF !important;
         color: #1E293B !important;
@@ -1002,7 +987,6 @@ def inject_custom_css():
         color: #1A4D4E !important;
     }}
 
-    /* menu popover do baseweb */
     [data-baseweb="popover"] {{
         background: #FFFFFF !important;
         color: #1E293B !important;
@@ -1012,7 +996,6 @@ def inject_custom_css():
         color: #1E293B !important;
     }}
 
-    /* badges pequenos escuros que continuam aparecendo */
     code {{
         background: #E8F3EC !important;
         color: #1A4D4E !important;
@@ -1027,7 +1010,6 @@ def inject_custom_css():
         border: 1px solid #D8E3DD !important;
     }}
 
-    /* entorno inferior do chat */
     [data-testid="stBottomBlockContainer"] {{
         background: #EEF4F1 !important;
         border-top: 1px solid #D8E3DD !important;
@@ -1042,11 +1024,10 @@ def inject_custom_css():
         border-top: none !important;
     }}
 
-    /* remove fundo escuro residual perto do chat */
     footer {{
         background: #EEF4F1 !important;
     }}
-        /* expander / accordion da auditoria */
+
     [data-testid="stExpander"] {{
         background: #FFFFFF !important;
         border: 1px solid #D8E3DD !important;
@@ -1077,7 +1058,6 @@ def inject_custom_css():
         color: #1E293B !important;
     }}
 
-    /* campo Nome do projeto e text inputs */
     .stTextInput > div > div > input {{
         background: #FFFFFF !important;
         color: #1E293B !important;
@@ -1090,7 +1070,6 @@ def inject_custom_css():
         font-weight: 600 !important;
     }}
 
-    /* multiselect container completo */
     .stMultiSelect > div > div {{
         background: #FFFFFF !important;
         color: #1E293B !important;
@@ -1102,7 +1081,6 @@ def inject_custom_css():
         color: #1E293B !important;
     }}
 
-    /* chips do multiselect */
     [data-baseweb="tag"] {{
         background: #E8F3EC !important;
         color: #1A4D4E !important;
@@ -1114,7 +1092,6 @@ def inject_custom_css():
         color: #1A4D4E !important;
     }}
 
-    /* radio e checkbox na área da auditoria */
     .stRadio > label,
     .stCheckbox > label {{
         color: #1E293B !important;
@@ -1125,7 +1102,7 @@ def inject_custom_css():
     .stCheckbox * {{
         color: #1E293B !important;
     }}
-        /* corrigir botões de download */
+
     div[data-testid="stDownloadButton"] > button {{
         background: #FFFFFF !important;
         color: #1E293B !important;
@@ -1147,8 +1124,8 @@ def inject_custom_css():
     """
     st.markdown(css, unsafe_allow_html=True)
 
+
 def render_header(lang: str):
-    logo_html = ""
     if LOGO_PATH and os.path.exists(LOGO_PATH):
         st.image(LOGO_PATH, width=340)
     else:
@@ -1328,6 +1305,21 @@ def auth_available() -> bool:
     return hasattr(st, "login") and hasattr(st, "logout") and hasattr(st, "user")
 
 
+def get_configured_auth_providers() -> List[str]:
+    providers = []
+
+    try:
+        auth_block = st.secrets["auth"]
+        if "google" in auth_block:
+            providers.append("google")
+        if "microsoft" in auth_block:
+            providers.append("microsoft")
+    except Exception:
+        pass
+
+    return providers
+
+
 def get_user_info() -> Dict[str, str]:
     if auth_available() and getattr(st.user, "is_logged_in", False):
         email = safe_str(getattr(st.user, "email", "")).strip().lower()
@@ -1452,22 +1444,60 @@ def render_login_gate(lang: str):
 
     st.warning(t(lang, "login_required"))
 
-    if auth_available():
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Login"):
-                st.login()
-        with col2:
-            if st.button("Login Microsoft"):
-                st.login("microsoft")
-    else:
-        st.error("Autenticação não configurada.")
+    if not auth_available():
+        st.error(
+            "Autenticação não configurada no ambiente. "
+            "Confirme se o Streamlit está com OIDC habilitado e se o arquivo "
+            ".streamlit/secrets.toml contém os blocos [auth.google] e/ou [auth.microsoft]."
+        )
+        st.stop()
+
+    providers = get_configured_auth_providers()
+
+    if not providers:
+        st.error(
+            "Nenhum provedor de autenticação foi encontrado em st.secrets['auth']. "
+            "Configure Google e/ou Microsoft no secrets.toml."
+        )
+        st.stop()
+
+    st.markdown("### Entrar")
+
+    cols = st.columns(2)
+
+    with cols[0]:
+        google_enabled = "google" in providers
+        if st.button(
+            "Entrar com Google",
+            use_container_width=True,
+            type="primary",
+            disabled=not google_enabled,
+            key="login_google_button",
+        ):
+            st.login("google")
+
+    with cols[1]:
+        microsoft_enabled = "microsoft" in providers
+        if st.button(
+            "Entrar com Microsoft",
+            use_container_width=True,
+            disabled=not microsoft_enabled,
+            key="login_microsoft_button",
+        ):
+            st.login("microsoft")
+
+    if not AUTH_REQUIRED and ALLOW_LOCAL_BYPASS:
+        st.info("Bypass local habilitado. Em desenvolvimento, o app pode entrar sem login real.")
+
     st.stop()
 
 
 def render_access_denied(lang: str, email: str):
     st.error(t(lang, "unauthorized"))
     st.markdown(f"**{safe_str(email)}**")
+    if auth_available() and getattr(st.user, "is_logged_in", False):
+        if st.button("Sair", key="logout_access_denied"):
+            st.logout()
     st.stop()
 
 # =========================================================
@@ -1527,8 +1557,13 @@ with st.sidebar:
     st.divider()
     st.write(f"**Modelo:** `{MODEL_NAME}`")
     st.write(f"**Usuário:** {safe_str(current_user['name'])}")
+    st.write(f"**E-mail:** `{safe_str(current_user['email'])}`")
     st.write(f"**Perfil:** `{safe_str(current_role)}`")
     st.write(f"**Modo de autenticação:** `{safe_str(current_user['auth_mode'])}`")
+
+    if current_user.get("auth_mode") == "oidc" and auth_available():
+        if st.button("Sair", use_container_width=True, key="sidebar_logout"):
+            st.logout()
 
     st.divider()
     show_sources = st.checkbox(t(lang, "show_sources"), value=True)
@@ -2042,10 +2077,6 @@ def render_full_audit_mode():
 
         except Exception as e:
             st.error(f"Erro ao reanalisar falhas: {str(e)}")
-
-    # =====================================================
-    # RESULTS
-    # =====================================================
 
     if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not st.session_state["last_full_audit_df"].empty:
         df = st.session_state["last_full_audit_df"].copy()
