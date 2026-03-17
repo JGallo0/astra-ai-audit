@@ -1179,7 +1179,7 @@ with st.sidebar:
 
     lang = st.session_state["language"]
 
-        menu = st.selectbox(
+    menu = st.selectbox(
         "Menu",
         [
             "Dashboard",
@@ -1199,7 +1199,6 @@ with st.sidebar:
             "User Access",
         ],
         index=6,
-    )
     )
 
     st.divider()
