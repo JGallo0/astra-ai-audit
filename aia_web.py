@@ -18,7 +18,22 @@ from reportlab.pdfgen import canvas
 from audit_engine import AuditEngine
 from isometric_requirements import ISOMETRIC_REQUIREMENTS
 from ui_config import APP_NAME, APP_SUBTITLE, APP_TAGLINE, LOGO_DEFAULT_PATH, THEME, I18N, t
-
+from app_pages import (
+    dashboard,
+    all_projects,
+    create_project,
+    pre_feasibility,
+    full_feasibility,
+    validation,
+    verification,
+    data_room,
+    document_filler,
+    spreadsheet_filler,
+    methodology_library,
+    settings_page,
+    audit_history_page,
+    user_access_page,
+)
 try:
     from db import execute as db_execute, fetch as db_fetch
     DB_MODULE_AVAILABLE = True
@@ -1548,10 +1563,27 @@ with st.sidebar:
 
     lang = st.session_state["language"]
 
-    app_mode = st.radio(
-        t(lang, "mode_label"),
-        [t(lang, "chat_mode"), t(lang, "full_audit_mode")],
-        index=0
+        menu = st.selectbox(
+        "Menu",
+        [
+            "Dashboard",
+            "All Projects",
+            "Create Project",
+            "Chat Técnico",
+            "Pre-Feasibility",
+            "Full Feasibility",
+            "Validation",
+            "Verification",
+            "Data Room",
+            "Document Filler",
+            "Spreadsheet Filler",
+            "Methodology Library",
+            "Settings",
+            "Audit History",
+            "User Access",
+        ],
+        index=6,
+    )
     )
 
     st.divider()
@@ -2354,12 +2386,58 @@ def render_full_audit_mode():
                         )
     else:
         st.info("Execute a auditoria completa para gerar a matriz de conformidade.")
+        # =========================================================
+# LEGACY PAGE BRIDGES
+# =========================================================
 
+st.session_state["_validation_legacy_renderer"] = render_full_audit_mode
+
+# =========================================================
 # =========================================================
 # ROUTER
 # =========================================================
 
-if app_mode == t(lang, "chat_mode"):
+if menu == "Dashboard":
+    dashboard.render()
+
+elif menu == "All Projects":
+    all_projects.render()
+
+elif menu == "Create Project":
+    create_project.render()
+
+elif menu == "Chat Técnico":
     render_chat_mode()
-else:
-    render_full_audit_mode()
+
+elif menu == "Pre-Feasibility":
+    pre_feasibility.render()
+
+elif menu == "Full Feasibility":
+    full_feasibility.render()
+
+elif menu == "Validation":
+    validation.render()
+
+elif menu == "Verification":
+    verification.render()
+
+elif menu == "Data Room":
+    data_room.render()
+
+elif menu == "Document Filler":
+    document_filler.render()
+
+elif menu == "Spreadsheet Filler":
+    spreadsheet_filler.render()
+
+elif menu == "Methodology Library":
+    methodology_library.render()
+
+elif menu == "Settings":
+    settings_page.render()
+
+elif menu == "Audit History":
+    audit_history_page.render()
+
+elif menu == "User Access":
+    user_access_page.render()
