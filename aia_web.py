@@ -157,39 +157,27 @@ if not OPENAI_API_KEY:
 
 MODEL_NAME = get_config_value("OPENAI_MODEL", "gpt-4.1")
 
-PROJECT_VECTOR_STORE_ID = "PROJECT_VECTOR_STORE_ID",
+VECTOR_STORE_ID_ISOMETRIC = st.secrets.get("VECTOR_STORE_ID_ISOMETRIC")
+VECTOR_STORE_ID_NOVA_ESPERANCA = st.secrets.get("VECTOR_STORE_ID_NOVA_ESPERANCA")
 
-METHODOLOGY_VECTOR_STORE_ID = "vs_69b310b246c08191a7eb5b13c1977787",
+VECTOR_STORE_ID_ISOMETRIC = st.secrets.get("VECTOR_STORE_ID_ISOMETRIC")
+VECTOR_STORE_ID_NOVA_ESPERANCA = st.secrets.get("VECTOR_STORE_ID_NOVA_ESPERANCA")
+
+vector_store_ids = [
+    vs for vs in [
+        VECTOR_STORE_ID_ISOMETRIC,
+        VECTOR_STORE_ID_NOVA_ESPERANCA
+    ] if vs
+]
 
 tools = []
-if VECTOR_STORE_ID:
+if vector_store_ids:
     tools = [
         {
             "type": "file_search",
-            "vector_store_ids": [VECTOR_STORE_ID]
+            "vector_store_ids": vector_store_ids
         }
     ]
-LOGO_PATH = get_config_value("AUDITORIA_LOGO_PATH", LOGO_DEFAULT_PATH)
-
-AUTH_REQUIRED = get_bool_config("AUTH_REQUIRED", False)
-ALLOW_LOCAL_BYPASS = get_bool_config("ALLOW_LOCAL_BYPASS", True)
-
-ALLOWED_EMAILS = get_list_config("ALLOWED_EMAILS", [])
-ALLOWED_DOMAINS = get_list_config("ALLOWED_DOMAINS", [])
-ADMIN_EMAILS = get_list_config("ADMIN_EMAILS", [])
-INTERNAL_DOMAINS = get_list_config("INTERNAL_DOMAINS", [])
-
-DEFAULT_ROLE = get_config_value("DEFAULT_ROLE", "pilot_client")
-
-ADMIN_CHAT_LIMIT = get_int_config("ADMIN_CHAT_LIMIT", 9999)
-ADMIN_FULL_AUDIT_LIMIT = get_int_config("ADMIN_FULL_AUDIT_LIMIT", 9999)
-INTERNAL_CHAT_LIMIT = get_int_config("INTERNAL_CHAT_LIMIT", 500)
-INTERNAL_FULL_AUDIT_LIMIT = get_int_config("INTERNAL_FULL_AUDIT_LIMIT", 50)
-PILOT_CHAT_LIMIT = get_int_config("PILOT_CHAT_LIMIT", 50)
-PILOT_FULL_AUDIT_LIMIT = get_int_config("PILOT_FULL_AUDIT_LIMIT", 5)
-
-PROJECT_MAX_RESULTS = 10
-METHODOLOGY_MAX_RESULTS = 10
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
