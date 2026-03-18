@@ -982,7 +982,8 @@ def get_configured_auth_providers() -> List[str]:
 
     return providers
 
-
+AUTH_REQUIRED = get_bool_config("AUTH_REQUIRED", False)
+ALLOW_LOCAL_BYPASS = get_bool_config("ALLOW_LOCAL_BYPASS", True)
 def get_user_info() -> Dict[str, str]:
     if auth_available() and getattr(st.user, "is_logged_in", False):
         email = safe_str(getattr(st.user, "email", "")).strip().lower()
