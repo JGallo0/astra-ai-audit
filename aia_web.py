@@ -163,6 +163,14 @@ PROJECT_VECTOR_STORE_ID = "PROJECT_VECTOR_STORE_ID",
 METHODOLOGY_VECTOR_STORE_ID = "vs_69b310b246c08191a7eb5b13c1977787",
 )
 
+tools = []
+if VECTOR_STORE_ID:
+    tools = [
+        {
+            "type": "file_search",
+            "vector_store_ids": [VECTOR_STORE_ID]
+        }
+    ]
 LOGO_PATH = get_config_value("AUDITORIA_LOGO_PATH", LOGO_DEFAULT_PATH)
 
 AUTH_REQUIRED = get_bool_config("AUTH_REQUIRED", False)
