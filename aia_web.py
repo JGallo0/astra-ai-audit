@@ -1244,16 +1244,20 @@ with st.sidebar:
     st.write("**Banco de dados:**")
 st.caption(f"DB module: {DB_MODULE_AVAILABLE}")
 st.caption(f"DB ok: {DB_CONNECTION_OK}")
+
 if DB_CONNECTION_ERROR:
     st.caption(f"DB error: {DB_CONNECTION_ERROR}")
+
+if db_is_configured():
+    st.success("Banco conectado e pronto para uso")
 else:
-    st.error("Módulo DB indisponível")
+    st.error("Banco não disponível")
     if DB_CONNECTION_ERROR:
         st.caption(DB_CONNECTION_ERROR)
 
-    if current_user.get("auth_mode") == "oidc" and auth_available():
-        if st.button("Sair", use_container_width=True, key="sidebar_logout"):
-            st.logout()
+if current_user.get("auth_mode") == "oidc" and auth_available():
+    if st.button("Sair", use_container_width=True, key="sidebar_logout"):
+        st.logout()
 
     st.divider()
     show_sources = st.checkbox(t(lang, "show_sources"), value=True)
