@@ -89,13 +89,13 @@ except Exception as e:
     DB_CONNECTION_OK = False
     DB_CONNECTION_ERROR = str(e)
 
-except Exception as e:
-    db_execute = None
-    db_fetch = None
-    db_fetch_one = None
-    DB_MODULE_AVAILABLE = False
-    DB_CONNECTION_OK = False
-    DB_CONNECTION_ERROR = str(e)
+def db_is_configured():
+    return (
+        DB_MODULE_AVAILABLE
+        and DB_CONNECTION_OK
+        and db_execute is not None
+        and db_fetch is not None
+    )
 
 # =========================================================
 # CONFIG
