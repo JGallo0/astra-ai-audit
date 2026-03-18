@@ -1,17 +1,11 @@
-import socket
 import psycopg2
 import streamlit as st
 from psycopg2.extras import RealDictCursor
 
 
 def get_connection():
-    original_host = st.secrets["DB_HOST"]
-
-    # Força resolução IPv4
-    ipv4_host = socket.gethostbyname(original_host)
-
     return psycopg2.connect(
-        host=ipv4_host,
+        host=st.secrets["DB_HOST"],
         dbname=st.secrets["DB_NAME"],
         user=st.secrets["DB_USER"],
         password=st.secrets["DB_PASSWORD"],
