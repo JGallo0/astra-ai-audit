@@ -1593,7 +1593,7 @@ def render_full_audit_mode():
     temp_engine = AuditEngine(
         api_key=OPENAI_API_KEY,
         model=MODEL_NAME,
-        project_vector_store_id=PROJECT_VECTOR_STORE_ID,
+        project_vector_store_id = VECTOR_STORE_ID_NOVA_ESPERANCA or "",
         methodology_vector_store_id=METHODOLOGY_VECTOR_STORE_ID,
         project_name=project_name,
         module_project_queries=engine_params["module_project_queries"],
