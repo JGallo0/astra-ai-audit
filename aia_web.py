@@ -819,7 +819,8 @@ def inject_custom_css():
     """
     st.markdown(css, unsafe_allow_html=True)
 
-
+if "LOGO_PATH" not in globals():
+    LOGO_PATH = get_config_value("AUDITORIA_LOGO_PATH", LOGO_DEFAULT_PATH)
 def render_header(lang: str):
     if LOGO_PATH and os.path.exists(LOGO_PATH):
         st.image(LOGO_PATH, width=340)
