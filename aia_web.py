@@ -53,7 +53,9 @@ def safe_str(value):
     if value is None:
         return ""
     return str(value)
-  try:
+
+
+try:
     from db import execute as db_execute, fetch as db_fetch, fetch_one as db_fetch_one
     DB_MODULE_AVAILABLE = True
     DB_CONNECTION_OK = False
@@ -68,6 +70,14 @@ def safe_str(value):
     except Exception as _e:
         DB_CONNECTION_OK = False
         DB_CONNECTION_ERROR = str(_e)
+
+except Exception as e:
+    db_execute = None
+    db_fetch = None
+    db_fetch_one = None
+    DB_MODULE_AVAILABLE = False
+    DB_CONNECTION_OK = False
+    DB_CONNECTION_ERROR = str(e)
 
 except Exception as e:
     db_execute = None
