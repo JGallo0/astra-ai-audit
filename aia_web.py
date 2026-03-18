@@ -54,12 +54,29 @@ def safe_str(value):
         return ""
     return str(value)
 try:
-    from db import execute as db_execute, fetch as db_fetch
+  try:
+    from db import execute as db_execute, fetch as db_fetch, fetch_one as db_fetch_one
     DB_MODULE_AVAILABLE = True
-except Exception:
+    DB_CONNECTION_OK = False
+    DB_CONNECTION_ERROR = ""
+
+    try:
+        _db_test = db_fetch_one("SELECT 1 AS ok")
+        if _db_test and str(_db_test.get("ok")) == "1":
+            DB_CONNECTION_OK = True
+        else:
+            DB_CONNECTION_ERROR = "Teste SELECT 1 não retornou resultado esperado."
+    except Exception as _e:
+        DB_CONNECTION_OK = False
+        DB_CONNECTION_ERROR = str(_e)
+
+except Exception as e:
     db_execute = None
     db_fetch = None
+    db_fetch_one = None
     DB_MODULE_AVAILABLE = False
+    DB_CONNECTION_OK = False
+    DB_CONNECTION_ERROR = str(e)
 
 # =========================================================
 # CONFIG
