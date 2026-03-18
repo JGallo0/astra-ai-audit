@@ -1227,6 +1227,17 @@ with st.sidebar:
     st.write(f"**E-mail:** `{safe_str(current_user['email'])}`")
     st.write(f"**Perfil:** `{safe_str(current_role)}`")
     st.write(f"**Modo de autenticação:** `{safe_str(current_user['auth_mode'])}`")
+    st.write("**Banco de dados:**")
+if DB_MODULE_AVAILABLE and DB_CONNECTION_OK:
+    st.success("Conectado")
+elif DB_MODULE_AVAILABLE and not DB_CONNECTION_OK:
+    st.error("Módulo carregado, mas conexão falhou")
+    if DB_CONNECTION_ERROR:
+        st.caption(DB_CONNECTION_ERROR)
+else:
+    st.error("Módulo DB indisponível")
+    if DB_CONNECTION_ERROR:
+        st.caption(DB_CONNECTION_ERROR)
 
     if current_user.get("auth_mode") == "oidc" and auth_available():
         if st.button("Sair", use_container_width=True, key="sidebar_logout"):
