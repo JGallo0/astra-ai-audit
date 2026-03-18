@@ -55,6 +55,16 @@ def safe_str(value):
     return str(value)
 
 
+def sanitize_xml_text(value):
+    if value is None:
+        return ""
+    text = str(value)
+    text = text.replace("&", "&amp;")
+    text = text.replace("<", "&lt;")
+    text = text.replace(">", "&gt;")
+    return text
+
+
 try:
     from db import execute as db_execute, fetch as db_fetch, fetch_one as db_fetch_one
     DB_MODULE_AVAILABLE = True
