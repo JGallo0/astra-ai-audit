@@ -49,6 +49,10 @@ from app_pages.validation_utils import (
     status_badge,
     risk_badge,
 )
+def safe_str(value):
+    if value is None:
+        return ""
+    return str(value)
 try:
     from db import execute as db_execute, fetch as db_fetch
     DB_MODULE_AVAILABLE = True
