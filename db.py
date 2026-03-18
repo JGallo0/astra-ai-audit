@@ -1,78 +1,70 @@
 import psycopg2
 import streamlit as st
+from psycopg2.extras import RealDictCursor
 
 
 def get_connection():
-    conn = psycopg2.connect(
+    return psycopg2.connect(
         host=st.secrets["DB_HOST"],
         dbname=st.secrets["DB_NAME"],
         user=st.secrets["DB_USER"],
         password=st.secrets["DB_PASSWORD"],
-        port=5432
+        port=int(st.secrets.get("DB_PORT", 5432)),
+        sslmode="require",
+        cursor_factory=RealDictCursor,
     )
-    return conn
 
 
 def execute(query, params=None):
     conn = get_connection()
     cur = conn.cursor()
-
-    cur.execute(query, params)
-
-    conn.commit()
-
-    cur.close()
-    conn.close()
+    try:
+        cur.execute(query, params)
+        conn.commit()
+    finally:
+        cur.close()
+        conn.close()
 
 
 def fetch(query, params=None):
     conn = get_connection()
     cur = conn.cursor()
-
-    cur.execute(query, params)
-
-    result = cur.fetchall()
-
-    cur.close()
-    conn.close()
-
-    return result
-  def ensure_user(email, name):
-
-    query = """
-    INSERT INTO users (email, name)
-    VALUES (%s, %s)
-    ON CONFLICT (email) DO NOTHING
-    """
-
-    execute(query, (email, name))
-    def log_usage(email, action, project):
-
-    query = """
-    INSERT INTO usage_logs (user_email, action_type, project_name)
-    VALUES (%s, %s, %s)
-    """
-
-    execute(query, (email, action, project))
-    from db import ensure_user
-
-ensure_user(user_email, user_name)
-from db import log_usage
-
-log_usage(user_email, "chat", project_name)
-def execute(query, params=None):
-
-    conn = get_connection()
-
     try:
-
-        cur = conn.cursor()
-
         cur.execute(query, params)
-
-        conn.commit()
-
+        return cur.fetchall()
     finally:
-
         cur.close()
         conn.close()
+
+
+def fetch_one(query, params=None):
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(query, params)
+        return cur.fetchone()
+    finally:
+        cur.close()
+        conn.close()
+
+
+def ensure_user(email, name, role="pilot_client", status="active"):
+    query = """
+    INSERT INTO users (email, name, role, status, last_login)
+    VALUES (%s, %s, %s, %s, NOW())
+    ON CONFLICT (email)
+    DO UPDATE SET
+        name = EXCLUDED.name,
+        role = EXCLUDED.role,
+        status = EXCLUDED.status,
+        last_login = NOW()
+    """
+    execute(query, (email, name, role, status))
+
+
+def log_usage(email, action, project):
+    query = """
+    INSERT INTO usage_logs (user_email, action_type, project_name, created_at)
+    VALUES (%s, %s, %s, NOW())
+    """
+    execute(query, (email, action, project))
