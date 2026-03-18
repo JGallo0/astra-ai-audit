@@ -53,7 +53,6 @@ def safe_str(value):
     if value is None:
         return ""
     return str(value)
-try:
   try:
     from db import execute as db_execute, fetch as db_fetch, fetch_one as db_fetch_one
     DB_MODULE_AVAILABLE = True
