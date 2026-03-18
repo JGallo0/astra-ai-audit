@@ -151,17 +151,25 @@ def get_list_config(name: str, default: Optional[List[str]] = None) -> List[str]
     return [str(x).strip().lower() for x in default if str(x).strip()]
 
 
+# =========================================================
+# OPENAI
+# =========================================================
+
 OPENAI_API_KEY = get_config_value("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY não encontrada em st.secrets nem no .env")
 
 MODEL_NAME = get_config_value("OPENAI_MODEL", "gpt-4.1")
 
-VECTOR_STORE_ID_ISOMETRIC = st.secrets.get("VECTOR_STORE_ID_ISOMETRIC")
-VECTOR_STORE_ID_NOVA_ESPERANCA = st.secrets.get("VECTOR_STORE_ID_NOVA_ESPERANCA")
+client = OpenAI(api_key=OPENAI_API_KEY)
 
-VECTOR_STORE_ID_ISOMETRIC = st.secrets.get("VECTOR_STORE_ID_ISOMETRIC")
-VECTOR_STORE_ID_NOVA_ESPERANCA = st.secrets.get("VECTOR_STORE_ID_NOVA_ESPERANCA")
+
+# =========================================================
+# VECTOR STORES
+# =========================================================
+
+VECTOR_STORE_ID_ISOMETRIC = get_config_value("VECTOR_STORE_ID_ISOMETRIC")
+VECTOR_STORE_ID_NOVA_ESPERANCA = get_config_value("VECTOR_STORE_ID_NOVA_ESPERANCA")
 
 vector_store_ids = [
     vs for vs in [
@@ -179,7 +187,24 @@ if vector_store_ids:
         }
     ]
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+
+# =========================================================
+# LIMITES DE USO (ESSENCIAL – estava faltando)
+# =========================================================
+
+ADMIN_CHAT_LIMIT = get_int_config("ADMIN_CHAT_LIMIT", 9999)
+ADMIN_FULL_AUDIT_LIMIT = get_int_config("ADMIN_FULL_AUDIT_LIMIT", 9999)
+
+INTERNAL_CHAT_LIMIT = get_int_config("INTERNAL_CHAT_LIMIT", 500)
+INTERNAL_FULL_AUDIT_LIMIT = get_int_config("INTERNAL_FULL_AUDIT_LIMIT", 50)
+
+PILOT_CHAT_LIMIT = get_int_config("PILOT_CHAT_LIMIT", 50)
+PILOT_FULL_AUDIT_LIMIT = get_int_config("PILOT_FULL_AUDIT_LIMIT", 5)
+
+
+# =========================================================
+# PROMPT DO SISTEMA
+# =========================================================
 
 SYSTEM_PROMPT = """
 Você é a AuditorIA, auditora técnica da AstraCarbon especializada em projetos de remoção de carbono via biochar.
