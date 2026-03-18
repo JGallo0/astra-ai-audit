@@ -1,25 +1,17 @@
-import psycopg2
-import streamlit as st
-from psycopg2.extras import RealDictCursor
-
-
-import psycopg2
 import socket
+import psycopg2
 import streamlit as st
 from psycopg2.extras import RealDictCursor
 
 
 def get_connection():
-    host = st.secrets["DB_HOST"]
+    original_host = st.secrets["DB_HOST"]
 
-    # 🔥 FORÇA IPv4 (corrige erro do Streamlit Cloud)
-    try:
-        ipv4 = socket.gethostbyname(host)
-    except Exception:
-        ipv4 = host  # fallback
+    # Força resolução IPv4
+    ipv4_host = socket.gethostbyname(original_host)
 
     return psycopg2.connect(
-        host=ipv4,
+        host=ipv4_host,
         dbname=st.secrets["DB_NAME"],
         user=st.secrets["DB_USER"],
         password=st.secrets["DB_PASSWORD"],
