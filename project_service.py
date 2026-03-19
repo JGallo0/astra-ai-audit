@@ -20,13 +20,13 @@ def create_project_record(
         )
         VALUES (%s, %s, %s, %s, %s, %s)
     """
-params = (
-    (project_name or "").strip(),
-    (owner_email or "").strip().lower(),
-    (methodology or "").strip().lower(),
-    (project_vector_store_id or "").strip(),
-    (methodology_vector_store_id or "").strip(),
-    status,
+    params = (
+        (project_name or "").strip(),
+        (owner_email or "").strip().lower(),
+        (methodology or "").strip().lower(),
+        (project_vector_store_id or "").strip(),
+        (methodology_vector_store_id or "").strip(),
+        status,
     )
     return execute(query, params)
 
@@ -34,9 +34,10 @@ params = (
 def list_projects_by_owner(owner_email: str):
     query = """
         SELECT id, project_name, methodology,
-               project_vector_store_id, methodology_vector_store_id, status, created_at
+               project_vector_store_id, methodology_vector_store_id,
+               status, created_at
         FROM projects
         WHERE lower(owner_email) = %s
         ORDER BY created_at DESC
     """
-    return fetch(query, (owner_email.strip().lower(),)) or []
+    return fetch(query, ((owner_email or "").strip().lower(),)) or []
