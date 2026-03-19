@@ -1390,8 +1390,12 @@ TRECHOS DA METODOLOGIA
 
 
 def render_chat_mode():
-    project_name = st.session_state.get("current_project_name", "Projeto Nova Esperança")
-    if db_is_configured():
+    project_name = st.session_state.get("current_project_name", "")
+    show_sources = st.session_state.get("show_sources", True)
+    show_attributes = st.session_state.get("show_attributes", False)
+    show_snippets = st.session_state.get("show_snippets", True)
+
+    if db_is_configured() and project_name:
         ensure_project_record(current_user["email"], project_name)
 
     for msg in st.session_state.messages:
