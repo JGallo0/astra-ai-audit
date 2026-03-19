@@ -27,7 +27,7 @@ def create_project_record(
         methodology_vector_store_id.strip(),
         status,
     )
-    return db_execute(query, params)
+    return execute(query, params)
 
 
 def list_projects_by_owner(owner_email: str):
@@ -38,4 +38,4 @@ def list_projects_by_owner(owner_email: str):
         WHERE lower(owner_email) = %s
         ORDER BY created_at DESC
     """
-    return db_fetch(query, (owner_email.strip().lower(),)) or []
+    return fetch(query, (owner_email.strip().lower(),)) or []
