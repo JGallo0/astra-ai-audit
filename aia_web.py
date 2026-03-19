@@ -1283,8 +1283,9 @@ with st.sidebar:
         st.session_state["language"] = new_lang
         st.rerun()
 
-lang = st.session_state.get("language", "pt")
-st.session_state["language"] = lang
+    lang = st.session_state.get("language", "pt")
+    st.session_state["language"] = lang
+
     menu = st.selectbox(
         "Menu",
         [
