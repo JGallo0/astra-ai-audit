@@ -287,6 +287,7 @@ DEFAULT_STATE = {
 for key, value in DEFAULT_STATE.items():
     if key not in st.session_state:
         st.session_state[key] = value
+        
 def init_project_session():
     defaults = {
         "current_project_id": None,
@@ -309,10 +310,10 @@ def set_current_project(project: dict):
     st.session_state["current_methodology_vector_store_id"] = project.get("methodology_vector_store_id")
 
 
-def render_project_manager(supabase, user_email: str):
-    st.sidebar.markdown("## Projetos")
+def render_project_manager(user_email: str):
+    st.markdown("## Projetos")
 
-    with st.sidebar.expander("➕ Criar projeto", expanded=False):
+    with st.expander("➕ Criar projeto", expanded=False):
         with st.form("create_project_form", clear_on_submit=True):
             project_name = st.text_input("Nome do projeto")
             methodology = st.selectbox(
@@ -320,6 +321,63 @@ def render_project_manager(supabase, user_email: str):
                 options=list(METHODOLOGY_VECTOR_STORES.keys()),
                 format_func=lambda x: x.upper()
             )
+            project_vector_store_id = st.text_input("Vector Store ID do projeto")
+
+            submitted = st.form_submit_button("Salvar projeto")
+
+            if submitted:
+                if not project_name.strip():
+                    st.error("Informe o nome do projeto.")
+                elif not project_vector_store_id.strip():
+                    st.error("Informe o Vector Store ID do projeto.")
+                else:
+                    methodology_vector_store_id = METHODOLOGY_VECTOR_STORES[methodology]
+
+                    try:
+                        create_project_record(
+                            project_name=project_name,
+                            owner_email=user_email,
+                            methodology=methodology,
+                            project_vector_store_id=project_vector_store_id,
+                            methodology_vector_store_id=methodology_vector_store_id,
+                        )
+                        st.success("Projeto criado com sucesso.")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Erro ao criar projeto: {e}")
+
+    st.markdown("#### Meus projetos")
+
+    try:
+        projects = list_projects_by_owner(user_email)
+    except Exception as e:
+        st.error(f"Erro ao carregar projetos: {e}")
+        return
+
+    if not projects:
+        st.info("Nenhum projeto cadastrado ainda.")
+        return
+
+    for project in projects:
+        col1, col2 = st.columns([3, 1])
+
+        with col1:
+            st.markdown(
+                f"**{project.get('project_name', 'Sem nome')}**  \n"
+                f"Metodologia: `{project.get('methodology') or '-'}`"
+            )
+
+        with col2:
+            if st.button("Selecionar", key=f"select_project_{project['id']}"):
+                set_current_project(project)
+                st.rerun()
+
+    if st.session_state.get("current_project_name"):
+        st.markdown("---")
+        st.success(
+            f"Projeto ativo: **{st.session_state['current_project_name']}**"
+        )
+        )
             project_vector_store_id = st.text_input("Vector Store ID do projeto")
 
             submitted = st.form_submit_button("Salvar projeto")
@@ -1418,6 +1476,7 @@ if current_user and current_user.get("email"):
 if current_user and current_user.get("email"):
     st.sidebar.markdown("### DEBUG PROJETOS")
     st.sidebar.write(f"Usuário: {current_user['email']}")
+    
     render_project_manager(current_user["email"])
     
 with st.sidebar:
