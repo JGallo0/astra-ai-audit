@@ -1373,32 +1373,26 @@ def render_project_manager(user_email: str):
             submitted = st.form_submit_button("Salvar projeto")
 
             if submitted:
-                if not project_name.strip():
-                    st.error("Informe o nome do projeto.")
-                elif not project_vector_store_id.strip():
-                    st.error("Informe o Vector Store ID do projeto.")
-                else:
-                    methodology_vector_store_id = METHODOLOGY_VECTOR_STORES[methodology]
+    if not project_name.strip():
+        st.error("Informe o nome do projeto.")
+    elif not project_vector_store_id.strip():
+        st.error("Informe o Vector Store ID do projeto.")
+    else:
+        methodology_vector_store_id = METHODOLOGY_VECTOR_STORES[methodology]
 
-                    try:
-create_project_record(
-    project_name=project_name,
-    owner_email=user_email,
-    methodology=methodology,
-    project_vector_store_id=project_vector_store_id,
-    methodology_vector_store_id=methodology_vector_store_id,
-)
-                        st.success("Projeto criado com sucesso.")
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Erro ao criar projeto: {e}")
+        try:
+            create_project_record(
+                project_name=project_name,
+                owner_email=user_email,
+                methodology=methodology,
+                project_vector_store_id=project_vector_store_id,
+                methodology_vector_store_id=methodology_vector_store_id,
+            )
+            st.success("Projeto criado com sucesso.")
+            st.rerun()
 
-    st.sidebar.markdown("#### Meus projetos")
-
-    try:
-        projects = list_projects_by_owner(user_email)
-    except Exception as e:
-        st.sidebar.error(f"Erro ao carregar projetos: {e}")
+        except Exception as e:
+            st.error(f"Erro ao criar projeto: {e}")
         return
 
     if not projects:
