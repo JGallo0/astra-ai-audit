@@ -381,7 +381,6 @@ def render_project_manager(user_email: str):
         st.success(
             f"Projeto ativo: **{st.session_state['current_project_name']}**"
         )
-        )
             project_vector_store_id = st.text_input("Vector Store ID do projeto")
 
             submitted = st.form_submit_button("Salvar projeto")
