@@ -1,5 +1,4 @@
-from db import db_execute, db_fetch
-
+from db import execute, fetch
 
 def create_project_record(
     project_name: str,
