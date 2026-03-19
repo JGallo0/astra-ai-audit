@@ -1786,25 +1786,6 @@ def render_chat_mode():
                     )
                 except Exception:
                     pass
-          # salvar mensagem no histórico da sessão
-st.session_state.messages.append({
-    "role": "assistant",
-    "content": sanitize_xml_text(final_answer)
-})
-
-# salvar no banco
-project_id = st.session_state.get("current_project_id")
-
-if project_id:
-    try:
-        save_chat_message(
-            project_id=project_id,
-            user_email=current_user["email"],
-            role="assistant",
-            message=sanitize_xml_text(final_answer),
-        )
-    except Exception:
-        pass
 # =========================================================
 # FULL AUDIT MODE HELPERS
 # =========================================================
