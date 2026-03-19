@@ -2200,7 +2200,7 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
                     st.markdown("**Resultado interpretado**")
                     st.json(trail.get("parsed_result", {}))
 
-        with tab_history:
+           with tab_history:
         st.markdown(f"#### {t(lang, 'history')}")
         history = st.session_state.get("audit_history", [])
         if not history:
