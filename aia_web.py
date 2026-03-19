@@ -1445,7 +1445,7 @@ def render_chat_mode():
     show_snippets = st.session_state.get("show_snippets", True)
 
     for msg in st.session_state.messages:
-        with st.chat_message(m{sg["role"]):
+        with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
     user_input = st.chat_input("Faça uma pergunta")
