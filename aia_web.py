@@ -934,8 +934,10 @@ def inject_custom_css():
 
     div[data-testid="stDownloadButton"] > button * {{
         color: #1E293B !important;
-    }}
-    st.markdown("""
+  # ================================
+# CUSTOM CSS
+# ================================
+st.markdown("""
 <style>
 
 /* SIDEBAR BUTTONS */
@@ -978,37 +980,6 @@ div[data-testid="stForm"] .stButton > button * {
 
 </style>
 """, unsafe_allow_html=True)
-
-if "LOGO_PATH" not in globals():
-    LOGO_PATH = get_config_value("AUDITORIA_LOGO_PATH", LOGO_DEFAULT_PATH)
-def render_header(lang: str):
-    if LOGO_PATH and os.path.exists(LOGO_PATH):
-        st.image(LOGO_PATH, width=340)
-    else:
-        st.markdown(
-            f"""
-            <div class="auditoria-header">
-                <div class="auditoria-header-text">
-                    <h1>{APP_NAME}</h1>
-                    <p>{APP_SUBTITLE.get(lang, APP_SUBTITLE['pt'])}</p>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        return
-
-    st.markdown(
-        f"""
-        <div class="auditoria-card" style="padding-top:0.7rem;padding-bottom:0.7rem;">
-            <div class="auditoria-small">{APP_TAGLINE.get(lang, APP_TAGLINE['pt'])}</div>
-            <div style="font-size:1.05rem;font-weight:700;color:{THEME["primary"]};">
-                {APP_SUBTITLE.get(lang, APP_SUBTITLE['pt'])}
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
 
 # =========================================================
 # DB / AUTH HELPERS
