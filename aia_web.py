@@ -1428,8 +1428,7 @@ TRECHOS DO PROJETO
 ======================
 TRECHOS DA METODOLOGIA
 ======================
-chr(10).join(methodology_block) if methodology_block else "Nenhum trecho metodológico recuperado."}
-""")
+chr(10).join(methodology_block) if methodology_block else "Nenhum trecho metodológico recuperado."
     
 def render_chat_mode():
     project_vs_id = st.session_state.get("current_project_vector_store_id")
