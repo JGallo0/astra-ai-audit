@@ -308,7 +308,6 @@ if "current_filters" not in st.session_state:
         "status": [],
         "risk": [],
     }
-)
 
 # =========================================================
 # THEME / VISUAL
