@@ -256,7 +256,7 @@ st.set_page_config(
 )
 
 # =========================================================
-value=st.session_state.get("current_project_name") or ""value=st.session_state.get("current_project_name") or ""value=st.session_state.get("current_project_name") or ""
+value=st.session_state.get("current_project_name") or ""value=st.session_state.get("current_project_name") or ""
 
 
 # =========================================================
