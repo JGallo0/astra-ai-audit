@@ -201,6 +201,9 @@ INTERNAL_FULL_AUDIT_LIMIT = get_int_config("INTERNAL_FULL_AUDIT_LIMIT", 50)
 PILOT_CHAT_LIMIT = get_int_config("PILOT_CHAT_LIMIT", 50)
 PILOT_FULL_AUDIT_LIMIT = get_int_config("PILOT_FULL_AUDIT_LIMIT", 5)
 
+PROJECT_MAX_RESULTS = get_int_config("PROJECT_MAX_RESULTS", 10)
+METHODOLOGY_MAX_RESULTS = get_int_config("METHODOLOGY_MAX_RESULTS", 10)
+
 
 # =========================================================
 # PROMPT DO SISTEMA
