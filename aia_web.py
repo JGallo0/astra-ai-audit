@@ -1428,7 +1428,7 @@ TRECHOS DO PROJETO
 ======================
 TRECHOS DA METODOLOGIA
 ======================
-{chr(10).join(methodology_block) if methodology_block else "Nenhum trecho metodológico recuperado."}
+chr(10).join(methodology_block) if methodology_block else "Nenhum trecho metodológico recuperado."}
 """)
     
 def render_chat_mode():
@@ -1445,7 +1445,7 @@ def render_chat_mode():
     show_snippets = st.session_state.get("show_snippets", True)
 
     for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
+        with st.chat_message(m{sg["role"]):
             st.markdown(msg["content"])
 
     user_input = st.chat_input("Faça uma pergunta")
@@ -1478,45 +1478,60 @@ def render_chat_mode():
 
             final_answer = ""
 
-            with st.chat_message("assistant"):
-                with st.spinner("Buscando evidências..."):
-                    try:
-                        project_search_response = call_file_search_for_store(
-                            messages=st.session_state.messages,
-                            vector_store_id=project_vs_id,
-                            max_results=PROJECT_MAX_RESULTS,
-                            extra_system_prompt="Recupere evidências da documentação do projeto relevantes para a pergunta."
-                        )
-                        project_search_response = call_file_search_for_store(
-    messages=st.session_state.messages,
-    vector_store_id=project_vs_id,
-    max_results=PROJECT_MAX_RESULTS,
-    extra_system_prompt="Recupere evidências da documentação do projeto relevantes para a pergunta."
-)
-project_sources = extract_file_search_results(project_search_response, "Projeto")
+with st.chat_message("assistant"):
+    with st.spinner("Buscando evidências..."):
+        try:
+            project_search_response = call_file_search_for_store(
+                messages=st.session_state.messages,
+                vector_store_id=project_vs_id,
+                max_results=PROJECT_MAX_RESULTS,
+                extra_system_prompt="Recupere evidências da documentação do projeto relevantes para a pergunta."
+            )
 
-methodology_search_response = call_file_search_for_store(
-    messages=st.session_state.messages,
-    vector_store_id=methodology_vs_id,
-    max_results=METHODOLOGY_MAX_RESULTS,
-    extra_system_prompt="Recupere requisitos e critérios metodológicos relevantes para a pergunta."
-)
-methodology_sources = extract_file_search_results(methodology_search_response, "Metodologia")
+            project_sources = extract_file_search_results(
+                project_search_response,
+                "Projeto"
+            )
 
-project_sources_rankable = normalize_sources(project_sources, "project")
-methodology_sources_rankable = normalize_sources(methodology_sources, "methodology")
+            methodology_search_response = call_file_search_for_store(
+                messages=st.session_state.messages,
+                vector_store_id=methodology_vs_id,
+                max_results=METHODOLOGY_MAX_RESULTS,
+                extra_system_prompt="Recupere requisitos e critérios metodológicos relevantes para a pergunta."
+            )
 
-all_sources = deduplicate_sources(project_sources + methodology_sources)
-ranked_sources = rank_sources(
-    user_input,
-    project_sources_rankable + methodology_sources_rankable,
-)
+            methodology_sources = extract_file_search_results(
+                methodology_search_response,
+                "Metodologia"
+            )
 
-combined_prompt = build_smart_context(
-    user_input,
-    ranked_sources,
-    max_items=8,
-)
+            project_sources_rankable = normalize_sources(project_sources, "project")
+            methodology_sources_rankable = normalize_sources(methodology_sources, "methodology")
+
+            ranked_sources = rank_sources(
+                user_input,
+                project_sources_rankable + methodology_sources_rankable,
+            )
+
+            combined_prompt = build_smart_context(
+                user_input,
+                ranked_sources,
+                max_items=8,
+            )
+
+            answer_response = call_reasoning_over_context(
+                user_content=combined_prompt
+            )
+            answer_text = get_response_text(answer_response).strip()
+
+            if not answer_text:
+                answer_text = "A base de conhecimento não contém informação suficiente para responder com segurança."
+
+            st.markdown(answer_text)
+
+        except Exception as e:
+            answer_text = f"Erro ao consultar a AuditorIA: {str(e)}"
+            st.error(answer_text)
 
 answer_response = call_reasoning_over_context(user_content=combined_prompt)
 answer_text = get_response_text(answer_response).strip()
