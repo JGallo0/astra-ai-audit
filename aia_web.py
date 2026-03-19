@@ -1372,7 +1372,7 @@ def render_project_manager(user_email: str):
 
             submitted = st.form_submit_button("Salvar projeto")
 
-            if submitted:
+    if submitted:
     if not project_name.strip():
         st.error("Informe o nome do projeto.")
     elif not project_vector_store_id.strip():
