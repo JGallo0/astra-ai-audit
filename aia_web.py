@@ -1399,6 +1399,37 @@ if current_role == "blocked":
 if db_is_configured():
     sync_user_to_db(current_user, current_role)
 
+def render_header(lang: str):
+    # Se tiver logo configurado
+    if "LOGO_PATH" in globals():
+        try:
+            import os
+            if LOGO_PATH and os.path.exists(LOGO_PATH):
+                st.image(LOGO_PATH, width=340)
+                return
+        except Exception:
+            pass
+
+    # Fallback simples
+    app_title = APP_NAME if "APP_NAME" in globals() else "AuditorIA"
+
+    if "APP_SUBTITLE" in globals() and isinstance(APP_SUBTITLE, dict):
+        app_subtitle = APP_SUBTITLE.get(lang, APP_SUBTITLE.get("pt", "Auditoria técnica documental"))
+    else:
+        app_subtitle = "Auditoria técnica documental"
+
+    st.markdown(
+        f"""
+        <div class="auditoria-header">
+            <div class="auditoria-header-text">
+                <h1>{app_title}</h1>
+                <p>{app_subtitle}</p>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 # =========================================================
 # THEME LOAD
 # =========================================================
