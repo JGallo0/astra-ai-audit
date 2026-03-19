@@ -264,8 +264,12 @@ DEFAULT_STATE = {
     "last_full_audit_summary": {},
     "last_full_audit_df": pd.DataFrame(),
     "last_full_audit_run_id": "",
-    "usage_counters": {},
-    "current_project_name": "Projeto Nova Esperança",
+        "usage_counters": {},
+    "current_project_id": None,
+    "current_project_name": None,
+    "current_methodology": None,
+    "current_project_vector_store_id": None,
+    "current_methodology_vector_store_id": None,
     "db_status_message": "",
     "progress_state": {
         "percent": 0,
@@ -1470,16 +1474,10 @@ else:
 # SIDEBAR
 # =========================================================
 
-if current_user and current_user.get("email"):
-    render_project_manager(current_user["email"])
-    
-if current_user and current_user.get("email"):
-    st.sidebar.markdown("### DEBUG PROJETOS")
-    st.sidebar.write(f"Usuário: {current_user['email']}")
-    
-    render_project_manager(current_user["email"])
-    
 with st.sidebar:
+    if current_user and current_user.get("email"):
+        render_project_manager(current_user["email"])
+
     st.markdown("### Configurações")
 
     language_choice = st.selectbox(
