@@ -1414,7 +1414,12 @@ else:
 
 if current_user and current_user.get("email"):
     render_project_manager(current_user["email"])
-
+    
+if current_user and current_user.get("email"):
+    st.sidebar.markdown("### DEBUG PROJETOS")
+    st.sidebar.write(f"Usuário: {current_user['email']}")
+    render_project_manager(current_user["email"])
+    
 with st.sidebar:
     st.markdown("### Configurações")
 
