@@ -1774,7 +1774,8 @@ def render_full_audit_mode():
 
             st.success("Auditoria concluída com sucesso.")
 project_id = st.session_state.get("current_project_id")
-if project_id:
+
+    if project_id:
     try:
         save_audit_output(
             project_id=project_id,
