@@ -1678,7 +1678,7 @@ def render_chat_mode():
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-        user_input = st.chat_input("Faça uma pergunta")
+    user_input = st.chat_input("Faça uma pergunta")
 
     if user_input:
         if not can_consume(current_user["email"], current_role, "chat"):
@@ -1902,14 +1902,14 @@ def make_progress_callback(progress_container, status_container):
 # FULL AUDIT MODE
 # =========================================================
 
+    def render_full_audit_mode():
     project_vs_id = st.session_state.get("current_project_vector_store_id")
     methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
 
     if not project_vs_id or not methodology_vs_id:
         st.error("Selecione um projeto antes de usar o chat ou a auditoria.")
         st.stop()
-    
-def render_full_audit_mode():
+
     st.markdown(f"### {t(lang, 'full_audit_mode')}")
 
     all_modules = sorted(list({r["module"] for r in ISOMETRIC_REQUIREMENTS}))
@@ -2019,8 +2019,8 @@ def render_full_audit_mode():
             engine = AuditEngine(
                 api_key=OPENAI_API_KEY,
                 model=MODEL_NAME,
-                project_vector_store_id=VECTOR_STORE_ID_NOVA_ESPERANCA,
-                methodology_vector_store_id=VECTOR_STORE_ID_ISOMETRIC,
+                project_vector_store_id=project_vs_id,
+                methodology_vector_store_id=methodology_vs_id,
                 project_name=project_name,
                 module_project_queries=engine_params["module_project_queries"],
                 module_methodology_queries=engine_params["module_methodology_queries"],
@@ -2073,8 +2073,8 @@ def render_full_audit_mode():
             engine = AuditEngine(
                 api_key=OPENAI_API_KEY,
                 model=MODEL_NAME,
-                project_vector_store_id=VECTOR_STORE_ID_NOVA_ESPERANCA,
-                methodology_vector_store_id=VECTOR_STORE_ID_ISOMETRIC,
+                project_vector_store_id=project_vs_id,
+                methodology_vector_store_id=methodology_vs_id,
                 project_name=project_name,
                 module_project_queries=3,
                 module_methodology_queries=3,
