@@ -20,13 +20,13 @@ def create_project_record(
         )
         VALUES (%s, %s, %s, %s, %s, %s)
     """
-    params = (
-        project_name.strip(),
-        owner_email.strip().lower(),
-        methodology.strip().lower(),
-        project_vector_store_id.strip(),
-        methodology_vector_store_id.strip(),
-        status,
+params = (
+    (project_name or "").strip(),
+    (owner_email or "").strip().lower(),
+    (methodology or "").strip().lower(),
+    (project_vector_store_id or "").strip(),
+    (methodology_vector_store_id or "").strip(),
+    status,
     )
     return execute(query, params)
 
