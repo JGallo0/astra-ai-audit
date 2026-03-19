@@ -1722,7 +1722,7 @@ def render_full_audit_mode():
             disabled=not has_previous
         )
 
-    if run_button:
+   if run_button:
     consume_usage(current_user["email"], "full_audit")
     callback = make_progress_callback(progress_container, status_container)
 
@@ -1774,7 +1774,6 @@ def render_full_audit_mode():
 
         st.success("Auditoria concluída com sucesso.")
 
-        # salvar no banco
         project_id = st.session_state.get("current_project_id")
         if project_id:
             try:
