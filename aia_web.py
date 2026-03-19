@@ -249,12 +249,17 @@ FORMATO PREFERENCIAL:
 # PAGE
 # =========================================================
 
+# =========================================================
+# PAGE
+# =========================================================
+
 st.set_page_config(
     page_title=APP_NAME,
     page_icon="🌱",
     layout="wide"
+)
 
-    if "language" not in st.session_state:
+if "language" not in st.session_state:
     st.session_state["language"] = "pt"
 
 if "messages" not in st.session_state:
