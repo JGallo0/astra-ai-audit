@@ -256,10 +256,6 @@ st.set_page_config(
 )
 
 # =========================================================
-value=st.session_state.get("current_project_name") or ""value=st.session_state.get("current_project_name")
-
-
-# =========================================================
 # THEME / VISUAL
 # =========================================================
 
@@ -1659,9 +1655,6 @@ def render_full_audit_mode():
 
     st.session_state["current_project_name"] = project_name
 
-    if db_is_configured():
-        ensure_project_record(current_user["email"], project_name)
-
     if not selected_modules:
         st.warning("Selecione pelo menos um módulo para auditar.")
         return
@@ -1780,6 +1773,20 @@ def render_full_audit_mode():
             )
 
             st.success("Auditoria concluída com sucesso.")
+project_id = st.session_state.get("current_project_id")
+if project_id:
+    try:
+        save_audit_output(
+            project_id=project_id,
+            user_email=current_user["email"],
+            output_type="full_audit",
+            title="Auditoria completa",
+            question=project_name,
+            answer=str(summary),
+            content=str(results),
+        )
+    except Exception:
+        pass
 
         except Exception as e:
             st.error(f"Erro ao executar auditoria: {str(e)}")
@@ -1842,6 +1849,21 @@ def render_full_audit_mode():
             )
 
             st.success("Falhas reanalisadas com sucesso.")
+
+project_id = st.session_state.get("current_project_id")
+if project_id:
+    try:
+        save_audit_output(
+            project_id=project_id,
+            user_email=current_user["email"],
+            output_type="full_audit_rerun",
+            title="Reanálise de falhas",
+            question=project_name,
+            answer=str(summary),
+            content=str(merged_results),
+        )
+    except Exception:
+        pass
 
         except Exception as e:
             st.error(f"Erro ao reanalisar falhas: {str(e)}")
