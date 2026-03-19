@@ -1616,13 +1616,6 @@ TRECHOS DA METODOLOGIA
 ======================
 {chr(10).join(methodology_block) if methodology_block else "Nenhum trecho metodológico recuperado."}
 """)
-
-project_vs_id = st.session_state.get("current_project_vector_store_id")
-methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
-
-if not project_vs_id or not methodology_vs_id:
-    st.error("Selecione um projeto antes de usar o chat ou a auditoria.")
-    st.stop()
     
 def render_chat_mode():
     project_vs_id = st.session_state.get("current_project_vector_store_id")
@@ -1829,12 +1822,12 @@ def make_progress_callback(progress_container, status_container):
 # FULL AUDIT MODE
 # =========================================================
 
-project_vs_id = st.session_state.get("current_project_vector_store_id")
-methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
+    project_vs_id = st.session_state.get("current_project_vector_store_id")
+    methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
 
-if not project_vs_id or not methodology_vs_id:
-    st.error("Selecione um projeto antes de usar o chat ou a auditoria.")
-    st.stop()
+    if not project_vs_id or not methodology_vs_id:
+        st.error("Selecione um projeto antes de usar o chat ou a auditoria.")
+        st.stop()
     
 def render_full_audit_mode():
     st.markdown(f"### {t(lang, 'full_audit_mode')}")
