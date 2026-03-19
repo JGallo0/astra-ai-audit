@@ -936,6 +936,65 @@ def inject_custom_css():
         color: #1E293B !important;
     }}
     </style>
+    st.markdown("""
+<style>
+/* Botões gerais */
+.stButton > button {
+    background: #0f5c5a !important;
+    color: #ffffff !important;
+    border: 1px solid #0f5c5a !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+}
+
+.stButton > button:hover {
+    background: #14736f !important;
+    color: #ffffff !important;
+    border: 1px solid #14736f !important;
+}
+
+.stButton > button:focus,
+.stButton > button:active {
+    background: #0f5c5a !important;
+    color: #ffffff !important;
+    border: 1px solid #0f5c5a !important;
+    box-shadow: none !important;
+}
+
+/* Botões dentro de formulário */
+div[data-testid="stForm"] .stButton > button {
+    background: #0f5c5a !important;
+    color: #ffffff !important;
+    border: 1px solid #0f5c5a !important;
+}
+
+div[data-testid="stForm"] .stButton > button:hover {
+    background: #14736f !important;
+    color: #ffffff !important;
+    border: 1px solid #14736f !important;
+}
+
+/* Botões da sidebar */
+section[data-testid="stSidebar"] .stButton > button {
+    background: #0f5c5a !important;
+    color: #ffffff !important;
+    border: 1px solid #0f5c5a !important;
+}
+
+section[data-testid="stSidebar"] .stButton > button:hover {
+    background: #14736f !important;
+    color: #ffffff !important;
+    border: 1px solid #14736f !important;
+}
+
+/* Garantir que textos internos não herdem cor escura */
+.stButton > button p,
+.stButton > button span,
+.stButton > button div {
+    color: #ffffff !important;
+}
+</style>
+""", unsafe_allow_html=True)
     """
     st.markdown(css, unsafe_allow_html=True)
 
