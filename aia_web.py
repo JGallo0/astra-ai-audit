@@ -1397,37 +1397,38 @@ def render_chat_mode():
 
     user_input = st.chat_input("Faça uma pergunta documental...")
 
-    if user_input:
-        if not can_consume(current_user["email"], current_role, "chat"):
-            st.error("Limite do chat atingido.")
-            return
+  if user_input:
+    if not can_consume(current_user["email"], current_role, "chat"):
+        st.error("Limite do chat atingido.")
+        return
 
-        consume_usage(current_user["email"], "chat")
-        st.session_state.messages.append({"role": "user", "content": sanitize_xml_text(user_input)})
+    consume_usage(current_user["email"], "chat")
+    st.session_state.messages.append({
+        "role": "user",
+        "content": sanitize_xml_text(user_input)
+    })
 
-        with st.chat_message("user"):
-            st.markdown(user_input)
+    with st.chat_message("user"):
+        st.markdown(user_input)
 
-        with st.chat_message("assistant"):
-            with st.spinner("Buscando evidências..."):
-                try:
-                   project_search_response = call_file_search_for_store(
-    messages=st.session_state.messages,
-    vector_store_id=VECTOR_STORE_ID_NOVA_ESPERANCA,
-    max_results=PROJECT_MAX_RESULTS,
-    extra_system_prompt="Recupere evidências da documentação do projeto relevantes para a pergunta."
-)
-                    project_sources = extract_file_search_results(project_search_response, "Projeto")
+    with st.chat_message("assistant"):
+        with st.spinner("Buscando evidências..."):
+            try:
+                project_search_response = call_file_search_for_store(
+                    messages=st.session_state.messages,
+                    vector_store_id=VECTOR_STORE_ID_NOVA_ESPERANCA,
+                    max_results=PROJECT_MAX_RESULTS,
+                    extra_system_prompt="Recupere evidências da documentação do projeto relevantes para a pergunta."
+                )
+                project_sources = extract_file_search_results(project_search_response, "Projeto")
 
-                   methodology_search_response = call_file_search_for_store(
-    messages=st.session_state.messages,
-    vector_store_id=VECTOR_STORE_ID_ISOMETRIC,
-    max_results=METHODOLOGY_MAX_RESULTS,
-    extra_system_prompt="Recupere requisitos e critérios metodológicos relevantes para a pergunta."
-)
-                    )
-                    methodology_sources = extract_file_search_results(methodology_search_response, "Metodologia")
-
+                methodology_search_response = call_file_search_for_store(
+                    messages=st.session_state.messages,
+                    vector_store_id=VECTOR_STORE_ID_ISOMETRIC,
+                    max_results=METHODOLOGY_MAX_RESULTS,
+                    extra_system_prompt="Recupere requisitos e critérios metodológicos relevantes para a pergunta."
+                )
+                methodology_sources = extract_file_search_results(methodology_search_response, "Metodologia")
                     all_sources = deduplicate_sources(project_sources + methodology_sources)
 
                     combined_prompt = build_combined_context_prompt(
