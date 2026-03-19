@@ -1678,7 +1678,7 @@ def render_chat_mode():
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-    user_input = st.chat_input("Faça uma pergunta")
+        user_input = st.chat_input("Faça uma pergunta")
 
     if user_input:
         if not can_consume(current_user["email"], current_role, "chat"):
@@ -1686,56 +1686,27 @@ def render_chat_mode():
         else:
             consume_usage(current_user["email"], "chat")
 
-            project_name = st.session_state.get("current_project_name", "")
-show_sources = st.session_state.get("show_sources", True)
-show_attributes = st.session_state.get("show_attributes", False)
-show_snippets = st.session_state.get("show_snippets", True)
-
-if db_is_configured() and project_name:
-    ensure_project_record(current_user["email"], project_name)
-
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-
-user_input = st.chat_input("Faça uma pergunta")
-
-if user_input:
-    if not can_consume(current_user["email"], current_role, "chat"):
-        st.error("Limite do chat atingido.")
-    else:
-        consume_usage(current_user["email"], "chat")
-
-        st.session_state.messages.append({
-            "role": "user",
-            "content": sanitize_xml_text(user_input),
-        })
-
-        project_id = st.session_state.get("current_project_id")
-        if project_id:
-            try:
-                save_chat_message(
-                    project_id=project_id,
-                    user_email=current_user["email"],
-                    role="user",
-                    message=sanitize_xml_text(user_input),
-                )
-            except Exception:
-                pass
-if project_id:
-    try:
-        save_chat_message(
-            project_id=project_id,
-            user_email=current_user["email"],
-            role="user",
-            message=sanitize_xml_text(user_input),
-        )
-    except Exception:
-        pass
+            st.session_state.messages.append({
+                "role": "user",
+                "content": sanitize_xml_text(user_input),
             })
+
+            project_id = st.session_state.get("current_project_id")
+            if project_id:
+                try:
+                    save_chat_message(
+                        project_id=project_id,
+                        user_email=current_user["email"],
+                        role="user",
+                        message=sanitize_xml_text(user_input),
+                    )
+                except Exception:
+                    pass
 
             with st.chat_message("user"):
                 st.markdown(user_input)
+
+            final_answer = ""
 
             with st.chat_message("assistant"):
                 with st.spinner("Buscando evidências..."):
@@ -1786,7 +1757,6 @@ if project_id:
                         final_answer = f"Erro ao consultar a AuditorIA: {str(e)}"
                         st.error(final_answer)
 
-            project_id = st.session_state.get("current_project_id")
             if project_id:
                 try:
                     save_audit_output(
@@ -1801,6 +1771,21 @@ if project_id:
                 except Exception:
                     pass
 
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": sanitize_xml_text(final_answer),
+            })
+
+            if project_id:
+                try:
+                    save_chat_message(
+                        project_id=project_id,
+                        user_email=current_user["email"],
+                        role="assistant",
+                        message=sanitize_xml_text(final_answer),
+                    )
+                except Exception:
+                    pass
           # salvar mensagem no histórico da sessão
 st.session_state.messages.append({
     "role": "assistant",
