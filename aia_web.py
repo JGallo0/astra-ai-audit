@@ -1388,7 +1388,6 @@ create_project_record(
     project_vector_store_id=project_vector_store_id,
     methodology_vector_store_id=methodology_vector_store_id,
 )
-                        )
                         st.success("Projeto criado com sucesso.")
                         st.rerun()
                     except Exception as e:
