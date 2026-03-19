@@ -333,7 +333,7 @@ def render_project_manager(supabase, user_email: str):
                     methodology_vector_store_id = METHODOLOGY_VECTOR_STORES[methodology]
 
                     try:
-                        create_project(
+                        create_project_record(
                             supabase=supabase,
                             project_name=project_name,
                             owner_email=user_email,
