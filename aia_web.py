@@ -24,6 +24,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 
+from smart_search import normalize_sources, rank_sources, build_smart_context
 from audit_engine import AuditEngine
 from isometric_requirements import ISOMETRIC_REQUIREMENTS
 from ui_config import APP_NAME, APP_SUBTITLE, APP_TAGLINE, LOGO_DEFAULT_PATH, THEME, I18N, t
@@ -1486,27 +1487,41 @@ def render_chat_mode():
                             max_results=PROJECT_MAX_RESULTS,
                             extra_system_prompt="Recupere evidências da documentação do projeto relevantes para a pergunta."
                         )
-                        project_sources = extract_file_search_results(project_search_response, "Projeto")
+                        project_search_response = call_file_search_for_store(
+    messages=st.session_state.messages,
+    vector_store_id=project_vs_id,
+    max_results=PROJECT_MAX_RESULTS,
+    extra_system_prompt="Recupere evidências da documentação do projeto relevantes para a pergunta."
+)
+project_sources = extract_file_search_results(project_search_response, "Projeto")
 
-                        methodology_search_response = call_file_search_for_store(
-                            messages=st.session_state.messages,
-                            vector_store_id=methodology_vs_id,
-                            max_results=METHODOLOGY_MAX_RESULTS,
-                            extra_system_prompt="Recupere requisitos e critérios metodológicos relevantes para a pergunta."
-                        )
-                        methodology_sources = extract_file_search_results(methodology_search_response, "Metodologia")
+methodology_search_response = call_file_search_for_store(
+    messages=st.session_state.messages,
+    vector_store_id=methodology_vs_id,
+    max_results=METHODOLOGY_MAX_RESULTS,
+    extra_system_prompt="Recupere requisitos e critérios metodológicos relevantes para a pergunta."
+)
+methodology_sources = extract_file_search_results(methodology_search_response, "Metodologia")
 
-                        all_sources = deduplicate_sources(project_sources + methodology_sources)
+project_sources_rankable = normalize_sources(project_sources, "project")
+methodology_sources_rankable = normalize_sources(methodology_sources, "methodology")
 
-                        combined_prompt = build_combined_context_prompt(
-                            user_question=user_input,
-                            project_sources=project_sources,
-                            methodology_sources=methodology_sources,
-                        )
+all_sources = deduplicate_sources(project_sources + methodology_sources)
+ranked_sources = rank_sources(
+    user_input,
+    project_sources_rankable + methodology_sources_rankable,
+)
 
-                        answer_response = call_reasoning_over_context(user_content=combined_prompt)
-                        answer_text = get_response_text(answer_response).strip()
+combined_prompt = build_smart_context(
+    user_input,
+    ranked_sources,
+    max_items=8,
+)
 
+answer_response = call_reasoning_over_context(user_content=combined_prompt)
+answer_text = get_response_text(answer_response).strip()
+
+                        
                         if not answer_text:
                             answer_text = "A base de conhecimento não contém informação suficiente para responder com segurança."
 
