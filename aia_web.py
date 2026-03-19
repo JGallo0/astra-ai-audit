@@ -1722,8 +1722,8 @@ def render_full_audit_mode():
             disabled=not has_previous
         )
 
-   if run_button:
-    consume_usage(current_user["email"], "full_audit")
+    if run_button:
+        consume_usage(current_user["email"], "full_audit")
     callback = make_progress_callback(progress_container, status_container)
 
     try:
