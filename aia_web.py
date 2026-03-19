@@ -1400,17 +1400,16 @@ if db_is_configured():
     sync_user_to_db(current_user, current_role)
 
 def render_header(lang: str):
-    # Se tiver logo configurado
-    if "LOGO_PATH" in globals():
-        try:
-            import os
-            if LOGO_PATH and os.path.exists(LOGO_PATH):
-                st.image(LOGO_PATH, width=340)
-                return
-        except Exception:
-            pass
+    logo_path = "assets/auditoria_logo.png"
 
-    # Fallback simples
+    try:
+        import os
+        if os.path.exists(logo_path):
+            st.image(logo_path, width=340)
+            return
+    except Exception:
+        pass
+
     app_title = APP_NAME if "APP_NAME" in globals() else "AuditorIA"
 
     if "APP_SUBTITLE" in globals() and isinstance(APP_SUBTITLE, dict):
@@ -1429,7 +1428,6 @@ def render_header(lang: str):
         """,
         unsafe_allow_html=True
     )
-
 # =========================================================
 # THEME LOAD
 # =========================================================
