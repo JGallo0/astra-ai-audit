@@ -935,50 +935,18 @@ def inject_custom_css():
     div[data-testid="stDownloadButton"] > button * {{
         color: #1E293B !important;
     }}
-    </style>
     st.markdown("""
 <style>
-/* Botões gerais */
-.stButton > button {
+
+/* SIDEBAR BUTTONS */
+section[data-testid="stSidebar"] .stButton > button {
     background: #0f5c5a !important;
     color: #ffffff !important;
     border: 1px solid #0f5c5a !important;
     border-radius: 12px !important;
     font-weight: 600 !important;
-}
-
-.stButton > button:hover {
-    background: #14736f !important;
-    color: #ffffff !important;
-    border: 1px solid #14736f !important;
-}
-
-.stButton > button:focus,
-.stButton > button:active {
-    background: #0f5c5a !important;
-    color: #ffffff !important;
-    border: 1px solid #0f5c5a !important;
-    box-shadow: none !important;
-}
-
-/* Botões dentro de formulário */
-div[data-testid="stForm"] .stButton > button {
-    background: #0f5c5a !important;
-    color: #ffffff !important;
-    border: 1px solid #0f5c5a !important;
-}
-
-div[data-testid="stForm"] .stButton > button:hover {
-    background: #14736f !important;
-    color: #ffffff !important;
-    border: 1px solid #14736f !important;
-}
-
-/* Botões da sidebar */
-section[data-testid="stSidebar"] .stButton > button {
-    background: #0f5c5a !important;
-    color: #ffffff !important;
-    border: 1px solid #0f5c5a !important;
+    min-height: 44px !important;
+    white-space: nowrap !important;
 }
 
 section[data-testid="stSidebar"] .stButton > button:hover {
@@ -987,16 +955,29 @@ section[data-testid="stSidebar"] .stButton > button:hover {
     border: 1px solid #14736f !important;
 }
 
-/* Garantir que textos internos não herdem cor escura */
-.stButton > button p,
-.stButton > button span,
-.stButton > button div {
+/* FORM BUTTON */
+div[data-testid="stForm"] .stButton > button {
+    background: #0f5c5a !important;
+    color: #ffffff !important;
+    border: 1px solid #0f5c5a !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+}
+
+div[data-testid="stForm"] .stButton > button:hover {
+    background: #14736f !important;
+    color: #ffffff !important;
+    border: 1px solid #14736f !important;
+}
+
+/* Garantir texto branco */
+section[data-testid="stSidebar"] .stButton > button *,
+div[data-testid="stForm"] .stButton > button * {
     color: #ffffff !important;
 }
+
 </style>
 """, unsafe_allow_html=True)
-    """
-    st.markdown(css, unsafe_allow_html=True)
 
 if "LOGO_PATH" not in globals():
     LOGO_PATH = get_config_value("AUDITORIA_LOGO_PATH", LOGO_DEFAULT_PATH)
