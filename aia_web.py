@@ -315,7 +315,7 @@ def set_current_project(project: dict):
 
 
 def render_project_manager(user_email: str):
-    st.markdown("## Projetos")
+    st.markdown("### Projetos")
 
     with st.expander("➕ Criar projeto", expanded=False):
         with st.form("create_project_form", clear_on_submit=True):
@@ -1339,12 +1339,13 @@ def render_project_manager(user_email: str):
                     methodology_vector_store_id = METHODOLOGY_VECTOR_STORES[methodology]
 
                     try:
-                        create_project(
-                            project_name=project_name,
-                            owner_email=user_email,
-                            methodology=methodology,
-                            project_vector_store_id=project_vector_store_id,
-                            methodology_vector_store_id=methodology_vector_store_id,
+create_project_record(
+    project_name=project_name,
+    owner_email=user_email,
+    methodology=methodology,
+    project_vector_store_id=project_vector_store_id,
+    methodology_vector_store_id=methodology_vector_store_id,
+)
                         )
                         st.success("Projeto criado com sucesso.")
                         st.rerun()
@@ -1616,8 +1617,21 @@ TRECHOS DA METODOLOGIA
 {chr(10).join(methodology_block) if methodology_block else "Nenhum trecho metodológico recuperado."}
 """)
 
+project_vs_id = st.session_state.get("current_project_vector_store_id")
+methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
 
+if not project_vs_id or not methodology_vs_id:
+    st.error("Selecione um projeto antes de usar o chat ou a auditoria.")
+    st.stop()
+    
 def render_chat_mode():
+    project_vs_id = st.session_state.get("current_project_vector_store_id")
+    methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
+
+    if not project_vs_id or not methodology_vs_id:
+        st.error("Selecione um projeto antes de usar o chat ou a auditoria.")
+        st.stop()
+
     project_name = st.session_state.get("current_project_name", "")
     show_sources = st.session_state.get("show_sources", True)
     show_attributes = st.session_state.get("show_attributes", False)
@@ -1651,7 +1665,7 @@ def render_chat_mode():
                     try:
                         project_search_response = call_file_search_for_store(
                             messages=st.session_state.messages,
-                            vector_store_id=VECTOR_STORE_ID_NOVA_ESPERANCA,
+                            vector_store_id=project_vs_id,
                             max_results=PROJECT_MAX_RESULTS,
                             extra_system_prompt="Recupere evidências da documentação do projeto relevantes para a pergunta."
                         )
@@ -1659,7 +1673,7 @@ def render_chat_mode():
 
                         methodology_search_response = call_file_search_for_store(
                             messages=st.session_state.messages,
-                            vector_store_id=VECTOR_STORE_ID_ISOMETRIC,
+                            vector_store_id=methodology_vs_id,
                             max_results=METHODOLOGY_MAX_RESULTS,
                             extra_system_prompt="Recupere requisitos e critérios metodológicos relevantes para a pergunta."
                         )
@@ -1815,6 +1829,13 @@ def make_progress_callback(progress_container, status_container):
 # FULL AUDIT MODE
 # =========================================================
 
+project_vs_id = st.session_state.get("current_project_vector_store_id")
+methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
+
+if not project_vs_id or not methodology_vs_id:
+    st.error("Selecione um projeto antes de usar o chat ou a auditoria.")
+    st.stop()
+    
 def render_full_audit_mode():
     st.markdown(f"### {t(lang, 'full_audit_mode')}")
 
@@ -1861,8 +1882,8 @@ def render_full_audit_mode():
     temp_engine = AuditEngine(
         api_key=OPENAI_API_KEY,
         model=MODEL_NAME,
-        project_vector_store_id=VECTOR_STORE_ID_NOVA_ESPERANCA or "",
-        methodology_vector_store_id=VECTOR_STORE_ID_ISOMETRIC,
+        project_vector_store_id=project_vs_id or "",
+        methodology_vector_store_id=methodology_vs_id,
         project_name=project_name,
         module_project_queries=engine_params["module_project_queries"],
         module_methodology_queries=engine_params["module_methodology_queries"],
@@ -1871,6 +1892,7 @@ def render_full_audit_mode():
         max_project_hits_in_prompt=engine_params["max_project_hits_in_prompt"],
         max_methodology_hits_in_prompt=engine_params["max_methodology_hits_in_prompt"],
         max_text_chars_per_hit=engine_params["max_text_chars_per_hit"],
+    )
     )
     cost_estimate = temp_engine.estimate_run_cost(selected_modules=selected_modules, execution_mode=execution_mode)
 
