@@ -1463,7 +1463,6 @@ if user_input:
             "role": "assistant",
             "content": sanitize_xml_text(final_answer)
         })
-    })
 # =========================================================
 # FULL AUDIT MODE HELPERS
 # =========================================================
