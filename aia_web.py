@@ -1390,7 +1390,6 @@ def render_project_manager(user_email: str):
             )
             st.success("Projeto criado com sucesso.")
             st.rerun()
-
         except Exception as e:
             st.error(f"Erro ao criar projeto: {e}")
         return
