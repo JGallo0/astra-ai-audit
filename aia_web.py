@@ -1941,7 +1941,7 @@ def render_full_audit_mode():
             t(lang, "show_trails"),
             value=False,
             key="show_trails_full_audit"
-        ))
+        )
 
     st.session_state["current_project_name"] = project_name
 
