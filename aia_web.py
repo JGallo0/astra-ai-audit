@@ -381,64 +381,7 @@ def render_project_manager(user_email: str):
         st.success(
             f"Projeto ativo: **{st.session_state['current_project_name']}**"
         )
-            project_vector_store_id = st.text_input("Vector Store ID do projeto")
-
-            submitted = st.form_submit_button("Salvar projeto")
-
-            if submitted:
-                if not project_name.strip():
-                    st.error("Informe o nome do projeto.")
-                elif not project_vector_store_id.strip():
-                    st.error("Informe o Vector Store ID do projeto.")
-                else:
-                    methodology_vector_store_id = METHODOLOGY_VECTOR_STORES[methodology]
-
-                    try:
-                        create_project_record(
-                            supabase=supabase,
-                            project_name=project_name,
-                            owner_email=user_email,
-                            methodology=methodology,
-                            project_vector_store_id=project_vector_store_id,
-                            methodology_vector_store_id=methodology_vector_store_id,
-                        )
-                        st.success("Projeto criado com sucesso.")
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Erro ao criar projeto: {e}")
-
-    st.sidebar.markdown("### Meus projetos")
-
-    try:
-        projects = list_projects_by_owner(supabase, user_email)
-    except Exception as e:
-        st.sidebar.error(f"Erro ao carregar projetos: {e}")
-        return
-
-    if not projects:
-        st.sidebar.info("Nenhum projeto cadastrado ainda.")
-        return
-
-    for project in projects:
-        col1, col2 = st.sidebar.columns([3, 1])
-
-        with col1:
-            st.markdown(
-                f"**{project.get('project_name', 'Sem nome')}**  \n"
-                f"Metodologia: `{project.get('methodology', '-')}`"
-            )
-
-        with col2:
-            if st.button("Selecionar", key=f"select_project_{project['id']}"):
-                set_current_project(project)
-                st.rerun()
-
-    if st.session_state.get("current_project_name"):
-        st.sidebar.markdown("---")
-        st.sidebar.success(
-            f"Projeto ativo: **{st.session_state['current_project_name']}**"
-        )
-
+           
 # =========================================================
 # HELPERS
 # =========================================================
