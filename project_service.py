@@ -1,5 +1,6 @@
 from db import execute, fetch
 
+
 def create_project_record(
     project_name: str,
     owner_email: str,
