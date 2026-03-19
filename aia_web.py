@@ -1417,7 +1417,6 @@ def render_chat_mode():
     max_results=PROJECT_MAX_RESULTS,
     extra_system_prompt="Recupere evidências da documentação do projeto relevantes para a pergunta."
 )
-                    )
                     project_sources = extract_file_search_results(project_search_response, "Projeto")
 
                    methodology_search_response = call_file_search_for_store(
