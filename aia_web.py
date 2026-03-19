@@ -1962,7 +1962,6 @@ def render_full_audit_mode():
         max_methodology_hits_in_prompt=engine_params["max_methodology_hits_in_prompt"],
         max_text_chars_per_hit=engine_params["max_text_chars_per_hit"],
     )
-    )
     cost_estimate = temp_engine.estimate_run_cost(selected_modules=selected_modules, execution_mode=execution_mode)
 
     st.markdown(f"#### {t(lang, 'estimated_effort')}")
