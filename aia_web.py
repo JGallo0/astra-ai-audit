@@ -934,52 +934,49 @@ def inject_custom_css():
 
     div[data-testid="stDownloadButton"] > button * {{
         color: #1E293B !important;
-  # ================================
-# CUSTOM CSS
-# ================================
-st.markdown("""
-<style>
+    }}
 
-/* SIDEBAR BUTTONS */
-section[data-testid="stSidebar"] .stButton > button {
-    background: #0f5c5a !important;
-    color: #ffffff !important;
-    border: 1px solid #0f5c5a !important;
-    border-radius: 12px !important;
-    font-weight: 600 !important;
-    min-height: 44px !important;
-    white-space: nowrap !important;
-}
+    /* SIDEBAR BUTTONS */
+    section[data-testid="stSidebar"] .stButton > button {{
+        background: #0f5c5a !important;
+        color: #ffffff !important;
+        border: 1px solid #0f5c5a !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        min-height: 44px !important;
+        white-space: nowrap !important;
+    }}
 
-section[data-testid="stSidebar"] .stButton > button:hover {
-    background: #14736f !important;
-    color: #ffffff !important;
-    border: 1px solid #14736f !important;
-}
+    section[data-testid="stSidebar"] .stButton > button:hover {{
+        background: #14736f !important;
+        color: #ffffff !important;
+        border: 1px solid #14736f !important;
+    }}
 
-/* FORM BUTTON */
-div[data-testid="stForm"] .stButton > button {
-    background: #0f5c5a !important;
-    color: #ffffff !important;
-    border: 1px solid #0f5c5a !important;
-    border-radius: 12px !important;
-    font-weight: 600 !important;
-}
+    /* FORM BUTTON */
+    div[data-testid="stForm"] .stButton > button {{
+        background: #0f5c5a !important;
+        color: #ffffff !important;
+        border: 1px solid #0f5c5a !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+    }}
 
-div[data-testid="stForm"] .stButton > button:hover {
-    background: #14736f !important;
-    color: #ffffff !important;
-    border: 1px solid #14736f !important;
-}
+    div[data-testid="stForm"] .stButton > button:hover {{
+        background: #14736f !important;
+        color: #ffffff !important;
+        border: 1px solid #14736f !important;
+    }}
 
-/* Garantir texto branco */
-section[data-testid="stSidebar"] .stButton > button *,
-div[data-testid="stForm"] .stButton > button * {
-    color: #ffffff !important;
-}
+    /* Garantir texto branco */
+    section[data-testid="stSidebar"] .stButton > button *,
+    div[data-testid="stForm"] .stButton > button * {{
+        color: #ffffff !important;
+    }}
 
-</style>
-""", unsafe_allow_html=True)
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
 
 # =========================================================
 # DB / AUTH HELPERS
