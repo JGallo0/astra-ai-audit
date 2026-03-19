@@ -161,6 +161,9 @@ if not OPENAI_API_KEY:
 
 MODEL_NAME = get_config_value("OPENAI_MODEL", "gpt-4.1")
 
+PROJECT_MAX_RESULTS = get_int_config("PROJECT_MAX_RESULTS", 5)
+METHODOLOGY_MAX_RESULTS = get_int_config("METHODOLOGY_MAX_RESULTS", 5)
+
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 
@@ -1395,7 +1398,7 @@ def render_chat_mode():
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-    user_input = st.chat_input("Faça uma pergunta documental...")
+    user_input = st.chat_input("Faça uma pergunta")
 if user_input:
     if not can_consume(current_user["email"], current_role, "chat"):
         st.error("Limite do chat atingido.")
