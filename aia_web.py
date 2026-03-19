@@ -1411,19 +1411,21 @@ def render_chat_mode():
         with st.chat_message("assistant"):
             with st.spinner("Buscando evidências..."):
                 try:
-                    project_search_response = call_file_search_for_store(
-                        messages=st.session_state.messages,
-                        project_vector_store_id=VECTOR_STORE_ID_NOVA_ESPERANCA,
-                        max_results=PROJECT_MAX_RESULTS,
-                        extra_system_prompt="Recupere evidências da documentação do projeto relevantes para a pergunta."
+                   project_search_response = call_file_search_for_store(
+    messages=st.session_state.messages,
+    vector_store_id=VECTOR_STORE_ID_NOVA_ESPERANCA,
+    max_results=PROJECT_MAX_RESULTS,
+    extra_system_prompt="Recupere evidências da documentação do projeto relevantes para a pergunta."
+)
                     )
                     project_sources = extract_file_search_results(project_search_response, "Projeto")
 
-                    methodology_search_response = call_file_search_for_store(
-                        messages=st.session_state.messages,
-                        vector_store_id=VECTOR_STORE_ID_ISOMETRIC,
-                        max_results=METHODOLOGY_MAX_RESULTS,
-                        extra_system_prompt="Recupere requisitos metodológicos relevantes para a pergunta."
+                   methodology_search_response = call_file_search_for_store(
+    messages=st.session_state.messages,
+    vector_store_id=VECTOR_STORE_ID_ISOMETRIC,
+    max_results=METHODOLOGY_MAX_RESULTS,
+    extra_system_prompt="Recupere requisitos e critérios metodológicos relevantes para a pergunta."
+)
                     )
                     methodology_sources = extract_file_search_results(methodology_search_response, "Metodologia")
 
