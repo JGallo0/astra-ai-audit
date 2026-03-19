@@ -308,23 +308,39 @@ def init_project_session():
         "current_methodology_vector_store_id": None,
     }
 
-    for key, value in defaults.items():
-        if key not in st.session_state:
-            st.session_state[key] = value
+   for key, value in defaults.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
 
 
-def set_current_project(project: dict):
+def set_current_project(project: dict, user_email: str = ""):
     st.session_state["current_project_id"] = project.get("id")
     st.session_state["current_project_name"] = project.get("project_name")
     st.session_state["current_methodology"] = project.get("methodology")
     st.session_state["current_project_vector_store_id"] = project.get("project_vector_store_id")
     st.session_state["current_methodology_vector_store_id"] = project.get("methodology_vector_store_id")
 
+    if project.get("id") and user_email:
+        try:
+            rows = load_chat_history(project.get("id"), user_email)
+
+            st.session_state["messages"] = [
+                {
+                    "role": row.get("role", "assistant"),
+                    "content": row.get("message", ""),
+                }
+                for row in rows
+            ]
+        except Exception:
+            st.session_state["messages"] = []
+    else:
+        st.session_state["messages"] = []
+
 
 def render_project_manager(user_email: str):
-    st.markdown("### Projetos")
+    st.sidebar.markdown("### Projetos")
 
-    with st.expander("➕ Criar projeto", expanded=False):
+    with st.sidebar.expander("➕ Criar projeto", expanded=False):
         with st.form("create_project_form", clear_on_submit=True):
             project_name = st.text_input("Nome do projeto")
             methodology = st.selectbox(
@@ -357,20 +373,20 @@ def render_project_manager(user_email: str):
                     except Exception as e:
                         st.error(f"Erro ao criar projeto: {e}")
 
-    st.markdown("#### Meus projetos")
+    st.sidebar.markdown("#### Meus projetos")
 
     try:
         projects = list_projects_by_owner(user_email)
     except Exception as e:
-        st.error(f"Erro ao carregar projetos: {e}")
+        st.sidebar.error(f"Erro ao carregar projetos: {e}")
         return
 
     if not projects:
-        st.info("Nenhum projeto cadastrado ainda.")
+        st.sidebar.info("Nenhum projeto cadastrado ainda.")
         return
 
     for project in projects:
-        col1, col2 = st.columns([3, 1])
+        col1, col2 = st.sidebar.columns([3, 1])
 
         with col1:
             st.markdown(
@@ -380,12 +396,12 @@ def render_project_manager(user_email: str):
 
         with col2:
             if st.button("Selecionar", key=f"select_project_{project['id']}"):
-                set_current_project(project)
+                set_current_project(project, user_email)
                 st.rerun()
 
     if st.session_state.get("current_project_name"):
-        st.markdown("---")
-        st.success(
+        st.sidebar.markdown("---")
+        st.sidebar.success(
             f"Projeto ativo: **{st.session_state['current_project_name']}**"
         )
            
@@ -1314,12 +1330,30 @@ def init_project_session():
             st.session_state[key] = value
 
 
-def set_current_project(project: dict):
+def set_current_project(project: dict, user_email: str = ""):
     st.session_state["current_project_id"] = project.get("id")
     st.session_state["current_project_name"] = project.get("project_name")
     st.session_state["current_methodology"] = project.get("methodology")
     st.session_state["current_project_vector_store_id"] = project.get("project_vector_store_id")
     st.session_state["current_methodology_vector_store_id"] = project.get("methodology_vector_store_id")
+
+    # 🔥 NOVO: carregar histórico do chat do banco
+    if project.get("id") and user_email:
+        try:
+            rows = load_chat_history(project.get("id"), user_email)
+
+            st.session_state["messages"] = [
+                {
+                    "role": row.get("role", "assistant"),
+                    "content": row.get("message", ""),
+                }
+                for row in rows
+            ]
+
+        except Exception as e:
+            st.session_state["messages"] = []
+    else:
+        st.session_state["messages"] = []
 
 
 def render_project_manager(user_email: str):
@@ -1382,7 +1416,7 @@ create_project_record(
 
         with col2:
             if st.button("Selecionar", key=f"select_project_{project['id']}"):
-                set_current_project(project)
+                set_current_project(project, user_email)
                 st.rerun()
 
     if st.session_state.get("current_project_name"):
@@ -1655,6 +1689,17 @@ def render_chat_mode():
             st.session_state.messages.append({
                 "role": "user",
                 "content": sanitize_xml_text(user_input)
+                project_id = st.session_state.get("current_project_id")
+if project_id:
+    try:
+        save_chat_message(
+            project_id=project_id,
+            user_email=current_user["email"],
+            role="user",
+            message=sanitize_xml_text(user_input),
+        )
+    except Exception:
+        pass
             })
 
             with st.chat_message("user"):
@@ -1709,9 +1754,51 @@ def render_chat_mode():
                         final_answer = f"Erro ao consultar a AuditorIA: {str(e)}"
                         st.error(final_answer)
 
+            project_id = st.session_state.get("current_project_id")
+            if project_id:
+                try:
+                    save_audit_output(
+                        project_id=project_id,
+                        user_email=current_user["email"],
+                        output_type="chat_answer",
+                        title="Resposta do chat técnico",
+                        question=user_input,
+                        answer=final_answer,
+                        content=final_answer,
+                    )
+                except Exception:
+                    pass
+
             st.session_state.messages.append({
                 "role": "assistant",
                 "content": sanitize_xml_text(final_answer)
+            })
+
+            if project_id:
+                try:
+                    save_chat_message(
+                        project_id=project_id,
+                        user_email=current_user["email"],
+                        role="assistant",
+                        message=sanitize_xml_text(final_answer),
+                    )
+                except Exception:
+                    pass
+
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": sanitize_xml_text(final_answer)
+                project_id = st.session_state.get("current_project_id")
+if project_id:
+    try:
+        save_chat_message(
+            project_id=project_id,
+            user_email=current_user["email"],
+            role="assistant",
+            message=sanitize_xml_text(final_answer),
+        )
+    except Exception:
+        pass
             })
 # =========================================================
 # FULL AUDIT MODE HELPERS
