@@ -1398,8 +1398,8 @@ def render_chat_mode():
     user_input = st.chat_input("Faça uma pergunta documental...")
 if user_input:
     if not can_consume(current_user["email"], current_role, "chat"):
-        st.error("Limite do chat atingido.")
-        return
+    st.error("Limite do chat atingido.")
+else:
 
     consume_usage(current_user["email"], "chat")
 
