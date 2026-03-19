@@ -8,7 +8,14 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 import streamlit as st
 from project_config import METHODOLOGY_VECTOR_STORES
-from project_service import create_project_record, list_projects_by_owner
+from project_service import (
+    create_project_record,
+    list_projects_by_owner,
+    save_chat_message,
+    load_chat_history,
+    save_audit_output,
+    list_audit_outputs,
+)
 from dotenv import load_dotenv
 from openai import OpenAI
 from docx import Document
