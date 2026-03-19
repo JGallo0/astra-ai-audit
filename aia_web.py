@@ -1397,7 +1397,7 @@ def render_chat_mode():
 
     user_input = st.chat_input("Faça uma pergunta documental...")
 
-  if user_input:
+ if user_input:
     if not can_consume(current_user["email"], current_role, "chat"):
         st.error("Limite do chat atingido.")
         return
@@ -1430,38 +1430,41 @@ def render_chat_mode():
                     extra_system_prompt="Recupere requisitos e critérios metodológicos relevantes para a pergunta."
                 )
                 methodology_sources = extract_file_search_results(methodology_search_response, "Metodologia")
-                    all_sources = deduplicate_sources(project_sources + methodology_sources)
 
-                    combined_prompt = build_combined_context_prompt(
-                        user_question=user_input,
-                        project_sources=project_sources,
-                        methodology_sources=methodology_sources,
-                    )
+                all_sources = deduplicate_sources(project_sources + methodology_sources)
 
-                    answer_response = call_reasoning_over_context(user_content=combined_prompt)
-                    answer_text = get_response_text(answer_response).strip()
+                combined_prompt = build_combined_context_prompt(
+                    user_question=user_input,
+                    project_sources=project_sources,
+                    methodology_sources=methodology_sources,
+                )
 
-                    if not answer_text:
-                        answer_text = "A base de conhecimento não contém informação suficiente para responder com segurança."
+                answer_response = call_reasoning_over_context(user_content=combined_prompt)
+                answer_text = get_response_text(answer_response).strip()
 
-                    st.markdown(answer_text)
+                if not answer_text:
+                    answer_text = "A base de conhecimento não contém informação suficiente para responder com segurança."
 
-                    if show_sources:
-                        render_sources_block("Fontes do Projeto", project_sources, show_attributes, show_snippets)
-                        render_sources_block("Fontes da Metodologia", methodology_sources, show_attributes, show_snippets)
+                st.markdown(answer_text)
 
-                    st.session_state.last_answer_text = sanitize_xml_text(answer_text)
-                    st.session_state.last_sources_project = project_sources
-                    st.session_state.last_sources_methodology = methodology_sources
-                    st.session_state.last_sources_all = all_sources
-                    final_answer = answer_text
+                if show_sources:
+                    render_sources_block("Fontes do Projeto", project_sources, show_attributes, show_snippets)
+                    render_sources_block("Fontes da Metodologia", methodology_sources, show_attributes, show_snippets)
 
-                except Exception as e:
-                    final_answer = f"Erro ao consultar a AuditorIA: {str(e)}"
-                    st.error(final_answer)
+                st.session_state.last_answer_text = sanitize_xml_text(answer_text)
+                st.session_state.last_sources_project = project_sources
+                st.session_state.last_sources_methodology = methodology_sources
+                st.session_state.last_sources_all = all_sources
+                final_answer = answer_text
 
-        st.session_state.messages.append({"role": "assistant", "content": sanitize_xml_text(final_answer)})
+            except Exception as e:
+                final_answer = f"Erro ao consultar a AuditorIA: {str(e)}"
+                st.error(final_answer)
 
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": sanitize_xml_text(final_answer)
+    })
 # =========================================================
 # FULL AUDIT MODE HELPERS
 # =========================================================
