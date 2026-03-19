@@ -253,6 +253,56 @@ st.set_page_config(
     page_title=APP_NAME,
     page_icon="🌱",
     layout="wide"
+
+    if "language" not in st.session_state:
+    st.session_state["language"] = "pt"
+
+if "messages" not in st.session_state:
+    st.session_state["messages"] = []
+
+if "usage_counters" not in st.session_state:
+    st.session_state["usage_counters"] = {}
+
+if "current_project_id" not in st.session_state:
+    st.session_state["current_project_id"] = None
+
+if "current_project_name" not in st.session_state:
+    st.session_state["current_project_name"] = None
+
+if "current_methodology" not in st.session_state:
+    st.session_state["current_methodology"] = None
+
+if "current_project_vector_store_id" not in st.session_state:
+    st.session_state["current_project_vector_store_id"] = None
+
+if "current_methodology_vector_store_id" not in st.session_state:
+    st.session_state["current_methodology_vector_store_id"] = None
+
+if "db_status_message" not in st.session_state:
+    st.session_state["db_status_message"] = ""
+
+if "progress_state" not in st.session_state:
+    st.session_state["progress_state"] = {
+        "percent": 0,
+        "message": "",
+        "module": "",
+        "stage": "",
+        "execution_estimated_cost": 0.0,
+        "session_estimated_cost": 0.0,
+    }
+
+if "audit_history" not in st.session_state:
+    st.session_state["audit_history"] = []
+
+if "audit_session_cost_estimate" not in st.session_state:
+    st.session_state["audit_session_cost_estimate"] = 0.0
+
+if "current_filters" not in st.session_state:
+    st.session_state["current_filters"] = {
+        "module": [],
+        "status": [],
+        "risk": [],
+    }
 )
 
 # =========================================================
@@ -1192,8 +1242,8 @@ def render_header(lang: str):
 # =========================================================
 
 inject_custom_css()
-lang = st.session_state["language"]
-
+lang = st.session_state.get("language", "pt")
+st.session_state["language"] = lang
 # =========================================================
 # HEADER
 # =========================================================
@@ -1229,8 +1279,8 @@ with st.sidebar:
         st.session_state["language"] = new_lang
         st.rerun()
 
-    lang = st.session_state["language"]
-
+lang = st.session_state.get("language", "pt")
+st.session_state["language"] = lang
     menu = st.selectbox(
         "Menu",
         [
