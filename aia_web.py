@@ -91,102 +91,6 @@ except Exception as e:
     DB_CONNECTION_OK = False
     DB_CONNECTION_ERROR = str(e)
 
-def db_is_configured():
-    return (
-        DB_MODULE_AVAILABLE
-        and DB_CONNECTION_OK
-        and db_execute is not None
-        and db_fetch is not None
-
-        def init_project_session():
-    defaults = {
-        "current_project_id": None,
-        "current_project_name": None,
-        "current_methodology": None,
-        "current_project_vector_store_id": None,
-        "current_methodology_vector_store_id": None,
-    }
-
-    for key, value in defaults.items():
-        if key not in st.session_state:
-            st.session_state[key] = value
-
-
-def set_current_project(project: dict):
-    st.session_state["current_project_id"] = project.get("id")
-    st.session_state["current_project_name"] = project.get("project_name")
-    st.session_state["current_methodology"] = project.get("methodology")
-    st.session_state["current_project_vector_store_id"] = project.get("project_vector_store_id")
-    st.session_state["current_methodology_vector_store_id"] = project.get("methodology_vector_store_id")
-
-    def render_project_manager(supabase, user_email: str):
-    st.sidebar.markdown("## Projetos")
-
-    with st.sidebar.expander("➕ Criar projeto", expanded=False):
-        with st.form("create_project_form", clear_on_submit=True):
-            project_name = st.text_input("Nome do projeto")
-            methodology = st.selectbox(
-                "Metodologia",
-                options=list(METHODOLOGY_VECTOR_STORES.keys()),
-                format_func=lambda x: x.upper()
-            )
-            project_vector_store_id = st.text_input("Vector Store ID do projeto")
-
-            submitted = st.form_submit_button("Salvar projeto")
-
-            if submitted:
-                if not project_name.strip():
-                    st.error("Informe o nome do projeto.")
-                elif not project_vector_store_id.strip():
-                    st.error("Informe o Vector Store ID do projeto.")
-                else:
-                    methodology_vector_store_id = METHODOLOGY_VECTOR_STORES[methodology]
-
-                    try:
-                        create_project(
-                            supabase=supabase,
-                            project_name=project_name,
-                            owner_email=user_email,
-                            methodology=methodology,
-                            project_vector_store_id=project_vector_store_id,
-                            methodology_vector_store_id=methodology_vector_store_id,
-                        )
-                        st.success("Projeto criado com sucesso.")
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Erro ao criar projeto: {e}")
-
-    st.sidebar.markdown("### Meus projetos")
-
-    try:
-        projects = list_projects_by_owner(supabase, user_email)
-    except Exception as e:
-        st.sidebar.error(f"Erro ao carregar projetos: {e}")
-        return
-
-    if not projects:
-        st.sidebar.info("Nenhum projeto cadastrado ainda.")
-        return
-
-    for project in projects:
-        col1, col2 = st.sidebar.columns([3, 1])
-
-        with col1:
-            st.markdown(
-                f"**{project.get('project_name', 'Sem nome')}**  \n"
-                f"Metodologia: `{project.get('methodology', '-')}`"
-            )
-
-        with col2:
-            if st.button("Selecionar", key=f"select_project_{project['id']}"):
-                set_current_project(project)
-                st.rerun()
-
-    if st.session_state.get("current_project_name"):
-        st.sidebar.markdown("---")
-        st.sidebar.success(
-            f"Projeto ativo: **{st.session_state['current_project_name']}**"
-        )
 
 # =========================================================
 # CONFIG
@@ -383,6 +287,96 @@ DEFAULT_STATE = {
 for key, value in DEFAULT_STATE.items():
     if key not in st.session_state:
         st.session_state[key] = value
+        def init_project_session():
+    defaults = {
+        "current_project_id": None,
+        "current_project_name": None,
+        "current_methodology": None,
+        "current_project_vector_store_id": None,
+        "current_methodology_vector_store_id": None,
+    }
+
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
+
+
+def set_current_project(project: dict):
+    st.session_state["current_project_id"] = project.get("id")
+    st.session_state["current_project_name"] = project.get("project_name")
+    st.session_state["current_methodology"] = project.get("methodology")
+    st.session_state["current_project_vector_store_id"] = project.get("project_vector_store_id")
+    st.session_state["current_methodology_vector_store_id"] = project.get("methodology_vector_store_id")
+
+
+def render_project_manager(supabase, user_email: str):
+    st.sidebar.markdown("## Projetos")
+
+    with st.sidebar.expander("➕ Criar projeto", expanded=False):
+        with st.form("create_project_form", clear_on_submit=True):
+            project_name = st.text_input("Nome do projeto")
+            methodology = st.selectbox(
+                "Metodologia",
+                options=list(METHODOLOGY_VECTOR_STORES.keys()),
+                format_func=lambda x: x.upper()
+            )
+            project_vector_store_id = st.text_input("Vector Store ID do projeto")
+
+            submitted = st.form_submit_button("Salvar projeto")
+
+            if submitted:
+                if not project_name.strip():
+                    st.error("Informe o nome do projeto.")
+                elif not project_vector_store_id.strip():
+                    st.error("Informe o Vector Store ID do projeto.")
+                else:
+                    methodology_vector_store_id = METHODOLOGY_VECTOR_STORES[methodology]
+
+                    try:
+                        create_project(
+                            supabase=supabase,
+                            project_name=project_name,
+                            owner_email=user_email,
+                            methodology=methodology,
+                            project_vector_store_id=project_vector_store_id,
+                            methodology_vector_store_id=methodology_vector_store_id,
+                        )
+                        st.success("Projeto criado com sucesso.")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Erro ao criar projeto: {e}")
+
+    st.sidebar.markdown("### Meus projetos")
+
+    try:
+        projects = list_projects_by_owner(supabase, user_email)
+    except Exception as e:
+        st.sidebar.error(f"Erro ao carregar projetos: {e}")
+        return
+
+    if not projects:
+        st.sidebar.info("Nenhum projeto cadastrado ainda.")
+        return
+
+    for project in projects:
+        col1, col2 = st.sidebar.columns([3, 1])
+
+        with col1:
+            st.markdown(
+                f"**{project.get('project_name', 'Sem nome')}**  \n"
+                f"Metodologia: `{project.get('methodology', '-')}`"
+            )
+
+        with col2:
+            if st.button("Selecionar", key=f"select_project_{project['id']}"):
+                set_current_project(project)
+                st.rerun()
+
+    if st.session_state.get("current_project_name"):
+        st.sidebar.markdown("---")
+        st.sidebar.success(
+            f"Projeto ativo: **{st.session_state['current_project_name']}**"
+        )
 
 # =========================================================
 # HELPERS
@@ -1291,6 +1285,8 @@ def render_access_denied(lang: str, email: str):
 # AUTH GATE
 # =========================================================
 
+init_project_session()
+
 current_user = get_user_info()
 if AUTH_REQUIRED:
     current_user = render_login_gate(st.session_state["language"])
@@ -1314,6 +1310,14 @@ lang = st.session_state["language"]
 # =========================================================
 
 render_header(lang)
+
+if st.session_state.get("current_project_name"):
+    st.info(
+        f"Projeto ativo: {st.session_state['current_project_name']} | "
+        f"Metodologia: {st.session_state.get('current_methodology') or '-'}"
+    )
+else:
+    st.warning("Nenhum projeto selecionado.")
 
 # =========================================================
 # SIDEBAR
