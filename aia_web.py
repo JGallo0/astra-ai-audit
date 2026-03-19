@@ -1902,7 +1902,11 @@ def make_progress_callback(progress_container, status_container):
 # FULL AUDIT MODE
 # =========================================================
 
-    def render_full_audit_mode():
+# =========================================================
+# FULL AUDIT MODE
+# =========================================================
+
+def render_full_audit_mode():
     project_vs_id = st.session_state.get("current_project_vector_store_id")
     methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
 
@@ -1937,7 +1941,7 @@ def make_progress_callback(progress_container, status_container):
             t(lang, "show_trails"),
             value=False,
             key="show_trails_full_audit"
-        )
+        ))
 
     st.session_state["current_project_name"] = project_name
 
