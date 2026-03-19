@@ -271,7 +271,7 @@ DEFAULT_STATE = {
     "last_full_audit_summary": {},
     "last_full_audit_df": pd.DataFrame(),
     "last_full_audit_run_id": "",
-        "usage_counters": {},
+    "usage_counters": {},
     "current_project_id": None,
     "current_project_name": None,
     "current_methodology": None,
@@ -298,7 +298,8 @@ DEFAULT_STATE = {
 for key, value in DEFAULT_STATE.items():
     if key not in st.session_state:
         st.session_state[key] = value
-        
+
+
 def init_project_session():
     defaults = {
         "current_project_id": None,
@@ -308,9 +309,9 @@ def init_project_session():
         "current_methodology_vector_store_id": None,
     }
 
-   for key, value in defaults.items():
-    if key not in st.session_state:
-        st.session_state[key] = value
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
 
 
 def set_current_project(project: dict, user_email: str = ""):
@@ -404,7 +405,7 @@ def render_project_manager(user_email: str):
         st.sidebar.success(
             f"Projeto ativo: **{st.session_state['current_project_name']}**"
         )
-           
+
 # =========================================================
 # HELPERS
 # =========================================================
