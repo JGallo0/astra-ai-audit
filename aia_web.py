@@ -1403,6 +1403,7 @@ def render_chat_mode():
         return
 
     consume_usage(current_user["email"], "chat")
+
     st.session_state.messages.append({
         "role": "user",
         "content": sanitize_xml_text(user_input)
