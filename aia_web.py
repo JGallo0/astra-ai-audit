@@ -1878,6 +1878,137 @@ def render_chat_mode():
                 )
             except Exception:
                 pass
+
+# =========================================================
+# FULL AUDIT MODE HELPERS
+# =========================================================
+
+def get_engine_params_for_mode(execution_mode: str) -> Dict[str, int]:
+    if execution_mode == t(lang, "fast_mode"):
+        return {
+            "module_project_queries": 2,
+            "module_methodology_queries": 2,
+            "project_max_results_per_query": 3,
+            "methodology_max_results_per_query": 3,
+            "max_project_hits_in_prompt": 4,
+            "max_methodology_hits_in_prompt": 4,
+            "max_text_chars_per_hit": 900,
+        }
+
+    return {
+        "module_project_queries": 4,
+        "module_methodology_queries": 4,
+        "project_max_results_per_query": 5,
+        "methodology_max_results_per_query": 5,
+        "max_project_hits_in_prompt": 8,
+        "max_methodology_hits_in_prompt": 8,
+        "max_text_chars_per_hit": 1800,
+    }
+
+
+def estimate_audit_effort(
+    execution_mode: str,
+    selected_modules: List[str],
+    selected_requirements_count: int
+) -> Dict[str, Any]:
+    module_count = len(selected_modules)
+
+    if execution_mode == t(lang, "fast_mode"):
+        if module_count <= 2 and selected_requirements_count <= 10:
+            level = "baixo"
+        elif module_count <= 4 and selected_requirements_count <= 18:
+            level = "medio"
+        else:
+            level = "alto"
+    else:
+        if module_count <= 2 and selected_requirements_count <= 10:
+            level = "medio"
+        elif module_count <= 4 and selected_requirements_count <= 18:
+            level = "alto"
+        else:
+            level = "muito alto"
+
+    hard_stop = execution_mode == t(lang, "complete_mode") and (
+        module_count >= 5 or selected_requirements_count >= 20
+    )
+    needs_confirmation = level in {"alto", "muito alto"}
+
+    return {
+        "level": level,
+        "hard_stop": hard_stop,
+        "needs_confirmation": needs_confirmation,
+    }
+
+
+def render_progress_box():
+    state = st.session_state["progress_state"]
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric(t(lang, "progress"), f"{state.get('percent', 0)}%")
+    col2.metric(t(lang, "current_module"), safe_str(state.get("module", "")) or "-")
+    col3.metric(t(lang, "current_step"), safe_str(state.get("stage", "")) or "-")
+    col4.metric(
+        t(lang, "cost_estimate"),
+        f"US$ {float(state.get('execution_estimated_cost', 0.0)):.3f}"
+    )
+    st.progress(int(state.get("percent", 0)))
+    if state.get("message"):
+        st.caption(state["message"])
+
+
+def append_history_entry(
+    run_id: str,
+    project_name: str,
+    execution_mode: str,
+    selected_modules: List[str],
+    summary: Dict[str, Any],
+    estimated_cost: float,
+):
+    st.session_state["audit_history"].insert(
+        0,
+        {
+            "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+            "run_id": run_id,
+            "project_name": project_name,
+            "execution_mode": execution_mode,
+            "modules": selected_modules,
+            "module_count": len(selected_modules),
+            "overall_score": summary.get("overall_score", 0),
+            "overall_confidence": summary.get("overall_confidence", 0),
+            "estimated_cost": estimated_cost,
+            "status_counts": summary.get("status_counts", {}),
+        }
+    )
+
+
+def apply_matrix_filters(
+    df: pd.DataFrame,
+    module_filter: List[str],
+    status_filter: List[str],
+    risk_filter: List[str]
+) -> pd.DataFrame:
+    out = df.copy()
+
+    if not out.empty:
+        if module_filter:
+            out = out[out["module"].isin(module_filter)]
+        if status_filter:
+            out = out[out["status"].isin(status_filter)]
+        if risk_filter:
+            out = out[out["risk"].isin(risk_filter)]
+
+    return out
+
+
+def make_progress_callback(progress_container, status_container):
+    def _callback(payload: Dict[str, Any]):
+        st.session_state["progress_state"] = payload
+        with progress_container:
+            render_progress_box()
+        with status_container:
+            pass
+
+    return _callback
+    
 # =========================================================
 # FULL AUDIT MODE
 # =========================================================
