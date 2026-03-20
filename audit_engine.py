@@ -427,48 +427,48 @@ def rerun_failed_items(
             "module_confidence": module_confidence,
         }
 
-def estimate_run_cost(
-    self,
-    selected_modules: Optional[List[str]] = None,
-    execution_mode: str = "Rápido",
-) -> Dict[str, Any]:
-    if not self.requirements:
+    def estimate_run_cost(
+        self,
+        selected_modules: Optional[List[str]] = None,
+        execution_mode: str = "Rápido",
+    ) -> Dict[str, Any]:
+        if not self.requirements:
+            return {
+                "module_count": 0,
+                "requirement_count": 0,
+                "estimated_min_cost": 0.0,
+                "estimated_max_cost": 0.0,
+                "estimated_cost": 0.0,
+            }
+
+        requirements = [
+            r for r in self.requirements
+            if not selected_modules or r.get("module") in selected_modules
+        ]
+        grouped = self._group_requirements_by_module(requirements)
+        module_count = len(grouped)
+        requirement_count = len(requirements)
+
+        if execution_mode.lower().startswith("ráp"):
+            base_per_module = 0.035
+            min_factor = 0.8
+            max_factor = 1.15
+        else:
+            base_per_module = 0.085
+            min_factor = 0.9
+            max_factor = 1.35
+
+        min_cost = round(module_count * base_per_module * min_factor, 4)
+        max_cost = round(module_count * base_per_module * max_factor, 4)
+        est_cost = round((min_cost + max_cost) / 2, 4)
+
         return {
-            "module_count": 0,
-            "requirement_count": 0,
-            "estimated_min_cost": 0.0,
-            "estimated_max_cost": 0.0,
-            "estimated_cost": 0.0,
+            "module_count": module_count,
+            "requirement_count": requirement_count,
+            "estimated_min_cost": min_cost,
+            "estimated_max_cost": max_cost,
+            "estimated_cost": est_cost,
         }
-
-    requirements = [
-        r for r in self.requirements
-        if not selected_modules or r.get("module") in selected_modules
-    ]
-    grouped = self._group_requirements_by_module(requirements)
-    module_count = len(grouped)
-    requirement_count = len(requirements)
-
-    if execution_mode.lower().startswith("ráp"):
-        base_per_module = 0.035
-        min_factor = 0.8
-        max_factor = 1.15
-    else:
-        base_per_module = 0.085
-        min_factor = 0.9
-        max_factor = 1.35
-
-    min_cost = round(module_count * base_per_module * min_factor, 4)
-    max_cost = round(module_count * base_per_module * max_factor, 4)
-    est_cost = round((min_cost + max_cost) / 2, 4)
-
-    return {
-        "module_count": module_count,
-        "requirement_count": requirement_count,
-        "estimated_min_cost": min_cost,
-        "estimated_max_cost": max_cost,
-        "estimated_cost": est_cost,
-    }
     # =========================================================
     # MODULE AUDIT
     # =========================================================
