@@ -87,6 +87,3 @@ def build_smart_context(query: str, ranked_sources: List[Dict], max_items: int =
         + "Se houver evidência insuficiente, diga isso explicitamente.\n\n"
         + "\n".join(blocks)
     )
-
-{chr(10).join(blocks)}
-"""
