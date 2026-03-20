@@ -2503,7 +2503,6 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
     results=st.session_state["last_full_audit_results"],
     trails=st.session_state["last_full_audit_trails"],
 )
-        )
         eligibility_docx = docx_from_text("Dossiê de Elegibilidade Metodológica", eligibility_dossier_text)
         eligibility_pdf = pdf_from_text("Dossiê de Elegibilidade Metodológica", eligibility_dossier_text)
 
