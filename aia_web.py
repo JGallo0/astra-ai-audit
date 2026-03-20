@@ -1402,33 +1402,55 @@ def build_combined_context_prompt(
     project_block = []
     for i, src in enumerate(project_sources, start=1):
         project_block.append(
-            f"[PROJETO {i}] Documento: {safe_str(src['filename'])} | Página/Seção: {safe_str(src.get('page') or 'não identificada')}\nTrecho:\n{sanitize_xml_text(src.get('text') or '')}\n"
+            "[PROJETO "
+            + str(i)
+            + "] Documento: "
+            + safe_str(src.get("filename"))
+            + " | Página/Seção: "
+            + safe_str(src.get("page") or "não identificada")
+            + "\nTrecho:\n"
+            + sanitize_xml_text(src.get("text") or "")
+            + "\n"
         )
 
     methodology_block = []
     for i, src in enumerate(methodology_sources, start=1):
         methodology_block.append(
-            f"[METODOLOGIA {i}] Documento: {safe_str(src['filename'])} | Página/Seção: {safe_str(src.get('page') or 'não identificada')}\nTrecho:\n{sanitize_xml_text(src.get('text') or '')}\n"
+            "[METODOLOGIA "
+            + str(i)
+            + "] Documento: "
+            + safe_str(src.get("filename"))
+            + " | Página/Seção: "
+            + safe_str(src.get("page") or "não identificada")
+            + "\nTrecho:\n"
+            + sanitize_xml_text(src.get("text") or "")
+            + "\n"
         )
 
-    return sanitize_xml_text(f"""
-Pergunta do usuário:
-{safe_str(user_question)}
+    project_text = "\n".join(project_block) if project_block else "Nenhum trecho de projeto recuperado."
+    methodology_text = "\n".join(methodology_block) if methodology_block else "Nenhum trecho metodológico recuperado."
 
-Responda à pergunta usando EXCLUSIVAMENTE os trechos abaixo.
-Compare explicitamente Projeto × Metodologia quando aplicável.
-Não use conhecimento externo.
+    prompt = (
+        "Pergunta do usuário:\n"
+        + safe_str(user_question)
+        + "\n\n"
+        + "Responda à pergunta usando EXCLUSIVAMENTE os trechos abaixo.\n"
+        + "Compare explicitamente Projeto × Metodologia quando aplicável.\n"
+        + "Não use conhecimento externo.\n\n"
+        + "======================\n"
+        + "TRECHOS DO PROJETO\n"
+        + "======================\n"
+        + project_text
+        + "\n\n"
+        + "======================\n"
+        + "TRECHOS DA METODOLOGIA\n"
+        + "======================\n"
+        + methodology_text
+    )
 
-======================
-TRECHOS DO PROJETO
-======================
-{chr(10).join(project_block) if project_block else "Nenhum trecho de projeto recuperado."}
+    return sanitize_xml_text(prompt)
 
-======================
-TRECHOS DA METODOLOGIA
-======================
-chr(10).join(methodology_block) if methodology_block else "Nenhum trecho metodológico recuperado."
-    
+
 def render_chat_mode():
     project_vs_id = st.session_state.get("current_project_vector_store_id")
     methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
@@ -1437,7 +1459,6 @@ def render_chat_mode():
         st.error("Selecione um projeto antes de usar o chat ou a auditoria.")
         st.stop()
 
-    project_name = st.session_state.get("current_project_name", "")
     show_sources = st.session_state.get("show_sources", True)
     show_attributes = st.session_state.get("show_attributes", False)
     show_snippets = st.session_state.get("show_snippets", True)
@@ -1451,250 +1472,123 @@ def render_chat_mode():
     if user_input:
         if not can_consume(current_user["email"], current_role, "chat"):
             st.error("Limite do chat atingido.")
-        else:
-            consume_usage(current_user["email"], "chat")
+            return
 
-            st.session_state.messages.append({
-                "role": "user",
-                "content": sanitize_xml_text(user_input),
-            })
+        consume_usage(current_user["email"], "chat")
 
-            project_id = st.session_state.get("current_project_id")
-            if project_id:
+        st.session_state.messages.append({
+            "role": "user",
+            "content": sanitize_xml_text(user_input),
+        })
+
+        project_id = st.session_state.get("current_project_id")
+        if project_id:
+            try:
+                save_chat_message(
+                    project_id=project_id,
+                    user_email=current_user["email"],
+                    role="user",
+                    message=sanitize_xml_text(user_input),
+                )
+            except Exception:
+                pass
+
+        with st.chat_message("user"):
+            st.markdown(user_input)
+
+        final_answer = ""
+        project_sources = []
+        methodology_sources = []
+        all_sources = []
+
+        with st.chat_message("assistant"):
+            with st.spinner("Buscando evidências..."):
                 try:
-                    save_chat_message(
-                        project_id=project_id,
-                        user_email=current_user["email"],
-                        role="user",
-                        message=sanitize_xml_text(user_input),
+                    project_search_response = call_file_search_for_store(
+                        messages=st.session_state.messages,
+                        vector_store_id=project_vs_id,
+                        max_results=PROJECT_MAX_RESULTS,
+                        extra_system_prompt="Recupere evidências da documentação do projeto relevantes para a pergunta."
                     )
-                except Exception:
-                    pass
+                    project_sources = extract_file_search_results(project_search_response, "Projeto")
 
-            with st.chat_message("user"):
-                st.markdown(user_input)
-
-            final_answer = ""
-
-with st.chat_message("assistant"):
-    with st.spinner("Buscando evidências..."):
-        try:
-            project_search_response = call_file_search_for_store(
-                messages=st.session_state.messages,
-                vector_store_id=project_vs_id,
-                max_results=PROJECT_MAX_RESULTS,
-                extra_system_prompt="Recupere evidências da documentação do projeto relevantes para a pergunta."
-            )
-
-            project_sources = extract_file_search_results(
-                project_search_response,
-                "Projeto"
-            )
-
-            methodology_search_response = call_file_search_for_store(
-                messages=st.session_state.messages,
-                vector_store_id=methodology_vs_id,
-                max_results=METHODOLOGY_MAX_RESULTS,
-                extra_system_prompt="Recupere requisitos e critérios metodológicos relevantes para a pergunta."
-            )
-
-            methodology_sources = extract_file_search_results(
-                methodology_search_response,
-                "Metodologia"
-            )
-
-            project_sources_rankable = normalize_sources(project_sources, "project")
-            methodology_sources_rankable = normalize_sources(methodology_sources, "methodology")
-
-            ranked_sources = rank_sources(
-                user_input,
-                project_sources_rankable + methodology_sources_rankable,
-            )
-
-            combined_prompt = build_smart_context(
-                user_input,
-                ranked_sources,
-                max_items=8,
-            )
-
-            answer_response = call_reasoning_over_context(
-                user_content=combined_prompt
-            )
-            answer_text = get_response_text(answer_response).strip()
-
-            if not answer_text:
-                answer_text = "A base de conhecimento não contém informação suficiente para responder com segurança."
-
-            st.markdown(answer_text)
-
-        except Exception as e:
-            answer_text = f"Erro ao consultar a AuditorIA: {str(e)}"
-            st.error(answer_text)
-
-answer_response = call_reasoning_over_context(user_content=combined_prompt)
-answer_text = get_response_text(answer_response).strip()
-
-                        
-                        if not answer_text:
-                            answer_text = "A base de conhecimento não contém informação suficiente para responder com segurança."
-
-                        st.markdown(answer_text)
-
-                        if show_sources:
-                            render_sources_block("Fontes do Projeto", project_sources, show_attributes, show_snippets)
-                            render_sources_block("Fontes da Metodologia", methodology_sources, show_attributes, show_snippets)
-
-                        st.session_state.last_answer_text = sanitize_xml_text(answer_text)
-                        st.session_state.last_sources_project = project_sources
-                        st.session_state.last_sources_methodology = methodology_sources
-                        st.session_state.last_sources_all = all_sources
-                        final_answer = answer_text
-
-                    except Exception as e:
-                        final_answer = f"Erro ao consultar a AuditorIA: {str(e)}"
-                        st.error(final_answer)
-
-            if project_id:
-                try:
-                    save_audit_output(
-                        project_id=project_id,
-                        user_email=current_user["email"],
-                        output_type="chat_answer",
-                        title="Resposta do chat técnico",
-                        question=user_input,
-                        answer=final_answer,
-                        content=final_answer,
+                    methodology_search_response = call_file_search_for_store(
+                        messages=st.session_state.messages,
+                        vector_store_id=methodology_vs_id,
+                        max_results=METHODOLOGY_MAX_RESULTS,
+                        extra_system_prompt="Recupere requisitos e critérios metodológicos relevantes para a pergunta."
                     )
-                except Exception:
-                    pass
+                    methodology_sources = extract_file_search_results(methodology_search_response, "Metodologia")
 
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": sanitize_xml_text(final_answer),
-            })
+                    project_sources_rankable = normalize_sources(project_sources, "project")
+                    methodology_sources_rankable = normalize_sources(methodology_sources, "methodology")
 
-            if project_id:
-                try:
-                    save_chat_message(
-                        project_id=project_id,
-                        user_email=current_user["email"],
-                        role="assistant",
-                        message=sanitize_xml_text(final_answer),
+                    ranked_sources = rank_sources(
+                        user_input,
+                        project_sources_rankable + methodology_sources_rankable,
                     )
-                except Exception:
-                    pass
-# =========================================================
-# FULL AUDIT MODE HELPERS
-# =========================================================
 
-def get_engine_params_for_mode(execution_mode: str) -> Dict[str, int]:
-    if execution_mode == t(lang, "fast_mode"):
-        return {
-            "module_project_queries": 2,
-            "module_methodology_queries": 2,
-            "project_max_results_per_query": 3,
-            "methodology_max_results_per_query": 3,
-            "max_project_hits_in_prompt": 4,
-            "max_methodology_hits_in_prompt": 4,
-            "max_text_chars_per_hit": 900,
-        }
-    return {
-        "module_project_queries": 4,
-        "module_methodology_queries": 4,
-        "project_max_results_per_query": 5,
-        "methodology_max_results_per_query": 5,
-        "max_project_hits_in_prompt": 8,
-        "max_methodology_hits_in_prompt": 8,
-        "max_text_chars_per_hit": 1800,
-    }
+                    combined_prompt = build_smart_context(
+                        user_input,
+                        ranked_sources,
+                        max_items=8,
+                    )
 
+                    answer_response = call_reasoning_over_context(
+                        user_content=combined_prompt
+                    )
+                    answer_text = get_response_text(answer_response).strip()
 
-def estimate_audit_effort(execution_mode: str, selected_modules: List[str], selected_requirements_count: int) -> Dict[str, Any]:
-    module_count = len(selected_modules)
+                    if not answer_text:
+                        answer_text = "A base de conhecimento não contém informação suficiente para responder com segurança."
 
-    if execution_mode == t(lang, "fast_mode"):
-        if module_count <= 2 and selected_requirements_count <= 10:
-            level = "baixo"
-        elif module_count <= 4 and selected_requirements_count <= 18:
-            level = "medio"
-        else:
-            level = "alto"
-    else:
-        if module_count <= 2 and selected_requirements_count <= 10:
-            level = "medio"
-        elif module_count <= 4 and selected_requirements_count <= 18:
-            level = "alto"
-        else:
-            level = "muito alto"
+                    st.markdown(answer_text)
 
-    hard_stop = execution_mode == t(lang, "complete_mode") and (module_count >= 5 or selected_requirements_count >= 20)
-    needs_confirmation = level in {"alto", "muito alto"}
+                    all_sources = deduplicate_sources(project_sources + methodology_sources)
 
-    return {
-        "level": level,
-        "hard_stop": hard_stop,
-        "needs_confirmation": needs_confirmation,
-    }
+                    if show_sources:
+                        render_sources_block("Fontes do Projeto", project_sources, show_attributes, show_snippets)
+                        render_sources_block("Fontes da Metodologia", methodology_sources, show_attributes, show_snippets)
 
+                    st.session_state["last_answer_text"] = sanitize_xml_text(answer_text)
+                    st.session_state["last_sources_project"] = project_sources
+                    st.session_state["last_sources_methodology"] = methodology_sources
+                    st.session_state["last_sources_all"] = all_sources
+                    final_answer = answer_text
 
-def render_progress_box():
-    state = st.session_state["progress_state"]
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric(t(lang, "progress"), f"{state.get('percent', 0)}%")
-    col2.metric(t(lang, "current_module"), safe_str(state.get("module", "")) or "-")
-    col3.metric(t(lang, "current_step"), safe_str(state.get("stage", "")) or "-")
-    col4.metric(t(lang, "cost_estimate"), f"US$ {float(state.get('execution_estimated_cost', 0.0)):.3f}")
-    st.progress(int(state.get("percent", 0)))
-    if state.get("message"):
-        st.caption(state["message"])
+                except Exception as e:
+                    final_answer = f"Erro ao consultar a AuditorIA: {str(e)}"
+                    st.error(final_answer)
 
+        if project_id:
+            try:
+                save_audit_output(
+                    project_id=project_id,
+                    user_email=current_user["email"],
+                    output_type="chat_answer",
+                    title="Resposta do chat técnico",
+                    question=user_input,
+                    answer=final_answer,
+                    content=final_answer,
+                )
+            except Exception:
+                pass
 
-def append_history_entry(
-    run_id: str,
-    project_name: str,
-    execution_mode: str,
-    selected_modules: List[str],
-    summary: Dict[str, Any],
-    estimated_cost: float,
-):
-    st.session_state["audit_history"].insert(
-        0,
-        {
-            "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-            "run_id": run_id,
-            "project_name": project_name,
-            "execution_mode": execution_mode,
-            "modules": selected_modules,
-            "module_count": len(selected_modules),
-            "overall_score": summary.get("overall_score", 0),
-            "overall_confidence": summary.get("overall_confidence", 0),
-            "estimated_cost": estimated_cost,
-            "status_counts": summary.get("status_counts", {}),
-        }
-    )
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": sanitize_xml_text(final_answer),
+        })
 
-
-def apply_matrix_filters(df: pd.DataFrame, module_filter: List[str], status_filter: List[str], risk_filter: List[str]) -> pd.DataFrame:
-    out = df.copy()
-    if not out.empty:
-        if module_filter:
-            out = out[out["module"].isin(module_filter)]
-        if status_filter:
-            out = out[out["status"].isin(status_filter)]
-        if risk_filter:
-            out = out[out["risk"].isin(risk_filter)]
-    return out
-
-
-def make_progress_callback(progress_container, status_container):
-    def _callback(payload: Dict[str, Any]):
-        st.session_state["progress_state"] = payload
-        with progress_container:
-            render_progress_box()
-        with status_container:
-            pass
-    return _callback
-
+        if project_id:
+            try:
+                save_chat_message(
+                    project_id=project_id,
+                    user_email=current_user["email"],
+                    role="assistant",
+                    message=sanitize_xml_text(final_answer),
+                )
+            except Exception:
+                pass
 # =========================================================
 # FULL AUDIT MODE
 # =========================================================
