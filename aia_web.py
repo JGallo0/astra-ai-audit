@@ -2073,7 +2073,6 @@ def append_history_entry(
         }
     )
 
-
 def apply_matrix_filters(
     df: pd.DataFrame,
     module_filter: List[str],
