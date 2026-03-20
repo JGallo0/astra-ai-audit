@@ -1410,9 +1410,7 @@ def call_file_search_for_store(
     max_results: int,
     extra_system_prompt: Optional[str] = None,
 ):
-    system_text = BASE_SYSTEM_PROMPT + "
-
-" + CHAT_SYSTEM_PROMPT
+    system_text = BASE_SYSTEM_PROMPT + "\n\n" + CHAT_SYSTEM_PROMPT
     if extra_system_prompt:
         system_text += "\n\n" + extra_system_prompt
 
