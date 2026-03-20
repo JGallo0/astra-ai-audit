@@ -1640,6 +1640,100 @@ with st.sidebar:
         for key, value in DEFAULT_STATE.items():
             st.session_state[key] = value
         st.rerun()
+
+# =========================================================
+# FILE SEARCH RESULT HELPERS
+# =========================================================
+
+def extract_file_search_results(response, source_label: str = "") -> List[Dict[str, Any]]:
+    results = []
+
+    if response is None:
+        return results
+
+    output = getattr(response, "output", None) or []
+
+    for item in output:
+        if getattr(item, "type", None) != "file_search_call":
+            continue
+
+        search_results = getattr(item, "results", None) or []
+
+        for r in search_results:
+            filename = getattr(r, "filename", None) or "Documento sem nome"
+            score = getattr(r, "score", None) or 0.0
+
+            text = ""
+            page = None
+
+            content = getattr(r, "content", None) or []
+            if content:
+                text_parts = []
+                for c in content:
+                    c_text = getattr(c, "text", None)
+                    if c_text:
+                        text_parts.append(str(c_text))
+
+                    c_page = getattr(c, "page", None)
+                    if c_page is not None and page is None:
+                        page = c_page
+
+                text = "\n".join(text_parts).strip()
+
+            if not text:
+                text = getattr(r, "text", None) or ""
+
+            results.append({
+                "source_label": source_label,
+                "filename": filename,
+                "page": page,
+                "text": text,
+                "score": score,
+            })
+
+    return results
+
+
+def deduplicate_sources(sources: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    deduped = []
+    seen = set()
+
+    for s in sources:
+        key = (
+            str(s.get("filename") or "").strip().lower(),
+            str(s.get("page") or "").strip().lower(),
+            str(s.get("text") or "").strip().lower(),
+        )
+
+        if key in seen:
+            continue
+
+        seen.add(key)
+        deduped.append(s)
+
+    return deduped
+
+
+def get_response_text(response) -> str:
+    if response is None:
+        return ""
+
+    text = getattr(response, "output_text", None)
+    if text:
+        return str(text)
+
+    output = getattr(response, "output", None) or []
+
+    collected = []
+
+    for item in output:
+        content = getattr(item, "content", None) or []
+        for c in content:
+            c_text = getattr(c, "text", None)
+            if c_text:
+                collected.append(str(c_text))
+
+    return "\n".join(collected).strip()
 # =========================================================
 # CHAT MODE
 # =========================================================
