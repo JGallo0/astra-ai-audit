@@ -1315,8 +1315,6 @@ def set_current_project(project: dict, user_email: str = "", methodology_key: st
             st.session_state["messages"] = []
     else:
         st.session_state["messages"] = []
-    else:
-        st.session_state["messages"] = []
 
 def ensure_default_example_project(user_email: str):
     project_vs_id = get_config_value("VECTOR_STORE_ID_NOVA_ESPERANCA")
