@@ -1463,7 +1463,6 @@ def render_project_manager(user_email: str):
     if not projects:
         st.sidebar.info("Nenhum projeto disponível ainda.")
         return
-    }
 
     methodology_options = list_methodology_keys()
 
