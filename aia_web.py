@@ -1278,83 +1278,82 @@ def render_project_manager(user_email: str):
     st.sidebar.markdown("### Projetos")
 
     with st.sidebar.expander("➕ Criar projeto", expanded=False):
-with st.form("create_project_form", clear_on_submit=True):
+        with st.form("create_project_form", clear_on_submit=True):
 
-    project_name = st.text_input("Nome do projeto")
+            project_name = st.text_input("Nome do projeto")
 
-    methodology = st.selectbox(
-        "Metodologia",
-        options=list(METHODOLOGY_VECTOR_STORES.keys()),
-        format_func=lambda x: x.upper()
-    )
-
-    st.markdown("**Documentos do projeto**")
-    uploaded_files = st.file_uploader(
-        "Envie os arquivos do projeto",
-        accept_multiple_files=True,
-        type=["pdf", "docx", "doc", "xlsx", "xls", "csv", "txt", "md", "json"],
-    )
-
-    # fallback técnico (admin)
-    project_vector_store_id_manual = ""
-
-    if current_role == "admin":
-        st.markdown("**Fallback técnico (admin)**")
-        project_vector_store_id_manual = st.text_input(
-            "Vector Store ID do projeto (opcional)"
-        )
-
-    submitted = st.form_submit_button("Salvar projeto")
-
-    if submitted:
-
-        if not project_name.strip():
-            st.error("Informe o nome do projeto.")
-            st.stop()
-
-        methodology_vector_store_id = METHODOLOGY_VECTOR_STORES.get(methodology)
-
-        if not methodology_vector_store_id:
-            st.error("Metodologia sem vector store configurado.")
-            st.stop()
-
-        try:
-            project_vector_store_id = None
-
-            if uploaded_files and len(uploaded_files) > 0:
-                with st.spinner("Criando vector store e indexando arquivos..."):
-                    project_vector_store_id = create_project_vector_store_from_uploads(
-                        project_name=project_name,
-                        uploaded_files=uploaded_files,
-                    )
-
-            elif project_vector_store_id_manual.strip():
-                project_vector_store_id = project_vector_store_id_manual.strip()
-
-            else:
-                if current_role == "admin":
-                    st.error(
-                        "Envie pelo menos um arquivo do projeto ou informe manualmente o Vector Store ID."
-                    )
-                else:
-                    st.error(
-                        "Envie pelo menos um arquivo do projeto para criar o projeto."
-                    )
-                st.stop()
-
-            create_project_record(
-                project_name=project_name,
-                owner_email=user_email,
-                methodology=methodology,
-                project_vector_store_id=project_vector_store_id,
-                methodology_vector_store_id=methodology_vector_store_id,
+            methodology = st.selectbox(
+                "Metodologia",
+                options=list(METHODOLOGY_VECTOR_STORES.keys()),
+                format_func=lambda x: x.upper()
             )
 
-            st.success("Projeto criado com sucesso.")
-            st.rerun()
+            st.markdown("**Documentos do projeto**")
+            uploaded_files = st.file_uploader(
+                "Envie os arquivos do projeto",
+                accept_multiple_files=True,
+                type=["pdf", "docx", "doc", "xlsx", "xls", "csv", "txt", "md", "json"],
+            )
 
-        except Exception as e:
-            st.error(f"Erro ao criar projeto: {e}")
+            project_vector_store_id_manual = ""
+
+            if current_role == "admin":
+                st.markdown("**Fallback técnico (admin)**")
+                project_vector_store_id_manual = st.text_input(
+                    "Vector Store ID do projeto (opcional)"
+                )
+
+            submitted = st.form_submit_button("Salvar projeto")
+
+            if submitted:
+
+                if not project_name.strip():
+                    st.error("Informe o nome do projeto.")
+                    st.stop()
+
+                methodology_vector_store_id = METHODOLOGY_VECTOR_STORES.get(methodology)
+
+                if not methodology_vector_store_id:
+                    st.error("Metodologia sem vector store configurado.")
+                    st.stop()
+
+                try:
+                    project_vector_store_id = None
+
+                    if uploaded_files and len(uploaded_files) > 0:
+                        with st.spinner("Criando vector store e indexando arquivos..."):
+                            project_vector_store_id = create_project_vector_store_from_uploads(
+                                project_name=project_name,
+                                uploaded_files=uploaded_files,
+                            )
+
+                    elif project_vector_store_id_manual.strip():
+                        project_vector_store_id = project_vector_store_id_manual.strip()
+
+                    else:
+                        if current_role == "admin":
+                            st.error(
+                                "Envie pelo menos um arquivo do projeto ou informe manualmente o Vector Store ID."
+                            )
+                        else:
+                            st.error(
+                                "Envie pelo menos um arquivo do projeto para criar o projeto."
+                            )
+                        st.stop()
+
+                    create_project_record(
+                        project_name=project_name,
+                        owner_email=user_email,
+                        methodology=methodology,
+                        project_vector_store_id=project_vector_store_id,
+                        methodology_vector_store_id=methodology_vector_store_id,
+                    )
+
+                    st.success("Projeto criado com sucesso.")
+                    st.rerun()
+
+                except Exception as e:
+                    st.error(f"Erro ao criar projeto: {e}")
 
     st.sidebar.markdown("#### Meus projetos")
 
