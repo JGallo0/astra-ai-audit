@@ -1366,7 +1366,6 @@ def ensure_default_example_project(user_email: str):
 
 
 def render_project_manager(user_email: str):
-    def render_project_manager(user_email: str):
     st.sidebar.markdown("### Projetos")
     ensure_default_example_project(user_email)
 
