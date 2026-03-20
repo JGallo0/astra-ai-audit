@@ -2492,17 +2492,17 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
                     st.markdown("**Notas**")
                     st.write(safe_str(row.get("notes", "")))
 
-    with tab_downloads:
+        with tab_downloads:
         full_audit_text = build_full_audit_text(summary, st.session_state["last_full_audit_results"])
         full_audit_docx = docx_from_text("Auditoria Resumida Isometric", full_audit_text)
         full_audit_pdf = pdf_from_text("Auditoria Resumida Isometric", full_audit_text)
 
         eligibility_dossier_text = build_full_eligibility_dossier_text(
-    project_name=st.session_state.get("current_project_name") or "Projeto sem nome",
-    summary=summary,
-    results=st.session_state["last_full_audit_results"],
-    trails=st.session_state["last_full_audit_trails"],
-)
+            project_name=project_name,
+            summary=summary,
+            results=st.session_state["last_full_audit_results"],
+            trails=st.session_state["last_full_audit_trails"],
+        )
         eligibility_docx = docx_from_text("Dossiê de Elegibilidade Metodológica", eligibility_dossier_text)
         eligibility_pdf = pdf_from_text("Dossiê de Elegibilidade Metodológica", eligibility_dossier_text)
 
