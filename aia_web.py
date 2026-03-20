@@ -2114,9 +2114,6 @@ def render_full_audit_mode():
         st.error("Selecione um projeto antes de usar o chat ou a auditoria.")
         st.stop()
 
-    if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not st.session_state["last_full_audit_df"].empty:
-    st.markdown("Resultado já disponível")
-
     st.markdown(f"### {t(lang, 'full_audit_mode')}")
 
     all_modules = sorted(list({r["module"] for r in ISOMETRIC_REQUIREMENTS}))
