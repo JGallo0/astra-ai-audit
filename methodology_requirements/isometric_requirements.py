@@ -1,0 +1,1 @@
+from isometric_requirements import ISOMETRIC_REQUIREMENTS
