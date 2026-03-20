@@ -1380,7 +1380,7 @@ def render_project_manager(user_email: str):
             project_name = st.text_input("Nome do projeto")
 
             methodology = st.selectbox(
-                "Metodologia",
+                "Metodologia inicial",
                 options=list_methodology_keys(),
                 format_func=lambda x: METHODOLOGY_REGISTRY[x]["label"]
             )
@@ -1422,10 +1422,8 @@ def render_project_manager(user_email: str):
                                 project_name=project_name,
                                 uploaded_files=uploaded_files,
                             )
-
                     elif project_vector_store_id_manual.strip():
                         project_vector_store_id = project_vector_store_id_manual.strip()
-
                     else:
                         if current_role == "admin":
                             st.error(
@@ -1456,35 +1454,72 @@ def render_project_manager(user_email: str):
     try:
         projects = [
             p for p in list_projects_by_owner(user_email)
-            if p.get("project_vector_store_id") and p.get("methodology_vector_store_id")
+            if p.get("project_vector_store_id")
         ]
     except Exception as e:
         st.sidebar.error(f"Erro ao carregar projetos: {e}")
         return
 
     if not projects:
-        st.sidebar.info("Nenhum projeto completo cadastrado ainda.")
+        st.sidebar.info("Nenhum projeto disponível ainda.")
         return
 
     project_options = {
-        f"{p['project_name']} | {str(p.get('methodology') or '-').upper()}": p
+        f"{p['project_name']}": p
         for p in projects
     }
 
-    selected_label = st.sidebar.selectbox(
+    methodology_options = list_methodology_keys()
+
+    default_project_label = None
+    current_project_name = st.session_state.get("current_project_name")
+    if current_project_name:
+        for label, proj in project_options.items():
+            if proj.get("project_name") == current_project_name:
+                default_project_label = label
+                break
+
+    if default_project_label and default_project_label in list(project_options.keys()):
+        default_project_index = list(project_options.keys()).index(default_project_label)
+    else:
+        default_project_index = 0
+
+    current_methodology = (st.session_state.get("current_methodology") or "").strip().lower()
+    if current_methodology in methodology_options:
+        default_methodology_index = methodology_options.index(current_methodology)
+    else:
+        default_methodology_index = 0
+
+    selected_project_label = st.sidebar.selectbox(
         "Selecionar projeto",
         options=list(project_options.keys()),
+        index=default_project_index,
         key="project_selector"
     )
 
-    if st.sidebar.button("Ativar projeto", key="activate_project_button"):
-        set_current_project(project_options[selected_label], user_email)
+    selected_methodology = st.sidebar.selectbox(
+        "Selecionar metodologia",
+        options=methodology_options,
+        index=default_methodology_index,
+        format_func=lambda x: METHODOLOGY_REGISTRY[x]["label"],
+        key="methodology_selector"
+    )
+
+    if st.sidebar.button("Ativar análise", key="activate_project_button"):
+        set_current_project(
+            project_options[selected_project_label],
+            user_email,
+            methodology_key=selected_methodology,
+        )
         st.rerun()
 
-    if st.session_state.get("current_project_name"):
+    if st.session_state.get("current_project_name") or st.session_state.get("current_methodology"):
         st.sidebar.markdown("---")
         st.sidebar.success(
-            f"Projeto ativo: **{st.session_state['current_project_name']}**"
+            f"Projeto ativo: **{st.session_state.get('current_project_name') or '-'}**"
+        )
+        st.sidebar.info(
+            f"Metodologia ativa: **{METHODOLOGY_REGISTRY.get(st.session_state.get('current_methodology', ''), {}).get('label', '-')}**"
         )
 # =========================================================
 # AUTH GATE
@@ -1545,14 +1580,18 @@ st.session_state["language"] = lang
 
 render_header(lang)
 
+active_methodology_label = METHODOLOGY_REGISTRY.get(
+    st.session_state.get("current_methodology", ""),
+    {}
+).get("label", "-")
+
 if st.session_state.get("current_project_name"):
     st.info(
-        f"Projeto ativo: {st.session_state['current_project_name']} | "
-        f"Metodologia: {st.session_state.get('current_methodology') or '-'}"
+        f"Projeto ativo: {st.session_state.get('current_project_name')} | "
+        f"Metodologia: {active_methodology_label}"
     )
 else:
     st.warning("Nenhum projeto selecionado.")
-
 # =========================================================
 # SIDEBAR
 # =========================================================
