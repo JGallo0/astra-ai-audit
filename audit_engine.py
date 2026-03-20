@@ -151,6 +151,7 @@ class AuditEngine:
         max_methodology_hits_in_prompt: int = 4,
         max_text_chars_per_hit: int = 900,
         progress_callback=None,
+        max_retries: int = 2,
     ):
         self.client = OpenAI(api_key=api_key)
         self.model = model
@@ -168,9 +169,7 @@ class AuditEngine:
         self.max_project_hits_in_prompt = max_project_hits_in_prompt
         self.max_methodology_hits_in_prompt = max_methodology_hits_in_prompt
         self.max_text_chars_per_hit = max_text_chars_per_hit
-        self.low_confidence_threshold = low_confidence_threshold
         self.progress_callback = progress_callback
-
         self.session_cost_estimate = 0.0
         self.last_execution_cost_estimate = 0.0
         self.last_run_stats: Dict[str, Any] = {}
@@ -301,8 +300,8 @@ def rerun_failed_items(
 
     requirements_to_retry = []
     for req in self.requirements:
-            if selected_modules and req.get("module") not in selected_modules:
-                continue
+        if selected_modules and req.get("module") not in selected_modules:
+            continue
 
             rid = safe_str(req.get("id", ""))
             prev = previous_by_id.get(rid)
