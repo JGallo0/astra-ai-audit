@@ -1,6 +1,7 @@
 import io
 import json
 import os
+import time
 import unicodedata
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -169,6 +170,77 @@ METHODOLOGY_MAX_RESULTS = get_int_config("METHODOLOGY_MAX_RESULTS", 5)
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
+# =========================================================
+# OPENAI VECTOR STORE HELPERS
+# =========================================================
+
+def wait_for_vector_store_file(
+    vector_store_id: str,
+    vector_store_file_id: str,
+    timeout_seconds: int = 180,
+    poll_interval_seconds: int = 2,
+):
+    start = time.time()
+
+    while time.time() - start < timeout_seconds:
+        vs_file = client.vector_stores.files.retrieve(
+            vector_store_id=vector_store_id,
+            file_id=vector_store_file_id,
+        )
+
+        status = getattr(vs_file, "status", None)
+
+        if status == "completed":
+            return vs_file
+
+        if status in {"failed", "cancelled"}:
+            last_error = getattr(vs_file, "last_error", None)
+            error_message = ""
+            if last_error:
+                error_message = f" | detalhe: {last_error}"
+            raise RuntimeError(
+                f"Falha ao indexar arquivo no vector store. status={status}{error_message}"
+            )
+
+        time.sleep(poll_interval_seconds)
+
+    raise TimeoutError("Tempo excedido aguardando indexação dos arquivos no vector store.")
+
+
+def create_project_vector_store_from_uploads(
+    project_name: str,
+    uploaded_files: List[Any],
+) -> str:
+    if not uploaded_files:
+        raise ValueError("Nenhum arquivo foi enviado para criação do vector store.")
+
+    vector_store = client.vector_stores.create(
+        name=f"project_{(project_name or 'sem_nome').strip()}"
+    )
+
+    vector_store_id = vector_store.id
+
+    for uploaded_file in uploaded_files:
+        file_bytes = uploaded_file.getvalue()
+        file_buffer = io.BytesIO(file_bytes)
+        file_buffer.name = uploaded_file.name
+
+        created_file = client.files.create(
+            file=file_buffer,
+            purpose="assistants",
+        )
+
+        attached = client.vector_stores.files.create(
+            vector_store_id=vector_store_id,
+            file_id=created_file.id,
+        )
+
+        wait_for_vector_store_file(
+            vector_store_id=vector_store_id,
+            vector_store_file_id=attached.id,
+        )
+
+    return vector_store_id
 
 # =========================================================
 # VECTOR STORES
@@ -1182,24 +1254,57 @@ def render_project_manager(user_email: str):
     with st.sidebar.expander("➕ Criar projeto", expanded=False):
         with st.form("create_project_form", clear_on_submit=True):
             project_name = st.text_input("Nome do projeto")
+
             methodology = st.selectbox(
                 "Metodologia",
                 options=list(METHODOLOGY_VECTOR_STORES.keys()),
                 format_func=lambda x: x.upper()
             )
-            project_vector_store_id = st.text_input("Vector Store ID do projeto")
+
+            st.markdown("**Documentos do projeto**")
+            uploaded_files = st.file_uploader(
+                "Envie os arquivos do projeto",
+                accept_multiple_files=True,
+                type=["pdf", "docx", "doc", "xlsx", "xls", "csv", "txt", "md", "json"],
+                help="Ex.: PIN, PDD, LCA, MRV Plan, contratos, evidências, anexos."
+            )
+
+            st.markdown("**Fallback técnico (opcional)**")
+            project_vector_store_id_manual = st.text_input(
+                "Vector Store ID do projeto (opcional)",
+                help="Use apenas para desenvolvimento/admin. Para clientes, prefira o upload de arquivos."
+            )
 
             submitted = st.form_submit_button("Salvar projeto")
 
             if submitted:
                 if not project_name.strip():
                     st.error("Informe o nome do projeto.")
-                elif not project_vector_store_id.strip():
-                    st.error("Informe o Vector Store ID do projeto.")
                 else:
-                    methodology_vector_store_id = METHODOLOGY_VECTOR_STORES[methodology]
+                    methodology_vector_store_id = METHODOLOGY_VECTOR_STORES.get(methodology)
+
+                    if not methodology_vector_store_id:
+                        st.error("Metodologia sem vector store configurado.")
+                        st.stop()
 
                     try:
+                        project_vector_store_id = None
+
+                        # Prioriza upload automático
+                        if uploaded_files and len(uploaded_files) > 0:
+                            with st.spinner("Criando vector store e indexando arquivos..."):
+                                project_vector_store_id = create_project_vector_store_from_uploads(
+                                    project_name=project_name,
+                                    uploaded_files=uploaded_files,
+                                )
+                        elif project_vector_store_id_manual.strip():
+                            project_vector_store_id = project_vector_store_id_manual.strip()
+                        else:
+                            st.error(
+                                "Envie pelo menos um arquivo do projeto ou informe manualmente o Vector Store ID."
+                            )
+                            st.stop()
+
                         create_project_record(
                             project_name=project_name,
                             owner_email=user_email,
@@ -1207,8 +1312,10 @@ def render_project_manager(user_email: str):
                             project_vector_store_id=project_vector_store_id,
                             methodology_vector_store_id=methodology_vector_store_id,
                         )
+
                         st.success("Projeto criado com sucesso.")
                         st.rerun()
+
                     except Exception as e:
                         st.error(f"Erro ao criar projeto: {e}")
 
