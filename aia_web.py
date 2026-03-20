@@ -915,7 +915,41 @@ def inject_custom_css():
     div[data-testid="stForm"] .stButton > button * {{
         color: #ffffff !important;
     }}
+    /* FILE UPLOADER BUTTON */
+    [data-testid="stFileUploader"] button {{
+        background: #0f5c5a !important;
+        color: #ffffff !important;
+        border: 1px solid #0f5c5a !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+    }}
 
+    [data-testid="stFileUploader"] button:hover {{
+        background: #14736f !important;
+        color: #ffffff !important;
+        border: 1px solid #14736f !important;
+    }}
+
+    [data-testid="stFileUploader"] button * {{
+        color: #ffffff !important;
+    }}
+
+    /* DISABLED BUTTONS */
+    section[data-testid="stSidebar"] .stButton > button:disabled,
+    div[data-testid="stForm"] .stButton > button:disabled,
+    [data-testid="stFileUploader"] button:disabled {{
+        background: #DCE9E2 !important;
+        color: #6B7C75 !important;
+        border: 1px solid #C8D8D0 !important;
+        opacity: 1 !important;
+        cursor: not-allowed !important;
+    }}
+
+    section[data-testid="stSidebar"] .stButton > button:disabled *,
+    div[data-testid="stForm"] .stButton > button:disabled *,
+    [data-testid="stFileUploader"] button:disabled * {{
+        color: #6B7C75 !important;
+    }}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
@@ -1275,9 +1309,66 @@ def set_current_project(project: dict, user_email: str = ""):
     else:
         st.session_state["messages"] = []
 
+def ensure_default_example_project(user_email: str):
+    project_vs_id = get_config_value("VECTOR_STORE_ID_NOVA_ESPERANCA")
+    methodology_vs_id = get_config_value("VECTOR_STORE_ID_ISOMETRIC")
+
+    if not project_vs_id or not methodology_vs_id:
+        return
+
+    try:
+        existing = db_fetch_safe(
+            """
+            SELECT id, project_name, methodology,
+                   project_vector_store_id, methodology_vector_store_id
+            FROM projects
+            WHERE lower(owner_email) = %s
+              AND lower(project_name) = %s
+            LIMIT 1
+            """,
+            ((user_email or "").strip().lower(), "nova esperança")
+        )
+
+        if existing:
+            row = existing[0]
+            project_id = row.get("id")
+            current_project_vs = row.get("project_vector_store_id")
+            current_methodology_vs = row.get("methodology_vector_store_id")
+            current_methodology = row.get("methodology")
+
+            if (
+                current_project_vs != project_vs_id
+                or current_methodology_vs != methodology_vs_id
+                or (current_methodology or "").strip().lower() != "isometric"
+            ):
+                db_execute_safe(
+                    """
+                    UPDATE projects
+                    SET methodology = %s,
+                        project_vector_store_id = %s,
+                        methodology_vector_store_id = %s,
+                        status = %s
+                    WHERE id = %s
+                    """,
+                    ("isometric", project_vs_id, methodology_vs_id, "active", project_id)
+                )
+        else:
+            create_project_record(
+                project_name="Nova Esperança",
+                owner_email=user_email,
+                methodology="isometric",
+                project_vector_store_id=project_vs_id,
+                methodology_vector_store_id=methodology_vs_id,
+                status="active",
+            )
+    except Exception as e:
+        st.session_state["db_status_message"] = f"Erro ao garantir projeto exemplo: {e}"
+
 
 def render_project_manager(user_email: str):
+    def render_project_manager(user_email: str):
     st.sidebar.markdown("### Projetos")
+    ensure_default_example_project(user_email)
 
     with st.sidebar.expander("➕ Criar projeto", expanded=False):
         with st.form("create_project_form", clear_on_submit=True):
