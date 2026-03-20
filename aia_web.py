@@ -2120,13 +2120,13 @@ def render_full_audit_mode():
 
     st.markdown(f"### {t(lang, 'full_audit_mode')}")
 
-requirements = get_requirements_for_methodology(
-    st.session_state.get("current_methodology")
-)
+    requirements = get_requirements_for_methodology(
+        st.session_state.get("current_methodology")
+    )
 
-all_modules = sorted(list({r["module"] for r in requirements})) if requirements else []
+    all_modules = sorted(list({r["module"] for r in requirements})) if requirements else []
 
-with st.expander("Configuração", expanded=True):
+    with st.expander("Configuração", expanded=True):
         project_name = st.text_input(
             t(lang, "project_name"),
             value=st.session_state.get("current_project_name") or ""
@@ -2180,21 +2180,29 @@ with st.expander("Configuração", expanded=True):
         max_methodology_hits_in_prompt=engine_params["max_methodology_hits_in_prompt"],
         max_text_chars_per_hit=engine_params["max_text_chars_per_hit"],
     )
-    cost_estimate = temp_engine.estimate_run_cost(selected_modules=selected_modules, execution_mode=execution_mode)
+    cost_estimate = temp_engine.estimate_run_cost(
+        selected_modules=selected_modules,
+        execution_mode=execution_mode
+    )
 
     st.markdown(f"#### {t(lang, 'estimated_effort')}")
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Nível", safe_str(effort["level"]).upper())
     c2.metric("Módulos", len(selected_modules))
     c3.metric("Requisitos", selected_requirements_count)
-    c4.metric(t(lang, "cost_estimate"), f"US$ {cost_estimate['estimated_min_cost']:.3f} – {cost_estimate['estimated_max_cost']:.3f}")
+    c4.metric(
+        t(lang, "cost_estimate"),
+        f"US$ {cost_estimate['estimated_min_cost']:.3f} – {cost_estimate['estimated_max_cost']:.3f}"
+    )
 
     if effort["hard_stop"]:
         st.error("Execução bloqueada preventivamente: reduza módulos ou use o modo rápido.")
 
     confirm_run = True
     if effort["needs_confirmation"] and not effort["hard_stop"]:
-        confirm_run = st.checkbox("Confirmo que desejo executar esta auditoria mesmo com esforço/custo estimado elevado.")
+        confirm_run = st.checkbox(
+            "Confirmo que desejo executar esta auditoria mesmo com esforço/custo estimado elevado."
+        )
 
     progress_container = st.empty()
     status_container = st.empty()
@@ -2247,7 +2255,6 @@ with st.expander("Configuração", expanded=True):
                 max_text_chars_per_hit=engine_params["max_text_chars_per_hit"],
                 progress_callback=callback,
             )
-
             with st.spinner("Executando auditoria..."):
                 audit_output = engine.run_full_audit(
                     selected_modules=selected_modules,
