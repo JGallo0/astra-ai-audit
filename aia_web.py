@@ -2602,22 +2602,22 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
                 use_container_width=True
             )
 
-        if show_trails:
-            st.markdown("#### Trilha detalhada")
-            for i, trail in enumerate(trails, start=1):
-                with st.expander(f"[{i}] {trail.get('module', '')} | {trail.get('analysis_label', '')}"):
-                    st.markdown("**Queries do projeto**")
-                    st.code(trail.get("project_query", ""), language="text")
-                    st.markdown("**Queries da metodologia**")
-                    st.code(trail.get("methodology_query", ""), language="text")
-                    st.markdown("**Trechos do projeto**")
-                    st.code(trail.get("project_context", ""), language="text")
-                    st.markdown("**Trechos da metodologia**")
-                    st.code(trail.get("methodology_context", ""), language="text")
-                    st.markdown("**Resposta bruta do modelo**")
-                    st.code(trail.get("model_response_raw", ""), language="json")
-                    st.markdown("**Resultado interpretado**")
-                    st.json(trail.get("parsed_result", {}))
+if st.session_state.get("show_trails_full_audit", False):
+    st.markdown("#### Trilha detalhada")
+    for i, trail in enumerate(trails, start=1):
+        with st.expander(f"[{i}] {trail.get('module', '')} | {trail.get('analysis_label', '')}"):
+            st.markdown("**Queries do projeto**")
+            st.code(trail.get("project_query", ""), language="text")
+            st.markdown("**Queries da metodologia**")
+            st.code(trail.get("methodology_query", ""), language="text")
+            st.markdown("**Trechos do projeto**")
+            st.code(trail.get("project_context", ""), language="text")
+            st.markdown("**Trechos da metodologia**")
+            st.code(trail.get("methodology_context", ""), language="text")
+            st.markdown("**Resposta bruta do modelo**")
+            st.code(trail.get("model_response_raw", ""), language="json")
+            st.markdown("**Resultado interpretado**")
+            st.json(trail.get("parsed_result", {}))
 
     with tab_history:
         st.markdown(f"#### {t(lang, 'history')}")
