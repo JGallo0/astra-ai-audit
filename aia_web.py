@@ -1505,6 +1505,14 @@ def render_project_manager(user_email: str):
         key="methodology_selector"
     )
 
+    selected_methodology = st.sidebar.selectbox(
+        "Selecionar metodologia",
+        options=methodology_options,
+        index=default_methodology_index,
+        format_func=lambda x: METHODOLOGY_REGISTRY[x]["label"],
+        key="methodology_selector"
+    )
+
     if st.sidebar.button("Ativar análise", key="activate_project_button"):
         set_current_project(
             project_options[selected_project_label],
