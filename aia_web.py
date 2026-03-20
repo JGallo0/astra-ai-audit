@@ -2115,6 +2115,8 @@ def render_full_audit_mode():
         st.error("Selecione um projeto antes de usar o chat ou a auditoria.")
         st.stop()
 
+    if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not st.session_state["last_full_audit_df"].empty:
+
     st.markdown(f"### {t(lang, 'full_audit_mode')}")
 
     all_modules = sorted(list({r["module"] for r in ISOMETRIC_REQUIREMENTS}))
@@ -2369,6 +2371,7 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
     summary = st.session_state["last_full_audit_summary"]
     trails = st.session_state["last_full_audit_trails"]
     run_id = st.session_state["last_full_audit_run_id"]
+    project_name = st.session_state.get("current_project_name") or "Projeto sem nome"
 
     tab_summary, tab_matrix, tab_details, tab_downloads, tab_history = st.tabs([
         t(lang, "summary_tab"),
@@ -2495,10 +2498,11 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
         full_audit_pdf = pdf_from_text("Auditoria Resumida Isometric", full_audit_text)
 
         eligibility_dossier_text = build_full_eligibility_dossier_text(
-            project_name=project_name,
-            summary=summary,
-            results=st.session_state["last_full_audit_results"],
-            trails=st.session_state["last_full_audit_trails"],
+    project_name=st.session_state.get("current_project_name") or "Projeto sem nome",
+    summary=summary,
+    results=st.session_state["last_full_audit_results"],
+    trails=st.session_state["last_full_audit_trails"],
+)
         )
         eligibility_docx = docx_from_text("Dossiê de Elegibilidade Metodológica", eligibility_dossier_text)
         eligibility_pdf = pdf_from_text("Dossiê de Elegibilidade Metodológica", eligibility_dossier_text)
