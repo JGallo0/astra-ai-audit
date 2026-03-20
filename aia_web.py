@@ -2126,7 +2126,7 @@ requirements = get_requirements_for_methodology(
 
 all_modules = sorted(list({r["module"] for r in requirements})) if requirements else []
 
-    with st.expander("Configuração", expanded=True):
+with st.expander("Configuração", expanded=True):
         project_name = st.text_input(
             t(lang, "project_name"),
             value=st.session_state.get("current_project_name") or ""
