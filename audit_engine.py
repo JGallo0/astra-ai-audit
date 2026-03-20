@@ -141,23 +141,23 @@ class AuditEngine:
         model: str,
         project_vector_store_id: str,
         methodology_vector_store_id: str,
-        project_name: str = "Projeto",
-        module_project_queries: int = DEFAULT_MODULE_PROJECT_QUERIES,
-        module_methodology_queries: int = DEFAULT_MODULE_METHODOLOGY_QUERIES,
-        project_max_results_per_query: int = DEFAULT_PROJECT_MAX_RESULTS_PER_QUERY,
-        methodology_max_results_per_query: int = DEFAULT_METHODOLOGY_MAX_RESULTS_PER_QUERY,
-        max_retries: int = DEFAULT_MAX_RETRIES,
-        max_project_hits_in_prompt: int = DEFAULT_MAX_PROJECT_HITS_IN_PROMPT,
-        max_methodology_hits_in_prompt: int = DEFAULT_MAX_METHODOLOGY_HITS_IN_PROMPT,
-        max_text_chars_per_hit: int = DEFAULT_MAX_TEXT_CHARS_PER_HIT,
-        low_confidence_threshold: int = DEFAULT_LOW_CONFIDENCE_THRESHOLD,
-        progress_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
+        project_name: str,
+        requirements: Optional[List[Dict[str, Any]]] = None,
+        module_project_queries: int = 2,
+        module_methodology_queries: int = 2,
+        project_max_results_per_query: int = 3,
+        methodology_max_results_per_query: int = 3,
+        max_project_hits_in_prompt: int = 4,
+        max_methodology_hits_in_prompt: int = 4,
+        max_text_chars_per_hit: int = 900,
+        progress_callback=None,
     ):
         self.client = OpenAI(api_key=api_key)
         self.model = model
         self.project_vector_store_id = project_vector_store_id
         self.methodology_vector_store_id = methodology_vector_store_id
         self.project_name = project_name
+        self.requirements = requirements or []
 
         self.module_project_queries = module_project_queries
         self.module_methodology_queries = module_methodology_queries
@@ -179,18 +179,19 @@ class AuditEngine:
     # PUBLIC API
     # =========================================================
 
-    def run_full_audit(
-        self,
-        selected_modules: Optional[List[str]] = None,
-        enable_auto_reanalysis: bool = True,
-    ) -> Dict[str, Any]:
-        from isometric_requirements import ISOMETRIC_REQUIREMENTS
+def run_full_audit(
+    self,
+    selected_modules: Optional[List[str]] = None,
+    enable_auto_reanalysis: bool = True,
+) -> Dict[str, Any]:
+    if not self.requirements:
+        raise ValueError("Nenhum requisito estruturado foi carregado para a metodologia selecionada.")
 
-        filtered_requirements = []
-        for req in ISOMETRIC_REQUIREMENTS:
-            if selected_modules and req.get("module") not in selected_modules:
-                continue
-            filtered_requirements.append(req)
+    filtered_requirements = []
+    for req in self.requirements:
+        if selected_modules and req.get("module") not in selected_modules:
+            continue
+        filtered_requirements.append(req)
 
         grouped = self._group_requirements_by_module(filtered_requirements)
         modules = list(grouped.keys())
@@ -288,20 +289,18 @@ class AuditEngine:
             "stats": self.last_run_stats,
         }
 
-    def rerun_failed_items(
-        self,
-        previous_results: List[Dict[str, Any]],
-        selected_modules: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
-        from isometric_requirements import ISOMETRIC_REQUIREMENTS
+def rerun_failed_items(
+    self,
+    previous_results: List[Dict[str, Any]],
+    selected_modules: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    previous_by_id = {
+        safe_str(item.get("requirement_id", "")): item
+        for item in previous_results
+    }
 
-        previous_by_id = {
-            safe_str(item.get("requirement_id", "")): item
-            for item in previous_results
-        }
-
-        requirements_to_retry = []
-        for req in ISOMETRIC_REQUIREMENTS:
+    requirements_to_retry = []
+    for req in self.requirements:
             if selected_modules and req.get("module") not in selected_modules:
                 continue
 
@@ -429,17 +428,24 @@ class AuditEngine:
             "module_confidence": module_confidence,
         }
 
-    def estimate_run_cost(
-        self,
-        selected_modules: Optional[List[str]] = None,
-        execution_mode: str = "Rápido",
-    ) -> Dict[str, Any]:
-        from isometric_requirements import ISOMETRIC_REQUIREMENTS
+def estimate_run_cost(
+    self,
+    selected_modules: Optional[List[str]] = None,
+    execution_mode: str = "Rápido",
+) -> Dict[str, Any]:
+    if not self.requirements:
+        return {
+            "module_count": 0,
+            "requirement_count": 0,
+            "estimated_min_cost": 0.0,
+            "estimated_max_cost": 0.0,
+            "estimated_cost": 0.0,
+        }
 
-        requirements = [
-            r for r in ISOMETRIC_REQUIREMENTS
-            if not selected_modules or r.get("module") in selected_modules
-        ]
+    requirements = [
+        r for r in self.requirements
+        if not selected_modules or r.get("module") in selected_modules
+    ]
         grouped = self._group_requirements_by_module(requirements)
         module_count = len(grouped)
         requirement_count = len(requirements)
