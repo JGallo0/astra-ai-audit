@@ -1214,28 +1214,32 @@ def render_project_manager(user_email: str):
     st.sidebar.markdown("#### Meus projetos")
 
     try:
-        projects = list_projects_by_owner(user_email)
+        projects = [
+            p for p in list_projects_by_owner(user_email)
+            if p.get("project_vector_store_id") and p.get("methodology_vector_store_id")
+        ]
     except Exception as e:
         st.sidebar.error(f"Erro ao carregar projetos: {e}")
         return
 
     if not projects:
-        st.sidebar.info("Nenhum projeto cadastrado ainda.")
+        st.sidebar.info("Nenhum projeto completo cadastrado ainda.")
         return
 
-    for project in projects:
-        col1, col2 = st.sidebar.columns([3, 1])
+    project_options = {
+        f"{p['project_name']} | {str(p.get('methodology') or '-').upper()}": p
+        for p in projects
+    }
 
-        with col1:
-            st.markdown(
-                f"**{project.get('project_name', 'Sem nome')}**  \n"
-                f"Metodologia: `{project.get('methodology') or '-'}`"
-            )
+    selected_label = st.sidebar.selectbox(
+        "Selecionar projeto",
+        options=list(project_options.keys()),
+        key="project_selector"
+    )
 
-        with col2:
-            if st.button("Selecionar", key=f"select_project_{project['id']}"):
-                set_current_project(project, user_email)
-                st.rerun()
+    if st.sidebar.button("Ativar projeto", key="activate_project_button"):
+        set_current_project(project_options[selected_label], user_email)
+        st.rerun()
 
     if st.session_state.get("current_project_name"):
         st.sidebar.markdown("---")
