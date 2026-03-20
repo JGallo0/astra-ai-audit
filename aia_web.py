@@ -2111,9 +2111,9 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
                     '</div>'
                     '<div style="margin-top:0.5rem;">'
                     f'{badge_html(safe_str(item["execution_mode"]), "info")}'
-                    f'{badge_html(f"score {item["overall_score"]}%", "success")}'
-                    f'{badge_html(f"conf {item["overall_confidence"]}%", "warning")}'
-                    f'{badge_html(f"US$ {item["estimated_cost"]:.3f}", "danger")}'
+                    badge_html(f"score {item['overall_score']}%", "success")
+                    badge_html(f"conf {item['overall_confidence']}%", "warning")
+                    badge_html(f"US$ {item['estimated_cost']:.3f}", "danger")
                     '</div>'
                     '<div class="auditoria-small" style="margin-top:0.5rem;">'
                     f'módulos: {", ".join(item["modules"])}'
@@ -2123,6 +2123,7 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
                 st.markdown(html, unsafe_allow_html=True)
 else:
     st.info("Execute a auditoria completa para gerar a matriz de conformidade.")
+    
         # =========================================================
 # LEGACY PAGE BRIDGES
 # =========================================================
