@@ -434,33 +434,35 @@ if "current_filters" not in st.session_state:
 
 def inject_custom_css():
     css = f"""
-        /* FILE UPLOADER */
-    [data-testid="stFileUploader"] {
+    <style>
+
+    /* FILE UPLOADER */
+    [data-testid="stFileUploader"] {{
         background: #FFFFFF !important;
         border: 1px solid #D8E3DD !important;
         border-radius: 14px !important;
         padding: 0.75rem !important;
-    }
+    }}
 
-    [data-testid="stFileUploader"] * {
+    [data-testid="stFileUploader"] * {{
         color: #1E293B !important;
-    }
+    }}
 
-    [data-testid="stFileUploaderDropzone"] {
+    [data-testid="stFileUploaderDropzone"] {{
         background: #F7FBF8 !important;
         border: 2px dashed #D8E3DD !important;
         border-radius: 12px !important;
-    }
+    }}
 
-    [data-testid="stFileUploaderDropzone"] * {
+    [data-testid="stFileUploaderDropzone"] * {{
         color: #1E293B !important;
-    }
+    }}
 
-    [data-testid="stFileUploaderFileName"] {
+    [data-testid="stFileUploaderFileName"] {{
         color: #1A4D4E !important;
         font-weight: 600 !important;
-    }
-    <style>
+    }}
+
     :root {{
         --primary: {THEME["primary"]};
         --secondary: {THEME["secondary"]};
