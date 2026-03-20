@@ -1501,7 +1501,7 @@ def render_project_manager(user_email: str):
         key="methodology_selector"
     )
 
-    if st.sidebar.button("Ativar Análise", key="activate_project_button"):
+    if st.sidebar.button("Ativar análise", key="activate_project_button"):
         set_current_project(
             project_options[selected_project_label],
             user_email,
