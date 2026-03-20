@@ -8,7 +8,13 @@ from typing import Any, Dict, List, Optional
 
 import pandas as pd
 import streamlit as st
-from project_config import METHODOLOGY_VECTOR_STORES
+from project_config import (
+    METHODOLOGY_REGISTRY,
+    METHODOLOGY_VECTOR_STORES,
+    list_methodology_keys,
+    get_methodology_config,
+    get_methodology_vector_store_id,
+)
 from project_service import (
     create_project_record,
     list_projects_by_owner,
@@ -27,7 +33,7 @@ from reportlab.pdfgen import canvas
 
 from smart_search import normalize_sources, rank_sources, build_smart_context
 from audit_engine import AuditEngine
-from isometric_requirements import ISOMETRIC_REQUIREMENTS
+from methodology_requirements import get_requirements_for_methodology
 from ui_config import APP_NAME, APP_SUBTITLE, APP_TAGLINE, LOGO_DEFAULT_PATH, THEME, I18N, t
 from app_pages import (
     dashboard,
@@ -1374,11 +1380,11 @@ def render_project_manager(user_email: str):
 
             project_name = st.text_input("Nome do projeto")
 
-            methodology = st.selectbox(
-                "Metodologia",
-                options=list(METHODOLOGY_VECTOR_STORES.keys()),
-                format_func=lambda x: x.upper()
-            )
+methodology = st.selectbox(
+    "Metodologia",
+    options=list_methodology_keys(),
+    format_func=lambda x: METHODOLOGY_REGISTRY[x]["label"]
+)
 
             st.markdown("**Documentos do projeto**")
             uploaded_files = st.file_uploader(
@@ -1403,7 +1409,7 @@ def render_project_manager(user_email: str):
                     st.error("Informe o nome do projeto.")
                     st.stop()
 
-                methodology_vector_store_id = METHODOLOGY_VECTOR_STORES.get(methodology)
+                methodology_vector_store_id = get_methodology_vector_store_id(methodology)
 
                 if not methodology_vector_store_id:
                     st.error("Metodologia sem vector store configurado.")
@@ -2116,7 +2122,11 @@ def render_full_audit_mode():
 
     st.markdown(f"### {t(lang, 'full_audit_mode')}")
 
-    all_modules = sorted(list({r["module"] for r in ISOMETRIC_REQUIREMENTS}))
+requirements = get_requirements_for_methodology(
+    st.session_state.get("current_methodology")
+)
+
+all_modules = sorted(list({r["module"] for r in requirements})) if requirements else []
 
     with st.expander("Configuração", expanded=True):
         project_name = st.text_input(
@@ -2145,11 +2155,15 @@ def render_full_audit_mode():
 
     st.session_state["current_project_name"] = project_name
 
-    if not selected_modules:
-        st.warning("Selecione pelo menos um módulo para auditar.")
-        return
+if not requirements:
+    st.warning("A metodologia selecionada ainda não possui matriz estruturada de requisitos no app.")
+    return
 
-    selected_requirements_count = len([r for r in ISOMETRIC_REQUIREMENTS if r["module"] in selected_modules])
+if not selected_modules:
+    st.warning("Selecione pelo menos um módulo para auditar.")
+    return
+
+selected_requirements_count = len([r for r in requirements if r["module"] in selected_modules])
     engine_params = get_engine_params_for_mode(execution_mode)
     effort = estimate_audit_effort(execution_mode, selected_modules, selected_requirements_count)
 
