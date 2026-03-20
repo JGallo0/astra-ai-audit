@@ -1377,14 +1377,13 @@ def render_project_manager(user_email: str):
 
     with st.sidebar.expander("➕ Criar projeto", expanded=False):
         with st.form("create_project_form", clear_on_submit=True):
-
             project_name = st.text_input("Nome do projeto")
 
-methodology = st.selectbox(
-    "Metodologia",
-    options=list_methodology_keys(),
-    format_func=lambda x: METHODOLOGY_REGISTRY[x]["label"]
-)
+            methodology = st.selectbox(
+                "Metodologia",
+                options=list_methodology_keys(),
+                format_func=lambda x: METHODOLOGY_REGISTRY[x]["label"]
+            )
 
             st.markdown("**Documentos do projeto**")
             uploaded_files = st.file_uploader(
@@ -1404,7 +1403,6 @@ methodology = st.selectbox(
             submitted = st.form_submit_button("Salvar projeto")
 
             if submitted:
-
                 if not project_name.strip():
                     st.error("Informe o nome do projeto.")
                     st.stop()
