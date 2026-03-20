@@ -1492,7 +1492,7 @@ def render_project_manager(user_email: str):
         key="project_selector"
     )
 
-selected_methodology = st.sidebar.selectbox(
+    selected_methodology = st.sidebar.selectbox(
         "Selecionar metodologia",
         options=methodology_options,
         index=default_methodology_index,
