@@ -1460,7 +1460,7 @@ def render_project_manager(user_email: str):
         st.sidebar.error(f"Erro ao carregar projetos: {e}")
         return
 
-        if not projects:
+    if not projects:
         st.sidebar.info("Nenhum projeto disponível ainda.")
         return
 
