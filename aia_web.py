@@ -1290,18 +1290,20 @@ def init_project_session():
             st.session_state[key] = value
 
 
-def set_current_project(project: dict, user_email: str = ""):
+def set_current_project(project: dict, user_email: str = "", methodology_key: str | None = None):
+    methodology_key = (methodology_key or project.get("methodology") or "").strip().lower()
+    methodology_config = get_methodology_config(methodology_key)
+
     st.session_state["current_project_id"] = project.get("id")
     st.session_state["current_project_name"] = project.get("project_name")
-    st.session_state["current_methodology"] = project.get("methodology")
     st.session_state["current_project_vector_store_id"] = project.get("project_vector_store_id")
-    st.session_state["current_methodology_vector_store_id"] = project.get("methodology_vector_store_id")
 
-    # 🔥 NOVO: carregar histórico do chat do banco
+    st.session_state["current_methodology"] = methodology_key
+    st.session_state["current_methodology_vector_store_id"] = methodology_config.get("vector_store_id")
+
     if project.get("id") and user_email:
         try:
             rows = load_chat_history(project.get("id"), user_email)
-
             st.session_state["messages"] = [
                 {
                     "role": row.get("role", "assistant"),
@@ -1309,9 +1311,10 @@ def set_current_project(project: dict, user_email: str = ""):
                 }
                 for row in rows
             ]
-
-        except Exception as e:
+        except Exception:
             st.session_state["messages"] = []
+    else:
+        st.session_state["messages"] = []
     else:
         st.session_state["messages"] = []
 
