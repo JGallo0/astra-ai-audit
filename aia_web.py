@@ -2153,25 +2153,25 @@ with st.expander("Configuração", expanded=True):
 
     st.session_state["current_project_name"] = project_name
 
-if not requirements:
-    st.warning("A metodologia selecionada ainda não possui matriz estruturada de requisitos no app.")
-    return
+    if not requirements:
+        st.warning("A metodologia selecionada ainda não possui matriz estruturada de requisitos no app.")
+        return
 
-if not selected_modules:
-    st.warning("Selecione pelo menos um módulo para auditar.")
-    return
+    if not selected_modules:
+        st.warning("Selecione pelo menos um módulo para auditar.")
+        return
 
-selected_requirements_count = len([r for r in requirements if r["module"] in selected_modules])
+    selected_requirements_count = len([r for r in requirements if r["module"] in selected_modules])
     engine_params = get_engine_params_for_mode(execution_mode)
     effort = estimate_audit_effort(execution_mode, selected_modules, selected_requirements_count)
 
     temp_engine = AuditEngine(
         api_key=OPENAI_API_KEY,
         model=MODEL_NAME,
-        requirements=requirements,
         project_vector_store_id=project_vs_id or "",
         methodology_vector_store_id=methodology_vs_id,
         project_name=project_name,
+        requirements=requirements,
         module_project_queries=engine_params["module_project_queries"],
         module_methodology_queries=engine_params["module_methodology_queries"],
         project_max_results_per_query=engine_params["project_max_results_per_query"],
