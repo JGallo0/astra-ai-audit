@@ -434,6 +434,32 @@ if "current_filters" not in st.session_state:
 
 def inject_custom_css():
     css = f"""
+        /* FILE UPLOADER */
+    [data-testid="stFileUploader"] {
+        background: #FFFFFF !important;
+        border: 1px solid #D8E3DD !important;
+        border-radius: 14px !important;
+        padding: 0.75rem !important;
+    }
+
+    [data-testid="stFileUploader"] * {
+        color: #1E293B !important;
+    }
+
+    [data-testid="stFileUploaderDropzone"] {
+        background: #F7FBF8 !important;
+        border: 2px dashed #D8E3DD !important;
+        border-radius: 12px !important;
+    }
+
+    [data-testid="stFileUploaderDropzone"] * {
+        color: #1E293B !important;
+    }
+
+    [data-testid="stFileUploaderFileName"] {
+        color: #1A4D4E !important;
+        font-weight: 600 !important;
+    }
     <style>
     :root {{
         --primary: {THEME["primary"]};
@@ -1269,11 +1295,14 @@ def render_project_manager(user_email: str):
                 help="Ex.: PIN, PDD, LCA, MRV Plan, contratos, evidências, anexos."
             )
 
-            st.markdown("**Fallback técnico (opcional)**")
-            project_vector_store_id_manual = st.text_input(
-                "Vector Store ID do projeto (opcional)",
-                help="Use apenas para desenvolvimento/admin. Para clientes, prefira o upload de arquivos."
-            )
+            project_vector_store_id_manual = ""
+
+if current_role == "admin":
+    st.markdown("**Fallback técnico (admin)**")
+    project_vector_store_id_manual = st.text_input(
+        "Vector Store ID do projeto (opcional)",
+        help="Use apenas para desenvolvimento/admin."
+    )
 
             submitted = st.form_submit_button("Salvar projeto")
 
@@ -1297,13 +1326,18 @@ def render_project_manager(user_email: str):
                                     project_name=project_name,
                                     uploaded_files=uploaded_files,
                                 )
-                        elif project_vector_store_id_manual.strip():
-                            project_vector_store_id = project_vector_store_id_manual.strip()
-                        else:
-                            st.error(
-                                "Envie pelo menos um arquivo do projeto ou informe manualmente o Vector Store ID."
-                            )
-                            st.stop()
+elif project_vector_store_id_manual.strip():
+    project_vector_store_id = project_vector_store_id_manual.strip()
+else:
+    if current_role == "admin":
+        st.error(
+            "Envie pelo menos um arquivo do projeto ou informe manualmente o Vector Store ID."
+        )
+    else:
+        st.error(
+            "Envie pelo menos um arquivo do projeto para criar o projeto."
+        )
+    st.stop()
 
                         create_project_record(
                             project_name=project_name,
