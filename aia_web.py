@@ -907,6 +907,7 @@ def sync_user_to_db(user: Dict[str, str], role: str):
 
 
 def ensure_project_record(owner_email: str, project_name: str):
+    return
     owner_email = safe_str(owner_email).strip().lower()
     project_name = safe_str(project_name).strip()
     if not owner_email or not project_name:
