@@ -2545,7 +2545,7 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
         filtered_df = apply_matrix_filters(df, module_filter, status_filter, risk_filter)
         st.dataframe(filtered_df, use_container_width=True, hide_index=True)
 
- with tab_matrix:
+with tab_matrix:
         st.markdown(f"#### {t(lang, 'filters')}")
         f1, f2, f3 = st.columns(3)
 
