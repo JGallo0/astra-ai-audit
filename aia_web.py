@@ -1591,14 +1591,17 @@ active_methodology_label = METHODOLOGY_REGISTRY.get(
     {}
 ).get("label", "-")
 
+active_methodology_label = METHODOLOGY_REGISTRY.get(
+    st.session_state.get("current_methodology", ""),
+    {}
+).get("label", "-")
+
 if st.session_state.get("current_project_name"):
     st.info(
         f"Projeto ativo: {st.session_state.get('current_project_name')} | "
         f"Metodologia: {active_methodology_label}"
     )
 else:
-    
-if not st.session_state.get("current_project_name"):
     st.warning("Nenhum projeto selecionado.")
 # =========================================================
 # SIDEBAR
