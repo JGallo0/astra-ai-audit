@@ -686,38 +686,37 @@ def _estimate_confidence(
             status=normalized["status"],
         )
 
-        def _classify_status(
-    self,
-    score: int,
-    evidence_present: bool,
-    methodology_present: bool,
-    confidence: int = 100,
-) -> str:
-    score = clip_int(score, default=0)
-    confidence = clip_int(confidence, default=100)
+    def _classify_status(
+        self,
+        score: int,
+        evidence_present: bool,
+        methodology_present: bool,
+        confidence: int = 100,
+    ) -> str:
+        score = clip_int(score, default=0)
+        confidence = clip_int(confidence, default=100)
 
-    if not evidence_present:
-        return "Não evidenciado"
+        if not evidence_present:
+            return "Não evidenciado"
 
-    if evidence_present and not methodology_present:
+        if evidence_present and not methodology_present:
+            if score >= 70:
+                return "Parcialmente conforme"
+            if score > 0:
+                return "Parcialmente conforme"
+            return "Não evidenciado"
+
+        if confidence < 20 and score < 40:
+            return "Erro de análise"
+
         if score >= 70:
+            return "Conforme"
+        if score >= 45:
             return "Parcialmente conforme"
         if score > 0:
-            return "Parcialmente conforme"
+            return "Não conforme"
+
         return "Não evidenciado"
-
-    if confidence < 20 and score < 40:
-        return "Erro de análise"
-
-    if score >= 70:
-        return "Conforme"
-    if score >= 45:
-        return "Parcialmente conforme"
-    if score > 0:
-        return "Não conforme"
-
-    return "Não evidenciado"
-
         if not normalized["gap"]:
             normalized["gap"] = self._infer_gap(normalized["status"])
 
