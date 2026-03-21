@@ -2625,23 +2625,14 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
                     st.write(safe_str(row.get("notes", "")))
 
         # 👇 AGORA SIM: fora do loop
-        with st.expander("Ver resultado bruto da auditoria"):
-            st.json(st.session_state.get("last_full_audit_results", []))
-                st.markdown("**Base metodológica**")
-                st.write(safe_str(row.get("methodology_basis", "")) or "Não identificado.")
+                   with st.expander(title):
+                st.markdown(
+                    status_badge(safe_str(row.get("status", ""))) +
+                    " " +
+                    risk_badge(safe_str(row.get("risk", ""))),
+                    unsafe_allow_html=True
+                )
 
-                st.markdown("**Evidência do projeto**")
-                st.write(safe_str(row.get("project_evidence", "")) or "Não identificado.")
-
-                st.markdown("**Gap**")
-                st.write(safe_str(row.get("gap", "")) or "Não identificado.")
-
-                st.markdown("**Recomendação**")
-                st.write(safe_str(row.get("recommendation", "")) or "Não identificado.")
-
-                if safe_str(row.get("notes", "")).strip():
-                    st.markdown("**Notas**")
-                    st.write(safe_str(row.get("notes", "")))
                 c1, c2 = st.columns(2)
                 with c1:
                     st.write(f"**Módulo:** {safe_str(row.get('module', ''))}")
@@ -2665,6 +2656,9 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
                     st.markdown("**Notas**")
                     st.write(safe_str(row.get("notes", "")))
 
+        # 🔥 FORA DO LOOP (IMPORTANTE)
+        with st.expander("Ver resultado bruto da auditoria"):
+            st.json(st.session_state.get("last_full_audit_results", []))
     with tab_downloads:
         full_audit_text = build_full_audit_text(summary, st.session_state["last_full_audit_results"])
         full_audit_docx = docx_from_text("Auditoria Resumida Isometric", full_audit_text)
