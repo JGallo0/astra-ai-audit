@@ -718,72 +718,7 @@ class AuditEngine:
 
         return clip_int(score, default=50, min_value=10, max_value=95)
 
-    def _derive_score(
-        self,
-        project_evidence: str,
-        methodology_basis: str,
-        gap: str,
-        recommendation: str,
-        notes: str,
-    ) -> int:
-        score = 0
-
-        if self._has_real_evidence(project_evidence):
-            score += 45
-        if self._has_real_methodology_basis(methodology_basis):
-            score += 25
-
-        gap_text = safe_str(gap).lower()
-        rec_text = safe_str(recommendation).lower()
-        notes_text = safe_str(notes).lower()
-        combined = " ".join([gap_text, rec_text, notes_text])
-
-        negative_markers = [
-            "não foi possível",
-            "nao foi possivel",
-            "ausência",
-            "ausencia",
-            "insuficiente",
-            "falt",
-            "missing",
-            "not identified",
-            "not found",
-            "incomplete",
-            "inconsist",
-            "conflict",
-            "não atende",
-            "nao atende",
-            "não demonstrado",
-            "nao demonstrado",
-            "não comprovado",
-            "nao comprovado",
-        ]
-        positive_markers = [
-            "robusto",
-            "consistente",
-            "adequado",
-            "claro",
-            "suficiente",
-            "evidenciado",
-            "documentado",
-            "compatível",
-            "compativel",
-            "aderente",
-            "demonstrado",
-            "comprovado",
-            "none identified",
-            "nenhuma lacuna",
-            "sem lacuna",
-        ]
-
-        neg_hits = sum(1 for marker in negative_markers if marker in combined)
-        pos_hits = sum(1 for marker in positive_markers if marker in combined)
-
-        score += pos_hits * 8
-        score -= neg_hits * 10
-
-        return clip_int(score, default=0)
-
+    
     # =========================================================
     # SUPPORT
     # =========================================================
