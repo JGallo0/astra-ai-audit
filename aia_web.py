@@ -2493,21 +2493,21 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
                 }
                 for mod in sorted(module_scores.keys())
             ])
-            st.dataframe(module_df, hide_index=True, use_container_width=True)
+            st.dataframe(module_df, hide_index=True, width="stretch")
 
         st.markdown("#### Status")
         status_df = pd.DataFrame([
             {"Status": k, "Quantidade": v}
             for k, v in (summary.get("status_counts", {}) or {}).items()
         ])
-        st.dataframe(status_df, hide_index=True, use_container_width=True)
+        st.dataframe(status_df, hide_index=True, width="stretch")
 
         st.markdown("#### Risco")
         risk_df = pd.DataFrame([
             {"Risco": k, "Quantidade": v}
             for k, v in (summary.get("risk_counts", {}) or {}).items()
         ])
-        st.dataframe(risk_df, hide_index=True, use_container_width=True)
+        st.dataframe(risk_df, hide_index=True, width="stretch")
 
     with tab_matrix:
         st.markdown(f"#### {t(lang, 'filters')}")
