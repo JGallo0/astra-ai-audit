@@ -2545,6 +2545,42 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
         filtered_df = apply_matrix_filters(df, module_filter, status_filter, risk_filter)
         st.dataframe(filtered_df, use_container_width=True, hide_index=True)
 
+ with tab_matrix:
+        st.markdown(f"#### {t(lang, 'filters')}")
+        f1, f2, f3 = st.columns(3)
+
+        module_options = sorted(df["module"].dropna().unique().tolist()) if "module" in df.columns else []
+        status_options = sorted(df["status"].dropna().unique().tolist()) if "status" in df.columns else []
+        risk_options = sorted(df["risk"].dropna().unique().tolist()) if "risk" in df.columns else []
+
+        with f1:
+            module_filter = st.multiselect(
+                t(lang, "module_filter"),
+                options=module_options,
+                default=st.session_state["current_filters"]["module"],
+            )
+        with f2:
+            status_filter = st.multiselect(
+                t(lang, "status_filter"),
+                options=status_options,
+                default=st.session_state["current_filters"]["status"],
+            )
+        with f3:
+            risk_filter = st.multiselect(
+                t(lang, "risk_filter"),
+                options=risk_options,
+                default=st.session_state["current_filters"]["risk"],
+            )
+
+        st.session_state["current_filters"] = {
+            "module": module_filter,
+            "status": status_filter,
+            "risk": risk_filter,
+        }
+
+        filtered_df = apply_matrix_filters(df, module_filter, status_filter, risk_filter)
+        st.dataframe(filtered_df, use_container_width=True, hide_index=True)
+
     with tab_details:
         detail_df = apply_matrix_filters(
             df,
@@ -2564,6 +2600,28 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
             st.json(st.session_state.get("last_full_audit_results", []))            
                 )
 
+                c1, c2 = st.columns(2)
+                with c1:
+                    st.write(f"**Módulo:** {safe_str(row.get('module', ''))}")
+                    st.write(f"**Score:** {safe_str(row.get('score', ''))}")
+                with c2:
+                    st.write(f"**Confiança:** {safe_str(row.get('confidence', ''))}")
+
+                st.markdown("**Base metodológica**")
+                st.write(safe_str(row.get("methodology_basis", "")) or "Não identificado.")
+
+                st.markdown("**Evidência do projeto**")
+                st.write(safe_str(row.get("project_evidence", "")) or "Não identificado.")
+
+                st.markdown("**Gap**")
+                st.write(safe_str(row.get("gap", "")) or "Não identificado.")
+
+                st.markdown("**Recomendação**")
+                st.write(safe_str(row.get("recommendation", "")) or "Não identificado.")
+
+                if safe_str(row.get("notes", "")).strip():
+                    st.markdown("**Notas**")
+                    st.write(safe_str(row.get("notes", "")))
                 c1, c2 = st.columns(2)
                 with c1:
                     st.write(f"**Módulo:** {safe_str(row.get('module', ''))}")
