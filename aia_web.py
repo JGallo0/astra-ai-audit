@@ -2624,8 +2624,7 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
                     st.markdown("**Notas**")
                     st.write(safe_str(row.get("notes", "")))
 
-        # 👇 AGORA SIM: fora do loop
-                   with st.expander(title):
+            with st.expander(title):
                 st.markdown(
                     status_badge(safe_str(row.get("status", ""))) +
                     " " +
@@ -2656,9 +2655,9 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
                     st.markdown("**Notas**")
                     st.write(safe_str(row.get("notes", "")))
 
-        # 🔥 FORA DO LOOP (IMPORTANTE)
         with st.expander("Ver resultado bruto da auditoria"):
             st.json(st.session_state.get("last_full_audit_results", []))
+
     with tab_downloads:
         full_audit_text = build_full_audit_text(summary, st.session_state["last_full_audit_results"])
         full_audit_docx = docx_from_text("Auditoria Resumida Isometric", full_audit_text)
@@ -2682,19 +2681,6 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
             "results": st.session_state["last_full_audit_results"],
             "trails": st.session_state["last_full_audit_trails"],
         })
-        eligibility_docx = docx_from_text("Dossiê de Elegibilidade Metodológica", eligibility_dossier_text)
-        eligibility_pdf = pdf_from_text("Dossiê de Elegibilidade Metodológica", eligibility_dossier_text)
-
-        matrix_docx = matrix_to_docx_bytes(df, "Matriz de Conformidade Isometric")
-        matrix_pdf = matrix_to_pdf_bytes(df, "Matriz de Conformidade Isometric")
-        csv_bytes = convert_df_to_csv_bytes(df)
-        json_bytes = convert_json_to_bytes({
-            "run_id": run_id,
-            "summary": summary,
-            "results": st.session_state["last_full_audit_results"],
-            "trails": st.session_state["last_full_audit_trails"],
-        })
-
         d1, d2, d3 = st.columns(3)
         with d1:
             st.download_button(
