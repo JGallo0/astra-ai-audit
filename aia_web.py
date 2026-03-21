@@ -1498,12 +1498,13 @@ def render_project_manager(user_email: str):
         key="sidebar_project_selector_v2"
     )
 
-    selected_methodology = st.sidebar.selectbox(
-        "Selecionar metodologia",
-        options=methodology_options,
-        index=default_methodology_index,
-        format_func=lambda x: METHODOLOGY_REGISTRY[x]["label"],
-        key="sidebar_methodology_selector_v2"
+selected_methodology = st.sidebar.selectbox(
+    "Selecionar metodologia",
+    options=methodology_options,
+    index=default_methodology_index,
+    format_func=lambda x: METHODOLOGY_REGISTRY[x]["label"],
+    key="sidebar_methodology_selector_v2"
+)
 
 st.sidebar.markdown("### Seleção atual")
 
