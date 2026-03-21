@@ -1593,6 +1593,7 @@ if st.session_state.get("current_project_name"):
         f"Metodologia: {active_methodology_label}"
     )
 else:
+if not st.session_state.get("current_project_name"):
     st.warning("Nenhum projeto selecionado.")
 # =========================================================
 # SIDEBAR
