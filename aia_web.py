@@ -1504,12 +1504,12 @@ def render_project_manager(user_email: str):
         index=default_methodology_index,
         format_func=lambda x: METHODOLOGY_REGISTRY[x]["label"],
         key="sidebar_methodology_selector_v2"
-    )
-    
+
 st.sidebar.markdown("### Seleção atual")
 
 st.sidebar.write(f"Projeto: {selected_project_label}")
-st.sidebar.write(f"Metodologia: {METHODOLOGY_REGISTRY[selected_methodology]['label']}")
+st.sidebar.write(f"Metodologia: {METHODOLOGY_REGISTRY[selected_methodology]['label']}")        
+    )
 
     if st.sidebar.button("Ativar", key="sidebar_activate_analysis_button_v2", use_container_width=True):
         set_current_project(
@@ -1524,10 +1524,9 @@ st.sidebar.write(f"Metodologia: {METHODOLOGY_REGISTRY[selected_methodology]['lab
         st.sidebar.success(
             f"Projeto ativo: **{st.session_state.get('current_project_name') or '-'}**"
         )
-        st.sidebar.info(
-            f"Metodologia ativa: **{METHODOLOGY_REGISTRY.get(st.session_state.get('current_methodology', ''), {}).get('label', '-')}**"
-        )
-
+st.sidebar.info(
+    f"Projeto: {selected_project_label}\nMetodologia: {METHODOLOGY_REGISTRY[selected_methodology]['label']}"
+)
 # =========================================================
 # AUTH GATE
 # =========================================================
@@ -2334,7 +2333,7 @@ def render_full_audit_mode():
                 estimated_cost=float(audit_output.get("estimated_cost", 0.0)),
             )
 
-            st.success("Auditoria concluída com sucesso.")
+              st.success("Auditoria concluída com sucesso.")
 
             project_id = st.session_state.get("current_project_id")
             if project_id:
@@ -2457,6 +2456,30 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
         s3.metric("Confiança geral", f"{summary.get('overall_confidence', 0)}%")
         s4.metric(t(lang, "session_cost"), f"US$ {st.session_state['audit_session_cost_estimate']:.3f}")
 
+        st.markdown("#### Visão rápida")
+        quick_status = summary.get("status_counts", {})
+        quick_risk = summary.get("risk_counts", {})
+
+        q1, q2 = st.columns(2)
+        with q1:
+            st.write("**Status**")
+            st.write(quick_status if quick_status else {"Sem dados": 0})
+        with q2:
+            st.write("**Risco**")
+            st.write(quick_risk if quick_risk else {"Sem dados": 0})       
+
+         st.markdown("#### Visão rápida")
+        quick_status = summary.get("status_counts", {})
+        quick_risk = summary.get("risk_counts", {})
+
+        q1, q2 = st.columns(2)
+        with q1:
+            st.write("**Status**")
+            st.write(quick_status if quick_status else {"Sem dados": 0})
+        with q2:
+            st.write("**Risco**")
+            st.write(quick_risk if quick_risk else {"Sem dados": 0})       
+
         st.markdown("#### Módulos")
         module_scores = summary.get("module_scores", {})
         module_conf = summary.get("module_confidence", {})
@@ -2536,6 +2559,8 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
                 st.markdown(
                     status_badge(safe_str(row.get("status", ""))) + " " + risk_badge(safe_str(row.get("risk", ""))),
                     unsafe_allow_html=True
+            with st.expander("Ver resultado bruto da auditoria"):
+            st.json(st.session_state.get("last_full_audit_results", []))            
                 )
 
                 c1, c2 = st.columns(2)
