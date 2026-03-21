@@ -173,6 +173,7 @@ class AuditEngine:
         self.session_cost_estimate = 0.0
         self.last_execution_cost_estimate = 0.0
         self.last_run_stats: Dict[str, Any] = {}
+        self.low_confidence_threshold = DEFAULT_LOW_CONFIDENCE_THRESHOLD
 
     # =========================================================
     # PUBLIC API
