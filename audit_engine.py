@@ -612,91 +612,91 @@ def _estimate_confidence(
 
         return normalized_results, trail
 
-def _normalize_module_results(
-    self,
-    requirements: List[Dict[str, Any]],
-    parsed_items: Any,
-    module_name: str,
-    project_hits: List[Dict[str, Any]],
-    methodology_hits: List[Dict[str, Any]],
-) -> List[Dict[str, Any]]:
+    def _normalize_module_results(
+        self,
+        requirements: List[Dict[str, Any]],
+        parsed_items: Any,
+        module_name: str,
+        project_hits: List[Dict[str, Any]],
+        methodology_hits: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
 
-    parsed_by_id: Dict[str, Dict[str, Any]] = {}
+        parsed_by_id: Dict[str, Dict[str, Any]] = {}
 
-    if isinstance(parsed_items, list):
-        for item in parsed_items:
-            if not isinstance(item, dict):
-                continue
-            rid = safe_str(item.get("requirement_id", ""))
-            if rid:
-                parsed_by_id[rid] = item
+        if isinstance(parsed_items, list):
+            for item in parsed_items:
+                if not isinstance(item, dict):
+                    continue
+                rid = safe_str(item.get("requirement_id", ""))
+                if rid:
+                    parsed_by_id[rid] = item
 
-    normalized_results: List[Dict[str, Any]] = []
+        normalized_results: List[Dict[str, Any]] = []
 
-    for requirement in requirements:
-        rid = safe_str(requirement.get("id", ""))
-        raw = parsed_by_id.get(rid, {}) if parsed_by_id else {}
+        for requirement in requirements:
+            rid = safe_str(requirement.get("id", ""))
+            raw = parsed_by_id.get(rid, {}) if parsed_by_id else {}
 
-        normalized = default_result(requirement)
+            normalized = default_result(requirement)
 
-        normalized["project_evidence"] = safe_str(raw.get("project_evidence", ""))
-        normalized["methodology_basis"] = safe_str(raw.get("methodology_basis", ""))
-        normalized["gap"] = safe_str(raw.get("gap", ""))
-        normalized["recommendation"] = safe_str(raw.get("recommendation", ""))
-        normalized["notes"] = safe_str(raw.get("notes", ""))
+            normalized["project_evidence"] = safe_str(raw.get("project_evidence", ""))
+            normalized["methodology_basis"] = safe_str(raw.get("methodology_basis", ""))
+            normalized["gap"] = safe_str(raw.get("gap", ""))
+            normalized["recommendation"] = safe_str(raw.get("recommendation", ""))
+            normalized["notes"] = safe_str(raw.get("notes", ""))
 
-        if not normalized["project_evidence"]:
-            normalized["project_evidence"] = self._fallback_project_evidence(project_hits)
+            if not normalized["project_evidence"]:
+                normalized["project_evidence"] = self._fallback_project_evidence(project_hits)
 
-        if not normalized["methodology_basis"]:
-            normalized["methodology_basis"] = self._fallback_methodology_basis(methodology_hits)
+            if not normalized["methodology_basis"]:
+                normalized["methodology_basis"] = self._fallback_methodology_basis(methodology_hits)
 
-        evidence_present = self._has_real_evidence(normalized["project_evidence"])
-        methodology_present = self._has_real_methodology_basis(normalized["methodology_basis"])
+            evidence_present = self._has_real_evidence(normalized["project_evidence"])
+            methodology_present = self._has_real_methodology_basis(normalized["methodology_basis"])
 
-        raw_conf = raw.get("confidence")
-        if raw_conf is None or safe_str(raw_conf) == "":
-            normalized["confidence"] = self._estimate_confidence(
+            raw_conf = raw.get("confidence")
+            if raw_conf is None or safe_str(raw_conf) == "":
+                normalized["confidence"] = self._estimate_confidence(
+                    project_evidence=normalized["project_evidence"],
+                    methodology_basis=normalized["methodology_basis"],
+                    gap=normalized["gap"],
+                    recommendation=normalized["recommendation"],
+                    notes=normalized["notes"],
+                )
+            else:
+                normalized["confidence"] = clip_int(raw_conf, default=50)
+
+            normalized["score"] = self._derive_score(
                 project_evidence=normalized["project_evidence"],
                 methodology_basis=normalized["methodology_basis"],
                 gap=normalized["gap"],
                 recommendation=normalized["recommendation"],
                 notes=normalized["notes"],
             )
-        else:
-            normalized["confidence"] = clip_int(raw_conf, default=50)
 
-        normalized["score"] = self._derive_score(
-            project_evidence=normalized["project_evidence"],
-            methodology_basis=normalized["methodology_basis"],
-            gap=normalized["gap"],
-            recommendation=normalized["recommendation"],
-            notes=normalized["notes"],
-        )
+            normalized["status"] = self._classify_status(
+                score=normalized["score"],
+                evidence_present=evidence_present,
+                methodology_present=methodology_present,
+                confidence=normalized["confidence"],
+            )
 
-        normalized["status"] = self._classify_status(
-            score=normalized["score"],
-            evidence_present=evidence_present,
-            methodology_present=methodology_present,
-            confidence=normalized["confidence"],
-        )
+            normalized["risk"] = classify_risk(
+                score=normalized["score"],
+                confidence=normalized["confidence"],
+                status=normalized["status"],
+            )
 
-        normalized["risk"] = classify_risk(
-            score=normalized["score"],
-            confidence=normalized["confidence"],
-            status=normalized["status"],
-        )
+            if not normalized["gap"]:
+                normalized["gap"] = self._infer_gap(normalized["status"])
 
-        if not normalized["gap"]:
-            normalized["gap"] = self._infer_gap(normalized["status"])
+            if not normalized["recommendation"]:
+                normalized["recommendation"] = self._infer_recommendation(normalized["status"])
 
-        if not normalized["recommendation"]:
-            normalized["recommendation"] = self._infer_recommendation(normalized["status"])
+            normalized_results.append(normalized)
 
-        normalized_results.append(normalized)
-
-    return normalized_results
-
+        return normalized_results
+        
     def _classify_status(
         self,
         score: int,
@@ -728,35 +728,6 @@ def _normalize_module_results(
             return "Não conforme"
 
         return "Não evidenciado"
-        if not normalized["gap"]:
-            normalized["gap"] = self._infer_gap(normalized["status"])
-
-        if not normalized["recommendation"]:
-            normalized["recommendation"] = self._infer_recommendation(normalized["status"])
-
-        normalized_results.append(normalized)
-
-    return normalized_results
-            normalized["status"] = classify_status(
-                score=normalized["score"],
-                evidence_present=evidence_present,
-                methodology_present=methodology_present,
-            )
-            normalized["risk"] = classify_risk(
-                score=normalized["score"],
-                confidence=normalized["confidence"],
-                status=normalized["status"],
-            )
-
-            if not normalized["gap"]:
-                normalized["gap"] = self._infer_gap(normalized["status"])
-
-            if not normalized["recommendation"]:
-                normalized["recommendation"] = self._infer_recommendation(normalized["status"])
-
-            normalized_results.append(normalized)
-
-        return normalized_results
 
     def _derive_score(
         self,
