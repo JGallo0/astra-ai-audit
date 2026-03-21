@@ -65,24 +65,10 @@ def normalize_risk(risk: str) -> str:
     return "alto"
 
 
-def classify_status(score: int, evidence_present: bool, methodology_present: bool) -> str:
-    if not evidence_present:
-        return "Não evidenciado"
-    if not methodology_present and score < 80:
-        return "Parcialmente conforme"
-    if score >= 80:
-        return "Conforme"
-    if score >= 50:
-        return "Parcialmente conforme"
-    if score > 0:
-        return "Não conforme"
-    return "Não evidenciado"
-
-
 def classify_risk(score: int, confidence: int, status: str) -> str:
     if status in {"Não conforme", "Não evidenciado", "Erro de análise", "Inconsistência documental"}:
         return "alto"
-    if confidence < 50 or score < 80:
+    if confidence < 50 or score < 70:
         return "medio"
     return "baixo"
 
@@ -144,96 +130,7 @@ class AuditEngine:
         self.last_execution_cost_estimate = 0.0
         self.last_run_stats: Dict[str, Any] = {}
         self.low_confidence_threshold = DEFAULT_LOW_CONFIDENCE_THRESHOLD
-def _has_real_evidence(self, text: str) -> bool:
-    text = safe_str(text).lower()
-    if not text:
-        return False
 
-    negative_markers = [
-        "não foi possível identificar evidência",
-        "nao foi possivel identificar evidencia",
-        "nenhuma evidência",
-        "nenhuma evidencia",
-        "não identificado",
-        "nao identificado",
-        "not identified",
-        "not found",
-        "insufficient evidence",
-        "sem evidência",
-        "sem evidencia",
-    ]
-    return not any(marker in text for marker in negative_markers)
-
-
-def _has_real_methodology_basis(self, text: str) -> bool:
-    text = safe_str(text).lower()
-    if not text:
-        return False
-
-    negative_markers = [
-        "não foi possível identificar base metodológica",
-        "nao foi possivel identificar base metodologica",
-        "nenhuma base metodológica",
-        "nenhuma base metodologica",
-        "não identificado",
-        "nao identificado",
-        "not identified",
-        "not found",
-        "insufficient evidence",
-    ]
-    return not any(marker in text for marker in negative_markers)
-
-
-def _estimate_confidence(
-    self,
-    project_evidence: str,
-    methodology_basis: str,
-    gap: str,
-    recommendation: str,
-    notes: str,
-) -> int:
-    score = 0
-
-    pe = safe_str(project_evidence)
-    mb = safe_str(methodology_basis)
-    gp = safe_str(gap)
-    rc = safe_str(recommendation)
-    nt = safe_str(notes)
-
-    if self._has_real_evidence(pe):
-        score += 35
-        if len(pe) >= 120:
-            score += 15
-
-    if self._has_real_methodology_basis(mb):
-        score += 25
-        if len(mb) >= 120:
-            score += 10
-
-    if gp:
-        score += 8
-
-    if rc:
-        score += 8
-
-    if nt:
-        score += 4
-
-    combined = " ".join([pe.lower(), mb.lower(), gp.lower(), rc.lower(), nt.lower()])
-
-    vague_markers = [
-        "generic",
-        "genérico",
-        "generico",
-        "not clear",
-        "unclear",
-        "não claro",
-        "nao claro",
-    ]
-    if any(marker in combined for marker in vague_markers):
-        score -= 10
-
-    return clip_int(score, default=50, min_value=10, max_value=95)
     # =========================================================
     # PUBLIC API
     # =========================================================
@@ -620,7 +517,6 @@ def _estimate_confidence(
         project_hits: List[Dict[str, Any]],
         methodology_hits: List[Dict[str, Any]],
     ) -> List[Dict[str, Any]]:
-
         parsed_by_id: Dict[str, Dict[str, Any]] = {}
 
         if isinstance(parsed_items, list):
@@ -696,7 +592,7 @@ def _estimate_confidence(
             normalized_results.append(normalized)
 
         return normalized_results
-        
+
     def _classify_status(
         self,
         score: int,
@@ -729,6 +625,95 @@ def _estimate_confidence(
 
         return "Não evidenciado"
 
+    def _has_real_evidence(self, text: str) -> bool:
+        text = safe_str(text).lower()
+        if not text:
+            return False
+
+        negative_markers = [
+            "não foi possível identificar evidência",
+            "nao foi possivel identificar evidencia",
+            "nenhuma evidência",
+            "nenhuma evidencia",
+            "não identificado",
+            "nao identificado",
+            "not identified",
+            "not found",
+            "insufficient evidence",
+            "sem evidência",
+            "sem evidencia",
+        ]
+        return not any(marker in text for marker in negative_markers)
+
+    def _has_real_methodology_basis(self, text: str) -> bool:
+        text = safe_str(text).lower()
+        if not text:
+            return False
+
+        negative_markers = [
+            "não foi possível identificar base metodológica",
+            "nao foi possivel identificar base metodologica",
+            "nenhuma base metodológica",
+            "nenhuma base metodologica",
+            "não identificado",
+            "nao identificado",
+            "not identified",
+            "not found",
+            "insufficient evidence",
+        ]
+        return not any(marker in text for marker in negative_markers)
+
+    def _estimate_confidence(
+        self,
+        project_evidence: str,
+        methodology_basis: str,
+        gap: str,
+        recommendation: str,
+        notes: str,
+    ) -> int:
+        score = 0
+
+        pe = safe_str(project_evidence)
+        mb = safe_str(methodology_basis)
+        gp = safe_str(gap)
+        rc = safe_str(recommendation)
+        nt = safe_str(notes)
+
+        if self._has_real_evidence(pe):
+            score += 35
+            if len(pe) >= 120:
+                score += 15
+
+        if self._has_real_methodology_basis(mb):
+            score += 25
+            if len(mb) >= 120:
+                score += 10
+
+        if gp:
+            score += 8
+
+        if rc:
+            score += 8
+
+        if nt:
+            score += 4
+
+        combined = " ".join([pe.lower(), mb.lower(), gp.lower(), rc.lower(), nt.lower()])
+
+        vague_markers = [
+            "generic",
+            "genérico",
+            "generico",
+            "not clear",
+            "unclear",
+            "não claro",
+            "nao claro",
+        ]
+        if any(marker in combined for marker in vague_markers):
+            score -= 10
+
+        return clip_int(score, default=50, min_value=10, max_value=95)
+
     def _derive_score(
         self,
         project_evidence: str,
@@ -739,9 +724,9 @@ def _estimate_confidence(
     ) -> int:
         score = 0
 
-        if safe_str(project_evidence):
+        if self._has_real_evidence(project_evidence):
             score += 45
-        if safe_str(methodology_basis):
+        if self._has_real_methodology_basis(methodology_basis):
             score += 25
 
         gap_text = safe_str(gap).lower()
@@ -762,6 +747,12 @@ def _estimate_confidence(
             "incomplete",
             "inconsist",
             "conflict",
+            "não atende",
+            "nao atende",
+            "não demonstrado",
+            "nao demonstrado",
+            "não comprovado",
+            "nao comprovado",
         ]
         positive_markers = [
             "robusto",
@@ -771,6 +762,14 @@ def _estimate_confidence(
             "suficiente",
             "evidenciado",
             "documentado",
+            "compatível",
+            "compativel",
+            "aderente",
+            "demonstrado",
+            "comprovado",
+            "none identified",
+            "nenhuma lacuna",
+            "sem lacuna",
         ]
 
         neg_hits = sum(1 for marker in negative_markers if marker in combined)
