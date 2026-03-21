@@ -567,18 +567,6 @@ class AuditEngine:
             else:
                 normalized["confidence"] = clip_int(raw_conf, default=50)
 
-# considera inválido se vier vazio, 0 ou muito baixo
-if raw_conf is None or safe_str(raw_conf) == "" or clip_int(raw_conf, 0) <= 1:
-    normalized["confidence"] = self._estimate_confidence(
-        project_evidence=normalized["project_evidence"],
-        methodology_basis=normalized["methodology_basis"],
-        gap=normalized["gap"],
-        recommendation=normalized["recommendation"],
-        notes=normalized["notes"],
-    )
-else:
-    normalized["confidence"] = clip_int(raw_conf, default=50)
-
             normalized["score"] = self._derive_score(
                 project_evidence=normalized["project_evidence"],
                 methodology_basis=normalized["methodology_basis"],
@@ -609,7 +597,6 @@ else:
             normalized_results.append(normalized)
 
         return normalized_results
-
     def _classify_status(
         self,
         score: int,
