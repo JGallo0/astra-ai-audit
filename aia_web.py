@@ -1505,6 +1505,11 @@ def render_project_manager(user_email: str):
         format_func=lambda x: METHODOLOGY_REGISTRY[x]["label"],
         key="sidebar_methodology_selector_v2"
     )
+    
+st.sidebar.markdown("### Seleção atual")
+
+st.sidebar.write(f"Projeto: {selected_project_label}")
+st.sidebar.write(f"Metodologia: {METHODOLOGY_REGISTRY[selected_methodology]['label']}")
 
     if st.sidebar.button("Ativar", key="sidebar_activate_analysis_button_v2", use_container_width=True):
         set_current_project(
@@ -1687,6 +1692,8 @@ with st.sidebar:
         for key, value in DEFAULT_STATE.items():
             st.session_state[key] = value
         st.rerun()
+
+
 
 # =========================================================
 # FILE SEARCH RESULT HELPERS
