@@ -1491,20 +1491,20 @@ def render_project_manager(user_email: str):
     else:
         default_methodology_index = 0
 
-selected_project_label = st.sidebar.selectbox(
+    selected_project_label = st.sidebar.selectbox(
         "Selecionar projeto",
         options=list(project_options.keys()),
         index=default_project_index,
         key="sidebar_project_selector_v2"
     )
 
-selected_methodology = st.sidebar.selectbox(
-    "Selecionar metodologia",
-    options=methodology_options,
-    index=default_methodology_index,
-    format_func=lambda x: METHODOLOGY_REGISTRY[x]["label"],
-    key="sidebar_methodology_selector_v2"
-)
+    selected_methodology = st.sidebar.selectbox(
+        "Selecionar metodologia",
+        options=methodology_options,
+        index=default_methodology_index,
+        format_func=lambda x: METHODOLOGY_REGISTRY[x]["label"],
+        key="sidebar_methodology_selector_v2"
+    )
 
     st.sidebar.markdown("### Seleção atual")
     st.sidebar.write(f"Projeto: {selected_project_label}")
