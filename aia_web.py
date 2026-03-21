@@ -2517,30 +2517,29 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
         status_options = sorted(df["status"].dropna().unique().tolist()) if "status" in df.columns else []
         risk_options = sorted(df["risk"].dropna().unique().tolist()) if "risk" in df.columns else []
 
-       with f1:
-    module_filter = st.multiselect(
-        t(lang, "module_filter"),
-        options=module_options,
-        default=st.session_state["current_filters"]["module"],
-        key="module_filter_matrix",  # 👈 adiciona
-    )
+        with f1:
+            module_filter = st.multiselect(
+                t(lang, "module_filter"),
+                options=module_options,
+                default=st.session_state["current_filters"]["module"],
+                key="module_filter_matrix",
+            )
 
-with f2:
-    status_filter = st.multiselect(
-        t(lang, "status_filter"),
-        options=status_options,
-        default=st.session_state["current_filters"]["status"],
-        key="status_filter_matrix",  # 👈 adiciona
-    )
+        with f2:
+            status_filter = st.multiselect(
+                t(lang, "status_filter"),
+                options=status_options,
+                default=st.session_state["current_filters"]["status"],
+                key="status_filter_matrix",
+            )
 
-with f3:
-    risk_filter = st.multiselect(
-        t(lang, "risk_filter"),
-        options=risk_options,
-        default=st.session_state["current_filters"]["risk"],
-        key="risk_filter_matrix",  # 👈 adiciona
-    )
-
+        with f3:
+            risk_filter = st.multiselect(
+                t(lang, "risk_filter"),
+                options=risk_options,
+                default=st.session_state["current_filters"]["risk"],
+                key="risk_filter_matrix",
+            )
         st.session_state["current_filters"] = {
             "module": module_filter,
             "status": status_filter,
