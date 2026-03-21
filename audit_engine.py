@@ -178,206 +178,206 @@ class AuditEngine:
     # PUBLIC API
     # =========================================================
 
-def run_full_audit(
-    self,
-    selected_modules: Optional[List[str]] = None,
-    enable_auto_reanalysis: bool = True,
-) -> Dict[str, Any]:
-    if not self.requirements:
-        raise ValueError("Nenhum requisito estruturado foi carregado para a metodologia selecionada.")
+    def run_full_audit(
+        self,
+        selected_modules: Optional[List[str]] = None,
+        enable_auto_reanalysis: bool = True,
+    ) -> Dict[str, Any]:
+        if not self.requirements:
+            raise ValueError("Nenhum requisito estruturado foi carregado para a metodologia selecionada.")
 
-    filtered_requirements = []
-    for req in self.requirements:
-        if selected_modules and req.get("module") not in selected_modules:
-            continue
-        filtered_requirements.append(req)
+        filtered_requirements = []
+        for req in self.requirements:
+            if selected_modules and req.get("module") not in selected_modules:
+                continue
+            filtered_requirements.append(req)
 
-    grouped = self._group_requirements_by_module(filtered_requirements)
-    modules = list(grouped.keys())
+        grouped = self._group_requirements_by_module(filtered_requirements)
+        modules = list(grouped.keys())
 
-    run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-    results: List[Dict[str, Any]] = []
-    trails: List[Dict[str, Any]] = []
+        run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+        results: List[Dict[str, Any]] = []
+        trails: List[Dict[str, Any]] = []
 
-    initial_modules = len(modules)
-    current_module_index = 0
+        initial_modules = len(modules)
+        current_module_index = 0
 
-    self.last_execution_cost_estimate = 0.0
+        self.last_execution_cost_estimate = 0.0
 
-    for module_name in modules:
-        current_module_index += 1
+        for module_name in modules:
+            current_module_index += 1
 
-        self._emit_progress(
-            stage="module_start",
-            module=module_name,
-            current=current_module_index,
-            total=initial_modules,
-            percent=self._compute_percent(current_module_index - 1, initial_modules),
-            message=f"Iniciando módulo {module_name}",
-        )
-
-        module_results, module_trail = self._audit_single_module(
-            module_name=module_name,
-            requirements=grouped[module_name],
-            analysis_label="primary",
-            current=current_module_index,
-            total=initial_modules,
-        )
-
-        results.extend(module_results)
-        trails.append(module_trail)
-
-        if enable_auto_reanalysis and self._module_needs_reanalysis(module_results):
             self._emit_progress(
-                stage="module_reanalysis",
+                stage="module_start",
                 module=module_name,
                 current=current_module_index,
                 total=initial_modules,
-                percent=self._compute_percent(current_module_index - 0.5, initial_modules),
-                message=f"Reanalisando módulo {module_name} por baixa robustez",
+                percent=self._compute_percent(current_module_index - 1, initial_modules),
+                message=f"Iniciando módulo {module_name}",
             )
 
-            refined_results, refined_trail = self._audit_single_module(
+            module_results, module_trail = self._audit_single_module(
                 module_name=module_name,
                 requirements=grouped[module_name],
-                analysis_label="reanalysis",
+                analysis_label="primary",
                 current=current_module_index,
                 total=initial_modules,
-                query_boost=True,
             )
 
-            merged_results = self._merge_module_results(module_results, refined_results)
-            results = [r for r in results if r.get("module") != module_name] + merged_results
-            trails.append(refined_trail)
+            results.extend(module_results)
+            trails.append(module_trail)
+
+            if enable_auto_reanalysis and self._module_needs_reanalysis(module_results):
+                self._emit_progress(
+                    stage="module_reanalysis",
+                    module=module_name,
+                    current=current_module_index,
+                    total=initial_modules,
+                    percent=self._compute_percent(current_module_index - 0.5, initial_modules),
+                    message=f"Reanalisando módulo {module_name} por baixa robustez",
+                )
+
+                refined_results, refined_trail = self._audit_single_module(
+                    module_name=module_name,
+                    requirements=grouped[module_name],
+                    analysis_label="reanalysis",
+                    current=current_module_index,
+                    total=initial_modules,
+                    query_boost=True,
+                )
+
+                merged_results = self._merge_module_results(module_results, refined_results)
+                results = [r for r in results if r.get("module") != module_name] + merged_results
+                trails.append(refined_trail)
+
+            self._emit_progress(
+                stage="module_complete",
+                module=module_name,
+                current=current_module_index,
+                total=initial_modules,
+                percent=self._compute_percent(current_module_index, initial_modules),
+                message=f"Módulo {module_name} concluído",
+            )
+
+        self.last_execution_cost_estimate = round(self.last_execution_cost_estimate, 4)
+        self.session_cost_estimate = round(self.session_cost_estimate, 4)
+
+        self.last_run_stats = {
+            "run_id": run_id,
+            "modules": modules,
+            "module_count": len(modules),
+            "requirement_count": len(filtered_requirements),
+            "estimated_cost": self.last_execution_cost_estimate,
+        }
 
         self._emit_progress(
-            stage="module_complete",
-            module=module_name,
-            current=current_module_index,
+            stage="run_complete",
+            module="",
+            current=initial_modules,
             total=initial_modules,
-            percent=self._compute_percent(current_module_index, initial_modules),
-            message=f"Módulo {module_name} concluído",
+            percent=100,
+            message="Auditoria concluída",
         )
 
-    self.last_execution_cost_estimate = round(self.last_execution_cost_estimate, 4)
-    self.session_cost_estimate = round(self.session_cost_estimate, 4)
+        return {
+            "run_id": run_id,
+            "results": results,
+            "trails": trails,
+            "estimated_cost": self.last_execution_cost_estimate,
+            "session_estimated_cost": self.session_cost_estimate,
+            "stats": self.last_run_stats,
+        }
 
-    self.last_run_stats = {
-        "run_id": run_id,
-        "modules": modules,
-        "module_count": len(modules),
-        "requirement_count": len(filtered_requirements),
-        "estimated_cost": self.last_execution_cost_estimate,
-    }
+    def rerun_failed_items(
+        self,
+        previous_results: List[Dict[str, Any]],
+        selected_modules: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
+        previous_by_id = {
+            safe_str(item.get("requirement_id", "")): item
+            for item in previous_results
+        }
 
-    self._emit_progress(
-        stage="run_complete",
-        module="",
-        current=initial_modules,
-        total=initial_modules,
-        percent=100,
-        message="Auditoria concluída",
-    )
+        requirements_to_retry = []
+        for req in self.requirements:
+            if selected_modules and req.get("module") not in selected_modules:
+                continue
 
-    return {
-        "run_id": run_id,
-        "results": results,
-        "trails": trails,
-        "estimated_cost": self.last_execution_cost_estimate,
-        "session_estimated_cost": self.session_cost_estimate,
-        "stats": self.last_run_stats,
-    }
+            rid = safe_str(req.get("id", ""))
+            prev = previous_by_id.get(rid)
+            if not prev:
+                continue
 
-def rerun_failed_items(
-    self,
-    previous_results: List[Dict[str, Any]],
-    selected_modules: Optional[List[str]] = None,
-) -> Dict[str, Any]:
-    previous_by_id = {
-        safe_str(item.get("requirement_id", "")): item
-        for item in previous_results
-    }
+            status = safe_str(prev.get("status", ""))
+            confidence = clip_int(prev.get("confidence", 0), default=0)
 
-    requirements_to_retry = []
-    for req in self.requirements:
-        if selected_modules and req.get("module") not in selected_modules:
-            continue
+            if status in DEFAULT_REANALYZE_STATUSES or confidence < self.low_confidence_threshold:
+                requirements_to_retry.append(req)
 
-        rid = safe_str(req.get("id", ""))
-        prev = previous_by_id.get(rid)
-        if not prev:
-            continue
+        grouped = self._group_requirements_by_module(requirements_to_retry)
+        modules = list(grouped.keys())
 
-        status = safe_str(prev.get("status", ""))
-        confidence = clip_int(prev.get("confidence", 0), default=0)
+        run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+        results: List[Dict[str, Any]] = []
+        trails: List[Dict[str, Any]] = []
 
-        if status in DEFAULT_REANALYZE_STATUSES or confidence < self.low_confidence_threshold:
-            requirements_to_retry.append(req)
+        total_modules = len(modules)
+        idx = 0
 
-    grouped = self._group_requirements_by_module(requirements_to_retry)
-    modules = list(grouped.keys())
+        self.last_execution_cost_estimate = 0.0
 
-    run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-    results: List[Dict[str, Any]] = []
-    trails: List[Dict[str, Any]] = []
+        for module_name in modules:
+            idx += 1
 
-    total_modules = len(modules)
-    idx = 0
+            self._emit_progress(
+                stage="rerun_start",
+                module=module_name,
+                current=idx,
+                total=total_modules,
+                percent=self._compute_percent(idx - 1, total_modules),
+                message=f"Reanalisando falhas do módulo {module_name}",
+            )
 
-    self.last_execution_cost_estimate = 0.0
+            module_results, module_trail = self._audit_single_module(
+                module_name=module_name,
+                requirements=grouped[module_name],
+                analysis_label="rerun_failed_items",
+                current=idx,
+                total=total_modules,
+                query_boost=True,
+            )
+            results.extend(module_results)
+            trails.append(module_trail)
 
-    for module_name in modules:
-        idx += 1
+            self._emit_progress(
+                stage="rerun_complete_module",
+                module=module_name,
+                current=idx,
+                total=total_modules,
+                percent=self._compute_percent(idx, total_modules),
+                message=f"Falhas do módulo {module_name} reanalisadas",
+            )
 
-        self._emit_progress(
-            stage="rerun_start",
-            module=module_name,
-            current=idx,
-            total=total_modules,
-            percent=self._compute_percent(idx - 1, total_modules),
-            message=f"Reanalisando falhas do módulo {module_name}",
-        )
+        self.last_execution_cost_estimate = round(self.last_execution_cost_estimate, 4)
+        self.session_cost_estimate = round(self.session_cost_estimate, 4)
 
-        module_results, module_trail = self._audit_single_module(
-            module_name=module_name,
-            requirements=grouped[module_name],
-            analysis_label="rerun_failed_items",
-            current=idx,
-            total=total_modules,
-            query_boost=True,
-        )
-        results.extend(module_results)
-        trails.append(module_trail)
+        self.last_run_stats = {
+            "run_id": run_id,
+            "modules": modules,
+            "module_count": len(modules),
+            "requirement_count": len(requirements_to_retry),
+            "estimated_cost": self.last_execution_cost_estimate,
+            "mode": "rerun_failed_items",
+        }
 
-        self._emit_progress(
-            stage="rerun_complete_module",
-            module=module_name,
-            current=idx,
-            total=total_modules,
-            percent=self._compute_percent(idx, total_modules),
-            message=f"Falhas do módulo {module_name} reanalisadas",
-        )
-
-    self.last_execution_cost_estimate = round(self.last_execution_cost_estimate, 4)
-    self.session_cost_estimate = round(self.session_cost_estimate, 4)
-
-    self.last_run_stats = {
-        "run_id": run_id,
-        "modules": modules,
-        "module_count": len(modules),
-        "requirement_count": len(requirements_to_retry),
-        "estimated_cost": self.last_execution_cost_estimate,
-        "mode": "rerun_failed_items",
-    }
-
-    return {
-        "run_id": run_id,
-        "results": results,
-        "trails": trails,
-        "estimated_cost": self.last_execution_cost_estimate,
-        "session_estimated_cost": self.session_cost_estimate,
-        "stats": self.last_run_stats,
-    }
+        return {
+            "run_id": run_id,
+            "results": results,
+            "trails": trails,
+            "estimated_cost": self.last_execution_cost_estimate,
+            "session_estimated_cost": self.session_cost_estimate,
+            "stats": self.last_run_stats,
+        }
 
     def summarize_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
         total = len(results)
