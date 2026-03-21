@@ -550,7 +550,22 @@ class AuditEngine:
             evidence_present = self._has_real_evidence(normalized["project_evidence"])
             methodology_present = self._has_real_methodology_basis(normalized["methodology_basis"])
 
-raw_conf = raw.get("confidence")
+            raw_conf = raw.get("confidence")
+
+            if (
+                raw_conf is None
+                or safe_str(raw_conf) == ""
+                or clip_int(raw_conf, default=0) <= 1
+            ):
+                normalized["confidence"] = self._estimate_confidence(
+                    project_evidence=normalized["project_evidence"],
+                    methodology_basis=normalized["methodology_basis"],
+                    gap=normalized["gap"],
+                    recommendation=normalized["recommendation"],
+                    notes=normalized["notes"],
+                )
+            else:
+                normalized["confidence"] = clip_int(raw_conf, default=50)
 
 # considera inválido se vier vazio, 0 ou muito baixo
 if raw_conf is None or safe_str(raw_conf) == "" or clip_int(raw_conf, 0) <= 1:
