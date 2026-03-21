@@ -1506,10 +1506,10 @@ selected_methodology = st.sidebar.selectbox(
     key="sidebar_methodology_selector_v2"
 )
 
-st.sidebar.markdown("### Seleção atual")
-
-st.sidebar.write(f"Projeto: {selected_project_label}")
-st.sidebar.write(f"Metodologia: {METHODOLOGY_REGISTRY[selected_methodology]['label']}")        
+    st.sidebar.markdown("### Seleção atual")
+    st.sidebar.write(f"Projeto: {selected_project_label}")
+    st.sidebar.write(
+        f"Metodologia: {METHODOLOGY_REGISTRY[selected_methodology]['label']}"
     )
 
     if st.sidebar.button("Ativar", key="sidebar_activate_analysis_button_v2", use_container_width=True):
@@ -1525,8 +1525,9 @@ st.sidebar.write(f"Metodologia: {METHODOLOGY_REGISTRY[selected_methodology]['lab
         st.sidebar.success(
             f"Projeto ativo: **{st.session_state.get('current_project_name') or '-'}**"
         )
-st.sidebar.info(
-    f"Projeto: {selected_project_label}\nMetodologia: {METHODOLOGY_REGISTRY[selected_methodology]['label']}"
+        st.sidebar.info(
+            f"Metodologia ativa: **{METHODOLOGY_REGISTRY.get(st.session_state.get('current_methodology', ''), {}).get('label', '-')}**"
+        )
 )
 # =========================================================
 # AUTH GATE
