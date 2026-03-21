@@ -2545,7 +2545,7 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
         filtered_df = apply_matrix_filters(df, module_filter, status_filter, risk_filter)
         st.dataframe(filtered_df, use_container_width=True, hide_index=True)
 
-with tab_matrix:
+    with tab_matrix:
         st.markdown(f"#### {t(lang, 'filters')}")
         f1, f2, f3 = st.columns(3)
 
@@ -2565,7 +2565,23 @@ with tab_matrix:
                 options=status_options,
                 default=st.session_state["current_filters"]["status"],
             )
-        with tab_details:
+        with f3:
+            risk_filter = st.multiselect(
+                t(lang, "risk_filter"),
+                options=risk_options,
+                default=st.session_state["current_filters"]["risk"],
+            )
+
+        st.session_state["current_filters"] = {
+            "module": module_filter,
+            "status": status_filter,
+            "risk": risk_filter,
+        }
+
+        filtered_df = apply_matrix_filters(df, module_filter, status_filter, risk_filter)
+        st.dataframe(filtered_df, use_container_width=True, hide_index=True)
+
+    with tab_details:
         detail_df = apply_matrix_filters(
             df,
             st.session_state["current_filters"]["module"],
@@ -2585,7 +2601,6 @@ with tab_matrix:
                     risk_badge(safe_str(row.get("risk", ""))),
                     unsafe_allow_html=True
                 )
-
                 c1, c2 = st.columns(2)
                 with c1:
                     st.write(f"**Módulo:** {safe_str(row.get('module', ''))}")
