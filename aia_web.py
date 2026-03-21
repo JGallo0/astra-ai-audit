@@ -2473,7 +2473,6 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
          st.markdown("#### Visão rápida")
         quick_status = summary.get("status_counts", {})
         quick_risk = summary.get("risk_counts", {})
-
         q1, q2 = st.columns(2)
         with q1:
             st.write("**Status**")
