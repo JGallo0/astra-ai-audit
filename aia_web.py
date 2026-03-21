@@ -1491,7 +1491,7 @@ def render_project_manager(user_email: str):
     else:
         default_methodology_index = 0
 
-    selected_project_label = st.sidebar.selectbox(
+selected_project_label = st.sidebar.selectbox(
         "Selecionar projeto",
         options=list(project_options.keys()),
         index=default_project_index,
