@@ -612,7 +612,7 @@ def _estimate_confidence(
 
         return normalized_results, trail
 
-   def _normalize_module_results(
+def _normalize_module_results(
     self,
     requirements: List[Dict[str, Any]],
     parsed_items: Any,
@@ -620,6 +620,7 @@ def _estimate_confidence(
     project_hits: List[Dict[str, Any]],
     methodology_hits: List[Dict[str, Any]],
 ) -> List[Dict[str, Any]]:
+
     parsed_by_id: Dict[str, Dict[str, Any]] = {}
 
     if isinstance(parsed_items, list):
@@ -685,6 +686,16 @@ def _estimate_confidence(
             confidence=normalized["confidence"],
             status=normalized["status"],
         )
+
+        if not normalized["gap"]:
+            normalized["gap"] = self._infer_gap(normalized["status"])
+
+        if not normalized["recommendation"]:
+            normalized["recommendation"] = self._infer_recommendation(normalized["status"])
+
+        normalized_results.append(normalized)
+
+    return normalized_results
 
     def _classify_status(
         self,
