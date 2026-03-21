@@ -2336,7 +2336,7 @@ def render_full_audit_mode():
                 estimated_cost=float(audit_output.get("estimated_cost", 0.0)),
             )
 
-              st.success("Auditoria concluída com sucesso.")
+            st.success("Auditoria concluída com sucesso.")
 
             project_id = st.session_state.get("current_project_id")
             if project_id:
@@ -2352,7 +2352,6 @@ def render_full_audit_mode():
                     )
                 except Exception:
                     pass
-
         except Exception as e:
             st.error(f"Erro ao executar auditoria: {str(e)}")
 
