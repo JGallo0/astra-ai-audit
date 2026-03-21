@@ -2470,7 +2470,7 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
             st.write("**Risco**")
             st.write(quick_risk if quick_risk else {"Sem dados": 0})       
 
-         st.markdown("#### Visão rápida")
+            st.markdown("#### Visão rápida")
         quick_status = summary.get("status_counts", {})
         quick_risk = summary.get("risk_counts", {})
         q1, q2 = st.columns(2)
