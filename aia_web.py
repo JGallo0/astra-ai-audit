@@ -1528,11 +1528,9 @@ selected_methodology = st.sidebar.selectbox(
         st.sidebar.info(
             f"Metodologia ativa: **{METHODOLOGY_REGISTRY.get(st.session_state.get('current_methodology', ''), {}).get('label', '-')}**"
         )
-)
 # =========================================================
 # AUTH GATE
 # =========================================================
-
 init_project_session()
 
 current_user = get_user_info()
