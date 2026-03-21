@@ -2565,23 +2565,7 @@ with tab_matrix:
                 options=status_options,
                 default=st.session_state["current_filters"]["status"],
             )
-        with f3:
-            risk_filter = st.multiselect(
-                t(lang, "risk_filter"),
-                options=risk_options,
-                default=st.session_state["current_filters"]["risk"],
-            )
-
-        st.session_state["current_filters"] = {
-            "module": module_filter,
-            "status": status_filter,
-            "risk": risk_filter,
-        }
-
-        filtered_df = apply_matrix_filters(df, module_filter, status_filter, risk_filter)
-        st.dataframe(filtered_df, use_container_width=True, hide_index=True)
-
-    with tab_details:
+        with tab_details:
         detail_df = apply_matrix_filters(
             df,
             st.session_state["current_filters"]["module"],
@@ -2590,14 +2574,16 @@ with tab_matrix:
         )
 
         st.markdown("#### Requisitos em detalhe")
+
         for _, row in detail_df.iterrows():
             title = f"{safe_str(row.get('requirement_id', ''))} — {safe_str(row.get('title', ''))}"
+
             with st.expander(title):
                 st.markdown(
-                    status_badge(safe_str(row.get("status", ""))) + " " + risk_badge(safe_str(row.get("risk", ""))),
+                    status_badge(safe_str(row.get("status", ""))) +
+                    " " +
+                    risk_badge(safe_str(row.get("risk", ""))),
                     unsafe_allow_html=True
-            with st.expander("Ver resultado bruto da auditoria"):
-            st.json(st.session_state.get("last_full_audit_results", []))            
                 )
 
                 c1, c2 = st.columns(2)
@@ -2607,6 +2593,25 @@ with tab_matrix:
                 with c2:
                     st.write(f"**Confiança:** {safe_str(row.get('confidence', ''))}")
 
+                st.markdown("**Base metodológica**")
+                st.write(safe_str(row.get("methodology_basis", "")) or "Não identificado.")
+
+                st.markdown("**Evidência do projeto**")
+                st.write(safe_str(row.get("project_evidence", "")) or "Não identificado.")
+
+                st.markdown("**Gap**")
+                st.write(safe_str(row.get("gap", "")) or "Não identificado.")
+
+                st.markdown("**Recomendação**")
+                st.write(safe_str(row.get("recommendation", "")) or "Não identificado.")
+
+                if safe_str(row.get("notes", "")).strip():
+                    st.markdown("**Notas**")
+                    st.write(safe_str(row.get("notes", "")))
+
+        # 👇 AGORA SIM: fora do loop
+        with st.expander("Ver resultado bruto da auditoria"):
+            st.json(st.session_state.get("last_full_audit_results", []))
                 st.markdown("**Base metodológica**")
                 st.write(safe_str(row.get("methodology_basis", "")) or "Não identificado.")
 
