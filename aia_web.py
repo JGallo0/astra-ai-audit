@@ -1550,7 +1550,7 @@ def render_header(lang: str):
     try:
         import os
         if os.path.exists(logo_path):
-            st.image(logo_path, width=340)
+            st.image(logo_path, width=420)
             return
     except Exception:
         pass
