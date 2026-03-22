@@ -2810,8 +2810,9 @@ if st.session_state.get("show_trails_full_audit", False):
                 st.markdown(html, unsafe_allow_html=True)
 else:
     st.info("Execute a auditoria completa para gerar a matriz de conformidade.")
-    
-        # =========================================================
+
+
+# =========================================================
 # LEGACY PAGE BRIDGES
 # =========================================================
 
