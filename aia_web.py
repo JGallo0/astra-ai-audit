@@ -2672,20 +2672,20 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
             last_full_audit_trails=st.session_state["last_full_audit_trails"],
         )
 
-    if st.session_state.get("show_trails_full_audit", False):
-        validation.render_trails_section(trails)
+if st.session_state.get("show_trails_full_audit", False):
+    validation.render_trails_section(trails)
 
     with tab_history:
-    validation.render_history_tab(
-        history=st.session_state.get("audit_history", []),
-        lang=lang,
-        t=t,
-        theme=THEME,
-        safe_str=safe_str,
-        badge_html=badge_html,
-    )
-    else:
-        st.info("Execute a auditoria completa para gerar a matriz de conformidade.")
+        validation.render_history_tab(
+            history=st.session_state.get("audit_history", []),
+            lang=lang,
+            t=t,
+            theme=THEME,
+            safe_str=safe_str,
+            badge_html=badge_html,
+        )
+else:
+    st.info("Execute a auditoria completa para gerar a matriz de conformidade.")
 
 
 # =========================================================
