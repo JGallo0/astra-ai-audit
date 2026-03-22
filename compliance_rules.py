@@ -253,3 +253,22 @@ def calculate_confidence(
     # NORMALIZAÇÃO FINAL
     # ---------------------------
     return clip_int(score, default=55, min_value=15, max_value=95)
+
+
+    # ---------------------------
+    # PENALIZAÇÃO POR GAP RELEVANTE
+    # ---------------------------
+    if gp:
+        if any(x in gp for x in [
+            "não há evidência",
+            "não foram apresentados",
+            "não localizado",
+            "ausência",
+            "missing",
+            "not provided",
+            "não atende",
+        ]):
+            score -= 25
+   
+
+
