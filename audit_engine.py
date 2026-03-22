@@ -557,7 +557,7 @@ class AuditEngine:
             evidence_present = self._has_real_evidence(normalized["project_evidence"])
             methodology_present = self._has_real_methodology_basis(normalized["methodology_basis"])
 
-                        raw_conf = raw.get("confidence")
+            raw_conf = raw.get("confidence")
 
             if (
                 raw_conf is None
@@ -593,6 +593,7 @@ class AuditEngine:
                 confidence=normalized["confidence"],
                 status=normalized["status"],
             )
+
             if not normalized["gap"]:
                 normalized["gap"] = self._infer_gap(normalized["status"])
 
@@ -602,7 +603,6 @@ class AuditEngine:
             normalized_results.append(normalized)
 
         return normalized_results
-
     def _has_real_evidence(self, text: str) -> bool:
         text = safe_str(text).lower()
         if not text:
