@@ -120,3 +120,13 @@ def render_downloads_tab(
             mime="application/json",
             use_container_width=True
         )
+
+def render():
+    st.warning("Validation page ainda em transição. Usando renderer legado.")
+
+    legacy_renderer = st.session_state.get("_validation_legacy_renderer")
+
+    if callable(legacy_renderer):
+        legacy_renderer()
+    else:
+        st.error("Renderer legado não encontrado.")
