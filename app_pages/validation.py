@@ -228,21 +228,35 @@ def render_executive_summary(summary):
         "e o alinhamento explícito com os critérios da metodologia."
     )
 
-    # =========================
-    # UI
-    # =========================
-    st.markdown("### 🧭 Executive Summary")
+# =========================
+# UI
+# =========================
+st.markdown("### 🧭 Executive Summary")
 
-    html = (
-        f'<div style="padding:16px;border-radius:12px;border:1px solid #e6e6e6;'
-        f'background-color:#f9fbfd;box-shadow:0 2px 8px rgba(0,0,0,0.05);">'
-        f'<div style="font-size:18px;font-weight:600;margin-bottom:10px;">{headline}</div>'
-        f'<div style="margin-bottom:8px;"><b>Score geral:</b> {score}% &nbsp;&nbsp;'
-        f'<b>Confiança:</b> {confidence}%</div>'
-        f'<div style="margin-bottom:8px;">{confidence_msg}</div>'
-        f'<div style="margin-bottom:8px;">{risk_msg}</div>'
-        f'<div style="margin-top:10px;"><b>Recomendação prioritária:</b><br>{recommendation}</div>'
-        f'</div>'
-    )
+with st.container(border=True):
 
-    st.markdown(html, unsafe_allow_html=True)
+    # Headline
+    st.markdown(f"#### {headline}")
+
+    # Métricas principais
+    m1, m2 = st.columns(2)
+    with m1:
+        st.metric("Score geral", f"{score}%")
+    with m2:
+        st.metric("Confiança", f"{confidence}%")
+
+    st.divider()
+
+    # Diagnóstico
+    st.markdown("**Diagnóstico da análise**")
+    st.write(confidence_msg)
+
+    # Risco
+    st.markdown("**Risco identificado**")
+    st.write(risk_msg)
+
+    st.divider()
+
+    # Próximo passo
+    st.markdown("**Próxima ação recomendada**")
+    st.write(recommendation)
