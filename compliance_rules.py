@@ -60,94 +60,229 @@ def calculate_score(
     recommendation: str,
     notes: str,
 ) -> int:
+    pe = (project_evidence or "").lower().strip()
+    mb = (methodology_basis or "").lower().strip()
+    gp = (gap or "").lower().strip()
+    rc = (recommendation or "").lower().strip()
+    nt = (notes or "").lower().strip()
+
+    combined = " ".join([pe, mb, gp, rc, nt])
 
     score = 0
 
-    pe = project_evidence.lower()
-    mb = methodology_basis.lower()
-    gp = gap.lower()
-    rc = recommendation.lower()
-    nt = notes.lower()
+    # =========================================================
+    # 1. EVIDÊNCIA DO PROJETO (0–42)
+    # =========================================================
+    if pe:
+        score += 18
 
-    # ---------------------------
-    # EVIDÊNCIA DO PROJETO (0–40)
-    # ---------------------------
-    if pe.strip():
-        score += 20
+        if len(pe) > 80:
+            score += 4
+        if len(pe) > 180:
+            score += 4
+        if len(pe) > 320:
+            score += 4
 
-        if len(pe) > 120:
-            score += 5
-        if len(pe) > 250:
-            score += 5
-        if len(pe) > 400:
-            score += 5
+    evidence_terms = [
+        "astm",
+        "iso",
+        "iso/iec 17025",
+        "mrv",
+        "batch",
+        "lote",
+        "traceability",
+        "rastreabilidade",
+        "h/corg",
+        "fixed carbon",
+        "carbono fixo",
+        "heavy metals",
+        "metais pesados",
+        "lab report",
+        "laudo",
+        "sample",
+        "sampling",
+        "amostra",
+        "operator",
+        "retention sample",
+        "chain of custody",
+        "digital record",
+        "batch id",
+        "report reference",
+    ]
+    score += min(sum(1 for t in evidence_terms if t in pe), 8)
 
-        strong_terms = [
-            "batch",
-            "lote",
-            "mrv",
-            "traceability",
-            "rastreabilidade",
-            "laboratório",
-            "iso",
-            "astm",
-        ]
+    # =========================================================
+    # 2. BASE METODOLÓGICA (0–24)
+    # =========================================================
+    if mb:
+        score += 10
 
-        score += min(sum(1 for t in strong_terms if t in pe), 5)
+        if len(mb) > 80:
+            score += 3
+        if len(mb) > 180:
+            score += 3
+        if len(mb) > 320:
+            score += 2
 
-    # ---------------------------
-    # BASE METODOLÓGICA (0–30)
-    # ---------------------------
-    if mb.strip():
-        score += 15
+    method_terms = [
+        "requirement",
+        "criteria",
+        "threshold",
+        "eligibility",
+        "methodology",
+        "protocol",
+        "must",
+        "shall",
+        "required",
+        "production and storage protocol",
+    ]
+    score += min(sum(1 for t in method_terms if t in mb), 6)
 
-        if len(mb) > 120:
-            score += 5
-        if len(mb) > 250:
-            score += 5
+    # =========================================================
+    # 3. SINAIS DE EVIDÊNCIA CONCRETA (+0–12)
+    # =========================================================
+    concrete_evidence_terms = [
+        "for each batch",
+        "each batch",
+        "batch id",
+        "lab report reference",
+        "digital record",
+        "retention sample",
+        "12 months",
+        "iso/iec 17025",
+        "fixed carbon",
+        "volatile matter",
+        "ash",
+        "moisture",
+        "total carbon",
+        "pahs",
+        "heavy metals",
+        "sampling date",
+        "operator",
+        "reactor conditions",
+    ]
+    score += min(sum(1 for t in concrete_evidence_terms if t in pe), 8)
 
-        method_terms = [
-            "requirement",
-            "criteria",
-            "threshold",
-            "eligibility",
-            "methodology",
-        ]
+    # =========================================================
+    # 4. GAP / LACUNA (-40 → +10)
+    # =========================================================
+    positive_gap_terms = [
+        "no material gap",
+        "não foi identificada lacuna",
+        "none explicitly identified",
+        "sem lacuna relevante",
+    ]
+    critical_gap_terms = [
+        "não há evidência",
+        "não foram apresentados",
+        "não localizado",
+        "ausência",
+        "missing",
+        "not provided",
+        "não atende",
+        "no explicit mention",
+        "no information given",
+        "not documented",
+        "not explicitly stated",
+        "not demonstrated",
+        "faltam evidências",
+        "faltam elementos",
+        "não foi evidenciado",
+        "não apresenta",
+    ]
+    moderate_gap_terms = [
+        "partial",
+        "parcial",
+        "incomplete",
+        "incompleto",
+        "not fully",
+        "carece",
+        "falta maior detalhe",
+        "needs more detail",
+        "not fully demonstrated",
+        "não está completa",
+        "detalhamento insuficiente",
+    ]
 
-        score += min(sum(1 for t in method_terms if t in mb), 5)
-
-    # ---------------------------
-    # GAP (-30 → +10)
-    # ---------------------------
     if gp:
-        if "no material gap" in gp or "não foi identificada lacuna" in gp:
-            score += 8
+        if any(t in gp for t in positive_gap_terms):
+            score += 10
         else:
-            score -= 10
+            score -= 8
 
-            if any(x in gp for x in ["missing", "ausência", "incomplete"]):
-                score -= 5
+            score -= min(sum(1 for t in critical_gap_terms if t in gp) * 6, 24)
+            score -= min(sum(1 for t in moderate_gap_terms if t in gp) * 3, 12)
 
-            if any(x in gp for x in ["not compliant", "não atende"]):
-                score -= 10
-
-    # ---------------------------
-    # RECOMENDAÇÃO (+0–5)
-    # ---------------------------
+    # =========================================================
+    # 5. RECOMENDAÇÃO (+0–4)
+    # =========================================================
     if rc:
         score += 2
+        if len(rc) > 120:
+            score += 1
+        if any(x in rc for x in ["incluir", "fornecer", "documentar", "apresentar", "attach", "provide", "document"]):
+            score += 1
 
-    # ---------------------------
-    # NOTAS (+0–5)
-    # ---------------------------
+    # =========================================================
+    # 6. NOTAS (+0–4)
+    # =========================================================
     if nt:
         score += 2
+        if len(nt) > 100:
+            score += 1
+        if any(x in nt for x in ["aligns", "alinha", "rastreabilidade", "traceability", "documented", "documentado"]):
+            score += 1
 
-    # ---------------------------
-    # NORMALIZAÇÃO FINAL
-    # ---------------------------
-    return clip_int(score, default=0)
+    # =========================================================
+    # 7. PENALIZAÇÕES POR EVIDÊNCIA FRACA (-18)
+    # =========================================================
+    weak_evidence_terms = [
+        "generic",
+        "unclear",
+        "not clear",
+        "não identificado",
+        "insufficient",
+        "insuficiente",
+    ]
+    score -= min(sum(1 for t in weak_evidence_terms if t in combined) * 3, 12)
 
+    if pe and len(pe) < 50:
+        score -= 6
+
+    if mb and len(mb) < 50:
+        score -= 3
+
+    # =========================================================
+    # 8. LIMITADORES CONTEXTUAIS
+    # =========================================================
+    # Sem evidência do projeto, score não pode passar de 20
+    if not pe:
+        score = min(score, 20)
+
+    # Sem base metodológica, score não pode passar de 35
+    if not mb:
+        score = min(score, 35)
+
+    # Gap crítico impede score alto
+    if any(t in gp for t in critical_gap_terms):
+        score = min(score, 58)
+
+    # Gap moderado impede score excelente
+    if any(t in gp for t in moderate_gap_terms):
+        score = min(score, 72)
+
+    # Evidência forte + base metodológica forte + sem lacuna relevante
+    pe_strong = len(pe) > 180 and sum(1 for t in evidence_terms if t in pe) >= 3
+    mb_strong = len(mb) > 100 and sum(1 for t in method_terms if t in mb) >= 2
+    no_material_gap = any(t in gp for t in positive_gap_terms)
+
+    if pe_strong and mb_strong and no_material_gap:
+        score = max(score, 78)
+
+    # =========================================================
+    # 9. NORMALIZAÇÃO FINAL
+    # =========================================================
+    return clip_int(score, default=0, min_value=0, max_value=95)
 
 # =========================================================
 # CONFIDENCE ENGINE
