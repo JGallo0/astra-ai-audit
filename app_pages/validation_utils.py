@@ -417,51 +417,53 @@ def risk_badge(risk: str) -> str:
     return badge_html(risk, "info")
 
 def build_executive_dossier_text(
-    project_name: str,
-    summary: Dict[str, Any],
-    results: List[Dict[str, Any]],
-) -> str:
-
+    project_name,
+    summary,
+    results,
+):
     score = summary.get("overall_score", 0)
     confidence = summary.get("overall_confidence", 0)
-    status_counts = summary.get("status_counts", {}) or {}
     risk_counts = summary.get("risk_counts", {}) or {}
 
     # =========================
     # CLASSIFICAÇÃO EXECUTIVA
     # =========================
     if score >= 75:
-        maturity = "High readiness for certification"
+        maturity = "Alta prontidão para certificação"
+        interpretation = "O projeto apresenta estrutura robusta e aderência consistente aos critérios metodológicos."
     elif score >= 55:
-        maturity = "Moderate readiness with material gaps"
+        maturity = "Prontidão moderada com lacunas relevantes"
+        interpretation = "O projeto possui base técnica consistente, porém com lacunas que podem comprometer a certificação."
     elif score >= 40:
-        maturity = "Low readiness – significant gaps"
+        maturity = "Baixa prontidão – riscos significativos"
+        interpretation = "O projeto apresenta estrutura parcial, com lacunas críticas que exigem intervenção antes de certificação."
     else:
-        maturity = "Not ready for certification"
+        maturity = "Não elegível no estado atual"
+        interpretation = "O projeto não atende aos requisitos mínimos para certificação no estágio atual."
 
     high_risk = risk_counts.get("alto", 0)
 
     # =========================
-    # PRINCIPAIS GAPS
+    # IDENTIFICAR GAPS CRÍTICOS
     # =========================
-    critical_gaps = []
-    for item in results:
-        if item.get("risk") == "alto":
-            critical_gaps.append(
-                f"{safe_str(item.get('requirement_id'))} – {safe_str(item.get('gap'))}"
-            )
+    critical_items = [
+        r for r in results if r.get("risk") == "alto"
+    ]
 
-    critical_gaps = critical_gaps[:5]
+    # prioriza os mais relevantes
+    critical_items = sorted(
+        critical_items,
+        key=lambda x: x.get("score", 0)
+    )[:5]
 
     # =========================
-    # RECOMENDAÇÕES PRIORITÁRIAS
+    # RECOMENDAÇÕES AGRUPADAS
     # =========================
     recommendations = []
-    for item in results:
-        if item.get("risk") in ["alto", "medio"]:
-            rec = safe_str(item.get("recommendation"))
-            if rec:
-                recommendations.append(rec)
+    for r in critical_items:
+        rec = safe_str(r.get("recommendation"))
+        if rec:
+            recommendations.append(rec)
 
     recommendations = list(dict.fromkeys(recommendations))[:5]
 
@@ -470,57 +472,64 @@ def build_executive_dossier_text(
     # =========================
     lines = []
 
-    # 1. Executive Summary
+    # EXECUTIVE SUMMARY
     lines.append("# Executive Summary")
     lines.append("")
-    lines.append(f"Project: {safe_str(project_name)}")
+    lines.append(f"Projeto: {safe_str(project_name)}")
     lines.append("")
-    lines.append(f"Overall score: {score}%")
-    lines.append(f"Confidence level: {confidence}%")
-    lines.append(f"Assessment: {maturity}")
+    lines.append(f"Score geral: {score:.1f}%")
+    lines.append(f"Confiança da análise: {confidence:.1f}%")
+    lines.append(f"Classificação: {maturity}")
+    lines.append("")
+    lines.append(interpretation)
     lines.append("")
 
     if high_risk:
-        lines.append(f"{high_risk} high-risk compliance gaps identified.")
+        lines.append(f"Foram identificados {high_risk} requisitos com risco alto, indicando necessidade imediata de ajuste antes de certificação.")
     else:
-        lines.append("No critical risks identified.")
+        lines.append("Não foram identificados riscos críticos imediatos.")
     lines.append("")
 
-    # 2. Key Risks & Gaps
-    lines.append("## Key Risks & Gaps")
-    if not critical_gaps:
-        lines.append("No critical gaps identified.")
-    else:
-        for gap in critical_gaps:
-            lines.append(f"- {gap}")
+    # KEY RISKS
+    lines.append("## Principais riscos e lacunas")
     lines.append("")
 
-    # 3. Priority Recommendations
-    lines.append("## Priority Recommendations")
+    if not critical_items:
+        lines.append("Nenhuma lacuna crítica identificada.")
+    else:
+        for r in critical_items:
+            lines.append(
+                f"- {safe_str(r.get('requirement_id'))}: "
+                f"{safe_str(r.get('gap'))}"
+            )
+    lines.append("")
+
+    # RECOMMENDATIONS
+    lines.append("## Recomendações prioritárias")
+    lines.append("")
+
     if not recommendations:
-        lines.append("No recommendations generated.")
+        lines.append("Nenhuma recomendação gerada.")
     else:
         for rec in recommendations:
             lines.append(f"- {rec}")
     lines.append("")
 
-    # 4. Detailed Assessment
-    lines.append("## Detailed Assessment by Module")
+    # DETAIL (RESUMIDO)
+    lines.append("## Avaliação por módulo")
     lines.append("")
 
-    grouped = {}
-    for item in results:
-        grouped.setdefault(item.get("module", "Unknown"), []).append(item)
+    modules = {}
+    for r in results:
+        modules.setdefault(r.get("module", "Geral"), []).append(r)
 
-    for module, items in grouped.items():
-        lines.append(f"### {safe_str(module)}")
-        lines.append("")
-        for item in items:
+    for module, items in modules.items():
+        lines.append(f"### {module}")
+        for r in items:
             lines.append(
-                f"- {safe_str(item.get('requirement_id'))} | "
-                f"Status: {safe_str(item.get('status'))} | "
-                f"Risk: {safe_str(item.get('risk'))} | "
-                f"Score: {safe_str(item.get('score'))}%"
+                f"- {safe_str(r.get('requirement_id'))} | "
+                f"{safe_str(r.get('status'))} | "
+                f"Risco: {safe_str(r.get('risk'))}"
             )
         lines.append("")
 
