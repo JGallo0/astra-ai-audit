@@ -2350,316 +2350,245 @@ def render_full_audit_mode():
         except Exception as e:
             st.error(f"Erro ao executar auditoria: {str(e)}")
 
-if rerun_failures and has_previous:
-    callback = make_progress_callback(progress_container, status_container)
+    if rerun_failures and has_previous:
+        callback = make_progress_callback(progress_container, status_container)
 
-    try:
-        with st.spinner("Reanalisando falhas..."):
-            runner_output = execute_rerun_failures(
-                api_key=OPENAI_API_KEY,
-                model=MODEL_NAME,
-                requirements=requirements,
-                project_vector_store_id=project_vs_id,
-                methodology_vector_store_id=methodology_vs_id,
-                project_name=project_name,
-                selected_modules=selected_modules,
-                previous_results=st.session_state["last_full_audit_results"],
-                callback=callback,
+        try:
+            with st.spinner("Reanalisando falhas..."):
+                runner_output = execute_rerun_failures(
+                    api_key=OPENAI_API_KEY,
+                    model=MODEL_NAME,
+                    requirements=requirements,
+                    project_vector_store_id=project_vs_id,
+                    methodology_vector_store_id=methodology_vs_id,
+                    project_name=project_name,
+                    selected_modules=selected_modules,
+                    previous_results=st.session_state["last_full_audit_results"],
+                    callback=callback,
+                )
+
+            rerun_output = runner_output["rerun_output"]
+            merged_results = runner_output["merged_results"]
+            summary = runner_output["summary"]
+            df = runner_output["df"]
+
+            st.session_state["last_full_audit_results"] = merged_results
+            st.session_state["last_full_audit_trails"] += rerun_output["trails"]
+            st.session_state["last_full_audit_summary"] = summary
+            st.session_state["last_full_audit_df"] = df
+            st.session_state["last_full_audit_run_id"] = rerun_output["run_id"]
+            st.session_state["audit_session_cost_estimate"] += float(rerun_output.get("estimated_cost", 0.0))
+            st.session_state["progress_state"]["execution_estimated_cost"] = float(
+                rerun_output.get("estimated_cost", 0.0)
+            )
+            st.session_state["progress_state"]["session_estimated_cost"] = float(
+                st.session_state["audit_session_cost_estimate"]
             )
 
-        rerun_output = runner_output["rerun_output"]
-        merged_results = runner_output["merged_results"]
-        summary = runner_output["summary"]
-        df = runner_output["df"]
+            append_history_entry(
+                run_id=rerun_output["run_id"],
+                project_name=project_name,
+                execution_mode="Reanálise",
+                selected_modules=selected_modules,
+                summary=summary,
+                estimated_cost=float(rerun_output.get("estimated_cost", 0.0)),
+            )
 
-        st.session_state["last_full_audit_results"] = merged_results
-        st.session_state["last_full_audit_trails"] += rerun_output["trails"]
-        st.session_state["last_full_audit_summary"] = summary
-        st.session_state["last_full_audit_df"] = df
-        st.session_state["last_full_audit_run_id"] = rerun_output["run_id"]
-        st.session_state["audit_session_cost_estimate"] += float(rerun_output.get("estimated_cost", 0.0))
-        st.session_state["progress_state"]["execution_estimated_cost"] = float(rerun_output.get("estimated_cost", 0.0))
-        st.session_state["progress_state"]["session_estimated_cost"] = float(st.session_state["audit_session_cost_estimate"])
+            st.success("Falhas reanalisadas com sucesso.")
 
-        append_history_entry(
-            run_id=rerun_output["run_id"],
-            project_name=project_name,
-            execution_mode="Reanálise",
-            selected_modules=selected_modules,
-            summary=summary,
-            estimated_cost=float(rerun_output.get("estimated_cost", 0.0)),
-        )
+            project_id = st.session_state.get("current_project_id")
+            if project_id:
+                try:
+                    save_audit_output(
+                        project_id=project_id,
+                        user_email=current_user["email"],
+                        output_type="full_audit_rerun",
+                        title="Reanálise de falhas",
+                        question=project_name,
+                        answer=str(summary),
+                        content=str(merged_results),
+                    )
+                except Exception:
+                    pass
 
-        st.success("Falhas reanalisadas com sucesso.")
+        except Exception as e:
+            st.error(f"Erro ao reanalisar falhas: {str(e)}")
 
-        project_id = st.session_state.get("current_project_id")
-        if project_id:
-            try:
-                save_audit_output(
-                    project_id=project_id,
-                    user_email=current_user["email"],
-                    output_type="full_audit_rerun",
-                    title="Reanálise de falhas",
-                    question=project_name,
-                    answer=str(summary),
-                    content=str(merged_results),
-                )
-            except Exception:
-                pass
+    if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not st.session_state["last_full_audit_df"].empty:
+        df = st.session_state["last_full_audit_df"].copy()
+        summary = st.session_state["last_full_audit_summary"]
+        trails = st.session_state["last_full_audit_trails"]
+        run_id = st.session_state["last_full_audit_run_id"]
+        project_name = st.session_state.get("current_project_name") or "Projeto sem nome"
 
-    except Exception as e:
-        st.error(f"Erro ao reanalisar falhas: {str(e)}")
+        tab_summary, tab_matrix, tab_details, tab_downloads, tab_history = st.tabs([
+            t(lang, "summary_tab"),
+            t(lang, "matrix_tab"),
+            t(lang, "details_tab"),
+            t(lang, "downloads_tab"),
+            t(lang, "history_tab"),
+        ])
 
-if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not st.session_state["last_full_audit_df"].empty:
-    df = st.session_state["last_full_audit_df"].copy()
-    summary = st.session_state["last_full_audit_summary"]
-    trails = st.session_state["last_full_audit_trails"]
-    run_id = st.session_state["last_full_audit_run_id"]
-    project_name = st.session_state.get("current_project_name") or "Projeto sem nome"
-
-    tab_summary, tab_matrix, tab_details, tab_downloads, tab_history = st.tabs([
-        t(lang, "summary_tab"),
-        t(lang, "matrix_tab"),
-        t(lang, "details_tab"),
-        t(lang, "downloads_tab"),
-        t(lang, "history_tab"),
-    ])
-
-    with tab_summary:
-        s1, s2, s3, s4 = st.columns(4)
-        s1.metric("Requisitos", summary.get("total_requirements", 0))
-        s2.metric("Score geral", f"{summary.get('overall_score', 0)}%")
-        s3.metric("Confiança geral", f"{summary.get('overall_confidence', 0)}%")
-        s4.metric(t(lang, "session_cost"), f"US$ {st.session_state['audit_session_cost_estimate']:.3f}")
-
-        st.markdown("#### Visão rápida")
-        quick_status = summary.get("status_counts", {})
-        quick_risk = summary.get("risk_counts", {})
-
-        q1, q2 = st.columns(2)
-        with q1:
-            st.write("**Status**")
-            st.write(quick_status if quick_status else {"Sem dados": 0})
-        with q2:
-            st.write("**Risco**")
-            st.write(quick_risk if quick_risk else {"Sem dados": 0})       
+        with tab_summary:
+            s1, s2, s3, s4 = st.columns(4)
+            s1.metric("Requisitos", summary.get("total_requirements", 0))
+            s2.metric("Score geral", f"{summary.get('overall_score', 0)}%")
+            s3.metric("Confiança geral", f"{summary.get('overall_confidence', 0)}%")
+            s4.metric(t(lang, "session_cost"), f"US$ {st.session_state['audit_session_cost_estimate']:.3f}")
 
             st.markdown("#### Visão rápida")
-        quick_status = summary.get("status_counts", {})
-        quick_risk = summary.get("risk_counts", {})
-        q1, q2 = st.columns(2)
-        with q1:
-            st.write("**Status**")
-            st.write(quick_status if quick_status else {"Sem dados": 0})
-        with q2:
-            st.write("**Risco**")
-            st.write(quick_risk if quick_risk else {"Sem dados": 0})       
+            quick_status = summary.get("status_counts", {})
+            quick_risk = summary.get("risk_counts", {})
 
-        st.markdown("#### Módulos")
-        module_scores = summary.get("module_scores", {})
-        module_conf = summary.get("module_confidence", {})
-        if module_scores:
-            module_df = pd.DataFrame([
-                {
-                    "Módulo": mod,
-                    "Score": module_scores.get(mod, 0),
-                    "Confiança": module_conf.get(mod, 0),
-                }
-                for mod in sorted(module_scores.keys())
+            q1, q2 = st.columns(2)
+            with q1:
+                st.write("**Status**")
+                st.write(quick_status if quick_status else {"Sem dados": 0})
+            with q2:
+                st.write("**Risco**")
+                st.write(quick_risk if quick_risk else {"Sem dados": 0})
+
+            st.markdown("#### Módulos")
+            module_scores = summary.get("module_scores", {})
+            module_conf = summary.get("module_confidence", {})
+            if module_scores:
+                module_df = pd.DataFrame([
+                    {
+                        "Módulo": mod,
+                        "Score": module_scores.get(mod, 0),
+                        "Confiança": module_conf.get(mod, 0),
+                    }
+                    for mod in sorted(module_scores.keys())
+                ])
+                st.dataframe(module_df, hide_index=True, width="stretch")
+
+            st.markdown("#### Status")
+            status_df = pd.DataFrame([
+                {"Status": k, "Quantidade": v}
+                for k, v in (summary.get("status_counts", {}) or {}).items()
             ])
-            st.dataframe(module_df, hide_index=True, width="stretch")
+            st.dataframe(status_df, hide_index=True, width="stretch")
 
-        st.markdown("#### Status")
-        status_df = pd.DataFrame([
-            {"Status": k, "Quantidade": v}
-            for k, v in (summary.get("status_counts", {}) or {}).items()
-        ])
-        st.dataframe(status_df, hide_index=True, width="stretch")
+            st.markdown("#### Risco")
+            risk_df = pd.DataFrame([
+                {"Risco": k, "Quantidade": v}
+                for k, v in (summary.get("risk_counts", {}) or {}).items()
+            ])
+            st.dataframe(risk_df, hide_index=True, width="stretch")
 
-        st.markdown("#### Risco")
-        risk_df = pd.DataFrame([
-            {"Risco": k, "Quantidade": v}
-            for k, v in (summary.get("risk_counts", {}) or {}).items()
-        ])
-        st.dataframe(risk_df, hide_index=True, width="stretch")
+        with tab_matrix:
+            st.markdown(f"#### {t(lang, 'filters')}")
+            f1, f2, f3 = st.columns(3)
 
-    with tab_matrix:
-        st.markdown(f"#### {t(lang, 'filters')}")
-        f1, f2, f3 = st.columns(3)
+            module_options = sorted(df["module"].dropna().unique().tolist()) if "module" in df.columns else []
+            status_options = sorted(df["status"].dropna().unique().tolist()) if "status" in df.columns else []
+            risk_options = sorted(df["risk"].dropna().unique().tolist()) if "risk" in df.columns else []
 
-        module_options = sorted(df["module"].dropna().unique().tolist()) if "module" in df.columns else []
-        status_options = sorted(df["status"].dropna().unique().tolist()) if "status" in df.columns else []
-        risk_options = sorted(df["risk"].dropna().unique().tolist()) if "risk" in df.columns else []
-
-        with f1:
-            module_filter = st.multiselect(
-                t(lang, "module_filter"),
-                options=module_options,
-                default=st.session_state["current_filters"]["module"],
-                key="module_filter_matrix",
-            )
-
-        with f2:
-            status_filter = st.multiselect(
-                t(lang, "status_filter"),
-                options=status_options,
-                default=st.session_state["current_filters"]["status"],
-                key="status_filter_matrix",
-            )
-
-        with f3:
-            risk_filter = st.multiselect(
-                t(lang, "risk_filter"),
-                options=risk_options,
-                default=st.session_state["current_filters"]["risk"],
-                key="risk_filter_matrix",
-            )
-        st.session_state["current_filters"] = {
-            "module": module_filter,
-            "status": status_filter,
-            "risk": risk_filter,
-        }
-
-        filtered_df = apply_matrix_filters(df, module_filter, status_filter, risk_filter)
-        st.dataframe(filtered_df, use_container_width=True, hide_index=True)
-
-    with tab_matrix:
-        st.markdown(f"#### {t(lang, 'filters')}")
-        f1, f2, f3 = st.columns(3)
-
-        module_options = sorted(df["module"].dropna().unique().tolist()) if "module" in df.columns else []
-        status_options = sorted(df["status"].dropna().unique().tolist()) if "status" in df.columns else []
-        risk_options = sorted(df["risk"].dropna().unique().tolist()) if "risk" in df.columns else []
-
-        with f1:
-            module_filter = st.multiselect(
-                t(lang, "module_filter"),
-                options=module_options,
-                default=st.session_state["current_filters"]["module"],
-            )
-        with f2:
-            status_filter = st.multiselect(
-                t(lang, "status_filter"),
-                options=status_options,
-                default=st.session_state["current_filters"]["status"],
-            )
-        with f3:
-            risk_filter = st.multiselect(
-                t(lang, "risk_filter"),
-                options=risk_options,
-                default=st.session_state["current_filters"]["risk"],
-            )
-
-        st.session_state["current_filters"] = {
-            "module": module_filter,
-            "status": status_filter,
-            "risk": risk_filter,
-        }
-
-        filtered_df = apply_matrix_filters(df, module_filter, status_filter, risk_filter)
-        st.dataframe(filtered_df, use_container_width=True, hide_index=True)
-
-    with tab_details:
-        detail_df = apply_matrix_filters(
-            df,
-            st.session_state["current_filters"]["module"],
-            st.session_state["current_filters"]["status"],
-            st.session_state["current_filters"]["risk"],
-        )
-
-        st.markdown("#### Requisitos em detalhe")
-
-        for _, row in detail_df.iterrows():
-            title = f"{safe_str(row.get('requirement_id', ''))} — {safe_str(row.get('title', ''))}"
-
-            with st.expander(title):
-                st.markdown(
-                    status_badge(safe_str(row.get("status", ""))) +
-                    " " +
-                    risk_badge(safe_str(row.get("risk", ""))),
-                    unsafe_allow_html=True
-                )
-                c1, c2 = st.columns(2)
-                with c1:
-                    st.write(f"**Módulo:** {safe_str(row.get('module', ''))}")
-                    st.write(f"**Score:** {safe_str(row.get('score', ''))}")
-                with c2:
-                    st.write(f"**Confiança:** {safe_str(row.get('confidence', ''))}")
-
-                st.markdown("**Base metodológica**")
-                st.write(safe_str(row.get("methodology_basis", "")) or "Não identificado.")
-
-                st.markdown("**Evidência do projeto**")
-                st.write(safe_str(row.get("project_evidence", "")) or "Não identificado.")
-
-                st.markdown("**Gap**")
-                st.write(safe_str(row.get("gap", "")) or "Não identificado.")
-
-                st.markdown("**Recomendação**")
-                st.write(safe_str(row.get("recommendation", "")) or "Não identificado.")
-
-                if safe_str(row.get("notes", "")).strip():
-                    st.markdown("**Notas**")
-                    st.write(safe_str(row.get("notes", "")))
-
-            with st.expander(title):
-                st.markdown(
-                    status_badge(safe_str(row.get("status", ""))) +
-                    " " +
-                    risk_badge(safe_str(row.get("risk", ""))),
-                    unsafe_allow_html=True
+            with f1:
+                module_filter = st.multiselect(
+                    t(lang, "module_filter"),
+                    options=module_options,
+                    default=st.session_state["current_filters"]["module"],
+                    key="module_filter_matrix",
                 )
 
-                c1, c2 = st.columns(2)
-                with c1:
-                    st.write(f"**Módulo:** {safe_str(row.get('module', ''))}")
-                    st.write(f"**Score:** {safe_str(row.get('score', ''))}")
-                with c2:
-                    st.write(f"**Confiança:** {safe_str(row.get('confidence', ''))}")
+            with f2:
+                status_filter = st.multiselect(
+                    t(lang, "status_filter"),
+                    options=status_options,
+                    default=st.session_state["current_filters"]["status"],
+                    key="status_filter_matrix",
+                )
 
-                st.markdown("**Base metodológica**")
-                st.write(safe_str(row.get("methodology_basis", "")) or "Não identificado.")
+            with f3:
+                risk_filter = st.multiselect(
+                    t(lang, "risk_filter"),
+                    options=risk_options,
+                    default=st.session_state["current_filters"]["risk"],
+                    key="risk_filter_matrix",
+                )
 
-                st.markdown("**Evidência do projeto**")
-                st.write(safe_str(row.get("project_evidence", "")) or "Não identificado.")
+            st.session_state["current_filters"] = {
+                "module": module_filter,
+                "status": status_filter,
+                "risk": risk_filter,
+            }
 
-                st.markdown("**Gap**")
-                st.write(safe_str(row.get("gap", "")) or "Não identificado.")
+            filtered_df = apply_matrix_filters(df, module_filter, status_filter, risk_filter)
+            st.dataframe(filtered_df, hide_index=True, width="stretch")
 
-                st.markdown("**Recomendação**")
-                st.write(safe_str(row.get("recommendation", "")) or "Não identificado.")
+        with tab_details:
+            detail_df = apply_matrix_filters(
+                df,
+                st.session_state["current_filters"]["module"],
+                st.session_state["current_filters"]["status"],
+                st.session_state["current_filters"]["risk"],
+            )
 
-                if safe_str(row.get("notes", "")).strip():
-                    st.markdown("**Notas**")
-                    st.write(safe_str(row.get("notes", "")))
+            st.markdown("#### Requisitos em detalhe")
 
-        with st.expander("Ver resultado bruto da auditoria"):
-            st.json(st.session_state.get("last_full_audit_results", []))
+            for _, row in detail_df.iterrows():
+                title = f"{safe_str(row.get('requirement_id', ''))} — {safe_str(row.get('title', ''))}"
 
-    with tab_downloads:
-        validation.render_downloads_tab(
-            run_id=run_id,
-            project_name=project_name,
-            summary=summary,
-            df=df,
-            last_full_audit_results=st.session_state["last_full_audit_results"],
-            last_full_audit_trails=st.session_state["last_full_audit_trails"],
-        )
+                with st.expander(title):
+                    st.markdown(
+                        status_badge(safe_str(row.get("status", ""))) +
+                        " " +
+                        risk_badge(safe_str(row.get("risk", ""))),
+                        unsafe_allow_html=True,
+                    )
 
-if st.session_state.get("show_trails_full_audit", False):
-    validation.render_trails_section(trails)
+                    c1, c2 = st.columns(2)
+                    with c1:
+                        st.write(f"**Módulo:** {safe_str(row.get('module', ''))}")
+                        st.write(f"**Score:** {safe_str(row.get('score', ''))}")
+                    with c2:
+                        st.write(f"**Confiança:** {safe_str(row.get('confidence', ''))}")
 
-    with tab_history:
-        validation.render_history_tab(
-            history=st.session_state.get("audit_history", []),
-            lang=lang,
-            t=t,
-            theme=THEME,
-            safe_str=safe_str,
-            badge_html=badge_html,
-        )
-else:
-    st.info("Execute a auditoria completa para gerar a matriz de conformidade.")
+                    st.markdown("**Base metodológica**")
+                    st.write(safe_str(row.get("methodology_basis", "")) or "Não identificado.")
+
+                    st.markdown("**Evidência do projeto**")
+                    st.write(safe_str(row.get("project_evidence", "")) or "Não identificado.")
+
+                    st.markdown("**Gap**")
+                    st.write(safe_str(row.get("gap", "")) or "Não identificado.")
+
+                    st.markdown("**Recomendação**")
+                    st.write(safe_str(row.get("recommendation", "")) or "Não identificado.")
+
+                    if safe_str(row.get("notes", "")).strip():
+                        st.markdown("**Notas**")
+                        st.write(safe_str(row.get("notes", "")))
+
+            with st.expander("Ver resultado bruto da auditoria"):
+                st.json(st.session_state.get("last_full_audit_results", []))
+
+        with tab_downloads:
+            validation.render_downloads_tab(
+                run_id=run_id,
+                project_name=project_name,
+                summary=summary,
+                df=df,
+                last_full_audit_results=st.session_state["last_full_audit_results"],
+                last_full_audit_trails=st.session_state["last_full_audit_trails"],
+            )
+
+        with tab_history:
+            validation.render_history_tab(
+                history=st.session_state.get("audit_history", []),
+                lang=lang,
+                t=t,
+                theme=THEME,
+                safe_str=safe_str,
+                badge_html=badge_html,
+            )
+
+        if st.session_state.get("show_trails_full_audit", False):
+            validation.render_trails_section(trails)
+
+    else:
+        st.info("Execute a auditoria completa para gerar a matriz de conformidade.")
 
 
 # =========================================================
@@ -2668,7 +2597,6 @@ else:
 
 st.session_state["_validation_legacy_renderer"] = render_full_audit_mode
 
-# =========================================================
 # =========================================================
 # ROUTER
 # =========================================================
@@ -2717,4 +2645,3 @@ elif menu == "Audit History":
 
 elif menu == "User Access":
     user_access_page.render()
-     
