@@ -159,29 +159,97 @@ def calculate_confidence(
     recommendation: str,
     notes: str,
 ) -> int:
-
     score = 0
 
-    pe = project_evidence.lower()
-    mb = methodology_basis.lower()
+    pe = (project_evidence or "").lower()
+    mb = (methodology_basis or "").lower()
+    gp = (gap or "").lower()
+    rc = (recommendation or "").lower()
+    nt = (notes or "").lower()
 
+    combined = " ".join([pe, mb, gp, rc, nt])
+
+    # ---------------------------
+    # PRESENÇA BASE (0–45)
+    # ---------------------------
     if pe.strip():
-        score += 40
+        score += 20
     if mb.strip():
-        score += 30
+        score += 15
+    if gp.strip():
+        score += 4
+    if rc.strip():
+        score += 3
+    if nt.strip():
+        score += 3
 
-    if gap:
-        score += 10
+    # ---------------------------
+    # DENSIDADE / DETALHE (0–20)
+    # ---------------------------
+    if len(pe) > 120:
+        score += 4
+    if len(pe) > 250:
+        score += 4
+    if len(pe) > 400:
+        score += 4
 
-    if recommendation:
-        score += 10
+    if len(mb) > 120:
+        score += 3
+    if len(mb) > 250:
+        score += 3
+    if len(mb) > 400:
+        score += 2
 
-    if notes:
-        score += 5
+    # ---------------------------
+    # TERMOS TÉCNICOS FORTES (0–20)
+    # ---------------------------
+    strong_terms = [
+        "astm",
+        "iso",
+        "iso/iec 17025",
+        "mrv",
+        "batch",
+        "lote",
+        "traceability",
+        "rastreabilidade",
+        "h/corg",
+        "fixed carbon",
+        "carbono fixo",
+        "laboratório",
+        "laudo",
+        "sample",
+        "sampling",
+        "amostra",
+    ]
+    score += min(sum(1 for t in strong_terms if t in combined), 10)
 
-    vague_terms = ["unclear", "generic", "not clear"]
+    # ---------------------------
+    # SINAIS DE FRAGILIDADE (-25)
+    # ---------------------------
+    weak_terms = [
+        "unclear",
+        "generic",
+        "not clear",
+        "não identificado",
+        "não localizado",
+        "insufficient",
+        "insuficiente",
+        "ausência",
+        "incomplete",
+        "incompleto",
+    ]
+    score -= min(sum(1 for t in weak_terms if t in combined) * 4, 20)
 
-    if any(t in (pe + mb) for t in vague_terms):
-        score -= 15
+    # ---------------------------
+    # AJUSTES POR LACUNA EXPLÍCITA
+    # ---------------------------
+    if gp:
+        if "no material gap" in gp or "não foi identificada lacuna" in gp:
+            score += 6
+        elif any(x in gp for x in ["não atende", "not compliant", "ausência", "missing"]):
+            score -= 8
 
-    return clip_int(score, default=50, min_value=10, max_value=95)
+    # ---------------------------
+    # NORMALIZAÇÃO FINAL
+    # ---------------------------
+    return clip_int(score, default=55, min_value=15, max_value=95)
