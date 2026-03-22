@@ -602,37 +602,6 @@ class AuditEngine:
             normalized_results.append(normalized)
 
         return normalized_results
-    def _classify_status(
-        self,
-        score: int,
-        evidence_present: bool,
-        methodology_present: bool,
-        confidence: int = 100,
-    ) -> str:
-        score = clip_int(score, default=0)
-        confidence = clip_int(confidence, default=100)
-
-        if not evidence_present:
-            return "Não evidenciado"
-
-        if evidence_present and not methodology_present:
-            if score >= 70:
-                return "Parcialmente conforme"
-            if score > 0:
-                return "Parcialmente conforme"
-            return "Não evidenciado"
-
-        if confidence < 20 and score < 40:
-            return "Erro de análise"
-
-        if score >= 70:
-            return "Conforme"
-        if score >= 45:
-            return "Parcialmente conforme"
-        if score > 0:
-            return "Não conforme"
-
-        return "Não evidenciado"
 
     def _has_real_evidence(self, text: str) -> bool:
         text = safe_str(text).lower()
@@ -671,78 +640,6 @@ class AuditEngine:
             "insufficient evidence",
         ]
         return not any(marker in text for marker in negative_markers)
-
-    def _estimate_confidence(
-        self,
-        project_evidence: str,
-        methodology_basis: str,
-        gap: str,
-        recommendation: str,
-        notes: str,
-    ) -> int:
-        score = 0
-
-        pe = safe_str(project_evidence)
-        mb = safe_str(methodology_basis)
-        gp = safe_str(gap)
-        rc = safe_str(recommendation)
-        nt = safe_str(notes)
-
-        if self._has_real_evidence(pe):
-            score += 35
-            if len(pe) >= 120:
-                score += 15
-
-        if self._has_real_methodology_basis(mb):
-            score += 25
-            if len(mb) >= 120:
-                score += 10
-
-        if gp:
-            score += 8
-
-        if rc:
-            score += 8
-
-        if nt:
-            score += 4
-
-        combined = " ".join([pe.lower(), mb.lower(), gp.lower(), rc.lower(), nt.lower()])
-
-        vague_markers = [
-            "generic",
-            "genérico",
-            "generico",
-            "not clear",
-            "unclear",
-            "não claro",
-            "nao claro",
-        ]
-        if any(marker in combined for marker in vague_markers):
-            score -= 10
-
-        return clip_int(score, default=50, min_value=10, max_value=95)
-    def _derive_score(
-        self,
-        project_evidence: str,
-        methodology_basis: str,
-        gap: str,
-        recommendation: str,
-        notes: str,
-    ) -> int:
-        pe = safe_str(project_evidence)
-        mb = safe_str(methodology_basis)
-        gp = safe_str(gap)
-        rc = safe_str(recommendation)
-        nt = safe_str(notes)
-
-        pe_lower = pe.lower()
-        mb_lower = mb.lower()
-        gp_lower = gp.lower()
-        rc_lower = rc.lower()
-        nt_lower = nt.lower()
-
-        score = 0
 
         # =========================================================
         # 1. EVIDÊNCIA DO PROJETO (0–40)
@@ -804,7 +701,7 @@ class AuditEngine:
 
     
     # =========================================================
-    # SUPPORT
+    # ENGINE SUPPORT / SEARCH / FORMATTING
     # =========================================================
 
     def _group_requirements_by_module(self, requirements: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
