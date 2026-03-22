@@ -2430,6 +2430,8 @@ def render_full_audit_mode():
         ])
 
         with tab_summary:
+            validation.render_executive_summary(summary)
+
             s1, s2, s3, s4 = st.columns(4)
             s1.metric("Requisitos", summary.get("total_requirements", 0))
             s2.metric("Score geral", f"{summary.get('overall_score', 0)}%")
