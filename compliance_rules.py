@@ -159,50 +159,50 @@ def calculate_confidence(
     recommendation: str,
     notes: str,
 ) -> int:
-    score = 0
-
-    pe = (project_evidence or "").lower()
-    mb = (methodology_basis or "").lower()
-    gp = (gap or "").lower()
-    rc = (recommendation or "").lower()
-    nt = (notes or "").lower()
+    pe = (project_evidence or "").lower().strip()
+    mb = (methodology_basis or "").lower().strip()
+    gp = (gap or "").lower().strip()
+    rc = (recommendation or "").lower().strip()
+    nt = (notes or "").lower().strip()
 
     combined = " ".join([pe, mb, gp, rc, nt])
 
-    # ---------------------------
-    # PRESENÇA BASE (0–45)
-    # ---------------------------
-    if pe.strip():
-        score += 20
-    if mb.strip():
-        score += 15
-    if gp.strip():
+    score = 0
+
+    # =========================================================
+    # 1. PRESENÇA BASE DOS CAMPOS (0–42)
+    # =========================================================
+    if pe:
+        score += 18
+    if mb:
+        score += 12
+    if gp:
+        score += 5
+    if rc:
         score += 4
-    if rc.strip():
-        score += 3
-    if nt.strip():
+    if nt:
         score += 3
 
-    # ---------------------------
-    # DENSIDADE / DETALHE (0–20)
-    # ---------------------------
-    if len(pe) > 120:
+    # =========================================================
+    # 2. DENSIDADE / DETALHE DOCUMENTAL (0–18)
+    # =========================================================
+    if len(pe) > 80:
+        score += 3
+    if len(pe) > 180:
         score += 4
-    if len(pe) > 250:
-        score += 4
-    if len(pe) > 400:
+    if len(pe) > 320:
         score += 4
 
-    if len(mb) > 120:
+    if len(mb) > 80:
+        score += 2
+    if len(mb) > 180:
         score += 3
-    if len(mb) > 250:
-        score += 3
-    if len(mb) > 400:
+    if len(mb) > 320:
         score += 2
 
-    # ---------------------------
-    # TERMOS TÉCNICOS FORTES (0–20)
-    # ---------------------------
+    # =========================================================
+    # 3. TERMOS TÉCNICOS FORTES / SINAIS DE AUDITABILIDADE (0–20)
+    # =========================================================
     strong_terms = [
         "astm",
         "iso",
@@ -213,19 +213,25 @@ def calculate_confidence(
         "traceability",
         "rastreabilidade",
         "h/corg",
-        "fixed carbon",
         "carbono fixo",
+        "fixed carbon",
         "laboratório",
+        "lab report",
         "laudo",
-        "sample",
         "sampling",
+        "sample",
         "amostra",
+        "operator",
+        "retention sample",
+        "chain of custody",
+        "digital record",
+        "batch id",
     ]
     score += min(sum(1 for t in strong_terms if t in combined), 10)
 
-    # ---------------------------
-    # SINAIS DE FRAGILIDADE (-25)
-    # ---------------------------
+    # =========================================================
+    # 4. PENALIZAÇÕES POR VAGUEZA / FRAGILIDADE (-24)
+    # =========================================================
     weak_terms = [
         "unclear",
         "generic",
@@ -234,40 +240,98 @@ def calculate_confidence(
         "não localizado",
         "insufficient",
         "insuficiente",
-        "ausência",
         "incomplete",
         "incompleto",
+        "partial",
+        "parcial",
     ]
-    score -= min(sum(1 for t in weak_terms if t in combined) * 4, 20)
+    score -= min(sum(1 for t in weak_terms if t in combined) * 3, 12)
 
-    # ---------------------------
-    # AJUSTES POR LACUNA EXPLÍCITA
-    # ---------------------------
-    if gp:
-        if "no material gap" in gp or "não foi identificada lacuna" in gp:
-            score += 6
-        elif any(x in gp for x in ["não atende", "not compliant", "ausência", "missing"]):
-            score -= 8
-    # ---------------------------
-    # PENALIZAÇÃO POR GAP RELEVANTE
-    # ---------------------------
-    if gp:
-        if any(x in gp for x in [
-            "não há evidência",
-            "não foram apresentados",
-            "não localizado",
-            "ausência",
-            "missing",
-            "not provided",
-            "não atende",
-        ]):
-            score -= 25
+    # =========================================================
+    # 5. PENALIZAÇÕES POR AUSÊNCIA DE EVIDÊNCIA CONCRETA (-35)
+    # =========================================================
+    critical_gap_terms = [
+        "não há evidência",
+        "não foram apresentados",
+        "não localizado",
+        "ausência",
+        "missing",
+        "not provided",
+        "não atende",
+        "no explicit mention",
+        "no information given",
+        "not documented",
+        "not explicitly stated",
+        "not demonstrated",
+        "faltam evidências",
+        "faltam elementos",
+        "não foi evidenciado",
+        "não apresenta",
+    ]
+    score -= min(sum(1 for t in critical_gap_terms if t in gp) * 7, 35)
 
-    # ---------------------------
-    # NORMALIZAÇÃO FINAL
-    # ---------------------------
-    
-    return clip_int(score, default=55, min_value=15, max_value=95)
+    # =========================================================
+    # 6. AJUSTES POSITIVOS POR GAP FAVORÁVEL (+8)
+    # =========================================================
+    positive_gap_terms = [
+        "no material gap",
+        "não foi identificada lacuna",
+        "none explicitly identified",
+        "sem lacuna relevante",
+    ]
+    if any(t in gp for t in positive_gap_terms):
+        score += 8
 
+    # =========================================================
+    # 7. AJUSTE POR EVIDÊNCIA MUITO POBRE (-20)
+    # =========================================================
+    if pe and len(pe) < 40:
+        score -= 8
+    if mb and len(mb) < 40:
+        score -= 5
+
+    if pe and not any(t in pe for t in strong_terms):
+        score -= 4
+
+    # =========================================================
+    # 8. BÔNUS POR EVIDÊNCIA E BASE METODOLÓGICA FORTES (+10)
+    # =========================================================
+    pe_strong = len(pe) > 180 and sum(1 for t in strong_terms if t in pe) >= 2
+    mb_strong = len(mb) > 100
+
+    if pe_strong:
+        score += 5
+    if mb_strong:
+        score += 3
+    if pe_strong and mb_strong:
+        score += 2
+
+    # =========================================================
+    # 9. REGRAS DE PISO E TETO CONTEXTUAIS
+    # =========================================================
+    # Sem evidência do projeto -> confiança não pode ser alta
+    if not pe:
+        score = min(score, 25)
+
+    # Sem base metodológica -> confiança também deve ser limitada
+    if not mb:
+        score = min(score, 35)
+
+    # Gap muito crítico limita teto
+    if any(t in gp for t in critical_gap_terms):
+        score = min(score, 68)
+
+    # Ausência simultânea de evidência concreta e detalhamento metodológico
+    if len(pe) < 60 and len(mb) < 60:
+        score = min(score, 45)
+
+    # Caso muito robusto e sem lacuna relevante
+    if pe_strong and mb_strong and any(t in gp for t in positive_gap_terms):
+        score = max(score, 75)
+
+    # =========================================================
+    # 10. NORMALIZAÇÃO FINAL
+    # =========================================================
+    return clip_int(score, default=55, min_value=15, max_value=92)
 
   
