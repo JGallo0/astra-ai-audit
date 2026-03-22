@@ -2350,8 +2350,8 @@ def render_full_audit_mode():
         except Exception as e:
             st.error(f"Erro ao executar auditoria: {str(e)}")
 
-    if rerun_failures and has_previous:
-        callback = make_progress_callback(progress_container, status_container)
+if rerun_failures and has_previous:
+    callback = make_progress_callback(progress_container, status_container)
 
     try:
         with st.spinner("Reanalisando falhas..."):
@@ -2392,23 +2392,23 @@ def render_full_audit_mode():
 
         st.success("Falhas reanalisadas com sucesso.")
 
-            project_id = st.session_state.get("current_project_id")
-            if project_id:
-                try:
-                    save_audit_output(
-                        project_id=project_id,
-                        user_email=current_user["email"],
-                        output_type="full_audit_rerun",
-                        title="Reanálise de falhas",
-                        question=project_name,
-                        answer=str(summary),
-                        content=str(merged_results),
-                    )
-                except Exception:
-                    pass
+        project_id = st.session_state.get("current_project_id")
+        if project_id:
+            try:
+                save_audit_output(
+                    project_id=project_id,
+                    user_email=current_user["email"],
+                    output_type="full_audit_rerun",
+                    title="Reanálise de falhas",
+                    question=project_name,
+                    answer=str(summary),
+                    content=str(merged_results),
+                )
+            except Exception:
+                pass
 
-        except Exception as e:
-            st.error(f"Erro ao reanalisar falhas: {str(e)}")
+    except Exception as e:
+        st.error(f"Erro ao reanalisar falhas: {str(e)}")
 
 if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not st.session_state["last_full_audit_df"].empty:
     df = st.session_state["last_full_audit_df"].copy()
