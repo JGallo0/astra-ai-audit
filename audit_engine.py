@@ -717,6 +717,85 @@ class AuditEngine:
             score -= 10
 
         return clip_int(score, default=50, min_value=10, max_value=95)
+    def _derive_score(
+        self,
+        project_evidence: str,
+        methodology_basis: str,
+        gap: str,
+        recommendation: str,
+        notes: str,
+    ) -> int:
+        pe = safe_str(project_evidence)
+        mb = safe_str(methodology_basis)
+        gp = safe_str(gap)
+        rc = safe_str(recommendation)
+        nt = safe_str(notes)
+
+        pe_lower = pe.lower()
+        mb_lower = mb.lower()
+        gp_lower = gp.lower()
+        rc_lower = rc.lower()
+        nt_lower = nt.lower()
+
+        score = 0
+
+        # =========================================================
+        # 1. EVIDÊNCIA DO PROJETO (0–40)
+        # =========================================================
+        if self._has_real_evidence(pe):
+            score += 25
+
+            if len(pe) >= 120:
+                score += 5
+            if len(pe) >= 220:
+                score += 5
+            if len(pe) >= 400:
+                score += 5
+
+        # =========================================================
+        # 2. BASE METODOLÓGICA (0–30)
+        # =========================================================
+        if self._has_real_methodology_basis(mb):
+            score += 20
+
+            if len(mb) >= 100:
+                score += 4
+            if len(mb) >= 180:
+                score += 3
+            if len(mb) >= 300:
+                score += 3
+
+        # =========================================================
+        # 3. GAP (-30 até +10)
+        # =========================================================
+        if gp:
+            if "no material gap" in gp_lower or "não foi identificada lacuna" in gp_lower:
+                score += 8
+            else:
+                score -= 10
+
+                if any(x in gp_lower for x in ["missing", "ausência", "incomplete", "não especifica"]):
+                    score -= 5
+
+                if any(x in gp_lower for x in ["not compliant", "não atende", "insufficient"]):
+                    score -= 10
+
+        # =========================================================
+        # 4. RECOMENDAÇÃO (+0–5)
+        # =========================================================
+        if rc:
+            score += 2
+
+        # =========================================================
+        # 5. NOTAS (+0–5)
+        # =========================================================
+        if nt:
+            score += 2
+
+        # =========================================================
+        # 6. NORMALIZAÇÃO FINAL
+        # =========================================================
+        return clip_int(score, default=0, min_value=0, max_value=100)        
 
     
     # =========================================================
