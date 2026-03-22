@@ -4,6 +4,13 @@ from typing import Any, Dict, List, Optional
 
 from openai import OpenAI
 
+from compliance_rules import (
+    calculate_score,
+    calculate_confidence,
+    classify_status,
+    classify_risk,
+)
+
 
 DEFAULT_LOW_CONFIDENCE_THRESHOLD = 45
 DEFAULT_REANALYZE_STATUSES = {
@@ -550,14 +557,14 @@ class AuditEngine:
             evidence_present = self._has_real_evidence(normalized["project_evidence"])
             methodology_present = self._has_real_methodology_basis(normalized["methodology_basis"])
 
-            raw_conf = raw.get("confidence")
+                        raw_conf = raw.get("confidence")
 
             if (
                 raw_conf is None
                 or safe_str(raw_conf) == ""
                 or clip_int(raw_conf, default=0) <= 1
             ):
-                normalized["confidence"] = self._estimate_confidence(
+                normalized["confidence"] = calculate_confidence(
                     project_evidence=normalized["project_evidence"],
                     methodology_basis=normalized["methodology_basis"],
                     gap=normalized["gap"],
@@ -567,7 +574,7 @@ class AuditEngine:
             else:
                 normalized["confidence"] = clip_int(raw_conf, default=50)
 
-            normalized["score"] = self._derive_score(
+            normalized["score"] = calculate_score(
                 project_evidence=normalized["project_evidence"],
                 methodology_basis=normalized["methodology_basis"],
                 gap=normalized["gap"],
@@ -575,11 +582,10 @@ class AuditEngine:
                 notes=normalized["notes"],
             )
 
-            normalized["status"] = self._classify_status(
+            normalized["status"] = classify_status(
                 score=normalized["score"],
-                evidence_present=evidence_present,
-                methodology_present=methodology_present,
                 confidence=normalized["confidence"],
+                evidence_present=evidence_present,
             )
 
             normalized["risk"] = classify_risk(
@@ -587,7 +593,6 @@ class AuditEngine:
                 confidence=normalized["confidence"],
                 status=normalized["status"],
             )
-
             if not normalized["gap"]:
                 normalized["gap"] = self._infer_gap(normalized["status"])
 
