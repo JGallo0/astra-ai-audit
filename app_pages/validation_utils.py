@@ -415,3 +415,113 @@ def risk_badge(risk: str) -> str:
     if r == "alto":
         return badge_html("alto", "danger")
     return badge_html(risk, "info")
+
+def build_executive_dossier_text(
+    project_name: str,
+    summary: Dict[str, Any],
+    results: List[Dict[str, Any]],
+) -> str:
+
+    score = summary.get("overall_score", 0)
+    confidence = summary.get("overall_confidence", 0)
+    status_counts = summary.get("status_counts", {}) or {}
+    risk_counts = summary.get("risk_counts", {}) or {}
+
+    # =========================
+    # CLASSIFICAÇÃO EXECUTIVA
+    # =========================
+    if score >= 75:
+        maturity = "High readiness for certification"
+    elif score >= 55:
+        maturity = "Moderate readiness with material gaps"
+    elif score >= 40:
+        maturity = "Low readiness – significant gaps"
+    else:
+        maturity = "Not ready for certification"
+
+    high_risk = risk_counts.get("alto", 0)
+
+    # =========================
+    # PRINCIPAIS GAPS
+    # =========================
+    critical_gaps = []
+    for item in results:
+        if item.get("risk") == "alto":
+            critical_gaps.append(
+                f"{safe_str(item.get('requirement_id'))} – {safe_str(item.get('gap'))}"
+            )
+
+    critical_gaps = critical_gaps[:5]
+
+    # =========================
+    # RECOMENDAÇÕES PRIORITÁRIAS
+    # =========================
+    recommendations = []
+    for item in results:
+        if item.get("risk") in ["alto", "medio"]:
+            rec = safe_str(item.get("recommendation"))
+            if rec:
+                recommendations.append(rec)
+
+    recommendations = list(dict.fromkeys(recommendations))[:5]
+
+    # =========================
+    # TEXTO
+    # =========================
+    lines = []
+
+    # 1. Executive Summary
+    lines.append("# Executive Summary")
+    lines.append("")
+    lines.append(f"Project: {safe_str(project_name)}")
+    lines.append("")
+    lines.append(f"Overall score: {score}%")
+    lines.append(f"Confidence level: {confidence}%")
+    lines.append(f"Assessment: {maturity}")
+    lines.append("")
+
+    if high_risk:
+        lines.append(f"{high_risk} high-risk compliance gaps identified.")
+    else:
+        lines.append("No critical risks identified.")
+    lines.append("")
+
+    # 2. Key Risks & Gaps
+    lines.append("## Key Risks & Gaps")
+    if not critical_gaps:
+        lines.append("No critical gaps identified.")
+    else:
+        for gap in critical_gaps:
+            lines.append(f"- {gap}")
+    lines.append("")
+
+    # 3. Priority Recommendations
+    lines.append("## Priority Recommendations")
+    if not recommendations:
+        lines.append("No recommendations generated.")
+    else:
+        for rec in recommendations:
+            lines.append(f"- {rec}")
+    lines.append("")
+
+    # 4. Detailed Assessment
+    lines.append("## Detailed Assessment by Module")
+    lines.append("")
+
+    grouped = {}
+    for item in results:
+        grouped.setdefault(item.get("module", "Unknown"), []).append(item)
+
+    for module, items in grouped.items():
+        lines.append(f"### {safe_str(module)}")
+        lines.append("")
+        for item in items:
+            lines.append(
+                f"- {safe_str(item.get('requirement_id'))} | "
+                f"Status: {safe_str(item.get('status'))} | "
+                f"Risk: {safe_str(item.get('risk'))} | "
+                f"Score: {safe_str(item.get('score'))}%"
+            )
+        lines.append("")
+
+    return "\n".join(lines)
