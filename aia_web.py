@@ -2662,7 +2662,7 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
         with st.expander("Ver resultado bruto da auditoria"):
             st.json(st.session_state.get("last_full_audit_results", []))
 
- with tab_downloads:
+    with tab_downloads:
     validation.render_downloads_tab(
         run_id=run_id,
         project_name=project_name,
@@ -2777,3 +2777,4 @@ elif menu == "Audit History":
 
 elif menu == "User Access":
     user_access_page.render()
+     
