@@ -2351,7 +2351,7 @@ def render_full_audit_mode():
             st.error(f"Erro ao executar auditoria: {str(e)}")
 
     if rerun_failures and has_previous:
-    callback = make_progress_callback(progress_container, status_container)
+        callback = make_progress_callback(progress_container, status_container)
 
     try:
         with st.spinner("Reanalisando falhas..."):
