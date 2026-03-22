@@ -182,3 +182,84 @@ def render_history_tab(history, lang, t, theme, safe_str, badge_html):
             ]
             html = "".join(html_parts)
             st.markdown(html, unsafe_allow_html=True)
+def render_executive_summary(summary):
+    score = summary.get("overall_score", 0)
+    confidence = summary.get("overall_confidence", 0)
+    status_counts = summary.get("status_counts", {})
+    risk_counts = summary.get("risk_counts", {})
+
+    # =========================
+    # CLASSIFICAÇÃO GERAL
+    # =========================
+    if score >= 75:
+        headline = "Projeto tecnicamente sólido e próximo de conformidade plena."
+    elif score >= 55:
+        headline = "Projeto tecnicamente consistente, com lacunas relevantes para certificação."
+    elif score >= 40:
+        headline = "Projeto parcialmente estruturado, com lacunas críticas de conformidade."
+    else:
+        headline = "Projeto ainda não atende aos requisitos mínimos de certificação."
+
+    # =========================
+    # RISCO PRINCIPAL
+    # =========================
+    high_risk = risk_counts.get("alto", 0)
+
+    if high_risk > 0:
+        risk_msg = f"Foram identificados {high_risk} requisitos com risco alto, indicando exposição significativa para auditoria."
+    else:
+        risk_msg = "Não foram identificados riscos críticos imediatos."
+
+    # =========================
+    # CONFIANÇA DA ANÁLISE
+    # =========================
+    if confidence >= 70:
+        confidence_msg = "A análise apresenta alta robustez documental e consistência."
+    elif confidence >= 50:
+        confidence_msg = "A análise apresenta confiabilidade moderada, com base documental parcial."
+    else:
+        confidence_msg = "A análise apresenta baixa robustez documental, com necessidade de evidências adicionais."
+
+    # =========================
+    # RECOMENDAÇÃO PRINCIPAL
+    # =========================
+    recommendation = (
+        "Priorizar a consolidação de evidências auditáveis (laudos, rastreabilidade por lote, documentação formal) "
+        "e o alinhamento explícito com os critérios da metodologia."
+    )
+
+    # =========================
+    # UI
+    # =========================
+    st.markdown("### 🧭 Executive Summary")
+
+    st.markdown(f"""
+<div style="
+    padding:16px;
+    border-radius:12px;
+    border:1px solid #e6e6e6;
+    background-color:#f9fbfd;
+">
+    <div style="font-size:18px;font-weight:600;margin-bottom:10px;">
+        {headline}
+    </div>
+
+    <div style="margin-bottom:8px;">
+        <b>Score geral:</b> {score}% &nbsp;&nbsp;
+        <b>Confiança:</b> {confidence}%
+    </div>
+
+    <div style="margin-bottom:8px;">
+        {confidence_msg}
+    </div>
+
+    <div style="margin-bottom:8px;">
+        {risk_msg}
+    </div>
+
+    <div style="margin-top:10px;">
+        <b>Recomendação prioritária:</b><br>
+        {recommendation}
+    </div>
+</div>
+""", unsafe_allow_html=True)
