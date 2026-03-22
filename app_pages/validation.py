@@ -11,6 +11,7 @@ from app_pages.validation_utils import (
     build_full_eligibility_dossier_text,
 )
 
+
 def render_downloads_tab(
     run_id,
     project_name,
