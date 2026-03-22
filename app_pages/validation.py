@@ -1,4 +1,5 @@
 import streamlit as st 
+import textwrap
 
 from app_pages.validation_utils import (
     convert_df_to_csv_bytes,
@@ -233,33 +234,35 @@ def render_executive_summary(summary):
     # =========================
     st.markdown("### 🧭 Executive Summary")
 
-    st.markdown(f"""
-<div style="
-    padding:16px;
-    border-radius:12px;
-    border:1px solid #e6e6e6;
-    background-color:#f9fbfd;
-">
-    <div style="font-size:18px;font-weight:600;margin-bottom:10px;">
-        {headline}
-    </div>
+    html = textwrap.dedent(f"""
+    <div style="
+        padding:16px;
+        border-radius:12px;
+        border:1px solid #e6e6e6;
+        background-color:#f9fbfd;
+    ">
+        <div style="font-size:18px;font-weight:600;margin-bottom:10px;">
+            {headline}
+        </div>
 
-    <div style="margin-bottom:8px;">
-        <b>Score geral:</b> {score}% &nbsp;&nbsp;
-        <b>Confiança:</b> {confidence}%
-    </div>
+        <div style="margin-bottom:8px;">
+            <b>Score geral:</b> {score}% &nbsp;&nbsp;
+            <b>Confiança:</b> {confidence}%
+        </div>
 
-    <div style="margin-bottom:8px;">
-        {confidence_msg}
-    </div>
+        <div style="margin-bottom:8px;">
+            {confidence_msg}
+        </div>
 
-    <div style="margin-bottom:8px;">
-        {risk_msg}
-    </div>
+        <div style="margin-bottom:8px;">
+            {risk_msg}
+        </div>
 
-    <div style="margin-top:10px;">
-        <b>Recomendação prioritária:</b><br>
-        {recommendation}
+        <div style="margin-top:10px;">
+            <b>Recomendação prioritária:</b><br>
+            {recommendation}
+        </div>
     </div>
-</div>
-""", unsafe_allow_html=True)
+    """)
+
+    st.markdown(html, unsafe_allow_html=True)
