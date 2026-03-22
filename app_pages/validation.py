@@ -1,5 +1,16 @@
 import streamlit as st
 
+from app_pages.validation_utils import (
+    convert_df_to_csv_bytes,
+    convert_json_to_bytes,
+    docx_from_text,
+    pdf_from_text,
+    matrix_to_docx_bytes,
+    matrix_to_pdf_bytes,
+    build_full_audit_text,
+    build_full_eligibility_dossier_text,
+)
+
 
 def render_downloads_tab(
     run_id,
