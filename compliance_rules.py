@@ -248,13 +248,6 @@ def calculate_confidence(
             score += 6
         elif any(x in gp for x in ["não atende", "not compliant", "ausência", "missing"]):
             score -= 8
-
-    # ---------------------------
-    # NORMALIZAÇÃO FINAL
-    # ---------------------------
-    return clip_int(score, default=55, min_value=15, max_value=95)
-
-
     # ---------------------------
     # PENALIZAÇÃO POR GAP RELEVANTE
     # ---------------------------
@@ -269,6 +262,12 @@ def calculate_confidence(
             "não atende",
         ]):
             score -= 25
-   
+
+    # ---------------------------
+    # NORMALIZAÇÃO FINAL
+    # ---------------------------
+    
+    return clip_int(score, default=55, min_value=15, max_value=95)
 
 
+  
