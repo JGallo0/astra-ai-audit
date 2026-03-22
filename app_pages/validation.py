@@ -19,24 +19,26 @@ def render_downloads_tab(
     df,
     last_full_audit_results,
     last_full_audit_trails,
+    dossier_lang="en",
 ):
     full_audit_text = build_full_audit_text(summary, last_full_audit_results)
     full_audit_docx = docx_from_text("Auditoria Resumida Isometric", full_audit_text)
     full_audit_pdf = pdf_from_text("Auditoria Resumida Isometric", full_audit_text)
 
-    try:
-        eligibility_dossier_text = build_executive_dossier_text(
-            project_name,
-            summary,
-            last_full_audit_results,
-        )
-    except Exception:
-        eligibility_dossier_text = build_full_eligibility_dossier_text(
-            project_name=project_name,
-            summary=summary,
-            results=last_full_audit_results,
-            trails=last_full_audit_trails,
-        )
+try:
+    eligibility_dossier_text = build_executive_dossier_text(
+        project_name,
+        summary,
+        last_full_audit_results,
+        lang="en",
+    )
+except Exception:
+    eligibility_dossier_text = build_full_eligibility_dossier_text(
+        project_name=project_name,
+        summary=summary,
+        results=last_full_audit_results,
+        trails=last_full_audit_trails,
+    )
     eligibility_docx = docx_from_text("Dossiê de Elegibilidade Metodológica", eligibility_dossier_text)
     eligibility_pdf = pdf_from_text("Dossiê de Elegibilidade Metodológica", eligibility_dossier_text)
 
