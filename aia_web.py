@@ -66,6 +66,10 @@ from app_pages.validation_utils import (
     status_badge,
     risk_badge,
 )
+from app_pages.audit_runner import (
+    execute_full_audit,
+    execute_rerun_failures,
+)
 def safe_str(value):
     if value is None:
         return ""
@@ -2291,32 +2295,24 @@ def render_full_audit_mode():
         callback = make_progress_callback(progress_container, status_container)
 
         try:
-            engine = AuditEngine(
-                api_key=OPENAI_API_KEY,
-                model=MODEL_NAME,
-                requirements=requirements,
-                project_vector_store_id=project_vs_id,
-                methodology_vector_store_id=methodology_vs_id,
-                project_name=project_name,
-                module_project_queries=engine_params["module_project_queries"],
-                module_methodology_queries=engine_params["module_methodology_queries"],
-                project_max_results_per_query=engine_params["project_max_results_per_query"],
-                methodology_max_results_per_query=engine_params["methodology_max_results_per_query"],
-                max_project_hits_in_prompt=engine_params["max_project_hits_in_prompt"],
-                max_methodology_hits_in_prompt=engine_params["max_methodology_hits_in_prompt"],
-                max_text_chars_per_hit=engine_params["max_text_chars_per_hit"],
-                progress_callback=callback,
-            )
             with st.spinner("Executando auditoria..."):
-                audit_output = engine.run_full_audit(
+                runner_output = execute_full_audit(
+                    api_key=OPENAI_API_KEY,
+                    model=MODEL_NAME,
+                    requirements=requirements,
+                    project_vector_store_id=project_vs_id,
+                    methodology_vector_store_id=methodology_vs_id,
+                    project_name=project_name,
+                    engine_params=engine_params,
                     selected_modules=selected_modules,
-                    enable_auto_reanalysis=True,
+                    callback=callback,
                 )
 
-            results = audit_output["results"]
-            trails = audit_output["trails"]
-            summary = engine.summarize_results(results)
-            df = build_audit_dataframe(results)
+            audit_output = runner_output["audit_output"]
+            results = runner_output["results"]
+            trails = runner_output["trails"]
+            summary = runner_output["summary"]
+            df = runner_output["df"]
 
             st.session_state["last_full_audit_results"] = results
             st.session_state["last_full_audit_trails"] = trails
@@ -2337,7 +2333,6 @@ def render_full_audit_mode():
             )
 
             st.success("Auditoria concluída com sucesso.")
-
             project_id = st.session_state.get("current_project_id")
             if project_id:
                 try:
@@ -2356,67 +2351,46 @@ def render_full_audit_mode():
             st.error(f"Erro ao executar auditoria: {str(e)}")
 
     if rerun_failures and has_previous:
-        callback = make_progress_callback(progress_container, status_container)
+    callback = make_progress_callback(progress_container, status_container)
 
-        try:
-            engine = AuditEngine(
+    try:
+        with st.spinner("Reanalisando falhas..."):
+            runner_output = execute_rerun_failures(
                 api_key=OPENAI_API_KEY,
                 model=MODEL_NAME,
                 requirements=requirements,
                 project_vector_store_id=project_vs_id,
                 methodology_vector_store_id=methodology_vs_id,
                 project_name=project_name,
-                module_project_queries=3,
-                module_methodology_queries=3,
-                project_max_results_per_query=4,
-                methodology_max_results_per_query=4,
-                max_project_hits_in_prompt=5,
-                max_methodology_hits_in_prompt=5,
-                max_text_chars_per_hit=1100,
-                progress_callback=callback,
-            )
-
-            with st.spinner("Reanalisando falhas..."):
-                rerun_output = engine.rerun_failed_items(
-                    previous_results=st.session_state["last_full_audit_results"],
-                    selected_modules=selected_modules,
-                )
-
-            rerun_results = rerun_output["results"]
-            prev_results = st.session_state["last_full_audit_results"]
-            prev_by_id = {safe_str(x.get("requirement_id", "")): x for x in prev_results}
-
-            for item in rerun_results:
-                prev_by_id[safe_str(item.get("requirement_id", ""))] = item
-
-            merged_results = list(prev_by_id.values())
-            merged_results = sorted(
-                merged_results,
-                key=lambda x: (safe_str(x.get("module", "")), safe_str(x.get("requirement_id", "")))
-            )
-
-            summary = engine.summarize_results(merged_results)
-            df = build_audit_dataframe(merged_results)
-
-            st.session_state["last_full_audit_results"] = merged_results
-            st.session_state["last_full_audit_trails"] += rerun_output["trails"]
-            st.session_state["last_full_audit_summary"] = summary
-            st.session_state["last_full_audit_df"] = df
-            st.session_state["last_full_audit_run_id"] = rerun_output["run_id"]
-            st.session_state["audit_session_cost_estimate"] += float(rerun_output.get("estimated_cost", 0.0))
-            st.session_state["progress_state"]["execution_estimated_cost"] = float(rerun_output.get("estimated_cost", 0.0))
-            st.session_state["progress_state"]["session_estimated_cost"] = float(st.session_state["audit_session_cost_estimate"])
-
-            append_history_entry(
-                run_id=rerun_output["run_id"],
-                project_name=project_name,
-                execution_mode="Reanálise",
                 selected_modules=selected_modules,
-                summary=summary,
-                estimated_cost=float(rerun_output.get("estimated_cost", 0.0)),
+                previous_results=st.session_state["last_full_audit_results"],
+                callback=callback,
             )
 
-            st.success("Falhas reanalisadas com sucesso.")
+        rerun_output = runner_output["rerun_output"]
+        merged_results = runner_output["merged_results"]
+        summary = runner_output["summary"]
+        df = runner_output["df"]
+
+        st.session_state["last_full_audit_results"] = merged_results
+        st.session_state["last_full_audit_trails"] += rerun_output["trails"]
+        st.session_state["last_full_audit_summary"] = summary
+        st.session_state["last_full_audit_df"] = df
+        st.session_state["last_full_audit_run_id"] = rerun_output["run_id"]
+        st.session_state["audit_session_cost_estimate"] += float(rerun_output.get("estimated_cost", 0.0))
+        st.session_state["progress_state"]["execution_estimated_cost"] = float(rerun_output.get("estimated_cost", 0.0))
+        st.session_state["progress_state"]["session_estimated_cost"] = float(st.session_state["audit_session_cost_estimate"])
+
+        append_history_entry(
+            run_id=rerun_output["run_id"],
+            project_name=project_name,
+            execution_mode="Reanálise",
+            selected_modules=selected_modules,
+            summary=summary,
+            estimated_cost=float(rerun_output.get("estimated_cost", 0.0)),
+        )
+
+        st.success("Falhas reanalisadas com sucesso.")
 
             project_id = st.session_state.get("current_project_id")
             if project_id:
