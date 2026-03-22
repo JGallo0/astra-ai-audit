@@ -2590,7 +2590,6 @@ def render_full_audit_mode():
     else:
         st.info("Execute a auditoria completa para gerar a matriz de conformidade.")
 
-
 # =========================================================
 # LEGACY PAGE BRIDGES
 # =========================================================
