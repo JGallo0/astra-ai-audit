@@ -228,35 +228,35 @@ def render_executive_summary(summary):
         "e o alinhamento explícito com os critérios da metodologia."
     )
 
-# =========================
-# UI
-# =========================
-st.markdown("### 🧭 Executive Summary")
+    # =========================
+    # UI
+    # =========================
+    st.markdown("### 🧭 Executive Summary")
 
-with st.container(border=True):
+    with st.container(border=True):
 
-    # Headline
-    st.markdown(f"#### {headline}")
+        # Headline
+        st.markdown(f"#### {headline}")
 
-    # Métricas principais
-    m1, m2 = st.columns(2)
-    with m1:
-        st.metric("Score geral", f"{score}%")
-    with m2:
-        st.metric("Confiança", f"{confidence}%")
+        # Métricas principais
+        m1, m2 = st.columns(2)
+        with m1:
+            st.metric("Score geral", f"{score}%")
+        with m2:
+            st.metric("Confiança", f"{confidence}%")
 
-    st.divider()
+        st.divider()
 
-    # Diagnóstico
-    st.markdown("**Diagnóstico da análise**")
-    st.write(confidence_msg)
+        # Diagnóstico
+        st.markdown("**Diagnóstico da análise**")
+        st.write(confidence_msg)
 
-    # Risco
-    st.markdown("**Risco identificado**")
-    st.write(risk_msg)
+        # Risco
+        st.markdown("**Risco identificado**")
+        st.write(risk_msg)
 
-    st.divider()
+        st.divider()
 
-    # Próximo passo
-    st.markdown("**Próxima ação recomendada**")
-    st.write(recommendation)
+        # Próximo passo
+        st.markdown("**Próxima ação recomendada**")
+        st.write(recommendation)
