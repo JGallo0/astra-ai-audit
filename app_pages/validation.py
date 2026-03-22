@@ -5,10 +5,12 @@ from app_pages.validation_utils import (
     convert_json_to_bytes,
     docx_from_text,
     pdf_from_text,
+    pdf_from_text_branded,
     matrix_to_docx_bytes,
     matrix_to_pdf_bytes,
     build_full_audit_text,
     build_full_eligibility_dossier_text,
+    build_executive_dossier_text,
 )
 
 
@@ -19,31 +21,31 @@ def render_downloads_tab(
     df,
     last_full_audit_results,
     last_full_audit_trails,
-    dossier_lang="en",
 ):
     full_audit_text = build_full_audit_text(summary, last_full_audit_results)
-    full_audit_docx = docx_from_text("Auditoria Resumida Isometric", full_audit_text)
-    full_audit_pdf = pdf_from_text("Auditoria Resumida Isometric", full_audit_text)
+    full_audit_docx = docx_from_text("CO2mply | Audit Summary", full_audit_text)
+    full_audit_pdf = pdf_from_text_branded("CO2mply | Audit Summary", full_audit_text, brand_name="CO2mply")
 
-try:
-    eligibility_dossier_text = build_executive_dossier_text(
-        project_name,
-        summary,
-        last_full_audit_results,
-        lang="en",
-    )
-except Exception:
-    eligibility_dossier_text = build_full_eligibility_dossier_text(
-        project_name=project_name,
-        summary=summary,
-        results=last_full_audit_results,
-        trails=last_full_audit_trails,
-    )
-    eligibility_docx = docx_from_text("Dossiê de Elegibilidade Metodológica", eligibility_dossier_text)
-    eligibility_pdf = pdf_from_text("Dossiê de Elegibilidade Metodológica", eligibility_dossier_text)
+    try:
+        eligibility_dossier_text = build_executive_dossier_text(
+            project_name,
+            summary,
+            last_full_audit_results,
+            lang="en",
+        )
+    except Exception:
+        eligibility_dossier_text = build_full_eligibility_dossier_text(
+            project_name=project_name,
+            summary=summary,
+            results=last_full_audit_results,
+            trails=last_full_audit_trails,
+        )
 
-    matrix_docx = matrix_to_docx_bytes(df, "Matriz de Conformidade Isometric")
-    matrix_pdf = matrix_to_pdf_bytes(df, "Matriz de Conformidade Isometric")
+    eligibility_docx = docx_from_text("CO2mply | Eligibility Dossier", eligibility_dossier_text)
+    eligibility_pdf = pdf_from_text_branded("CO2mply | Eligibility Dossier", eligibility_dossier_text, brand_name="CO2mply")
+
+    matrix_docx = matrix_to_docx_bytes(df, "CO2mply | Compliance Matrix")
+    matrix_pdf = matrix_to_pdf_bytes(df, "CO2mply | Compliance Matrix")
     csv_bytes = convert_df_to_csv_bytes(df)
     json_bytes = convert_json_to_bytes({
         "run_id": run_id,
@@ -56,78 +58,78 @@ except Exception:
 
     with d1:
         st.download_button(
-            "Auditoria resumida (.md)",
+            "Audit summary (.md)",
             data=full_audit_text,
-            file_name=f"auditoria_resumida_isometric_{run_id}.md",
+            file_name=f"co2mply_audit_summary_{run_id}.md",
             mime="text/markdown",
-            use_container_width=True
+            width="stretch"
         )
         st.download_button(
-            "Dossiê (.md)",
+            "Eligibility dossier (.md)",
             data=eligibility_dossier_text,
-            file_name=f"dossie_elegibilidade_{run_id}.md",
+            file_name=f"co2mply_eligibility_dossier_{run_id}.md",
             mime="text/markdown",
-            use_container_width=True
+            width="stretch"
         )
         st.download_button(
-            "Matriz (.csv)",
+            "Compliance matrix (.csv)",
             data=csv_bytes,
-            file_name=f"matriz_conformidade_isometric_{run_id}.csv",
+            file_name=f"co2mply_compliance_matrix_{run_id}.csv",
             mime="text/csv",
-            use_container_width=True
+            width="stretch"
         )
 
     with d2:
         st.download_button(
-            "Auditoria resumida (.docx)",
+            "Audit summary (.docx)",
             data=full_audit_docx,
-            file_name=f"auditoria_resumida_isometric_{run_id}.docx",
+            file_name=f"co2mply_audit_summary_{run_id}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            use_container_width=True
+            width="stretch"
         )
         st.download_button(
-            "Dossiê (.docx)",
+            "Eligibility dossier (.docx)",
             data=eligibility_docx,
-            file_name=f"dossie_elegibilidade_{run_id}.docx",
+            file_name=f"co2mply_eligibility_dossier_{run_id}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            use_container_width=True
+            width="stretch"
         )
         st.download_button(
-            "Matriz (.docx)",
+            "Compliance matrix (.docx)",
             data=matrix_docx,
-            file_name=f"matriz_conformidade_isometric_{run_id}.docx",
+            file_name=f"co2mply_compliance_matrix_{run_id}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            use_container_width=True
+            width="stretch"
         )
 
     with d3:
         st.download_button(
-            "Auditoria resumida (.pdf)",
+            "Audit summary (.pdf)",
             data=full_audit_pdf,
-            file_name=f"auditoria_resumida_isometric_{run_id}.pdf",
+            file_name=f"co2mply_audit_summary_{run_id}.pdf",
             mime="application/pdf",
-            use_container_width=True
+            width="stretch"
         )
         st.download_button(
-            "Dossiê (.pdf)",
+            "Eligibility dossier (.pdf)",
             data=eligibility_pdf,
-            file_name=f"dossie_elegibilidade_{run_id}.pdf",
+            file_name=f"co2mply_eligibility_dossier_{run_id}.pdf",
             mime="application/pdf",
-            use_container_width=True
+            width="stretch"
         )
         st.download_button(
-            "Matriz (.pdf)",
+            "Compliance matrix (.pdf)",
             data=matrix_pdf,
-            file_name=f"matriz_conformidade_isometric_{run_id}.pdf",
+            file_name=f"co2mply_compliance_matrix_{run_id}.pdf",
             mime="application/pdf",
-            use_container_width=True
+            width="stretch"
         )
         st.download_button(
-            "Trilha (.json)",
+            "Trace (.json)",
             data=json_bytes,
-            file_name=f"auditoria_isometric_{run_id}.json",
+            file_name=f"co2mply_audit_{run_id}.json",
             mime="application/json",
-            use_container_width=True
+            width="stretch"
         )
 def render_trails_section(trails):
     st.markdown("#### Trilha detalhada")
