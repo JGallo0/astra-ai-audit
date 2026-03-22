@@ -121,6 +121,7 @@ def render_downloads_tab(
             use_container_width=True
         )
 
+
 def render():
     st.warning("Validation page ainda em transição. Usando renderer legado.")
 
