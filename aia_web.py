@@ -2676,37 +2676,16 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
         validation.render_trails_section(trails)
 
     with tab_history:
-            st.markdown(f"#### {t(lang, 'history')}")
-            history = st.session_state.get("audit_history", [])
-            if not history:
-                st.info("Nenhuma execução registrada nesta sessão.")
-            else:
-                for item in history:
-                    html_parts = [
-                        '<div class="auditoria-card">',
-                        '<div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;">',
-                        '<div>',
-                        f'<div style="font-weight:700;color:{THEME["primary"]};">{safe_str(item["project_name"])}</div>',
-                        f'<div class="auditoria-small">{safe_str(item["timestamp"])}</div>',
-                        '</div>',
-                        f'<div class="auditoria-small">run_id: {safe_str(item["run_id"])}</div>',
-                        '</div>',
-                        '<div style="margin-top:0.5rem;">',
-                        badge_html(safe_str(item["execution_mode"]), "info"),
-                        badge_html(f"score {item['overall_score']}%", "success"),
-                        badge_html(f"conf {item['overall_confidence']}%", "warning"),
-                        badge_html(f"US$ {item['estimated_cost']:.3f}", "danger"),
-                        '</div>',
-                        '<div class="auditoria-small" style="margin-top:0.5rem;">',
-                        f'módulos: {", ".join(item["modules"])}',
-                        '</div>',
-                        '</div>',
-                    ]
-                    html = "".join(html_parts)
-                    st.markdown(html, unsafe_allow_html=True)
+    validation.render_history_tab(
+        history=st.session_state.get("audit_history", []),
+        lang=lang,
+        t=t,
+        theme=THEME,
+        safe_str=safe_str,
+        badge_html=badge_html,
+    )
     else:
         st.info("Execute a auditoria completa para gerar a matriz de conformidade.")
-
 
 
 # =========================================================
