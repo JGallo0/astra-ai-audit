@@ -2663,63 +2663,64 @@ if isinstance(st.session_state.get("last_full_audit_df"), pd.DataFrame) and not 
             st.json(st.session_state.get("last_full_audit_results", []))
 
     with tab_downloads:
-    validation.render_downloads_tab(
-        run_id=run_id,
-        project_name=project_name,
-        summary=summary,
-        df=df,
-        last_full_audit_results=st.session_state["last_full_audit_results"],
-        last_full_audit_trails=st.session_state["last_full_audit_trails"],
-    )
+        validation.render_downloads_tab(
+            run_id=run_id,
+            project_name=project_name,
+            summary=summary,
+            df=df,
+            last_full_audit_results=st.session_state["last_full_audit_results"],
+            last_full_audit_trails=st.session_state["last_full_audit_trails"],
+        )
 
-if st.session_state.get("show_trails_full_audit", False):
-    st.markdown("#### Trilha detalhada")
-    for i, trail in enumerate(trails, start=1):
-        with st.expander(f"[{i}] {trail.get('module', '')} | {trail.get('analysis_label', '')}"):
-            st.markdown("**Queries do projeto**")
-            st.code(trail.get("project_query", ""), language="text")
-            st.markdown("**Queries da metodologia**")
-            st.code(trail.get("methodology_query", ""), language="text")
-            st.markdown("**Trechos do projeto**")
-            st.code(trail.get("project_context", ""), language="text")
-            st.markdown("**Trechos da metodologia**")
-            st.code(trail.get("methodology_context", ""), language="text")
-            st.markdown("**Resposta bruta do modelo**")
-            st.code(trail.get("model_response_raw", ""), language="json")
-            st.markdown("**Resultado interpretado**")
-            st.json(trail.get("parsed_result", {}))
+    if st.session_state.get("show_trails_full_audit", False):
+        st.markdown("#### Trilha detalhada")
+        for i, trail in enumerate(trails, start=1):
+            with st.expander(f"[{i}] {trail.get('module', '')} | {trail.get('analysis_label', '')}"):
+                st.markdown("**Queries do projeto**")
+                st.code(trail.get("project_query", ""), language="text")
+                st.markdown("**Queries da metodologia**")
+                st.code(trail.get("methodology_query", ""), language="text")
+                st.markdown("**Trechos do projeto**")
+                st.code(trail.get("project_context", ""), language="text")
+                st.markdown("**Trechos da metodologia**")
+                st.code(trail.get("methodology_context", ""), language="text")
+                st.markdown("**Resposta bruta do modelo**")
+                st.code(trail.get("model_response_raw", ""), language="json")
+                st.markdown("**Resultado interpretado**")
+                st.json(trail.get("parsed_result", {}))
 
-    with tab_history:
-        st.markdown(f"#### {t(lang, 'history')}")
-        history = st.session_state.get("audit_history", [])
-        if not history:
-            st.info("Nenhuma execução registrada nesta sessão.")
-        else:
-            for item in history:
-                html_parts = [
-                    '<div class="auditoria-card">',
-                    '<div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;">',
-                    '<div>',
-                    f'<div style="font-weight:700;color:{THEME["primary"]};">{safe_str(item["project_name"])}</div>',
-                    f'<div class="auditoria-small">{safe_str(item["timestamp"])}</div>',
-                    '</div>',
-                    f'<div class="auditoria-small">run_id: {safe_str(item["run_id"])}</div>',
-                    '</div>',
-                    '<div style="margin-top:0.5rem;">',
-                    badge_html(safe_str(item["execution_mode"]), "info"),
-                    badge_html(f"score {item['overall_score']}%", "success"),
-                    badge_html(f"conf {item['overall_confidence']}%", "warning"),
-                    badge_html(f"US$ {item['estimated_cost']:.3f}", "danger"),
-                    '</div>',
-                    '<div class="auditoria-small" style="margin-top:0.5rem;">',
-                    f'módulos: {", ".join(item["modules"])}',
-                    '</div>',
-                    '</div>',
-                ]
-                html = "".join(html_parts)
-                st.markdown(html, unsafe_allow_html=True)
-else:
-    st.info("Execute a auditoria completa para gerar a matriz de conformidade.")
+        with tab_history:
+            st.markdown(f"#### {t(lang, 'history')}")
+            history = st.session_state.get("audit_history", [])
+            if not history:
+                st.info("Nenhuma execução registrada nesta sessão.")
+            else:
+                for item in history:
+                    html_parts = [
+                        '<div class="auditoria-card">',
+                        '<div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;">',
+                        '<div>',
+                        f'<div style="font-weight:700;color:{THEME["primary"]};">{safe_str(item["project_name"])}</div>',
+                        f'<div class="auditoria-small">{safe_str(item["timestamp"])}</div>',
+                        '</div>',
+                        f'<div class="auditoria-small">run_id: {safe_str(item["run_id"])}</div>',
+                        '</div>',
+                        '<div style="margin-top:0.5rem;">',
+                        badge_html(safe_str(item["execution_mode"]), "info"),
+                        badge_html(f"score {item['overall_score']}%", "success"),
+                        badge_html(f"conf {item['overall_confidence']}%", "warning"),
+                        badge_html(f"US$ {item['estimated_cost']:.3f}", "danger"),
+                        '</div>',
+                        '<div class="auditoria-small" style="margin-top:0.5rem;">',
+                        f'módulos: {", ".join(item["modules"])}',
+                        '</div>',
+                        '</div>',
+                    ]
+                    html = "".join(html_parts)
+                    st.markdown(html, unsafe_allow_html=True)
+    else:
+        st.info("Execute a auditoria completa para gerar a matriz de conformidade.")
+
 
 
 # =========================================================
