@@ -21,6 +21,8 @@ project_data = {
         "reactor_design_diagram": True,
         "maintenance_plan": True,
         "reactor_pressure_regime": "atmospheric",
+        "sensor_inventory": True,
+        "sensor_locations": True,
     },
 
     "storage": {
@@ -57,6 +59,7 @@ project_data = {
     "biochar": {
         "characterization": {
             "chemical_analysis_performed": True,
+            "lab_reports": True,
         }
     },
 
