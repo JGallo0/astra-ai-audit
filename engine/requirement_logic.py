@@ -125,8 +125,8 @@ def run_engine(project_data, requirements):
             logic_fn = get_logic(req["logic"])
             status = logic_fn(project_data)
 
-        except Exception as e:
-            status = "error"
+    except Exception:
+        status = "error"
 
         results.append({
             "id": req.get("id"),
