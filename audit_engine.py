@@ -777,7 +777,7 @@ class AuditEngine:
             original_by_id[safe_str(item.get("requirement_id", ""))] = item
         return list(original_by_id.values())
 
-        def _collect_requirement_keywords(
+    def _collect_requirement_keywords(
         self,
         requirements: List[Dict[str, Any]],
         key: str,
@@ -838,7 +838,6 @@ class AuditEngine:
                     lines.append(f"    - {item}")
 
         return "\n".join(lines).strip()
-
     def _build_module_project_queries(
         self,
         module_name: str,
