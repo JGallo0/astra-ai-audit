@@ -535,6 +535,30 @@ def sampling_plan_consistency(data):
 
     except Exception:
         return "error"    
+
+def sampling_plan_consistency(data):
+    """
+    R-S8K1-1 | Sampling plan consistent with Methods A/B
+    """
+    try:
+        sampling = data.get("sampling", {})
+
+        method = sampling.get("method")
+        plan_defined = sampling.get("sampling_plan_defined")
+
+        if not method:
+            return "non_compliant"
+
+        if method not in ["A", "B"]:
+            return "non_compliant"
+
+        if not plan_defined:
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
         
 # =========================
 # LOGIC REGISTRY
@@ -561,5 +585,7 @@ LOGIC_MAP = {
     "adaptive_management_plan": adaptive_management_plan,
     "feedstock_moisture_management": feedstock_moisture_management,
     "fuel_use_reversal_risk": fuel_use_reversal_risk,
+
+    "sampling_plan_consistency": sampling_plan_consistency,
 }
 
