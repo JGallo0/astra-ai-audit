@@ -405,6 +405,112 @@ def biochar_chemical_analysis(data):
 
     except Exception:
         return "error"
+
+def uncertainty_inputs(data):
+    """
+    R-Z106-1 | Uncertainty inputs disclosed
+    """
+    try:
+        quant = data.get("quantification", {})
+
+        if not quant.get("input_variables"):
+            return "non_compliant"
+
+        if not quant.get("input_uncertainties"):
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def stockpiling_disclosure(data):
+    """
+    R-6E1D-0 | Biochar stockpiling disclosed
+    """
+    try:
+        storage = data.get("storage", {})
+
+        stockpiled = storage.get("stockpiled_before_end_use")
+        disclosure = storage.get("stockpiling_documented")
+
+        if stockpiled is True and not disclosure:
+            return "non_compliant"
+
+        if stockpiled is True and disclosure:
+            return "compliant"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def adaptive_management_plan(data):
+    """
+    R-BC4H-1 | Adaptive management plan in place
+    """
+    try:
+        management = data.get("management", {})
+
+        plan = management.get("adaptive_management_plan")
+        triggers = management.get("monitoring_triggers")
+
+        if not plan:
+            return "non_compliant"
+
+        if not triggers:
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def feedstock_moisture_management(data):
+    """
+    R-NJ8G-0 | Feedstock moisture management and verification
+    """
+    try:
+        feedstock = data.get("feedstock", {})
+
+        moisture_control = feedstock.get("moisture_control_plan")
+        moisture_measurement = feedstock.get("moisture_measurement")
+
+        if not moisture_control:
+            return "non_compliant"
+
+        if not moisture_measurement:
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def fuel_use_reversal_risk(data):
+    """
+    R-Z4A3-0 | Fuel-use reversal risk assessed
+    """
+    try:
+        risk = data.get("risk_assessment", {})
+
+        assessment = risk.get("fuel_use_reversal_risk")
+        mitigation = risk.get("mitigation_plan")
+
+        if not assessment:
+            return "non_compliant"
+
+        if not mitigation:
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
     
 # =========================
 # LOGIC REGISTRY
@@ -424,5 +530,13 @@ LOGIC_MAP = {
     "sampling_batch_definition": sampling_batch_definition,
     "chain_of_custody_diagram": chain_of_custody_diagram,
     "biochar_chemical_analysis": biochar_chemical_analysis,
+
+    LOGIC_MAP.update({
+    "uncertainty_inputs": uncertainty_inputs,
+    "stockpiling_disclosure": stockpiling_disclosure,
+    "adaptive_management_plan": adaptive_management_plan,
+    "feedstock_moisture_management": feedstock_moisture_management,
+    "fuel_use_reversal_risk": fuel_use_reversal_risk,
+})
 }
 
