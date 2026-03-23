@@ -5,6 +5,9 @@ from schemas.project_schema import get_demo_project_data
 from versioning.methodology_manager import get_requirements
 from engine.requirement_logic import run_engine
 
+import streamlit as st
+st.write("🔥 APP V2 DA BRANCH CO2MPLY-V2")
+
 # Initialize the OpenAI client
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
