@@ -2407,7 +2407,7 @@ def render_full_audit_mode():
 
     st.caption(
         f"Auditando {len(selected_modules)} módulos internos distribuídos em {len(selected_scopes)} escopo(s)."
-    ))
+    )
 
     if effort["hard_stop"]:
         st.error("Execução bloqueada preventivamente: reduza módulos ou use o modo rápido.")
