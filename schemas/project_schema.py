@@ -98,6 +98,8 @@ def get_empty_project_data():
 
 def get_demo_project_data():
     data = get_empty_project_data()
+
+    # EXISTENTE (não mexer)
     data["project"]["name"] = "Demo Biochar Project"
     data["eligibility"]["net_negative_claim"] = True
     data["eligibility"]["additionality_claim"] = True
@@ -120,5 +122,47 @@ def get_demo_project_data():
     data["monitoring_reporting"]["monitoring_plan"] = True
     data["monitoring_reporting"]["uncertainty_method"] = "defined"
     data["monitoring_reporting"]["verification_ready"] = True
+
+    # =========================
+    # NOVO BLOCO - ENGINE V2
+    # =========================
+
+    data["methodology"] = {
+        "standard": "Isometric",
+        "pathway": "biochar",
+        "production_subpathway": "standard",
+        "storage_pathway": "soil",
+        "durability_option": "200",
+    }
+
+    data["production"]["sensor_inventory"] = True
+    data["production"]["sensor_locations"] = True
+
+    data["storage"]["stockpiled_before_end_use"] = False
+    data["storage"]["soil"] = {
+        "deployment_methods": ["direct_soil_application"],
+        "integration_method": "direct",
+    }
+
+    data["sampling"] = {
+        "method": "A",
+        "batch_definition_days": 7,
+    }
+
+    data["quantification"] = {
+        "input_variables": True,
+        "input_uncertainties": True,
+    }
+
+    data["biochar"] = {
+        "characterization": {
+            "chemical_analysis_performed": True,
+            "lab_reports": True,
+        }
+    }
+
+    data["traceability"] = {
+        "chain_of_custody_diagram": True,
+    }
 
     return data
