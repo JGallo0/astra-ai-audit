@@ -108,4 +108,11 @@ def get_demo_project_data():
     data["storage"]["storage_environment_stable"] = True
     data["storage"]["storage_module"] = "soil_application"
     data["storage"]["storage_monitoring_plan"] = True
+    data["feedstock"]["biomass_type"] = "eucalyptus_residues"
+    data["feedstock"]["pre_project_biomass_use"] = "left_on_field"
+    data["feedstock"]["feedstock_accounting_module_compliance"] = True
+
+    data["monitoring_reporting"]["monitoring_plan"] = True
+    data["monitoring_reporting"]["uncertainty_method"] = "defined"
+    data["monitoring_reporting"]["verification_ready"] = True
     return data
