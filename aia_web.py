@@ -2369,21 +2369,12 @@ def render_full_audit_mode():
             value=False,
             key="show_trails_full_audit"
         )
-    st.session_state["current_project_name"] = project_name
-
-    if not requirements:
-        st.warning("A metodologia selecionada ainda não possui matriz estruturada de requisitos no app.")
-        return
 
     if not selected_scopes:
         st.warning("Selecione pelo menos um escopo de auditoria para continuar.")
         return
 
-      selected_requirements = [
-        r for r in requirements if r["module"] in selected_modules
-    ]
     selected_requirements_count = len(selected_requirements)
-
     engine_params = get_engine_params_for_mode(execution_mode)
     effort = estimate_audit_effort(execution_mode, selected_scopes, selected_requirements_count)
 
