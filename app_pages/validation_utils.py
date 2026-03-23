@@ -594,6 +594,118 @@ def build_executive_dossier_text(
         lines.append("")
 
     return "\n".join(lines)
+
+def calculate_rating(score: int) -> str:
+    if score >= 85:
+        return "AAA"
+    if score >= 75:
+        return "AA"
+    if score >= 65:
+        return "A"
+    if score >= 55:
+        return "BBB"
+    if score >= 45:
+        return "BB"
+    if score >= 35:
+        return "B"
+    return "CCC"
+
+
+def build_investor_dossier_text(
+    project_name,
+    summary,
+    results,
+    lang="en",
+):
+    score = summary.get("overall_score", 0)
+    confidence = summary.get("overall_confidence", 0)
+    risk_counts = summary.get("risk_counts", {}) or {}
+
+    rating = calculate_rating(score)
+    high_risk = risk_counts.get("alto", 0) or risk_counts.get("high", 0)
+
+    if score >= 75:
+        readiness = "LOW RISK"
+        headline = "The project is structurally robust and close to certification readiness."
+        investment_signal = "POSITIVE"
+    elif score >= 55:
+        readiness = "MODERATE RISK"
+        headline = "The project presents a credible technical foundation, but material gaps remain."
+        investment_signal = "CONDITIONAL"
+    elif score >= 40:
+        readiness = "HIGH RISK"
+        headline = "The project is partially structured and requires corrective action before certification."
+        investment_signal = "CONDITIONAL"
+    else:
+        readiness = "VERY HIGH RISK"
+        headline = "The project is not currently ready for certification or investment-grade assessment."
+        investment_signal = "NEGATIVE"
+
+    high_risk_items = [r for r in results if safe_str(r.get("risk")).lower() in ["alto", "high"]]
+    high_risk_items = sorted(high_risk_items, key=lambda x: x.get("score", 0))[:5]
+
+    recommendations = []
+    for r in high_risk_items:
+        rec = safe_str(r.get("recommendation"))
+        if rec:
+            recommendations.append(rec)
+    recommendations = list(dict.fromkeys(recommendations))[:5]
+
+    modules = {}
+    for r in results:
+        modules.setdefault(safe_str(r.get("module", "General")), []).append(r)
+
+    lines = []
+    lines.append("# CO2mply | Investor Brief")
+    lines.append("")
+    lines.append(f"Project: {safe_str(project_name)}")
+    lines.append(f"CO2mply Rating: {rating}")
+    lines.append(f"Certification Readiness: {readiness}")
+    lines.append(f"Investment Signal: {investment_signal}")
+    lines.append("")
+    lines.append("## Executive Summary")
+    lines.append("")
+    lines.append(headline)
+    lines.append("")
+    lines.append(f"- Overall Score: {score:.1f}%")
+    lines.append(f"- Confidence Level: {confidence:.1f}%")
+    lines.append(f"- High-Risk Requirements: {high_risk}")
+    lines.append("")
+    lines.append("## Investment View")
+    lines.append("")
+    lines.append(
+        "The current assessment indicates that certification may be achievable, "
+        "but execution risk remains dependent on the project team's ability to close critical documentation, "
+        "traceability and methodological alignment gaps."
+    )
+    lines.append("")
+    lines.append("## Key Risks")
+    lines.append("")
+    if not high_risk_items:
+        lines.append("- No critical risks identified.")
+    else:
+        for item in high_risk_items:
+            title = safe_str(item.get("title"))
+            gap = safe_str(item.get("gap"))
+            lines.append(f"- {title}: {gap}")
+    lines.append("")
+    lines.append("## Priority Actions")
+    lines.append("")
+    if not recommendations:
+        lines.append("- No priority actions generated.")
+    else:
+        for rec in recommendations:
+            lines.append(f"- {rec}")
+    lines.append("")
+    lines.append("## Module Snapshot")
+    lines.append("")
+    for module, items in modules.items():
+        avg_score = sum(float(i.get("score", 0) or 0) for i in items) / max(len(items), 1)
+        lines.append(f"- {module}: average score {avg_score:.1f}%")
+    lines.append("")
+
+    return "\n".join(lines)
+    
 def pdf_from_text_branded(title: str, text: str, brand_name: str = "CO2mply") -> bytes:
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
