@@ -467,58 +467,48 @@ def status_badge(status: str) -> str:
     return badge_html(s, "info")
 
 
-def risk_badge(risk: str) -> str:
-    r = safe_str(risk).lower()
-    if r == "baixo":
-        return badge_html("baixo", "success")
-    if r == "medio":
-        return badge_html("medio", "warning")
-    if r == "alto":
-        return badge_html("alto", "danger")
-    return badge_html(risk, "info")
-
 def build_executive_dossier_text(
     project_name,
     summary,
     results,
+    lang="en",
 ):
     score = summary.get("overall_score", 0)
     confidence = summary.get("overall_confidence", 0)
     risk_counts = summary.get("risk_counts", {}) or {}
 
-    # =========================
-    # CLASSIFICAÇÃO EXECUTIVA
-    # =========================
-    if score >= 75:
-        maturity = "Alta prontidão para certificação"
-        interpretation = "O projeto apresenta estrutura robusta e aderência consistente aos critérios metodológicos."
-    elif score >= 55:
-        maturity = "Prontidão moderada com lacunas relevantes"
-        interpretation = "O projeto possui base técnica consistente, porém com lacunas que podem comprometer a certificação."
-    elif score >= 40:
-        maturity = "Baixa prontidão – riscos significativos"
-        interpretation = "O projeto apresenta estrutura parcial, com lacunas críticas que exigem intervenção antes de certificação."
-    else:
-        maturity = "Não elegível no estado atual"
-        interpretation = "O projeto não atende aos requisitos mínimos para certificação no estágio atual."
-
     high_risk = risk_counts.get("alto", 0)
 
     # =========================
-    # IDENTIFICAR GAPS CRÍTICOS
+    # MATURITY CLASSIFICATION
+    # =========================
+    if score >= 75:
+        maturity = "High readiness for certification"
+        interpretation = "The project demonstrates strong technical structure and consistent alignment with methodological requirements."
+    elif score >= 55:
+        maturity = "Moderate readiness with relevant gaps"
+        interpretation = "The project presents a solid technical foundation but contains gaps that may affect certification eligibility."
+    elif score >= 40:
+        maturity = "Low readiness – significant risks identified"
+        interpretation = "The project is partially structured, with critical gaps that must be addressed prior to certification."
+    else:
+        maturity = "Not eligible in current state"
+        interpretation = "The project does not meet minimum certification requirements at this stage."
+
+    # =========================
+    # CRITICAL ITEMS
     # =========================
     critical_items = [
-        r for r in results if r.get("risk") == "alto"
+        r for r in results if r.get("risk") in ["alto", "high"]
     ]
 
-    # prioriza os mais relevantes
     critical_items = sorted(
         critical_items,
         key=lambda x: x.get("score", 0)
     )[:5]
 
     # =========================
-    # RECOMENDAÇÕES AGRUPADAS
+    # RECOMMENDATIONS
     # =========================
     recommendations = []
     for r in critical_items:
@@ -529,69 +519,65 @@ def build_executive_dossier_text(
     recommendations = list(dict.fromkeys(recommendations))[:5]
 
     # =========================
-    # TEXTO
+    # BUILD TEXT
     # =========================
     lines = []
 
+    # HEADER
+    lines.append("# CO2mply Carbon Compliance Report")
+    lines.append("")
+    lines.append(f"## Project: {safe_str(project_name)}")
+    lines.append("")
+
     # EXECUTIVE SUMMARY
-    lines.append("# Executive Summary")
-    lines.append("")
-    lines.append(f"Projeto: {safe_str(project_name)}")
-    lines.append("")
-    lines.append(f"Score geral: {score:.1f}%")
-    lines.append(f"Confiança da análise: {confidence:.1f}%")
-    lines.append(f"Classificação: {maturity}")
+    lines.append("## Executive Summary")
     lines.append("")
     lines.append(interpretation)
     lines.append("")
-
-    if high_risk:
-        lines.append(f"Foram identificados {high_risk} requisitos com risco alto, indicando necessidade imediata de ajuste antes de certificação.")
-    else:
-        lines.append("Não foram identificados riscos críticos imediatos.")
+    lines.append(f"- Overall Score: {score:.1f}%")
+    lines.append(f"- Confidence Level: {confidence:.1f}%")
+    lines.append(f"- Certification Readiness: {maturity}")
+    lines.append(f"- High Risk Items Identified: {high_risk}")
     lines.append("")
 
-    # KEY RISKS
-    lines.append("## Principais riscos e lacunas")
+    # RISKS
+    lines.append("## Key Risks and Gaps")
     lines.append("")
 
     if not critical_items:
-        lines.append("Nenhuma lacuna crítica identificada.")
+        lines.append("No critical risks identified.")
     else:
         for r in critical_items:
             lines.append(
-                f"- {safe_str(r.get('requirement_id'))}: "
-                f"{safe_str(r.get('gap'))}"
+                f"- {safe_str(r.get('title'))}: {safe_str(r.get('gap'))}"
             )
+
     lines.append("")
 
     # RECOMMENDATIONS
-    lines.append("## Recomendações prioritárias")
+    lines.append("## Priority Actions")
     lines.append("")
 
     if not recommendations:
-        lines.append("Nenhuma recomendação gerada.")
+        lines.append("No recommendations generated.")
     else:
         for rec in recommendations:
             lines.append(f"- {rec}")
+
     lines.append("")
 
-    # DETAIL (RESUMIDO)
-    lines.append("## Avaliação por módulo")
+    # MODULE SUMMARY
+    lines.append("## Module Performance Overview")
     lines.append("")
 
     modules = {}
     for r in results:
-        modules.setdefault(r.get("module", "Geral"), []).append(r)
+        modules.setdefault(r.get("module", "General"), []).append(r)
 
     for module, items in modules.items():
+        avg_score = sum(i.get("score", 0) for i in items) / len(items)
         lines.append(f"### {module}")
-        for r in items:
-            lines.append(
-                f"- {safe_str(r.get('requirement_id'))} | "
-                f"{safe_str(r.get('status'))} | "
-                f"Risco: {safe_str(r.get('risk'))}"
-            )
+        lines.append(f"- Average Score: {round(avg_score,1)}%")
         lines.append("")
 
     return "\n".join(lines)
