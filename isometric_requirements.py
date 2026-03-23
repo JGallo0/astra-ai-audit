@@ -1069,3 +1069,4 @@ ISOMETRIC_REQUIREMENTS = [
             "authority"
         ],
     },
+]
