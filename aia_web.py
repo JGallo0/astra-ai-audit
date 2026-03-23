@@ -2170,39 +2170,73 @@ def make_progress_callback(progress_container, status_container):
 # AUDIT SCOPE MAPPING
 # =========================================================
 
-AUDIT_SCOPE_TO_MODULES = {
-    "Core Integrity": [
-        "Eligibility",
-        "Ownership",
-        "Additionality",
-        "Baseline",
-        "System Boundary",
-    ],
-    "Carbon Accounting": [
-        "Carbon Accounting",
-        "Biochar Carbon Quantification",
-        "Leakage",
-        "Uncertainty",
-        "LCA",
-    ],
-    "MRV & Verification": [
-        "MRV",
-        "Traceability",
-    ],
-    "Durability & Storage": [
-        "Durability",
-        "Storage/End Use",
-        "Reversal Risk",
-        "Biochar Quality",
-    ],
-    "Operations": [
-        "Feedstock",
-        "Technology",
-    ],
-    "Safeguards & Compliance": [
-        "Safeguards",
-        "Regulatory Compliance",
-    ],
+# =========================================================
+# AUDIT SCOPE CONFIG
+# =========================================================
+
+AUDIT_SCOPE_CONFIG = {
+    "Core Integrity": {
+        "label": "Core Integrity",
+        "help": "Foundational methodological integrity: eligibility, ownership, additionality, baseline, and system boundary.",
+        "modules": [
+            "Eligibility",
+            "Ownership",
+            "Additionality",
+            "Baseline",
+            "System Boundary",
+        ],
+        "default": True,
+    },
+    "Carbon Accounting": {
+        "label": "Carbon Accounting",
+        "help": "Net removals logic, carbon quantification, leakage, uncertainty, and lifecycle accounting.",
+        "modules": [
+            "Carbon Accounting",
+            "Biochar Carbon Quantification",
+            "Leakage",
+            "Uncertainty",
+            "LCA",
+        ],
+        "default": True,
+    },
+    "MRV & Verification": {
+        "label": "MRV & Verification",
+        "help": "Monitoring, traceability, data integrity, and audit readiness.",
+        "modules": [
+            "MRV",
+            "Traceability",
+        ],
+        "default": True,
+    },
+    "Durability & Storage": {
+        "label": "Durability & Storage",
+        "help": "Durability logic, storage integrity, reversal risk, and biochar quality.",
+        "modules": [
+            "Durability",
+            "Storage/End Use",
+            "Reversal Risk",
+            "Biochar Quality",
+        ],
+        "default": True,
+    },
+    "Operations": {
+        "label": "Operations",
+        "help": "Operational evidence for feedstock sourcing and technology configuration.",
+        "modules": [
+            "Feedstock",
+            "Technology",
+        ],
+        "default": False,
+    },
+    "Safeguards & Compliance": {
+        "label": "Safeguards & Compliance",
+        "help": "Environmental and social safeguards, permits, and legal compliance.",
+        "modules": [
+            "Safeguards",
+            "Regulatory Compliance",
+        ],
+        "default": False,
+    },
 }
 
 
@@ -2214,16 +2248,47 @@ def resolve_selected_modules_from_scope(
     resolved_modules: List[str] = []
 
     for scope in selected_scopes:
-        for module in AUDIT_SCOPE_TO_MODULES.get(scope, []):
+        scope_config = AUDIT_SCOPE_CONFIG.get(scope, {})
+        for module in scope_config.get("modules", []):
             if module in available_modules and module not in resolved_modules:
                 resolved_modules.append(module)
 
-    # garante base obrigatória, sem depender da escolha do usuário
-    for mandatory_module in ["Eligibility"]:
+    # base obrigatória independentemente da escolha explícita do usuário
+    mandatory_modules = ["Eligibility"]
+
+    for mandatory_module in mandatory_modules:
         if mandatory_module in available_modules and mandatory_module not in resolved_modules:
             resolved_modules.insert(0, mandatory_module)
 
     return resolved_modules
+
+def get_available_audit_scopes(requirements: List[Dict[str, Any]]) -> List[str]:
+    available_modules = {r["module"] for r in requirements}
+    available_scopes: List[str] = []
+
+    for scope_name, scope_config in AUDIT_SCOPE_CONFIG.items():
+        scope_modules = scope_config.get("modules", [])
+        if any(module in available_modules for module in scope_modules):
+            available_scopes.append(scope_name)
+
+    return available_scopes
+
+
+def get_default_audit_scopes(available_scopes: List[str]) -> List[str]:
+    return [
+        scope_name
+        for scope_name in available_scopes
+        if AUDIT_SCOPE_CONFIG.get(scope_name, {}).get("default", False)
+    ]
+
+
+def get_scope_help_text(selected_scopes: List[str]) -> str:
+    parts = []
+    for scope in selected_scopes:
+        help_text = AUDIT_SCOPE_CONFIG.get(scope, {}).get("help")
+        if help_text:
+            parts.append(f"**{scope}:** {help_text}")
+    return "\n\n".join(parts)
     
 def render_full_audit_mode():
     project_vs_id = st.session_state.get("current_project_vector_store_id")
@@ -2240,21 +2305,8 @@ def render_full_audit_mode():
     )
 
     all_modules = sorted(list({r["module"] for r in requirements})) if requirements else []
-
-    available_scopes = []
-    for scope_name, scope_modules in AUDIT_SCOPE_TO_MODULES.items():
-        if any(module in all_modules for module in scope_modules):
-            available_scopes.append(scope_name)
-
-    default_scopes = [
-        scope for scope in [
-            "Core Integrity",
-            "Carbon Accounting",
-            "MRV & Verification",
-            "Durability & Storage",
-        ]
-        if scope in available_scopes
-    ]
+    available_scopes = get_available_audit_scopes(requirements)
+    default_scopes = get_default_audit_scopes(available_scopes)
 
     with st.expander("Configuração", expanded=True):
         project_name = st.text_input(
@@ -2267,8 +2319,8 @@ def render_full_audit_mode():
             options=available_scopes,
             default=default_scopes,
             help=(
-                "Eligibility is always included as a mandatory foundation. "
-                "Choose the broader audit scopes you want Co2mply to evaluate."
+                "Core Integrity is the methodological foundation of the audit. "
+                "Eligibility is always enforced internally even if scope selection changes."
             ),
         )
 
@@ -2277,10 +2329,33 @@ def render_full_audit_mode():
             selected_scopes=selected_scopes,
         )
 
+        selected_requirements = [
+            r for r in requirements
+            if r["module"] in selected_modules
+        ]
+
         st.caption(
             "Modules covered in this run: "
             + (", ".join(selected_modules) if selected_modules else "none")
         )
+
+        if selected_scopes:
+            st.markdown(get_scope_help_text(selected_scopes))
+
+        with st.expander("Requirements covered in this run", expanded=False):
+            for scope in selected_scopes:
+                scope_modules = AUDIT_SCOPE_CONFIG.get(scope, {}).get("modules", [])
+                scope_requirements = [
+                    r for r in selected_requirements
+                    if r["module"] in scope_modules
+                ]
+
+                if not scope_requirements:
+                    continue
+
+                st.markdown(f"**{scope}**")
+                for req in scope_requirements:
+                    st.markdown(f"- `{req['id']}` — {req['title']}")
 
         execution_mode = st.radio(
             t(lang, "execution_mode"),
@@ -2301,12 +2376,14 @@ def render_full_audit_mode():
         return
 
     if not selected_scopes:
-        st.warning("Selecione pelo menos um escopo de auditoria.")
+        st.warning("Selecione pelo menos um escopo de auditoria para continuar.")
         return
 
-    selected_requirements_count = len(
-        [r for r in requirements if r["module"] in selected_modules]
-    )
+      selected_requirements = [
+        r for r in requirements if r["module"] in selected_modules
+    ]
+    selected_requirements_count = len(selected_requirements)
+
     engine_params = get_engine_params_for_mode(execution_mode)
     effort = estimate_audit_effort(execution_mode, selected_scopes, selected_requirements_count)
 
@@ -2332,13 +2409,14 @@ def render_full_audit_mode():
 
     st.markdown(f"#### {t(lang, 'estimated_effort')}")
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Nível", safe_str(effort["level"]).upper())
+    c1.metric("Nível", effort["level"].upper())
     c2.metric("Escopos", len(selected_scopes))
     c3.metric("Requisitos", selected_requirements_count)
-    c4.metric(
-        t(lang, "cost_estimate"),
-        f"US$ {cost_estimate['estimated_min_cost']:.3f} – {cost_estimate['estimated_max_cost']:.3f}"
-    )
+    c4.metric("Custo estimado", cost_range_text)
+
+    st.caption(
+        f"Auditando {len(selected_modules)} módulos internos distribuídos em {len(selected_scopes)} escopo(s)."
+    ))
 
     if effort["hard_stop"]:
         st.error("Execução bloqueada preventivamente: reduza módulos ou use o modo rápido.")
