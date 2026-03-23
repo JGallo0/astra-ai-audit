@@ -559,33 +559,147 @@ def sampling_plan_consistency(data):
 
     except Exception:
         return "error"
+def reactor_maintenance_plan(data):
+    """
+    R-19AF-1 | Reactor maintenance plan evidenced
+    """
+    try:
+        production = data.get("production", {})
+
+        maintenance_plan = production.get("maintenance_plan")
+        maintenance_schedule = production.get("maintenance_schedule")
+
+        if not maintenance_plan:
+            return "non_compliant"
+
+        if not maintenance_schedule:
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def stack_emissions_monitoring_method(data):
+    """
+    R-TKNH-0 | Stack emissions monitoring method selected
+    """
+    try:
+        emissions = data.get("emissions", {})
+
+        method = emissions.get("stack_monitoring_method")
+        frequency = emissions.get("testing_frequency")
+
+        if not method:
+            return "non_compliant"
+
+        if not frequency:
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def biochar_required_measurements(data):
+    """
+    R-VGXA-0 | All required physical and chemical measurements obtained or planned
+    """
+    try:
+        biochar = data.get("biochar", {})
+        characterization = biochar.get("characterization", {})
+
+        required_complete = characterization.get("required_measurements_complete")
+        measurement_values = characterization.get("measurement_values")
+
+        if required_complete is not True:
+            return "non_compliant"
+
+        if not measurement_values:
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def deployment_method_selected(data):
+    """
+    R-T2X2-0 | Deployment method specified
+    """
+    try:
+        storage = data.get("storage", {})
+        soil = storage.get("soil", {})
+
+        deployment_methods = soil.get("deployment_methods")
+
+        if not deployment_methods:
+            return "non_compliant"
+
+        if not isinstance(deployment_methods, list):
+            return "non_compliant"
+
+        if len(deployment_methods) == 0:
+            return "non_compliant"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def direct_soil_application_evidence(data):
+    """
+    R-8PBP-0 | Direct soil application evidence pathway confirmed
+    """
+    try:
+        storage = data.get("storage", {})
+        soil = storage.get("soil", {})
+        deployment_methods = soil.get("deployment_methods", [])
+
+        evidence = soil.get("direct_application_evidence_pathway")
+
+        if "direct_soil_application" not in deployment_methods:
+            return "not_applicable"
+
+        if not evidence:
+            return "non_compliant"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
         
 # =========================
 # LOGIC REGISTRY
 # =========================
 
 LOGIC_MAP = {
-    # lógica antiga / base
     "biochar_applicability": eval_biochar_applicability,
     "reactor_definition": eval_reactor_requirements,
     "storage_pathway": eval_storage_requirements,
     "feedstock_compliance": eval_feedstock_requirements,
     "monitoring_system": eval_monitoring_requirements,
 
-    # primeiros logic_keys reais
     "reactor_design_diagram": reactor_design_diagram,
     "durability_option_declared": durability_option_declared,
     "sampling_batch_definition": sampling_batch_definition,
     "chain_of_custody_diagram": chain_of_custody_diagram,
     "biochar_chemical_analysis": biochar_chemical_analysis,
 
-    # segundo lote
     "uncertainty_inputs": uncertainty_inputs,
     "stockpiling_disclosure": stockpiling_disclosure,
     "adaptive_management_plan": adaptive_management_plan,
     "feedstock_moisture_management": feedstock_moisture_management,
     "fuel_use_reversal_risk": fuel_use_reversal_risk,
-
     "sampling_plan_consistency": sampling_plan_consistency,
-}
 
+    "reactor_maintenance_plan": reactor_maintenance_plan,
+    "stack_emissions_monitoring_method": stack_emissions_monitoring_method,
+    "biochar_required_measurements": biochar_required_measurements,
+    "deployment_method_selected": deployment_method_selected,
+    "direct_soil_application_evidence": direct_soil_application_evidence,
+}
