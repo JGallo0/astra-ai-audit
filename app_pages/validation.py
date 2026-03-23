@@ -26,21 +26,17 @@ def render_downloads_tab(
     full_audit_docx = docx_from_text("CO2mply | Audit Summary", full_audit_text)
     full_audit_pdf = pdf_from_text_branded("CO2mply | Audit Summary", full_audit_text, brand_name="CO2mply")
 
-    try:
-        eligibility_dossier_text = build_executive_dossier_text(
-            project_name,
-            summary,
-            last_full_audit_results,
-            lang="en",
-        )
-    except Exception:
-        eligibility_dossier_text = build_full_eligibility_dossier_text(
-            project_name=project_name,
-            summary=summary,
-            results=last_full_audit_results,
-            trails=last_full_audit_trails,
-        )
+normalized_results_en = normalize_result_language(
+    last_full_audit_results,
+    lang="en",
+)
 
+eligibility_dossier_text = build_executive_dossier_text(
+    project_name,
+    summary,
+    normalized_results_en,
+    lang="en",
+)
     eligibility_docx = docx_from_text("CO2mply | Eligibility Dossier", eligibility_dossier_text)
     eligibility_pdf = pdf_from_text_branded("CO2mply | Eligibility Dossier", eligibility_dossier_text, brand_name="CO2mply")
 
