@@ -69,6 +69,8 @@ LOGIC_MAP = {
     "biochar_applicability": eval_biochar_applicability,
     "reactor_requirements": eval_reactor_requirements,
     "storage_requirements": eval_storage_requirements,
+    "feedstock_requirements": eval_feedstock_requirements,
+    "monitoring_requirements": eval_monitoring_requirements,
 }
 
 
@@ -76,6 +78,39 @@ def get_logic(name):
     if name not in LOGIC_MAP:
         raise ValueError(f"Logic function '{name}' not found")
     return LOGIC_MAP[name]
+
+def eval_feedstock_requirements(data):
+    try:
+        if not data["feedstock"]["biomass_type"]:
+            return "non_compliant"
+
+        if not data["feedstock"]["pre_project_biomass_use"]:
+            return "partial"
+
+        if data["feedstock"]["feedstock_accounting_module_compliance"] is not True:
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def eval_monitoring_requirements(data):
+    try:
+        if data["monitoring_reporting"]["monitoring_plan"] is not True:
+            return "non_compliant"
+
+        if not data["monitoring_reporting"]["uncertainty_method"]:
+            return "partial"
+
+        if data["monitoring_reporting"]["verification_ready"] is not True:
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
 
 
 # =========================
