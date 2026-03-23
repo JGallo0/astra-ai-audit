@@ -108,26 +108,32 @@ def get_demo_project_data():
     data["production"]["pyrolysis_technology"] = "continuous"
     data["production"]["reactor_design_diagram"] = True
     data["production"]["maintenance_plan"] = True
+    data["production"]["sensor_inventory"] = True
+    data["production"]["sensor_locations"] = True
+    data["production"]["maintenance_schedule"] = True
 
     data["storage"]["storage_environment_stable"] = True
     data["storage"]["storage_module"] = "soil_application"
     data["storage"]["storage_location"] = "demo_storage_site"
     data["storage"]["storage_monitoring_plan"] = True
     data["storage"]["loss_accounting_method"] = "mass_balance"
+    data["storage"]["stockpiled_before_end_use"] = False
+    data["storage"]["stockpiling_documented"] = True
+    data["storage"]["soil"] = {
+        "deployment_methods": ["direct_soil_application"],
+        "integration_method": "direct",
+        "direct_application_evidence_pathway": True,
+    }
 
     data["feedstock"]["biomass_type"] = "eucalyptus_residues"
     data["feedstock"]["pre_project_biomass_use"] = "left_on_field"
     data["feedstock"]["feedstock_accounting_module_compliance"] = True
+    data["feedstock"]["moisture_control_plan"] = True
+    data["feedstock"]["moisture_measurement"] = True
 
     data["monitoring_reporting"]["monitoring_plan"] = True
     data["monitoring_reporting"]["uncertainty_method"] = "defined"
     data["monitoring_reporting"]["verification_ready"] = True
-
-    data["sampling"]["sampling_plan_defined"] = True
-
-    # =========================
-    # NOVO BLOCO - ENGINE V2
-    # =========================
 
     data["methodology"] = {
         "standard": "Isometric",
@@ -137,18 +143,10 @@ def get_demo_project_data():
         "durability_option": "200",
     }
 
-    data["production"]["sensor_inventory"] = True
-    data["production"]["sensor_locations"] = True
-
-    data["storage"]["stockpiled_before_end_use"] = False
-    data["storage"]["soil"] = {
-        "deployment_methods": ["direct_soil_application"],
-        "integration_method": "direct",
-    }
-
     data["sampling"] = {
         "method": "A",
         "batch_definition_days": 7,
+        "sampling_plan_defined": True,
     }
 
     data["quantification"] = {
@@ -160,6 +158,8 @@ def get_demo_project_data():
         "characterization": {
             "chemical_analysis_performed": True,
             "lab_reports": True,
+            "required_measurements_complete": True,
+            "measurement_values": True,
         }
     }
 
@@ -172,14 +172,14 @@ def get_demo_project_data():
         "monitoring_triggers": True,
     }
 
-    data["feedstock"]["moisture_control_plan"] = True
-    data["feedstock"]["moisture_measurement"] = True
-
     data["risk_assessment"] = {
         "fuel_use_reversal_risk": True,
         "mitigation_plan": True,
     }
 
-    data["storage"]["stockpiling_documented"] = True
+    data["emissions"] = {
+        "stack_monitoring_method": "periodic_stack_testing",
+        "testing_frequency": "quarterly",
+    }
 
     return data
