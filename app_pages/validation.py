@@ -32,10 +32,15 @@ normalized_results_en = normalize_result_language(
     lang="en",
 )
 
+normalized_results = normalize_result_language(
+    last_full_audit_results,
+    lang="en",
+)
+
 eligibility_dossier_text = build_executive_dossier_text(
     project_name,
     summary,
-    normalized_results_en,
+    normalized_results,
     lang="en",
 )
 
