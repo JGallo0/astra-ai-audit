@@ -115,4 +115,6 @@ def get_demo_project_data():
     data["monitoring_reporting"]["monitoring_plan"] = True
     data["monitoring_reporting"]["uncertainty_method"] = "defined"
     data["monitoring_reporting"]["verification_ready"] = True
+    data["storage"]["storage_location"] = "demo_storage_site"
+    data["storage"]["loss_accounting_method"] = "mass_balance"
     return data
