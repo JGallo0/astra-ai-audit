@@ -96,7 +96,25 @@ def default_result(requirement: Dict[str, Any]) -> Dict[str, Any]:
         "notes": "",
     }
 
+def unique_preserve_order(items: List[str]) -> List[str]:
+    seen = set()
+    out = []
+    for item in items:
+        value = safe_str(item)
+        if not value or value in seen:
+            continue
+        seen.add(value)
+        out.append(value)
+    return out
 
+
+def compact_list(values: List[Any], limit: Optional[int] = None) -> List[str]:
+    cleaned = [safe_str(v) for v in values if safe_str(v)]
+    cleaned = unique_preserve_order(cleaned)
+    if limit is not None:
+        cleaned = cleaned[:limit]
+    return cleaned
+    
 class AuditEngine:
     def __init__(
         self,
@@ -512,8 +530,20 @@ class AuditEngine:
             "methodology_query": " | ".join(module_queries_methodology),
             "project_hits_count": len(project_hits),
             "methodology_hits_count": len(methodology_hits),
+            "requirement_ids": [safe_str(r.get("id", "")) for r in requirements],
+            "expected_evidence_types": self._collect_requirement_keywords(
+                requirements,
+                key="expected_evidence_types",
+                per_requirement_limit=3,
+                total_limit=12,
+            ),
+            "evaluation_criteria": self._collect_requirement_keywords(
+                requirements,
+                key="evaluation_criteria",
+                per_requirement_limit=2,
+                total_limit=12,
+            ),
         }
-
         return normalized_results, trail
 
     def _normalize_module_results(
@@ -547,12 +577,29 @@ class AuditEngine:
             normalized["gap"] = safe_str(raw.get("gap", ""))
             normalized["recommendation"] = safe_str(raw.get("recommendation", ""))
             normalized["notes"] = safe_str(raw.get("notes", ""))
-
+            expected_evidence_types = compact_list(requirement.get("expected_evidence_types", []), limit=6)
+            evaluation_criteria = compact_list(requirement.get("evaluation_criteria", []), limit=5)
+            
             if not normalized["project_evidence"]:
                 normalized["project_evidence"] = self._fallback_project_evidence(project_hits)
 
             if not normalized["methodology_basis"]:
                 normalized["methodology_basis"] = self._fallback_methodology_basis(methodology_hits)
+
+            if not normalized["notes"]:
+                note_parts = []
+
+                if expected_evidence_types:
+                    note_parts.append(
+                        "Tipos de evidência esperados: " + ", ".join(expected_evidence_types) + "."
+                    )
+
+                if evaluation_criteria:
+                    note_parts.append(
+                        "Critérios centrais considerados: " + "; ".join(evaluation_criteria[:3]) + "."
+                    )
+
+                normalized["notes"] = " ".join(note_parts).strip()
 
             evidence_present = self._has_real_evidence(normalized["project_evidence"])
             methodology_present = self._has_real_methodology_basis(normalized["methodology_basis"])
@@ -730,41 +777,148 @@ class AuditEngine:
             original_by_id[safe_str(item.get("requirement_id", ""))] = item
         return list(original_by_id.values())
 
+        def _collect_requirement_keywords(
+        self,
+        requirements: List[Dict[str, Any]],
+        key: str,
+        per_requirement_limit: Optional[int] = None,
+        total_limit: Optional[int] = None,
+    ) -> List[str]:
+        collected: List[str] = []
+
+        for req in requirements:
+            values = req.get(key, []) or []
+            if not isinstance(values, list):
+                continue
+
+            cleaned = compact_list(values, limit=per_requirement_limit)
+            collected.extend(cleaned)
+
+        collected = unique_preserve_order(collected)
+
+        if total_limit is not None:
+            collected = collected[:total_limit]
+
+        return collected
+
+    def _format_requirement_brief(self, req: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "requirement_id": safe_str(req.get("id", "")),
+            "module": safe_str(req.get("module", "")),
+            "title": safe_str(req.get("title", "")),
+            "description": safe_str(req.get("description", "")),
+            "rationale": safe_str(req.get("rationale", "")),
+            "keywords": compact_list(req.get("keywords", [])),
+            "evaluation_criteria": compact_list(req.get("evaluation_criteria", [])),
+            "expected_evidence_types": compact_list(req.get("expected_evidence_types", [])),
+        }
+
+    def _summarize_requirement_expectations(
+        self,
+        requirements: List[Dict[str, Any]],
+    ) -> str:
+        lines: List[str] = []
+
+        for req in requirements:
+            rid = safe_str(req.get("id", ""))
+            title = safe_str(req.get("title", ""))
+            criteria = compact_list(req.get("evaluation_criteria", []), limit=5)
+            evidence_types = compact_list(req.get("expected_evidence_types", []), limit=6)
+
+            lines.append(f"- {rid} | {title}")
+
+            if criteria:
+                lines.append("  Evaluation criteria:")
+                for item in criteria:
+                    lines.append(f"    - {item}")
+
+            if evidence_types:
+                lines.append("  Expected evidence types:")
+                for item in evidence_types:
+                    lines.append(f"    - {item}")
+
+        return "\n".join(lines).strip()
+
     def _build_module_project_queries(
         self,
         module_name: str,
         requirements: List[Dict[str, Any]],
         query_boost: bool = False,
     ) -> List[str]:
-        base_terms = [safe_str(r.get("title", "")) for r in requirements[:3]]
-        keywords = []
-        for req in requirements:
-            keywords.extend(req.get("keywords", [])[:3])
+        base_terms = compact_list(
+            [safe_str(r.get("title", "")) for r in requirements[:4]],
+            limit=4,
+        )
+        keywords = self._collect_requirement_keywords(
+            requirements,
+            key="keywords",
+            per_requirement_limit=3,
+            total_limit=8,
+        )
+        evidence_types = self._collect_requirement_keywords(
+            requirements,
+            key="expected_evidence_types",
+            per_requirement_limit=3,
+            total_limit=8,
+        )
 
-        parts = [module_name] + base_terms + keywords[:6]
-        query = " | ".join([p for p in parts if p])
+        primary_parts = [module_name] + base_terms + keywords[:5] + evidence_types[:4]
+        primary_query = " | ".join([p for p in primary_parts if p])
+
+        secondary_parts = [module_name] + evidence_types[:5] + [
+            "evidência documental",
+            "registro",
+            "plano",
+            "contrato",
+            "relatório",
+        ]
+        secondary_query = " | ".join([p for p in secondary_parts if p])
 
         if query_boost:
-            query += " | evidência documental | prova | registro | rastreabilidade"
+            primary_query += " | evidência objetiva | prova | rastreabilidade | documento fonte"
+            secondary_query += " | verificação | anexo | comprovação"
 
-        return [query, module_name]
-
+        return unique_preserve_order([primary_query, secondary_query, module_name])
+        
     def _build_module_methodology_queries(
         self,
         module_name: str,
         requirements: List[Dict[str, Any]],
         query_boost: bool = False,
     ) -> List[str]:
-        parts = [module_name]
-        for req in requirements[:4]:
-            parts.append(safe_str(req.get("description", ""))[:180])
+        descriptions = compact_list(
+            [safe_str(req.get("description", ""))[:180] for req in requirements[:4]],
+            limit=4,
+        )
+        criteria = self._collect_requirement_keywords(
+            requirements,
+            key="evaluation_criteria",
+            per_requirement_limit=3,
+            total_limit=10,
+        )
+        evidence_types = self._collect_requirement_keywords(
+            requirements,
+            key="expected_evidence_types",
+            per_requirement_limit=2,
+            total_limit=6,
+        )
 
-        query = " | ".join([p for p in parts if p])
+        primary_parts = [module_name] + descriptions[:3] + criteria[:5]
+        primary_query = " | ".join([p for p in primary_parts if p])
+
+        secondary_parts = [module_name] + criteria[:5] + evidence_types[:4] + [
+            "requirement",
+            "criteria",
+            "methodology",
+        ]
+        secondary_query = " | ".join([p for p in secondary_parts if p])
+
         if query_boost:
-            query += " | requirement | criteria | methodology | eligibility"
+            primary_query += " | compliance criteria | requirement basis | methodology requirement"
+            secondary_query += " | eligibility | verification | evidence requirement"
 
-        return [query, module_name]
-
+        return unique_preserve_order([primary_query, secondary_query, module_name])
+        
     def _run_multi_query_file_search(
         self,
         vector_store_id: str,
@@ -846,31 +1000,45 @@ class AuditEngine:
         for req in requirements:
             req_lines.append(
                 json.dumps(
-                    {
-                        "requirement_id": safe_str(req.get("id", "")),
-                        "module": safe_str(req.get("module", "")),
-                        "title": safe_str(req.get("title", "")),
-                        "description": safe_str(req.get("description", "")),
-                        "rationale": safe_str(req.get("rationale", "")),
-                        "keywords": req.get("keywords", []),
-                    },
+                    self._format_requirement_brief(req),
                     ensure_ascii=False,
                 )
             )
 
         req_block = "\n".join(req_lines)
+        expectation_block = self._summarize_requirement_expectations(requirements)
 
         return f"""
-Você está avaliando requisitos metodológicos de auditoria documental.
+Você está avaliando requisitos metodológicos de auditoria documental para um projeto de carbono.
 
-IMPORTANTE:
+OBJETIVO:
+Avaliar cada requisito com base APENAS nos trechos recuperados do projeto e da metodologia.
+
+REGRAS CRÍTICAS:
 - Retorne APENAS JSON válido.
 - Não escreva explicações fora do JSON.
 - Não invente fatos ausentes.
 - Use somente os trechos fornecidos.
 - Não defina status, score ou risk.
-- Para cada requisito, preencha:
-  requirement_id, project_evidence, methodology_basis, gap, recommendation, confidence, notes
+- Seja conservador quando a evidência for fraca.
+- Diferencie claramente:
+  - evidência do projeto
+  - base metodológica
+  - lacuna
+  - recomendação
+- Considere explicitamente os evaluation_criteria e expected_evidence_types de cada requisito.
+- Se a evidência encontrada for apenas indireta, incompleta ou genérica, deixe isso claro em gap ou notes.
+- Não trate narrativa genérica como conformidade robusta.
+
+INSTRUÇÕES DE AVALIAÇÃO:
+Para cada requisito:
+1. Identifique a evidência documental do projeto mais relevante.
+2. Identifique a base metodológica mais relevante.
+3. Avalie se a evidência atende substancialmente aos critérios esperados.
+4. Considere se os tipos de evidência esperados aparecem de forma explícita ou implícita.
+5. Descreva a principal lacuna remanescente.
+6. Recomende a ação mais útil para auditoria, validação ou robustez documental.
+7. Defina confidence entre 0 e 100 com conservadorismo.
 
 Formato obrigatório:
 [
@@ -888,8 +1056,11 @@ Formato obrigatório:
 Módulo:
 {module_name}
 
-Requisitos:
+Requisitos estruturados:
 {req_block}
+
+Resumo das expectativas por requisito:
+{expectation_block}
 
 {project_context}
 
