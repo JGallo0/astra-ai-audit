@@ -66,6 +66,11 @@ from app_pages.validation_utils import (
     status_badge,
     risk_badge,
 )
+from schemas.project_schema import get_demo_project_data
+from versioning.methodology_manager import get_requirements
+from engine.requirement_logic import run_engine
+
+
 from app_pages.audit_runner import (
     execute_full_audit,
     execute_rerun_failures,
@@ -1589,6 +1594,22 @@ st.session_state["language"] = lang
 # =========================================================
 
 render_header(lang)
+
+st.markdown("### Teste da Engine V2")
+
+if st.button("Rodar teste V2"):
+    try:
+        project_data = get_demo_project_data()
+        requirements = get_requirements()
+        results = run_engine(project_data, requirements)
+
+        st.success("Engine V2 executada com sucesso")
+
+        df_results = pd.DataFrame(results)
+        st.dataframe(df_results, hide_index=True, width="stretch")
+
+    except Exception as e:
+        st.error(f"Erro ao rodar engine V2: {e}")
 
 active_methodology_label = METHODOLOGY_REGISTRY.get(
     st.session_state.get("current_methodology", ""),
