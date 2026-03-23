@@ -101,10 +101,10 @@ def eval_monitoring_requirements(data):
 
 LOGIC_MAP = {
     "biochar_applicability": eval_biochar_applicability,
-    "reactor_requirements": eval_reactor_requirements,
-    "storage_requirements": eval_storage_requirements,
-    "feedstock_requirements": eval_feedstock_requirements,
-    "monitoring_requirements": eval_monitoring_requirements,
+    "reactor_definition": reactor_definition,
+    "storage_pathway": storage_pathway,
+    "feedstock_compliance": feedstock_compliance,
+    "monitoring_system": monitoring_system,
 }
 
 
