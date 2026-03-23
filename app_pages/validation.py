@@ -142,6 +142,7 @@ def render_downloads_tab(
             mime="application/json",
             width="stretch",
         )
+        
 def render_trails_section(trails):
     st.markdown("#### Trilha detalhada")
 
