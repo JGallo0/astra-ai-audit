@@ -1,6 +1,7 @@
 import streamlit as st 
 
 from app_pages.validation_utils import (
+    build_audit_dataframe,
     convert_df_to_csv_bytes,
     convert_json_to_bytes,
     docx_from_text,
@@ -9,13 +10,10 @@ from app_pages.validation_utils import (
     matrix_to_docx_bytes,
     matrix_to_pdf_bytes,
     build_full_audit_text,
-    build_full_eligibility_dossier_text,
     build_executive_dossier_text,
-    normalize_result_language,
     build_investor_dossier_text,
-    calculate_rating,
+    normalize_result_language,
 )
-
 
 def render_downloads_tab(
     run_id,
@@ -34,24 +32,18 @@ def render_downloads_tab(
     )
 
     normalized_results_en = normalize_result_language(
-    last_full_audit_results,
-    lang="en",
-)
-    executive_dossier_text = build_executive_dossier_text(
-        project_name,
-        summary,
-        normalized_results_en,
+        last_full_audit_results,
         lang="en",
-)
+    )
 
-    investor_dossier_text = build_investor_dossier_text(
+    eligibility_dossier_text = build_executive_dossier_text(
         project_name,
         summary,
         normalized_results_en,
         lang="en",
     )
 
-    eligibility_dossier_text = build_executive_dossier_text(
+    investor_dossier_text = build_investor_dossier_text(
         project_name,
         summary,
         normalized_results_en,
@@ -67,23 +59,23 @@ def render_downloads_tab(
         eligibility_dossier_text,
         brand_name="CO2mply",
     )
-    executive_docx = docx_from_text("CO2mply | Eligibility Dossier", executive_dossier_text)
-    executive_pdf = pdf_from_text_branded(
-        "CO2mply | Eligibility Dossier",
-        executive_dossier_text,
-        brand_name="CO2mply",
-)
 
-    investor_docx = docx_from_text("CO2mply | Investor Brief", investor_dossier_text)
+    investor_docx = docx_from_text(
+        "CO2mply | Investor Brief",
+        investor_dossier_text,
+    )
     investor_pdf = pdf_from_text_branded(
         "CO2mply | Investor Brief",
         investor_dossier_text,
         brand_name="CO2mply",
-)
+    )
 
-    matrix_docx = matrix_to_docx_bytes(df, "CO2mply | Compliance Matrix")
-    matrix_pdf = matrix_to_pdf_bytes(df, "CO2mply | Compliance Matrix")
-    csv_bytes = convert_df_to_csv_bytes(df)
+    df_en = build_audit_dataframe(normalized_results_en)
+
+    matrix_docx = matrix_to_docx_bytes(df_en, "CO2mply | Compliance Matrix")
+    matrix_pdf = matrix_to_pdf_bytes(df_en, "CO2mply | Compliance Matrix")
+    csv_bytes = convert_df_to_csv_bytes(df_en)
+
     json_bytes = convert_json_to_bytes(
         {
             "run_id": run_id,
@@ -111,6 +103,13 @@ def render_downloads_tab(
             width="stretch",
         )
         st.download_button(
+            "Investor brief (.md)",
+            data=investor_dossier_text,
+            file_name=f"co2mply_investor_brief_{run_id}.md",
+            mime="text/markdown",
+            width="stretch",
+        )
+        st.download_button(
             "Compliance matrix (.csv)",
             data=csv_bytes,
             file_name=f"co2mply_compliance_matrix_{run_id}.csv",
@@ -134,6 +133,13 @@ def render_downloads_tab(
             width="stretch",
         )
         st.download_button(
+            "Investor brief (.docx)",
+            data=investor_docx,
+            file_name=f"co2mply_investor_brief_{run_id}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            width="stretch",
+        )
+        st.download_button(
             "Compliance matrix (.docx)",
             data=matrix_docx,
             file_name=f"co2mply_compliance_matrix_{run_id}.docx",
@@ -153,6 +159,13 @@ def render_downloads_tab(
             "Eligibility dossier (.pdf)",
             data=eligibility_pdf,
             file_name=f"co2mply_eligibility_dossier_{run_id}.pdf",
+            mime="application/pdf",
+            width="stretch",
+        )
+        st.download_button(
+            "Investor brief (.pdf)",
+            data=investor_pdf,
+            file_name=f"co2mply_investor_brief_{run_id}.pdf",
             mime="application/pdf",
             width="stretch",
         )
