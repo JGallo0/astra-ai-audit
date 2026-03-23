@@ -2062,28 +2062,28 @@ def get_engine_params_for_mode(execution_mode: str) -> Dict[str, int]:
 
 def estimate_audit_effort(
     execution_mode: str,
-    selected_modules: List[str],
+    selected_scopes: List[str],
     selected_requirements_count: int
 ) -> Dict[str, Any]:
-    module_count = len(selected_modules)
+    scope_count = len(selected_scopes)
 
     if execution_mode == t(lang, "fast_mode"):
-        if module_count <= 2 and selected_requirements_count <= 10:
+        if scope_count <= 1 and selected_requirements_count <= 10:
             level = "baixo"
-        elif module_count <= 4 and selected_requirements_count <= 18:
+        elif scope_count <= 2 and selected_requirements_count <= 18:
             level = "medio"
         else:
             level = "alto"
     else:
-        if module_count <= 2 and selected_requirements_count <= 10:
+        if scope_count <= 1 and selected_requirements_count <= 10:
             level = "medio"
-        elif module_count <= 4 and selected_requirements_count <= 18:
+        elif scope_count <= 2 and selected_requirements_count <= 18:
             level = "alto"
         else:
             level = "muito alto"
 
     hard_stop = execution_mode == t(lang, "complete_mode") and (
-        module_count >= 5 or selected_requirements_count >= 20
+        scope_count >= 4 or selected_requirements_count >= 30
     )
     needs_confirmation = level in {"alto", "muito alto"}
 
@@ -2308,7 +2308,7 @@ def render_full_audit_mode():
         [r for r in requirements if r["module"] in selected_modules]
     )
     engine_params = get_engine_params_for_mode(execution_mode)
-    effort = estimate_audit_effort(execution_mode, selected_modules, selected_requirements_count)
+    effort = estimate_audit_effort(execution_mode, selected_scopes, selected_requirements_count)
 
     temp_engine = AuditEngine(
         api_key=OPENAI_API_KEY,
