@@ -94,20 +94,6 @@ def eval_monitoring_requirements(data):
     except Exception:
         return "error"
 
-
-# =========================
-# LOGIC REGISTRY
-# =========================
-
-LOGIC_MAP = {
-    "biochar_applicability": eval_biochar_applicability,
-    "reactor_definition": reactor_definition,
-    "storage_pathway": storage_pathway,
-    "feedstock_compliance": feedstock_compliance,
-    "monitoring_system": monitoring_system,
-}
-
-
 def get_logic(name):
     if name not in LOGIC_MAP:
         raise ValueError(f"Logic function '{name}' not found")
@@ -163,3 +149,17 @@ def monitoring_system(data):
     if mon["monitoring_plan"] and mon["uncertainty_method"] and mon["verification_ready"]:
         return "compliant"
     return "non_compliant"
+
+# =========================
+# LOGIC REGISTRY
+# =========================
+
+LOGIC_MAP = {
+    "biochar_applicability": eval_biochar_applicability,
+    "reactor_definition": reactor_definition,
+    "storage_pathway": storage_pathway,
+    "feedstock_compliance": feedstock_compliance,
+    "monitoring_system": monitoring_system,
+}
+
+
