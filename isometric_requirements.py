@@ -88,7 +88,6 @@ ISOMETRIC_REQUIREMENTS = [
             "end use"
         ],
     },
-]
     {
         "id": "ELIG_002",
         "module": "Eligibility",
