@@ -744,6 +744,23 @@ ISOMETRIC_REQUIREMENTS = [
             "site control",
             "equipment ownership"
         ],
+        "evaluation_criteria": [
+            "Identifies the legal entity or entities responsible for the project",
+            "Clarifies who owns or controls the site, equipment, feedstock, biochar, and associated removals",
+            "Demonstrates the contractual or legal right to claim issued removals or credits",
+            "Shows that ownership boundaries are consistent across project documentation",
+            "Reduces the risk of overlapping claims, double counting, or conflicting entitlements"
+        ],
+        "expected_evidence_types": [
+            "project design document",
+            "corporate documents",
+            "site lease or land agreement",
+            "equipment ownership records",
+            "feedstock supply agreement",
+            "biochar sale or application agreement",
+            "credit ownership clause",
+            "legal memo"
+        ],
     },
     {
         "id": "ADD_001",
@@ -766,6 +783,24 @@ ISOMETRIC_REQUIREMENTS = [
             "implementation barrier",
             "counterfactual project case"
         ],
+        "evaluation_criteria": [
+            "Explains why the project would not occur at the same scale, timing, or quality without carbon revenue or certification",
+            "Describes why the activity is not business-as-usual for the relevant market or geography",
+            "Provides a credible counterfactual or no-project case",
+            "Shows consistency between the additionality narrative and the project economics or implementation context",
+            "Addresses relevant financial, commercial, operational, or policy barriers"
+        ],
+        "expected_evidence_types": [
+            "additionality memo",
+            "financial model",
+            "business plan",
+            "board memo",
+            "investment committee material",
+            "feasibility study",
+            "management narrative",
+            "market analysis",
+            "implementation plan"
+        ],
     },
     {
         "id": "ADD_002",
@@ -786,6 +821,23 @@ ISOMETRIC_REQUIREMENTS = [
             "funding gap",
             "project economics",
             "not business as usual"
+        ],
+        "evaluation_criteria": [
+            "Identifies concrete barriers rather than generic statements",
+            "Links the barriers directly to project non-implementation risk",
+            "Shows why the barriers are material to the project decision",
+            "Demonstrates that carbon revenue or certification helps overcome the barriers",
+            "Presents evidence that is internally consistent with the project timeline and financing needs"
+        ],
+        "expected_evidence_types": [
+            "capex estimate",
+            "opex estimate",
+            "cash flow model",
+            "financing correspondence",
+            "supplier proposals",
+            "implementation roadmap",
+            "internal approvals",
+            "budget constraints memo"
         ],
     },
     {
@@ -808,6 +860,23 @@ ISOMETRIC_REQUIREMENTS = [
             "baseline emissions",
             "feedstock fate"
         ],
+        "evaluation_criteria": [
+            "Clearly describes the no-project or counterfactual scenario",
+            "Explains the expected fate of feedstock in the absence of the project",
+            "Identifies the major emissions sources or carbon flows in the baseline case",
+            "Shows that the baseline is plausible for the site, region, and business context",
+            "Keeps the baseline definition consistent with additionality and leakage discussions"
+        ],
+        "expected_evidence_types": [
+            "baseline memo",
+            "historical practice records",
+            "waste management records",
+            "feedstock disposition records",
+            "site operational records",
+            "supplier statements",
+            "regional practice study",
+            "project design document"
+        ],
     },
     {
         "id": "BASE_002",
@@ -826,6 +895,22 @@ ISOMETRIC_REQUIREMENTS = [
             "historical practice",
             "counterfactual evidence",
             "justification"
+        ],
+        "evaluation_criteria": [
+            "Lists the main assumptions underlying the baseline",
+            "Supports the assumptions with auditable evidence or credible references",
+            "Distinguishes evidence from speculation or unsupported narrative",
+            "Explains any conservative assumptions used in the baseline",
+            "Shows traceability from assumptions to the quantified baseline result"
+        ],
+        "expected_evidence_types": [
+            "assumptions register",
+            "historical operating data",
+            "photos or field records",
+            "waste handling logs",
+            "third-party reports",
+            "technical memo",
+            "baseline calculation sheet"
         ],
     },
     {
@@ -848,6 +933,23 @@ ISOMETRIC_REQUIREMENTS = [
             "energy boundary",
             "storage boundary"
         ],
+        "evaluation_criteria": [
+            "Defines the physical and operational boundary of the project",
+            "Identifies included and excluded processes explicitly",
+            "Covers upstream, on-site, transport, and storage stages where relevant",
+            "Aligns the boundary with the emissions accounting and net removals calculation",
+            "Uses diagrams or descriptions that a verifier can follow unambiguously"
+        ],
+        "expected_evidence_types": [
+            "process flow diagram",
+            "boundary diagram",
+            "site layout",
+            "project design document",
+            "lca memo",
+            "emissions accounting memo",
+            "transport mapping",
+            "operational narrative"
+        ],
     },
     {
         "id": "LEAK_001",
@@ -868,6 +970,22 @@ ISOMETRIC_REQUIREMENTS = [
             "biomass competition",
             "outside boundary emissions"
         ],
+        "evaluation_criteria": [
+            "Identifies relevant leakage pathways for the project context",
+            "Assesses whether feedstock diversion, market displacement, or activity shifting may occur",
+            "Explains why identified leakage risks are material or immaterial",
+            "Shows consistency between leakage analysis and feedstock sourcing strategy",
+            "Avoids treating leakage as a boilerplate statement without project-specific reasoning"
+        ],
+        "expected_evidence_types": [
+            "feedstock sourcing memo",
+            "market analysis",
+            "supplier contracts",
+            "biomass availability study",
+            "historical feedstock use records",
+            "leakage assessment memo",
+            "project design document"
+        ],
     },
     {
         "id": "LEAK_002",
@@ -885,6 +1003,21 @@ ISOMETRIC_REQUIREMENTS = [
             "deduction",
             "net removals adjustment",
             "second order effects"
+        ],
+        "evaluation_criteria": [
+            "Explains whether leakage is quantified, bounded, deducted, or conservatively assumed",
+            "Links the leakage treatment to the net removals calculation",
+            "Uses transparent assumptions for any leakage deduction",
+            "Shows that leakage treatment is neither omitted nor hidden inside unrelated calculations",
+            "Provides enough detail for an auditor to reproduce or challenge the treatment"
+        ],
+        "expected_evidence_types": [
+            "calculation memo",
+            "leakage model",
+            "deduction logic note",
+            "quantification spreadsheet",
+            "technical appendix",
+            "sensitivity analysis"
         ],
     },
     {
@@ -907,6 +1040,22 @@ ISOMETRIC_REQUIREMENTS = [
             "variance",
             "error source"
         ],
+        "evaluation_criteria": [
+            "Identifies the main sources of uncertainty in project quantification",
+            "Covers measurement, sampling, laboratory, model, and factor uncertainties where relevant",
+            "Shows that uncertainty is considered across the main quantified parameters",
+            "Avoids reducing uncertainty treatment to a generic statement without parameter linkage",
+            "Provides a basis for later conservative adjustment or deduction"
+        ],
+        "expected_evidence_types": [
+            "uncertainty memo",
+            "sampling plan",
+            "lab method documentation",
+            "qa qc plan",
+            "calibration records",
+            "spreadsheet model notes",
+            "parameter register"
+        ],
     },
     {
         "id": "UNC_002",
@@ -926,6 +1075,21 @@ ISOMETRIC_REQUIREMENTS = [
             "conservative assumption",
             "variance propagation",
             "monte carlo"
+        ],
+        "evaluation_criteria": [
+            "Explains how uncertainty affects credited removals rather than only reporting uncertainty qualitatively",
+            "Uses a conservative treatment consistent with methodology expectations",
+            "Shows the adjustment method or logic clearly",
+            "Maintains traceability between uncertainty sources and final deductions or bounds",
+            "Supports third-party verification of the chosen conservative approach"
+        ],
+        "expected_evidence_types": [
+            "uncertainty calculation sheet",
+            "confidence bound analysis",
+            "variance propagation note",
+            "monte carlo output",
+            "conservative estimate memo",
+            "verification appendix"
         ],
     },
     {
@@ -948,6 +1112,21 @@ ISOMETRIC_REQUIREMENTS = [
             "uncertainty adjustment",
             "calculation formula"
         ],
+        "evaluation_criteria": [
+            "Presents a clear equation or calculation chain for net removals",
+            "Includes the main required components of the net removals logic",
+            "Shows how deductions and adjustments affect the final result",
+            "Is internally consistent with the project's stated system boundary and baseline",
+            "Allows a reviewer to trace the result back to source parameters"
+        ],
+        "expected_evidence_types": [
+            "calculation memo",
+            "quantification spreadsheet",
+            "ghg statement",
+            "technical appendix",
+            "project design document",
+            "methodology crosswalk"
+        ],
     },
     {
         "id": "CARB_002",
@@ -969,6 +1148,22 @@ ISOMETRIC_REQUIREMENTS = [
             "cradle to grave",
             "lifecycle emissions"
         ],
+        "evaluation_criteria": [
+            "Identifies material emissions sources associated with the project",
+            "Explains how each major source is quantified or estimated",
+            "Covers operational, transport, and embodied emissions where relevant",
+            "Is consistent with the defined system boundary",
+            "Provides sufficient detail for independent review and recalculation"
+        ],
+        "expected_evidence_types": [
+            "lca report",
+            "energy consumption records",
+            "fuel logs",
+            "transport records",
+            "supplier emission data",
+            "embodied emissions memo",
+            "calculation spreadsheet"
+        ],
     },
     {
         "id": "BCQ_001",
@@ -987,6 +1182,22 @@ ISOMETRIC_REQUIREMENTS = [
             "biochar carbon",
             "lab analysis",
             "production batch"
+        ],
+        "evaluation_criteria": [
+            "Explains how biochar carbon content is measured or estimated",
+            "Links laboratory or analytical results to production or storage batches",
+            "Describes the sampling basis and representativeness of the measured material",
+            "Uses traceable records rather than disconnected laboratory values",
+            "Supports the amount of credited stored carbon with auditable evidence"
+        ],
+        "expected_evidence_types": [
+            "lab report",
+            "sampling plan",
+            "batch log",
+            "certificate of analysis",
+            "production records",
+            "mass balance sheet",
+            "qa qc documentation"
         ],
     },
     {
@@ -1008,6 +1219,21 @@ ISOMETRIC_REQUIREMENTS = [
             "durable storage",
             "crediting horizon"
         ],
+        "evaluation_criteria": [
+            "States the durability approach used for the project clearly",
+            "Explains the proxy, parameter, or laboratory basis used to justify durable storage",
+            "Connects the durability approach to the relevant storage pathway",
+            "Uses thresholds or assumptions consistently with project documentation",
+            "Provides enough detail for a verifier to evaluate the durability claim"
+        ],
+        "expected_evidence_types": [
+            "lab report",
+            "durability memo",
+            "methodology appendix",
+            "storage module cross-reference",
+            "project design document",
+            "biochar characterization report"
+        ],
     },
     {
         "id": "REV_001",
@@ -1026,6 +1252,22 @@ ISOMETRIC_REQUIREMENTS = [
             "storage failure",
             "risk mitigation",
             "durability failure"
+        ],
+        "evaluation_criteria": [
+            "Identifies plausible reversal or loss pathways for the specific project",
+            "Explains how the project mitigates or monitors those risks",
+            "Connects risk treatment to operational controls or contractual controls where relevant",
+            "Avoids generic statements that do not reflect the chosen storage pathway",
+            "Supports a credible long-duration storage claim"
+        ],
+        "expected_evidence_types": [
+            "risk register",
+            "reversal questionnaire",
+            "mitigation plan",
+            "storage agreement",
+            "monitoring plan",
+            "operational procedures",
+            "project design document"
         ],
     },
     {
@@ -1048,6 +1290,22 @@ ISOMETRIC_REQUIREMENTS = [
             "ecosystem impact",
             "stakeholder engagement"
         ],
+        "evaluation_criteria": [
+            "Covers both environmental and social risk dimensions",
+            "Addresses sourcing, processing, transport, and storage or deployment stages",
+            "Identifies project-specific risks rather than generic categories only",
+            "Describes mitigation and monitoring measures",
+            "Supports verification that safeguard obligations are operationalized"
+        ],
+        "expected_evidence_types": [
+            "safeguards plan",
+            "environmental risk assessment",
+            "social impact assessment",
+            "stakeholder engagement records",
+            "mitigation plan",
+            "monitoring plan",
+            "permits and compliance records"
+        ],
     },
     {
         "id": "REG_001",
@@ -1067,6 +1325,22 @@ ISOMETRIC_REQUIREMENTS = [
             "operating permit",
             "legal requirement",
             "authority"
+        ],
+        "evaluation_criteria": [
+            "Identifies the main permits, licenses, and legal obligations relevant to the project",
+            "Shows that compliance requirements are mapped to the actual project activities",
+            "Clarifies permit status, issuing authority, and scope where available",
+            "Supports the claim that the project can legally operate as described",
+            "Provides evidence that a verifier can inspect and trace"
+        ],
+        "expected_evidence_types": [
+            "environmental permit",
+            "operating license",
+            "regulatory register",
+            "legal memo",
+            "compliance matrix",
+            "authority correspondence",
+            "project design document"
         ],
     },
 ]
