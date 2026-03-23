@@ -123,6 +123,8 @@ def get_demo_project_data():
     data["monitoring_reporting"]["uncertainty_method"] = "defined"
     data["monitoring_reporting"]["verification_ready"] = True
 
+    data["sampling"]["sampling_plan_defined"] = True
+
     # =========================
     # NOVO BLOCO - ENGINE V2
     # =========================
