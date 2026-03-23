@@ -2399,7 +2399,14 @@ def render_full_audit_mode():
         execution_mode=execution_mode
     )
 
-    min_cost, max_cost = cost_estimate
+    cost_estimate = temp_engine.estimate_run_cost(
+        selected_modules=selected_modules,
+        execution_mode=execution_mode
+    )
+
+    min_cost = float(cost_estimate.get("estimated_min_cost", 0.0))
+    max_cost = float(cost_estimate.get("estimated_max_cost", 0.0))
+
     cost_range_text = f"US$ {min_cost:.3f} – {max_cost:.3f}"
 
     st.markdown(f"#### {t(lang, 'estimated_effort')}")
