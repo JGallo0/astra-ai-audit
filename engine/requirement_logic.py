@@ -287,10 +287,9 @@ def run_engine(project_data, requirements):
 
 LOGIC_MAP = {
     "biochar_applicability": eval_biochar_applicability,
-    "reactor_definition": reactor_definition,
-    "storage_pathway": storage_pathway,
-    "feedstock_compliance": feedstock_compliance,
-    "monitoring_system": monitoring_system,
+    "reactor_definition": eval_reactor_requirements,
+    "storage_pathway": eval_storage_requirements,
+    "feedstock_compliance": eval_feedstock_requirements,
+    "monitoring_system": eval_monitoring_requirements,
 }
-
 
