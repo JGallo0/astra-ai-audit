@@ -1,4 +1,5 @@
-# scripts/test_engine.py
+from versioning.methodology_manager import get_requirements
+from engine.requirement_logic import run_engine
 
 project_data = {
     "eligibility": {
@@ -13,11 +14,8 @@ project_data = {
         "storage_environment_stable": True
     }
 }
-from versioning.methodology_manager import get_requirements
-from engine.requirement_logic import run_engine
 
 requirements = get_requirements()
-
 results = run_engine(project_data, requirements)
 
 print(results)
