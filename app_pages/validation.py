@@ -34,9 +34,9 @@ def render_downloads_tab(
     )
 
     normalized_results_en = normalize_result_language(
-        last_full_audit_results,
-        lang="en",
-
+    last_full_audit_results,
+    lang="en",
+)
     executive_dossier_text = build_executive_dossier_text(
         project_name,
         summary,
