@@ -2393,12 +2393,17 @@ def render_full_audit_mode():
         max_methodology_hits_in_prompt=engine_params["max_methodology_hits_in_prompt"],
         max_text_chars_per_hit=engine_params["max_text_chars_per_hit"],
     )
+
     cost_estimate = temp_engine.estimate_run_cost(
         selected_modules=selected_modules,
         execution_mode=execution_mode
     )
 
+    min_cost, max_cost = cost_estimate
+    cost_range_text = f"US$ {min_cost:.3f} – {max_cost:.3f}"
+
     st.markdown(f"#### {t(lang, 'estimated_effort')}")
+
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Nível", effort["level"].upper())
     c2.metric("Escopos", len(selected_scopes))
@@ -2408,7 +2413,6 @@ def render_full_audit_mode():
     st.caption(
         f"Auditando {len(selected_modules)} módulos internos distribuídos em {len(selected_scopes)} escopo(s)."
     )
-
     if effort["hard_stop"]:
         st.error("Execução bloqueada preventivamente: reduza módulos ou use o modo rápido.")
 
