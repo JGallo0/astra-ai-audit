@@ -136,3 +136,30 @@ def run_engine(project_data, requirements):
         })
 
     return results
+
+def reactor_definition(data):
+    prod = data["production"]
+    if prod["pyrolysis_technology"] and prod["reactor_design_diagram"] and prod["maintenance_plan"]:
+        return "compliant"
+    return "non_compliant"
+
+
+def storage_pathway(data):
+    storage = data["storage"]
+    if storage["storage_environment_stable"] and storage["storage_module"] and storage["storage_monitoring_plan"]:
+        return "compliant"
+    return "non_compliant"
+
+
+def feedstock_compliance(data):
+    feed = data["feedstock"]
+    if feed["biomass_type"] and feed["pre_project_biomass_use"] and feed["feedstock_accounting_module_compliance"]:
+        return "compliant"
+    return "non_compliant"
+
+
+def monitoring_system(data):
+    mon = data["monitoring_reporting"]
+    if mon["monitoring_plan"] and mon["uncertainty_method"] and mon["verification_ready"]:
+        return "compliant"
+    return "non_compliant"
