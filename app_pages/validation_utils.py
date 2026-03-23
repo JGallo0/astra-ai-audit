@@ -466,7 +466,20 @@ def status_badge(status: str) -> str:
         return badge_html(s, "danger")
     return badge_html(s, "info")
 
+def risk_badge(risk: str) -> str:
+    r = safe_str(risk).lower()
 
+    if r in ["baixo", "low"]:
+        return badge_html("low", "success")
+
+    if r in ["medio", "medium"]:
+        return badge_html("medium", "warning")
+
+    if r in ["alto", "high"]:
+        return badge_html("high", "danger")
+
+    return badge_html(risk, "info")
+    
 def build_executive_dossier_text(
     project_name,
     summary,
