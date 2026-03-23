@@ -123,33 +123,164 @@ def run_engine(project_data, requirements):
 
     return results
 
-def reactor_definition(data):
-    prod = data["production"]
-    if prod["pyrolysis_technology"] and prod["reactor_design_diagram"] and prod["maintenance_plan"]:
-        return "compliant"
-    return "non_compliant"
+# =========================
+# ENGINE RUNNER
+# =========================
+
+def get_value(data, path):
+    """
+    Resolve dotted paths dentro do project_data.
+    Exemplo:
+        get_value(project_data, "methodology.storage_pathway")
+    """
+    keys = path.split(".")
+    value = data
+
+    for key in keys:
+        if not isinstance(value, dict):
+            return None
+        value = value.get(key)
+
+    return value
 
 
-def storage_pathway(data):
-    storage = data["storage"]
-    if storage["storage_environment_stable"] and storage["storage_module"] and storage["storage_monitoring_plan"]:
-        return "compliant"
-    return "non_compliant"
+def requirement_applies(project_data, applies_if):
+    """
+    Avalia se um requirement é aplicável ao projeto.
+
+    Suporta:
+    1) igualdade simples
+       ex: "methodology.storage_pathway": "soil"
+
+    2) __contains
+       ex: "storage.soil.deployment_methods__contains": "direct_soil_application"
+
+    3) __contains_any
+       ex: "storage.soil.deployment_methods__contains_any": ["on_site_mixing", "third_party_mixing"]
+    """
+    if not applies_if:
+        return True
+
+    for key, expected in applies_if.items():
+
+        # Operador: __contains_any
+        if key.endswith("__contains_any"):
+            field = key.replace("__contains_any", "")
+            value = get_value(project_data, field)
+
+            if not isinstance(value, list):
+                return False
+
+            if not isinstance(expected, list):
+                return False
+
+            if not any(item in value for item in expected):
+                return False
+
+        # Operador: __contains
+        elif key.endswith("__contains"):
+            field = key.replace("__contains", "")
+            value = get_value(project_data, field)
+
+            if not isinstance(value, list):
+                return False
+
+            if expected not in value:
+                return False
+
+        # Igualdade simples
+        else:
+            value = get_value(project_data, key)
+
+            if value != expected:
+                return False
+
+    return True
 
 
-def feedstock_compliance(data):
-    feed = data["feedstock"]
-    if feed["biomass_type"] and feed["pre_project_biomass_use"] and feed["feedstock_accounting_module_compliance"]:
-        return "compliant"
-    return "non_compliant"
+def run_engine(project_data, requirements):
+    results = []
 
+    for req in requirements:
+        req_id = req.get("id")
+        req_name = req.get("title") or req.get("name")
+        logic_key = req.get("logic")
+        applies_if = req.get("applies_if", {})
+        fields_evaluated = req.get("fields", [])
 
-def monitoring_system(data):
-    mon = data["monitoring_reporting"]
-    if mon["monitoring_plan"] and mon["uncertainty_method"] and mon["verification_ready"]:
-        return "compliant"
-    return "non_compliant"
+        # 1) Verifica aplicabilidade
+        if not requirement_applies(project_data, applies_if):
+            results.append({
+                "requirement_id": req_id,
+                "requirement_name": req_name,
+                "status": "not_applicable",
+                "confidence": 1.0,
+                "missing_fields": [],
+                "failed_fields": [],
+                "notes": ["Requirement not applicable to this project configuration."],
+                "logic_key": logic_key,
+                "fields_evaluated": fields_evaluated,
+            })
+            continue
 
+        # 2) Busca a função de lógica
+        try:
+            logic_fn = get_logic(logic_key)
+        except Exception:
+            results.append({
+                "requirement_id": req_id,
+                "requirement_name": req_name,
+                "status": "error",
+                "confidence": 0.0,
+                "missing_fields": [],
+                "failed_fields": [],
+                "notes": [f"Logic function '{logic_key}' not found."],
+                "logic_key": logic_key,
+                "fields_evaluated": fields_evaluated,
+            })
+            continue
+
+        # 3) Executa a lógica
+        try:
+            status = logic_fn(project_data)
+        except Exception as e:
+            results.append({
+                "requirement_id": req_id,
+                "requirement_name": req_name,
+                "status": "error",
+                "confidence": 0.0,
+                "missing_fields": [],
+                "failed_fields": [],
+                "notes": [f"Logic execution error: {str(e)}"],
+                "logic_key": logic_key,
+                "fields_evaluated": fields_evaluated,
+            })
+            continue
+
+        # 4) Monta saída estruturada
+        if status == "compliant":
+            confidence = 0.95
+        elif status == "partial":
+            confidence = 0.75
+        elif status == "non_compliant":
+            confidence = 0.90
+        else:
+            confidence = 0.0
+
+        results.append({
+            "requirement_id": req_id,
+            "requirement_name": req_name,
+            "status": status,
+            "confidence": confidence,
+            "missing_fields": [],
+            "failed_fields": [],
+            "notes": [],
+            "logic_key": logic_key,
+            "fields_evaluated": fields_evaluated,
+        })
+
+    return results
+    
 # =========================
 # LOGIC REGISTRY
 # =========================
