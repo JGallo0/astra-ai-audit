@@ -24,28 +24,34 @@ def render_downloads_tab(
     last_full_audit_trails,
 ):
     full_audit_text = build_full_audit_text(summary, last_full_audit_results)
-full_audit_docx = docx_from_text("CO2mply | Audit Summary", full_audit_text)
-full_audit_pdf = pdf_from_text_branded("CO2mply | Audit Summary", full_audit_text, brand_name="CO2mply")
+    full_audit_docx = docx_from_text("CO2mply | Audit Summary", full_audit_text)
+    full_audit_pdf = pdf_from_text_branded(
+        "CO2mply | Audit Summary",
+        full_audit_text,
+        brand_name="CO2mply",
+    )
 
-normalized_results_en = normalize_result_language(
-    last_full_audit_results,
-    lang="en",
-)
+    normalized_results_en = normalize_result_language(
+        last_full_audit_results,
+        lang="en",
+    )
 
-normalized_results = normalize_result_language(
-    last_full_audit_results,
-    lang="en",
-)
+    eligibility_dossier_text = build_executive_dossier_text(
+        project_name,
+        summary,
+        normalized_results_en,
+        lang="en",
+    )
 
-eligibility_dossier_text = build_executive_dossier_text(
-    project_name,
-    summary,
-    normalized_results,
-    lang="en",
-)
-
-eligibility_docx = docx_from_text("CO2mply | Eligibility Dossier", eligibility_dossier_text)
-eligibility_pdf = pdf_from_text_branded("CO2mply | Eligibility Dossier", eligibility_dossier_text, brand_name="CO2mply")
+    eligibility_docx = docx_from_text(
+        "CO2mply | Eligibility Dossier",
+        eligibility_dossier_text,
+    )
+    eligibility_pdf = pdf_from_text_branded(
+        "CO2mply | Eligibility Dossier",
+        eligibility_dossier_text,
+        brand_name="CO2mply",
+    )
 
     matrix_docx = matrix_to_docx_bytes(df, "CO2mply | Compliance Matrix")
     matrix_pdf = matrix_to_pdf_bytes(df, "CO2mply | Compliance Matrix")
@@ -58,7 +64,6 @@ eligibility_pdf = pdf_from_text_branded("CO2mply | Eligibility Dossier", eligibi
     })
 
     d1, d2, d3 = st.columns(3)
-
     with d1:
         st.download_button(
             "Audit summary (.md)",
