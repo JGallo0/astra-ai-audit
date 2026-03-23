@@ -280,16 +280,149 @@ def run_engine(project_data, requirements):
         })
 
     return results
+
+def reactor_design_diagram(data):
+    """
+    Requirement logic for:
+    - R-6AQG-1 | P&ID or engineering design diagram with sensors
+    """
+    try:
+        production = data.get("production", {})
+
+        has_diagram = production.get("reactor_design_diagram")
+        has_sensor_inventory = production.get("sensor_inventory")
+        has_sensor_locations = production.get("sensor_locations")
+
+        if not has_diagram:
+            return "non_compliant"
+
+        if not has_sensor_inventory:
+            return "partial"
+
+        if not has_sensor_locations:
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def durability_option_declared(data):
+    """
+    Requirement logic for:
+    - R-BFEE-0 | Durability option declared
+    """
+    try:
+        methodology = data.get("methodology", {})
+        durability_option = methodology.get("durability_option")
+
+        allowed = ["200", "1000", "combined_200_1000"]
+
+        if not durability_option:
+            return "non_compliant"
+
+        if durability_option not in allowed:
+            return "non_compliant"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def sampling_batch_definition(data):
+    """
+    Requirement logic for:
+    - R-6YSW-0 | Production batch definition within allowed threshold
+
+    Regra operacional simplificada:
+    - standard: até 31 dias
+    - combustion_coproduct: até 7 dias
+    """
+    try:
+        methodology = data.get("methodology", {})
+        sampling = data.get("sampling", {})
+
+        production_subpathway = methodology.get("production_subpathway")
+        batch_definition_days = sampling.get("batch_definition_days")
+
+        if batch_definition_days is None:
+            return "non_compliant"
+
+        if production_subpathway == "combustion_coproduct":
+            if batch_definition_days <= 7:
+                return "compliant"
+            return "non_compliant"
+
+        # fallback para standard / outros
+        if batch_definition_days <= 31:
+            return "compliant"
+
+        return "non_compliant"
+
+    except Exception:
+        return "error"
+
+
+def chain_of_custody_diagram(data):
+    """
+    Requirement logic for:
+    - R-3MYN-0 | Chain of custody diagram or equivalent provided
+    """
+    try:
+        traceability = data.get("traceability", {})
+        diagram = traceability.get("chain_of_custody_diagram")
+
+        if not diagram:
+            return "non_compliant"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def biochar_chemical_analysis(data):
+    """
+    Requirement logic for:
+    - R-6F0N-0 | Chemical analysis for biochar characterization performed
+    """
+    try:
+        biochar = data.get("biochar", {})
+        characterization = biochar.get("characterization", {})
+
+        chemical_analysis_performed = characterization.get("chemical_analysis_performed")
+        lab_reports = characterization.get("lab_reports")
+
+        if chemical_analysis_performed is not True:
+            return "non_compliant"
+
+        if not lab_reports:
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
     
 # =========================
 # LOGIC REGISTRY
 # =========================
 
 LOGIC_MAP = {
+    # lógica antiga / base
     "biochar_applicability": eval_biochar_applicability,
     "reactor_definition": eval_reactor_requirements,
     "storage_pathway": eval_storage_requirements,
     "feedstock_compliance": eval_feedstock_requirements,
     "monitoring_system": eval_monitoring_requirements,
+
+    # primeiros logic_keys reais
+    "reactor_design_diagram": reactor_design_diagram,
+    "durability_option_declared": durability_option_declared,
+    "sampling_batch_definition": sampling_batch_definition,
+    "chain_of_custody_diagram": chain_of_custody_diagram,
+    "biochar_chemical_analysis": biochar_chemical_analysis,
 }
 
