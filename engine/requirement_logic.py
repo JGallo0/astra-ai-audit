@@ -531,12 +531,11 @@ LOGIC_MAP = {
     "chain_of_custody_diagram": chain_of_custody_diagram,
     "biochar_chemical_analysis": biochar_chemical_analysis,
 
-    LOGIC_MAP.update({
+    # segundo lote
     "uncertainty_inputs": uncertainty_inputs,
     "stockpiling_disclosure": stockpiling_disclosure,
     "adaptive_management_plan": adaptive_management_plan,
     "feedstock_moisture_management": feedstock_moisture_management,
     "fuel_use_reversal_risk": fuel_use_reversal_risk,
-})
 }
 
