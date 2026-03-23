@@ -61,24 +61,6 @@ def eval_storage_requirements(data):
         return "error"
 
 
-# =========================
-# LOGIC REGISTRY
-# =========================
-
-LOGIC_MAP = {
-    "biochar_applicability": eval_biochar_applicability,
-    "reactor_requirements": eval_reactor_requirements,
-    "storage_requirements": eval_storage_requirements,
-    "feedstock_requirements": eval_feedstock_requirements,
-    "monitoring_requirements": eval_monitoring_requirements,
-}
-
-
-def get_logic(name):
-    if name not in LOGIC_MAP:
-        raise ValueError(f"Logic function '{name}' not found")
-    return LOGIC_MAP[name]
-
 def eval_feedstock_requirements(data):
     try:
         if not data["feedstock"]["biomass_type"]:
@@ -114,6 +96,25 @@ def eval_monitoring_requirements(data):
 
 
 # =========================
+# LOGIC REGISTRY
+# =========================
+
+LOGIC_MAP = {
+    "biochar_applicability": eval_biochar_applicability,
+    "reactor_requirements": eval_reactor_requirements,
+    "storage_requirements": eval_storage_requirements,
+    "feedstock_requirements": eval_feedstock_requirements,
+    "monitoring_requirements": eval_monitoring_requirements,
+}
+
+
+def get_logic(name):
+    if name not in LOGIC_MAP:
+        raise ValueError(f"Logic function '{name}' not found")
+    return LOGIC_MAP[name]
+
+
+# =========================
 # ENGINE RUNNER
 # =========================
 
@@ -124,9 +125,8 @@ def run_engine(project_data, requirements):
         try:
             logic_fn = get_logic(req["logic"])
             status = logic_fn(project_data)
-
-    except Exception:
-        status = "error"
+        except Exception:
+            status = "error"
 
         results.append({
             "id": req.get("id"),
