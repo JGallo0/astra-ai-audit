@@ -2166,6 +2166,65 @@ def make_progress_callback(progress_container, status_container):
 # FULL AUDIT MODE
 # =========================================================
 
+# =========================================================
+# AUDIT SCOPE MAPPING
+# =========================================================
+
+AUDIT_SCOPE_TO_MODULES = {
+    "Core Integrity": [
+        "Eligibility",
+        "Ownership",
+        "Additionality",
+        "Baseline",
+        "System Boundary",
+    ],
+    "Carbon Accounting": [
+        "Carbon Accounting",
+        "Biochar Carbon Quantification",
+        "Leakage",
+        "Uncertainty",
+        "LCA",
+    ],
+    "MRV & Verification": [
+        "MRV",
+        "Traceability",
+    ],
+    "Durability & Storage": [
+        "Durability",
+        "Storage/End Use",
+        "Reversal Risk",
+        "Biochar Quality",
+    ],
+    "Operations": [
+        "Feedstock",
+        "Technology",
+    ],
+    "Safeguards & Compliance": [
+        "Safeguards",
+        "Regulatory Compliance",
+    ],
+}
+
+
+def resolve_selected_modules_from_scope(
+    requirements: List[Dict[str, Any]],
+    selected_scopes: List[str],
+) -> List[str]:
+    available_modules = {r["module"] for r in requirements}
+    resolved_modules: List[str] = []
+
+    for scope in selected_scopes:
+        for module in AUDIT_SCOPE_TO_MODULES.get(scope, []):
+            if module in available_modules and module not in resolved_modules:
+                resolved_modules.append(module)
+
+    # garante base obrigatória, sem depender da escolha do usuário
+    for mandatory_module in ["Eligibility"]:
+        if mandatory_module in available_modules and mandatory_module not in resolved_modules:
+            resolved_modules.insert(0, mandatory_module)
+
+    return resolved_modules
+    
 def render_full_audit_mode():
     project_vs_id = st.session_state.get("current_project_vector_store_id")
     methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
@@ -2182,16 +2241,45 @@ def render_full_audit_mode():
 
     all_modules = sorted(list({r["module"] for r in requirements})) if requirements else []
 
+    available_scopes = []
+    for scope_name, scope_modules in AUDIT_SCOPE_TO_MODULES.items():
+        if any(module in all_modules for module in scope_modules):
+            available_scopes.append(scope_name)
+
+    default_scopes = [
+        scope for scope in [
+            "Core Integrity",
+            "Carbon Accounting",
+            "MRV & Verification",
+            "Durability & Storage",
+        ]
+        if scope in available_scopes
+    ]
+
     with st.expander("Configuração", expanded=True):
         project_name = st.text_input(
             t(lang, "project_name"),
             value=st.session_state.get("current_project_name") or ""
         )
 
-        selected_modules = st.multiselect(
-            t(lang, "modules_to_audit"),
-            options=all_modules,
-            default=all_modules[:2] if len(all_modules) >= 2 else all_modules
+        selected_scopes = st.multiselect(
+            "Audit scope",
+            options=available_scopes,
+            default=default_scopes,
+            help=(
+                "Eligibility is always included as a mandatory foundation. "
+                "Choose the broader audit scopes you want Co2mply to evaluate."
+            ),
+        )
+
+        selected_modules = resolve_selected_modules_from_scope(
+            requirements=requirements,
+            selected_scopes=selected_scopes,
+        )
+
+        st.caption(
+            "Modules covered in this run: "
+            + (", ".join(selected_modules) if selected_modules else "none")
         )
 
         execution_mode = st.radio(
@@ -2206,18 +2294,19 @@ def render_full_audit_mode():
             value=False,
             key="show_trails_full_audit"
         )
-
     st.session_state["current_project_name"] = project_name
 
     if not requirements:
         st.warning("A metodologia selecionada ainda não possui matriz estruturada de requisitos no app.")
         return
 
-    if not selected_modules:
-        st.warning("Selecione pelo menos um módulo para auditar.")
+    if not selected_scopes:
+        st.warning("Selecione pelo menos um escopo de auditoria.")
         return
 
-    selected_requirements_count = len([r for r in requirements if r["module"] in selected_modules])
+    selected_requirements_count = len(
+        [r for r in requirements if r["module"] in selected_modules]
+    )
     engine_params = get_engine_params_for_mode(execution_mode)
     effort = estimate_audit_effort(execution_mode, selected_modules, selected_requirements_count)
 
@@ -2244,7 +2333,7 @@ def render_full_audit_mode():
     st.markdown(f"#### {t(lang, 'estimated_effort')}")
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Nível", safe_str(effort["level"]).upper())
-    c2.metric("Módulos", len(selected_modules))
+    c2.metric("Escopos", len(selected_scopes))
     c3.metric("Requisitos", selected_requirements_count)
     c4.metric(
         t(lang, "cost_estimate"),
