@@ -37,7 +37,68 @@ def sanitize_xml_text(text: Any) -> str:
 
 def safe_str(value: Any) -> str:
     return sanitize_xml_text("" if value is None else str(value))
+    
+def normalize_result_language(results: List[Dict[str, Any]], lang: str = "en") -> List[Dict[str, Any]]:
+    is_en = lang == "en"
 
+    replacements_pt_to_en = {
+        "Não conforme": "Non-compliant",
+        "Parcialmente conforme": "Partially compliant",
+        "Conforme": "Compliant",
+        "Não evidenciado": "Not evidenced",
+        "Erro de análise": "Analysis error",
+        "alto": "high",
+        "medio": "medium",
+        "baixo": "low",
+        "A evidência disponível do projeto não atende adequadamente ao critério metodológico recuperado.": "The available project evidence does not adequately meet the retrieved methodological criterion.",
+        "Há evidência parcial, porém ainda faltam elementos documentais e/ou operacionais para robustez metodológica.": "There is partial evidence, but documentary and/or operational elements are still missing for methodological robustness.",
+        "Revisar a aderência metodológica e incluir evidências objetivas que atendam ao requisito.": "Review methodological alignment and include objective evidence that satisfies the requirement.",
+        "Complementar a documentação e fortalecer a rastreabilidade/evidência do requisito.": "Complete the documentation and strengthen traceability/evidence for the requirement.",
+        "Não identificado.": "Not identified.",
+        "Não foram identificados riscos críticos imediatos.": "No immediate critical risks were identified.",
+    }
+
+    replacements_en_to_pt = {v: k for k, v in replacements_pt_to_en.items()}
+
+    def normalize_text(text: Any) -> str:
+        s = safe_str(text)
+        if not s:
+            return s
+
+        mapping = replacements_pt_to_en if is_en else replacements_en_to_pt
+
+        # substituição exata primeiro
+        if s in mapping:
+            return mapping[s]
+
+        # substituição parcial simples
+        for src, dst in mapping.items():
+            s = s.replace(src, dst)
+
+        return s
+
+    normalized = []
+
+    for item in results:
+        row = dict(item)
+
+        for field in [
+            "status",
+            "risk",
+            "gap",
+            "recommendation",
+            "notes",
+            "methodology_basis",
+            "project_evidence",
+            "title",
+            "module",
+        ]:
+            if field in row:
+                row[field] = normalize_text(row[field])
+
+        normalized.append(row)
+
+    return normalized
 
 def flatten_markdown_to_lines(text: str) -> List[str]:
     text = sanitize_xml_text(text)
