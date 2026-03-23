@@ -165,4 +165,19 @@ def get_demo_project_data():
         "chain_of_custody_diagram": True,
     }
 
+    data["management"] = {
+        "adaptive_management_plan": True,
+        "monitoring_triggers": True,
+    }
+
+    data["feedstock"]["moisture_control_plan"] = True
+    data["feedstock"]["moisture_measurement"] = True
+
+    data["risk_assessment"] = {
+        "fuel_use_reversal_risk": True,
+        "mitigation_plan": True,
+    }
+
+    data["storage"]["stockpiling_documented"] = True
+
     return data
