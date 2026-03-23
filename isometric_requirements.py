@@ -1,3 +1,66 @@
+ISOMETRIC_AUDIT_BLOCKS = {
+    "core_eligibility": {
+        "label": "Core Eligibility",
+        "modules": [
+            "Eligibility",
+            "Ownership",
+        ],
+        "always_required": True,
+    },
+    "methodological_integrity": {
+        "label": "Methodological Integrity",
+        "modules": [
+            "Additionality",
+            "Baseline",
+            "System Boundary",
+            "Leakage",
+            "Uncertainty",
+        ],
+        "always_required": True,
+    },
+    "carbon_accounting": {
+        "label": "Carbon Accounting",
+        "modules": [
+            "Carbon Accounting",
+            "Biochar Carbon Quantification",
+        ],
+        "always_required": True,
+    },
+    "durability_storage": {
+        "label": "Durability & Storage Integrity",
+        "modules": [
+            "Durability",
+            "Storage/End Use",
+            "Reversal Risk",
+        ],
+        "always_required": True,
+    },
+    "mrv_verification": {
+        "label": "MRV & Verification",
+        "modules": [
+            "MRV",
+            "Traceability",
+        ],
+        "always_required": True,
+    },
+    "operational_evidence": {
+        "label": "Operational Evidence",
+        "modules": [
+            "Feedstock",
+            "Technology",
+            "Biochar Quality",
+        ],
+        "always_required": False,
+    },
+    "safeguards_compliance": {
+        "label": "Safeguards & Compliance",
+        "modules": [
+            "Safeguards",
+            "Regulatory Compliance",
+        ],
+        "always_required": True,
+    },
+}
 ISOMETRIC_REQUIREMENTS = [
     {
         "id": "ELIG_001",
@@ -658,4 +721,351 @@ ISOMETRIC_REQUIREMENTS = [
             "documentation package"
         ],
     },
-]
+    {
+        "id": "OWN_001",
+        "module": "Ownership",
+        "title": "Project ownership and right to claim removals documented",
+        "description": (
+            "The project must identify the entity or entities that own, control, or have the contractual right "
+            "to operate the project and to claim the associated carbon removals, including relevant agreements "
+            "covering sites, equipment, feedstock, biochar, and crediting rights."
+        ),
+        "rationale": (
+            "Ownership and right-to-claim documentation are necessary to establish accountability, avoid disputes, "
+            "and reduce the risk of double claiming or invalid credit issuance."
+        ),
+        "keywords": [
+            "ownership",
+            "right to claim",
+            "project proponent",
+            "legal entity",
+            "contract",
+            "credit ownership",
+            "site control",
+            "equipment ownership"
+        ],
+    },
+    {
+        "id": "ADD_001",
+        "module": "Additionality",
+        "title": "Project additionality justification documented",
+        "description": (
+            "The project must explain why the carbon removal activity is additional, including why it would not "
+            "reasonably occur at the same scale, timing, or standard without carbon finance or the certified project framework."
+        ),
+        "rationale": (
+            "Additionality is a core methodological requirement because credits should only be issued for removals "
+            "that would not have occurred under a credible counterfactual scenario."
+        ),
+        "keywords": [
+            "additionality",
+            "financial additionality",
+            "regulatory additionality",
+            "without carbon finance",
+            "investment barrier",
+            "implementation barrier",
+            "counterfactual project case"
+        ],
+    },
+    {
+        "id": "ADD_002",
+        "module": "Additionality",
+        "title": "Financial or implementation barriers documented",
+        "description": (
+            "The project should provide evidence of financial, operational, commercial, or implementation barriers "
+            "that support the claim that the project is not business-as-usual."
+        ),
+        "rationale": (
+            "Barrier evidence strengthens the credibility of additionality claims and supports third-party verification."
+        ),
+        "keywords": [
+            "barrier",
+            "financial barrier",
+            "commercial barrier",
+            "implementation barrier",
+            "funding gap",
+            "project economics",
+            "not business as usual"
+        ],
+    },
+    {
+        "id": "BASE_001",
+        "module": "Baseline",
+        "title": "Baseline scenario clearly defined",
+        "description": (
+            "The project must define the baseline scenario, including the expected fate of feedstock, expected emissions, "
+            "and relevant project activities in the absence of the certified carbon removal project."
+        ),
+        "rationale": (
+            "A clearly defined baseline is necessary to determine whether the project generates net removals beyond the counterfactual case."
+        ),
+        "keywords": [
+            "baseline",
+            "counterfactual",
+            "without project",
+            "business as usual",
+            "reference scenario",
+            "baseline emissions",
+            "feedstock fate"
+        ],
+    },
+    {
+        "id": "BASE_002",
+        "module": "Baseline",
+        "title": "Baseline assumptions and evidence documented",
+        "description": (
+            "The project should document the assumptions, evidence, and references used to justify the selected baseline scenario."
+        ),
+        "rationale": (
+            "Baseline assumptions materially affect net removal estimates and must be supported by auditable evidence."
+        ),
+        "keywords": [
+            "baseline assumptions",
+            "reference data",
+            "evidence",
+            "historical practice",
+            "counterfactual evidence",
+            "justification"
+        ],
+    },
+    {
+        "id": "BOUND_001",
+        "module": "System Boundary",
+        "title": "Project system boundary clearly defined",
+        "description": (
+            "The project must define the system boundary for removals quantification, including included processes, excluded processes, "
+            "physical sites, transport legs, energy uses, and storage stages."
+        ),
+        "rationale": (
+            "A transparent system boundary is essential for complete and consistent emissions accounting and verification."
+        ),
+        "keywords": [
+            "system boundary",
+            "included processes",
+            "excluded processes",
+            "boundary diagram",
+            "transport boundary",
+            "energy boundary",
+            "storage boundary"
+        ],
+    },
+    {
+        "id": "LEAK_001",
+        "module": "Leakage",
+        "title": "Leakage sources identified and assessed",
+        "description": (
+            "The project must identify and assess potential leakage sources, including displacement of biomass uses, market effects, "
+            "activity shifting, or unintended emissions caused outside the immediate project boundary."
+        ),
+        "rationale": (
+            "Leakage can materially reduce or invalidate claimed net removals if project impacts are shifted elsewhere."
+        ),
+        "keywords": [
+            "leakage",
+            "activity shifting",
+            "market leakage",
+            "displacement",
+            "biomass competition",
+            "outside boundary emissions"
+        ],
+    },
+    {
+        "id": "LEAK_002",
+        "module": "Leakage",
+        "title": "Leakage quantification or conservative treatment documented",
+        "description": (
+            "The project should explain how leakage is quantified, conservatively estimated, or otherwise treated in the net removals calculation."
+        ),
+        "rationale": (
+            "Projects should transparently show how leakage risk is translated into conservative crediting."
+        ),
+        "keywords": [
+            "leakage quantification",
+            "conservative estimate",
+            "deduction",
+            "net removals adjustment",
+            "second order effects"
+        ],
+    },
+    {
+        "id": "UNC_001",
+        "module": "Uncertainty",
+        "title": "Uncertainty sources identified",
+        "description": (
+            "The project must identify relevant uncertainty sources affecting removals quantification, including measurement uncertainty, "
+            "sampling uncertainty, laboratory uncertainty, model uncertainty, and emission factor uncertainty."
+        ),
+        "rationale": (
+            "Scientific robustness requires explicit treatment of uncertainty in accordance with methodology requirements."
+        ),
+        "keywords": [
+            "uncertainty",
+            "measurement uncertainty",
+            "sampling uncertainty",
+            "laboratory uncertainty",
+            "model uncertainty",
+            "variance",
+            "error source"
+        ],
+    },
+    {
+        "id": "UNC_002",
+        "module": "Uncertainty",
+        "title": "Conservative treatment of uncertainty documented",
+        "description": (
+            "The project should explain how uncertainty is translated into conservative assumptions, deductions, confidence bounds, "
+            "or other adjustments in the credited removals."
+        ),
+        "rationale": (
+            "Methodologies require uncertainty to be treated conservatively to avoid over-crediting."
+        ),
+        "keywords": [
+            "conservative estimate",
+            "confidence interval",
+            "uncertainty deduction",
+            "conservative assumption",
+            "variance propagation",
+            "monte carlo"
+        ],
+    },
+    {
+        "id": "CARB_001",
+        "module": "Carbon Accounting",
+        "title": "Net removals calculation structure documented",
+        "description": (
+            "The project must explain how gross stored carbon, baseline effects, project emissions, leakage, and uncertainty adjustments "
+            "are combined into a net removals figure."
+        ),
+        "rationale": (
+            "Transparent calculation structure is essential for reproducibility and auditability of the claimed removals."
+        ),
+        "keywords": [
+            "net removals",
+            "gross stored carbon",
+            "project emissions",
+            "baseline deduction",
+            "leakage deduction",
+            "uncertainty adjustment",
+            "calculation formula"
+        ],
+    },
+    {
+        "id": "CARB_002",
+        "module": "Carbon Accounting",
+        "title": "Emissions accounting methodology documented",
+        "description": (
+            "The project must describe how project-related emissions are quantified, including energy use, transport, process emissions, "
+            "embodied emissions, and any other material cradle-to-grave sources."
+        ),
+        "rationale": (
+            "Net carbon removal claims depend on complete and methodology-aligned accounting of project emissions."
+        ),
+        "keywords": [
+            "emissions accounting",
+            "energy use",
+            "transport emissions",
+            "process emissions",
+            "embodied emissions",
+            "cradle to grave",
+            "lifecycle emissions"
+        ],
+    },
+    {
+        "id": "BCQ_001",
+        "module": "Biochar Carbon Quantification",
+        "title": "Biochar carbon content quantification documented",
+        "description": (
+            "The project must describe how the carbon content of biochar is measured, estimated, and linked to credited production or storage batches."
+        ),
+        "rationale": (
+            "The amount of carbon durably stored in biochar is a core input to removals quantification."
+        ),
+        "keywords": [
+            "carbon content",
+            "organic carbon",
+            "fixed carbon",
+            "biochar carbon",
+            "lab analysis",
+            "production batch"
+        ],
+    },
+    {
+        "id": "DURA_001",
+        "module": "Durability",
+        "title": "Durability approach and proxy documented",
+        "description": (
+            "The project must document the durability approach used to support crediting, including the accepted permanence proxy, "
+            "laboratory method, thresholds, and assumptions used to justify durable storage."
+        ),
+        "rationale": (
+            "Durability is one of the core integrity dimensions of carbon removal credits."
+        ),
+        "keywords": [
+            "durability",
+            "permanence",
+            "H/Corg",
+            "stable carbon fraction",
+            "durable storage",
+            "crediting horizon"
+        ],
+    },
+    {
+        "id": "REV_001",
+        "module": "Reversal Risk",
+        "title": "Reversal risks identified and mitigated",
+        "description": (
+            "The project should identify risks that could lead to loss, diversion, degradation, or invalidation of stored carbon and describe mitigation measures."
+        ),
+        "rationale": (
+            "Reversal risk management is necessary to protect the integrity of long-duration removal claims."
+        ),
+        "keywords": [
+            "reversal risk",
+            "loss risk",
+            "diversion",
+            "storage failure",
+            "risk mitigation",
+            "durability failure"
+        ],
+    },
+    {
+        "id": "SAFE_001",
+        "module": "Safeguards",
+        "title": "Environmental and social safeguards documented",
+        "description": (
+            "The project must document environmental and social safeguards covering biomass sourcing areas, processing sites, transport routes, "
+            "and biochar deployment locations, including risk identification and mitigation measures."
+        ),
+        "rationale": (
+            "Safeguards are a required condition for high-integrity crediting and independent verification."
+        ),
+        "keywords": [
+            "environmental safeguards",
+            "social safeguards",
+            "risk assessment",
+            "mitigation plan",
+            "community impact",
+            "ecosystem impact",
+            "stakeholder engagement"
+        ],
+    },
+    {
+        "id": "REG_001",
+        "module": "Regulatory Compliance",
+        "title": "Regulatory compliance and permits documented",
+        "description": (
+            "The project must document relevant legal requirements, permits, licenses, and compliance obligations applicable to project operations."
+        ),
+        "rationale": (
+            "Regulatory compliance is a foundational requirement for project validity and auditability."
+        ),
+        "keywords": [
+            "permit",
+            "license",
+            "regulatory compliance",
+            "environmental permit",
+            "operating permit",
+            "legal requirement",
+            "authority"
+        ],
+    },
