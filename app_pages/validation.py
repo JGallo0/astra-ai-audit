@@ -56,35 +56,38 @@ def render_downloads_tab(
     matrix_docx = matrix_to_docx_bytes(df, "CO2mply | Compliance Matrix")
     matrix_pdf = matrix_to_pdf_bytes(df, "CO2mply | Compliance Matrix")
     csv_bytes = convert_df_to_csv_bytes(df)
-    json_bytes = convert_json_to_bytes({
-        "run_id": run_id,
-        "summary": summary,
-        "results": last_full_audit_results,
-        "trails": last_full_audit_trails,
-    })
+    json_bytes = convert_json_to_bytes(
+        {
+            "run_id": run_id,
+            "summary": summary,
+            "results": last_full_audit_results,
+            "trails": last_full_audit_trails,
+        }
+    )
 
     d1, d2, d3 = st.columns(3)
+
     with d1:
         st.download_button(
             "Audit summary (.md)",
             data=full_audit_text,
             file_name=f"co2mply_audit_summary_{run_id}.md",
             mime="text/markdown",
-            width="stretch"
+            width="stretch",
         )
         st.download_button(
             "Eligibility dossier (.md)",
             data=eligibility_dossier_text,
             file_name=f"co2mply_eligibility_dossier_{run_id}.md",
             mime="text/markdown",
-            width="stretch"
+            width="stretch",
         )
         st.download_button(
             "Compliance matrix (.csv)",
             data=csv_bytes,
             file_name=f"co2mply_compliance_matrix_{run_id}.csv",
             mime="text/csv",
-            width="stretch"
+            width="stretch",
         )
 
     with d2:
@@ -93,21 +96,21 @@ def render_downloads_tab(
             data=full_audit_docx,
             file_name=f"co2mply_audit_summary_{run_id}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            width="stretch"
+            width="stretch",
         )
         st.download_button(
             "Eligibility dossier (.docx)",
             data=eligibility_docx,
             file_name=f"co2mply_eligibility_dossier_{run_id}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            width="stretch"
+            width="stretch",
         )
         st.download_button(
             "Compliance matrix (.docx)",
             data=matrix_docx,
             file_name=f"co2mply_compliance_matrix_{run_id}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            width="stretch"
+            width="stretch",
         )
 
     with d3:
@@ -116,28 +119,28 @@ def render_downloads_tab(
             data=full_audit_pdf,
             file_name=f"co2mply_audit_summary_{run_id}.pdf",
             mime="application/pdf",
-            width="stretch"
+            width="stretch",
         )
         st.download_button(
             "Eligibility dossier (.pdf)",
             data=eligibility_pdf,
             file_name=f"co2mply_eligibility_dossier_{run_id}.pdf",
             mime="application/pdf",
-            width="stretch"
+            width="stretch",
         )
         st.download_button(
             "Compliance matrix (.pdf)",
             data=matrix_pdf,
             file_name=f"co2mply_compliance_matrix_{run_id}.pdf",
             mime="application/pdf",
-            width="stretch"
+            width="stretch",
         )
         st.download_button(
             "Trace (.json)",
             data=json_bytes,
             file_name=f"co2mply_audit_{run_id}.json",
             mime="application/json",
-            width="stretch"
+            width="stretch",
         )
 def render_trails_section(trails):
     st.markdown("#### Trilha detalhada")
