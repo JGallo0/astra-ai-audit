@@ -12,6 +12,8 @@ from app_pages.validation_utils import (
     build_full_eligibility_dossier_text,
     build_executive_dossier_text,
     normalize_result_language,
+    build_investor_dossier_text,
+    calculate_rating,
 )
 
 
@@ -34,6 +36,19 @@ def render_downloads_tab(
     normalized_results_en = normalize_result_language(
         last_full_audit_results,
         lang="en",
+
+    executive_dossier_text = build_executive_dossier_text(
+        project_name,
+        summary,
+        normalized_results_en,
+        lang="en",
+)
+
+    investor_dossier_text = build_investor_dossier_text(
+        project_name,
+        summary,
+        normalized_results_en,
+        lang="en",
     )
 
     eligibility_dossier_text = build_executive_dossier_text(
@@ -52,6 +67,19 @@ def render_downloads_tab(
         eligibility_dossier_text,
         brand_name="CO2mply",
     )
+    executive_docx = docx_from_text("CO2mply | Eligibility Dossier", executive_dossier_text)
+    executive_pdf = pdf_from_text_branded(
+        "CO2mply | Eligibility Dossier",
+        executive_dossier_text,
+        brand_name="CO2mply",
+)
+
+    investor_docx = docx_from_text("CO2mply | Investor Brief", investor_dossier_text)
+    investor_pdf = pdf_from_text_branded(
+        "CO2mply | Investor Brief",
+        investor_dossier_text,
+        brand_name="CO2mply",
+)
 
     matrix_docx = matrix_to_docx_bytes(df, "CO2mply | Compliance Matrix")
     matrix_pdf = matrix_to_pdf_bytes(df, "CO2mply | Compliance Matrix")
