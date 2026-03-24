@@ -13,7 +13,7 @@ from project_config import (
     METHODOLOGY_VECTOR_STORES,
     list_methodology_keys,
     get_methodology_config,
-    get_methodology_vector_store_id,
+    get_methodology_vector_store_id,from scoring import calculate_compliance_score, classify_compliance_score
 )
 from project_service import (
     create_project_record,
@@ -76,7 +76,6 @@ from app_pages.audit_runner import (
     execute_full_audit,
     execute_rerun_failures,
 
-from scoring import calculate_compliance_score, classify_compliance_score
 )
 def safe_str(value):
     if value is None:
