@@ -1599,53 +1599,54 @@ st.session_state["language"] = lang
 render_header(lang)
 
 # =========================================================
-# AUDITORIA ESTRUTURADA V2 (REAL)
+# AUDITORIAS DISPONÍVEIS
 # =========================================================
-
-st.markdown("### Auditoria Estruturada V2")
 
 project_vs_id = st.session_state.get("current_project_vector_store_id")
 methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
 project_name = st.session_state.get("current_project_name")
 current_methodology = st.session_state.get("current_methodology")
 
-st.caption(f"Projeto ativo: {project_name or '-'}")
-st.caption(f"Metodologia ativa: {current_methodology or '-'}")
-st.caption(f"Project VS ID: {project_vs_id or '-'}")
-st.caption(f"Methodology VS ID: {methodology_vs_id or '-'}")
+if project_vs_id and methodology_vs_id and project_name and current_methodology:
 
-if st.button("Rodar auditoria estruturada V2", key="run_structured_v2_real"):
+    st.markdown("### Auditorias disponíveis")
 
-    if not project_vs_id:
-        st.error("Projeto não possui vector store ativo.")
-        st.stop()
+    c1, c2, c3 = st.columns(3)
 
-    if not methodology_vs_id:
-        st.error("Metodologia não possui vector store ativo.")
-        st.stop()
+    with c1:
+        if st.button("Análise Exploratória", width="stretch", key="run_exploratory_button"):
+            st.session_state["audit_mode"] = "exploratory"
+            st.session_state["run_exploratory"] = True
 
-    if not project_name:
-        st.error("Nenhum projeto ativo selecionado.")
-        st.stop()
+    with c2:
+        if st.button("Auditar projeto em desenvolvimento", width="stretch", key="run_development_button"):
+            st.session_state["audit_mode"] = "development"
+            st.session_state["run_structured"] = True
 
-    if not current_methodology:
-        st.error("Nenhuma metodologia ativa selecionada.")
-        st.stop()
+    with c3:
+        if st.button("Auditar projeto em operação", width="stretch", key="run_operational_button"):
+            st.session_state["audit_mode"] = "operational"
+            st.session_state["run_structured"] = True
+
+else:
+    st.info("Selecione e ative um projeto e uma metodologia para iniciar a auditoria.")
+
+# =========================================================
+# EXECUÇÃO DA AUDITORIA ESTRUTURADA
+# =========================================================
+
+if st.session_state.get("run_structured"):
+
+    audit_mode = st.session_state.get("audit_mode", "development")
 
     try:
-        # =========================
-        # CARREGAR REQUIREMENTS (CORREÇÃO PRINCIPAL)
-        # =========================
         requirements = get_requirements()
 
         if not requirements:
             st.error("Nenhum requisito estruturado foi carregado.")
             st.stop()
 
-        # =========================
-        # RODAR ENGINE
-        # =========================
-        with st.spinner("Executando auditoria estruturada V2..."):
+        with st.spinner("Executando auditoria estruturada..."):
 
             engine = AuditEngine(
                 api_key=OPENAI_API_KEY,
@@ -1653,18 +1654,21 @@ if st.button("Rodar auditoria estruturada V2", key="run_structured_v2_real"):
                 project_vector_store_id=project_vs_id,
                 methodology_vector_store_id=methodology_vs_id,
                 project_name=project_name,
-                requirements=requirements,  # 🔥 CORREÇÃO CRÍTICA
+                requirements=requirements,
             )
 
-            output = engine.run_structured_engine_audit()
+            output = engine.run_structured_engine_audit(
+                audit_mode=audit_mode
+            )
 
             st.session_state["structured_v2_output"] = output
+            st.session_state["run_structured"] = False
 
-        st.success("Auditoria estruturada V2 executada com sucesso.")
+        st.success("Auditoria concluída com sucesso.")
 
     except Exception as e:
-        st.error(f"Erro na auditoria V2: {e}")
-
+        st.session_state["run_structured"] = False
+        st.error(f"Erro na auditoria estruturada: {e}")
 
 # =========================================================
 # RENDER RESULTADO V2
