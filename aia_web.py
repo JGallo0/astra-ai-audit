@@ -14,8 +14,8 @@ from project_config import (
     list_methodology_keys,
     get_methodology_config,
     get_methodology_vector_store_id,
-from scoring import calculate_compliance_score, classify_compliance_score
 )
+from scoring import calculate_compliance_score, classify_compliance_score
 from project_service import (
     create_project_record,
     list_projects_by_owner,
