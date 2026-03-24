@@ -9,12 +9,12 @@ from compliance_rules import (
     calculate_confidence,
     classify_status,
     classify_risk,
+)
 
 from smart_search import normalize_sources, rank_sources, build_smart_context
 from engine.document_mapper import extract_project_data_from_contexts
 from engine.requirement_logic import run_engine
 from scoring import calculate_compliance_score, classify_compliance_score
-)
 
 
 DEFAULT_LOW_CONFIDENCE_THRESHOLD = 45
