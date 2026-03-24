@@ -445,3 +445,86 @@ def summarize_results(results: List[Dict[str, Any]]) -> Dict[str, Any]:
         "module_scores": summarize_module_scores(results),
         "module_confidence": summarize_module_confidence(results),
     }
+
+# scoring.py
+
+def calculate_compliance_score(results):
+    """
+    Calcula score agregado da auditoria com base nos resultados da engine.
+
+    Regras de pontuação:
+    - compliant = 1.0
+    - partial = 0.5
+    - not_applicable = excluído do denominador
+    - non_compliant = 0.0
+    - error = 0.0
+    """
+    if not results:
+        return {
+            "score": 0.0,
+            "applicable_requirements": 0,
+            "compliant": 0,
+            "partial": 0,
+            "non_compliant": 0,
+            "not_applicable": 0,
+            "error": 0,
+        }
+
+    compliant = 0
+    partial = 0
+    non_compliant = 0
+    not_applicable = 0
+    error = 0
+
+    weighted_points = 0.0
+    applicable_requirements = 0
+
+    for r in results:
+        status = r.get("status")
+
+        if status == "not_applicable":
+            not_applicable += 1
+            continue
+
+        applicable_requirements += 1
+
+        if status == "compliant":
+            compliant += 1
+            weighted_points += 1.0
+        elif status == "partial":
+            partial += 1
+            weighted_points += 0.5
+        elif status == "non_compliant":
+            non_compliant += 1
+        elif status == "error":
+            error += 1
+        else:
+            error += 1
+
+    if applicable_requirements == 0:
+        score = 0.0
+    else:
+        score = round((weighted_points / applicable_requirements) * 100, 2)
+
+    return {
+        "score": score,
+        "applicable_requirements": applicable_requirements,
+        "compliant": compliant,
+        "partial": partial,
+        "non_compliant": non_compliant,
+        "not_applicable": not_applicable,
+        "error": error,
+    }
+
+
+def classify_compliance_score(score):
+    """
+    Classificação simples do score para exibição executiva.
+    """
+    if score >= 90:
+        return "Strong"
+    if score >= 75:
+        return "Moderate"
+    if score >= 50:
+        return "Weak"
+    return "Critical"
