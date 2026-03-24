@@ -123,6 +123,19 @@ def run_engine(project_data, requirements):
 
     return results
 
+def build_logic_result(
+    status,
+    missing_fields=None,
+    failed_fields=None,
+    notes=None,
+):
+    return {
+        "status": status,
+        "missing_fields": missing_fields or [],
+        "failed_fields": failed_fields or [],
+        "notes": notes or [],
+    }
+
 # =========================
 # ENGINE RUNNER
 # =========================
@@ -242,7 +255,7 @@ def run_engine(project_data, requirements):
 
         # 3) Executa a lógica
         try:
-            status = logic_fn(project_data)
+            logic_output = logic_fn(project_data)
         except Exception as e:
             results.append({
                 "requirement_id": req_id,
@@ -257,6 +270,18 @@ def run_engine(project_data, requirements):
             })
             continue
 
+        # Aceita formato antigo (string) e novo (dict)
+        if isinstance(logic_output, dict):
+            status = logic_output.get("status", "error")
+            missing_fields = logic_output.get("missing_fields", [])
+            failed_fields = logic_output.get("failed_fields", [])
+            notes = logic_output.get("notes", [])
+        else:
+            status = logic_output
+            missing_fields = []
+            failed_fields = []
+            notes = []
+
         # 4) Monta saída estruturada
         if status == "compliant":
             confidence = 0.95
@@ -264,6 +289,8 @@ def run_engine(project_data, requirements):
             confidence = 0.75
         elif status == "non_compliant":
             confidence = 0.90
+        elif status == "not_applicable":
+            confidence = 1.0
         else:
             confidence = 0.0
 
@@ -272,9 +299,9 @@ def run_engine(project_data, requirements):
             "requirement_name": req_name,
             "status": status,
             "confidence": confidence,
-            "missing_fields": [],
-            "failed_fields": [],
-            "notes": [],
+            "missing_fields": missing_fields,
+            "failed_fields": failed_fields,
+            "notes": notes,
             "logic_key": logic_key,
             "fields_evaluated": fields_evaluated,
         })
@@ -289,23 +316,45 @@ def reactor_design_diagram(data):
     try:
         production = data.get("production", {})
 
+        missing_fields = []
+        failed_fields = []
+        notes = []
+
         has_diagram = production.get("reactor_design_diagram")
         has_sensor_inventory = production.get("sensor_inventory")
         has_sensor_locations = production.get("sensor_locations")
 
         if not has_diagram:
-            return "non_compliant"
+            missing_fields.append("production.reactor_design_diagram")
+            notes.append("Reactor design diagram or P&ID is missing.")
 
         if not has_sensor_inventory:
-            return "partial"
+            missing_fields.append("production.sensor_inventory")
+            notes.append("Sensor inventory is missing.")
 
         if not has_sensor_locations:
-            return "partial"
+            missing_fields.append("production.sensor_locations")
+            notes.append("Sensor locations are missing.")
 
-        return "compliant"
+        if missing_fields:
+            status = "non_compliant" if "production.reactor_design_diagram" in missing_fields else "partial"
+            return build_logic_result(
+                status=status,
+                missing_fields=missing_fields,
+                failed_fields=failed_fields,
+                notes=notes,
+            )
 
-    except Exception:
-        return "error"
+        return build_logic_result(
+            status="compliant",
+            notes=["Reactor design diagram and sensor documentation are present."],
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"reactor_design_diagram execution error: {str(e)}"],
+        )
 
 
 def durability_option_declared(data):
@@ -519,46 +568,50 @@ def sampling_plan_consistency(data):
     try:
         sampling = data.get("sampling", {})
 
-        method = sampling.get("method")
-        plan_defined = sampling.get("sampling_plan_defined")
-
-        if not method:
-            return "non_compliant"
-
-        if method not in ["A", "B"]:
-            return "non_compliant"
-
-        if not plan_defined:
-            return "partial"
-
-        return "compliant"
-
-    except Exception:
-        return "error"    
-
-def sampling_plan_consistency(data):
-    """
-    R-S8K1-1 | Sampling plan consistent with Methods A/B
-    """
-    try:
-        sampling = data.get("sampling", {})
+        missing_fields = []
+        failed_fields = []
+        notes = []
 
         method = sampling.get("method")
         plan_defined = sampling.get("sampling_plan_defined")
 
         if not method:
-            return "non_compliant"
-
-        if method not in ["A", "B"]:
-            return "non_compliant"
+            missing_fields.append("sampling.method")
+        elif method not in ["A", "B"]:
+            failed_fields.append("sampling.method")
+            notes.append("Sampling method must be 'A' or 'B'.")
 
         if not plan_defined:
-            return "partial"
+            missing_fields.append("sampling.sampling_plan_defined")
+            notes.append("Sampling plan is not documented.")
 
-        return "compliant"
+        if failed_fields:
+            return build_logic_result(
+                status="non_compliant",
+                missing_fields=missing_fields,
+                failed_fields=failed_fields,
+                notes=notes,
+            )
 
-    except Exception:
-        return "error"
+        if missing_fields:
+            return build_logic_result(
+                status="partial",
+                missing_fields=missing_fields,
+                failed_fields=failed_fields,
+                notes=notes,
+            )
+
+        return build_logic_result(
+            status="compliant",
+            notes=["Sampling method and plan are defined."],
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"sampling_plan_consistency execution error: {str(e)}"],
+        )
+        
 def reactor_maintenance_plan(data):
     """
     R-19AF-1 | Reactor maintenance plan evidenced
