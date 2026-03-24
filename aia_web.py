@@ -31,6 +31,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 
+
 from smart_search import normalize_sources, rank_sources, build_smart_context
 from audit_engine import AuditEngine
 from methodology_requirements import get_requirements_for_methodology
@@ -74,6 +75,8 @@ from engine.requirement_logic import run_engine
 from app_pages.audit_runner import (
     execute_full_audit,
     execute_rerun_failures,
+
+from scoring import calculate_compliance_score, classify_compliance_score
 )
 def safe_str(value):
     if value is None:
@@ -2611,6 +2614,10 @@ def render_full_audit_mode():
         run_id = st.session_state["last_full_audit_run_id"]
         project_name = st.session_state.get("current_project_name") or "Projeto sem nome"
 
+        engine_results = st.session_state.get("last_full_audit_results", [])
+        score_data = calculate_compliance_score(engine_results)
+        score_label = classify_compliance_score(score_data["score"])        
+
         tab_summary, tab_matrix, tab_details, tab_downloads, tab_history = st.tabs([
             t(lang, "summary_tab"),
             t(lang, "matrix_tab"),
@@ -2621,6 +2628,20 @@ def render_full_audit_mode():
 
         with tab_summary:
             validation.render_executive_summary(summary)
+
+            st.markdown("#### Compliance Score")
+
+            c1, c2, c3, c4, c5, c6 = st.columns(6)
+            c1.metric("Score", f'{score_data["score"]}%')
+            c2.metric("Rating", score_label)
+            c3.metric("Applicable", score_data["applicable_requirements"])
+            c4.metric("Compliant", score_data["compliant"])
+            c5.metric("Partial", score_data["partial"])
+            c6.metric("Non-compliant", score_data["non_compliant"])
+
+            st.caption(
+                f'Not applicable: {score_data["not_applicable"]} | Errors: {score_data["error"]}'
+            )
 
             s1, s2, s3, s4 = st.columns(4)
             s1.metric("Requisitos", summary.get("total_requirements", 0))
@@ -2667,6 +2688,20 @@ def render_full_audit_mode():
                 for k, v in (summary.get("risk_counts", {}) or {}).items()
             ])
             st.dataframe(risk_df, hide_index=True, width="stretch")
+            
+
+c1, c2, c3, c4, c5, c6 = st.columns(6)
+
+c1.metric("Score", f'{score_data["score"]}%')
+c2.metric("Rating", score_label)
+c3.metric("Applicable", score_data["applicable_requirements"])
+c4.metric("Compliant", score_data["compliant"])
+c5.metric("Partial", score_data["partial"])
+c6.metric("Non-compliant", score_data["non_compliant"])
+
+st.caption(
+    f'Not applicable: {score_data["not_applicable"]} | Errors: {score_data["error"]}'
+)
 
         with tab_matrix:
             st.markdown(f"#### {t(lang, 'filters')}")
