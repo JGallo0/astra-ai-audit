@@ -514,10 +514,15 @@ class AuditEngine:
     def run_structured_engine_audit(
         self,
         selected_modules: Optional[List[str]] = None,
+        audit_mode: str = "development",
     ) -> Dict[str, Any]:
         """
         Nova rota de auditoria:
         vector stores -> contextos -> mapper -> schema -> engine determinística
+
+        audit_mode:
+        - development -> projeto em desenvolvimento / pré-operação
+        - operational -> projeto em operação / certificação
         """
         if not self.requirements:
             raise ValueError("Nenhum requisito estruturado foi carregado para a metodologia selecionada.")
@@ -537,11 +542,38 @@ class AuditEngine:
 
         project_data = mapped["project_data"]
         results = run_engine(project_data, filtered_requirements)
+
+        # =========================================================
+        # AJUSTE INICIAL POR MODO DE AUDITORIA
+        # =========================================================
+        if audit_mode == "development":
+            adjusted_results = []
+
+            for r in results:
+                item = dict(r)
+
+                if item.get("status") == "non_compliant":
+                    missing_fields = item.get("missing_fields", []) or []
+                    failed_fields = item.get("failed_fields", []) or []
+
+                    if missing_fields and not failed_fields:
+                        item["status"] = "future_evidence_required"
+
+                        original_notes = item.get("notes", []) or []
+                        item["notes"] = list(original_notes) + [
+                            "Projeto em desenvolvimento: evidência operacional e/ou documental futura ainda requerida."
+                        ]
+
+                adjusted_results.append(item)
+
+            results = adjusted_results
+
         score_data = calculate_compliance_score(results)
         score_label = classify_compliance_score(score_data["score"])
 
         self.last_run_stats = {
             "mode": "structured_engine_v2",
+            "audit_mode": audit_mode,
             "queries": contexts["queries"],
             "project_hits_count": len(contexts["project_hits"]),
             "methodology_hits_count": len(contexts["methodology_hits"]),
@@ -554,6 +586,7 @@ class AuditEngine:
             "results": results,
             "score_data": score_data,
             "score_label": score_label,
+            "audit_mode": audit_mode,
             "selected_modules": selected_modules or [],
             "queries": contexts["queries"],
             "project_context": contexts["project_context"],
