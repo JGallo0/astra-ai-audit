@@ -36,11 +36,49 @@ def build_extraction_prompt(fields: List[Dict[str, Any]]) -> str:
     return f"""
 You are extracting structured carbon project data from documentary evidence.
 
+Your task is to populate structured fields using ONLY the evidence provided.
+
 Return ONLY valid JSON.
-Do not add commentary, markdown, or explanations.
-If a field is not supported by evidence, return null.
-For list_string fields, return an array of strings.
-For boolean fields, return true, false, or null.
+Do not add commentary, markdown, or explanations outside the JSON.
+
+Important extraction rules:
+
+1. Use documentary evidence conservatively, but do not be overly literal.
+2. If the document explicitly states that a plan, diagram, appendix, attachment, contract, log,
+   drawing, report, file, or supporting document exists, you MAY treat the corresponding
+   boolean/document-existence field as supported.
+3. If the document provides clear textual evidence of a concept, mark the field accordingly
+   even if the exact field name is not used.
+4. If the text only says something will be implemented in the future, or "once available",
+   do NOT mark that as fully evidenced. Prefer null in such cases unless the field is explicitly
+   about a future plan.
+5. Distinguish between:
+   - explicit current evidence
+   - attachment/appendix reference
+   - future intention
+6. For booleans:
+   - return true when evidence clearly supports existence/presence/compliance
+   - return false only when the document clearly indicates absence or contradiction
+   - return null when evidence is insufficient or ambiguous
+7. For int fields:
+   - convert clear textual evidence into integers where appropriate
+   - example: "24-hour production window" -> 1 day
+8. For list_string fields:
+   - return a list of concise strings extracted from the evidence
+9. Prefer project evidence for project-specific fields, but methodology evidence may clarify
+   interpretation.
+10. If evidence exists only by reference to an attachment or appendix, mention that explicitly
+    in the evidence text.
+
+Special guidance for common patterns:
+- "Attached", "Appendix", "Supporting documents", "diagram", "drawing", "PFD", "P&ID",
+  "layout drawing", "contract", "lab report", "byproduct log", "SCADA", "archived records",
+  "sampling frequency", "per batch", "maintenance schedule", "sensor calibration", "ISO/IEC 17025"
+  should all be treated as strong signals when relevant.
+- "net negative", "environmentally additional", "financially additional", "regulatorily additional",
+  "counterfactual emissions of baseline is zero", "chosen 200 years", "annual average soil temperature"
+  are strong signals for the corresponding eligibility/additionality/durability fields.
+- "will be implemented", "once available", "planned", "future" are NOT strong signals for current evidence.
 
 Required output format:
 {{
