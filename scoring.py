@@ -455,6 +455,7 @@ def calculate_compliance_score(results):
     Regras de pontuação:
     - compliant = 1.0
     - partial = 0.5
+    - future_evidence_required = 0.35
     - not_applicable = excluído do denominador
     - non_compliant = 0.0
     - error = 0.0
@@ -465,6 +466,7 @@ def calculate_compliance_score(results):
             "applicable_requirements": 0,
             "compliant": 0,
             "partial": 0,
+            "future_evidence_required": 0,
             "non_compliant": 0,
             "not_applicable": 0,
             "error": 0,
@@ -472,6 +474,7 @@ def calculate_compliance_score(results):
 
     compliant = 0
     partial = 0
+    future_evidence_required = 0
     non_compliant = 0
     not_applicable = 0
     error = 0
@@ -480,7 +483,7 @@ def calculate_compliance_score(results):
     applicable_requirements = 0
 
     for r in results:
-        status = r.get("status")
+        status = str(r.get("status", "")).strip().lower()
 
         if status == "not_applicable":
             not_applicable += 1
@@ -491,13 +494,21 @@ def calculate_compliance_score(results):
         if status == "compliant":
             compliant += 1
             weighted_points += 1.0
+
         elif status == "partial":
             partial += 1
             weighted_points += 0.5
+
+        elif status == "future_evidence_required":
+            future_evidence_required += 1
+            weighted_points += 0.35
+
         elif status == "non_compliant":
             non_compliant += 1
+
         elif status == "error":
             error += 1
+
         else:
             error += 1
 
@@ -511,6 +522,7 @@ def calculate_compliance_score(results):
         "applicable_requirements": applicable_requirements,
         "compliant": compliant,
         "partial": partial,
+        "future_evidence_required": future_evidence_required,
         "non_compliant": non_compliant,
         "not_applicable": not_applicable,
         "error": error,
