@@ -755,6 +755,76 @@ def biochar_characterization_approach(data):
         return "compliant"
     except:
         return "error"
+
+def reactor_material_selection(data):
+    try:
+        prod = data.get("production", {})
+
+        components = prod.get("reactor_components")
+        justification = prod.get("material_selection_justification")
+
+        if not components:
+            return "non_compliant"
+
+        if not justification:
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def engineering_design_diagram(data):
+    try:
+        prod = data.get("production", {})
+
+        if not prod.get("engineering_design_diagram"):
+            return "non_compliant"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def end_material_process_description(data):
+    try:
+        prod = data.get("production", {})
+
+        if not prod.get("end_material_process_description"):
+            return "non_compliant"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def crediting_activity_boundaries(data):
+    try:
+        quant = data.get("quantification", {})
+
+        if not quant.get("crediting_activity_boundaries"):
+            return "non_compliant"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def storage_system_boundary(data):
+    try:
+        quant = data.get("quantification", {})
+
+        if not quant.get("storage_emissions_accounted"):
+            return "non_compliant"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
         
 # =========================
 # LOGIC REGISTRY
@@ -795,4 +865,11 @@ LOGIC_MAP = {
     "environmental_legal_requirements": environmental_legal_requirements,
     "regulatory_measurement_methods": regulatory_measurement_methods,
     "biochar_characterization_approach": biochar_characterization_approach,
+
+    "reactor_material_selection": reactor_material_selection,
+    "engineering_design_diagram": engineering_design_diagram,
+    "end_material_process_description": end_material_process_description,
+    "crediting_activity_boundaries": crediting_activity_boundaries,
+    "storage_system_boundary": storage_system_boundary,
+    
 }
