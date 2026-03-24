@@ -557,17 +557,37 @@ class AuditEngine:
                     failed_fields = item.get("failed_fields", []) or []
 
                     if missing_fields and not failed_fields:
-                        item["status"] = "future_evidence_required"
+                        missing_fields_text = " ".join(missing_fields).lower()
 
-                        original_notes = item.get("notes", []) or []
-                        item["notes"] = list(original_notes) + [
-                            "Projeto em desenvolvimento: evidência operacional e/ou documental futura ainda requerida."
-                        ]
+                        # Se for claramente evidência operacional ainda não esperada
+                        if any(k in missing_fields_text for k in [
+                            "lab",
+                            "monitoring",
+                            "measurement",
+                            "data",
+                            "testing",
+                            "emissions",
+                        ]):
+                            item["status"] = "future_evidence_required"
+
+                            original_notes = item.get("notes", []) or []
+                            item["notes"] = list(original_notes) + [
+                                "Projeto em desenvolvimento: evidência operacional e/ou documental futura ainda requerida."
+                            ]
+                        else:
+                            # Pode ser problema de desenho/estrutura do projeto,
+                            # então não reclassificamos como evidência futura.
+                            item["status"] = "partial"
+
+                            original_notes = item.get("notes", []) or []
+                            item["notes"] = list(original_notes) + [
+                                "Projeto em desenvolvimento: lacuna de desenho, definição ou estrutura documental ainda precisa ser fortalecida."
+                            ]
 
                 adjusted_results.append(item)
 
             results = adjusted_results
-
+            
         score_data = calculate_compliance_score(results)
         score_label = classify_compliance_score(score_data["score"])
 
