@@ -135,6 +135,22 @@ def get_demo_project_data():
     data["monitoring_reporting"]["uncertainty_method"] = "defined"
     data["monitoring_reporting"]["verification_ready"] = True
 
+    data["production"]["reactor_components"] = True
+    data["production"]["material_selection_justification"] = True
+    data["production"]["engineering_design_diagram"] = True
+    data["production"]["end_material_process_description"] = True
+
+    data["quantification"]["crediting_activity_boundaries"] = True
+    data["quantification"]["storage_emissions_accounted"] = True
+
+    data["legal"] = {
+        "applicable_environmental_requirements": True,
+        "regulatory_measurement_methods": True,
+}
+
+    data["biochar"]["characterization"]["approach_description"] = True
+    data["biochar"]["characterization"]["ongoing_monitoring_plan"] = True    
+
     data["methodology"] = {
         "standard": "Isometric",
         "pathway": "biochar",
@@ -180,22 +196,6 @@ def get_demo_project_data():
     data["emissions"] = {
         "stack_monitoring_method": "periodic_stack_testing",
         "testing_frequency": "quarterly",
-
-    data["production"]["reactor_components"] = True
-    data["production"]["material_selection_justification"] = True
-    data["production"]["engineering_design_diagram"] = True
-    data["production"]["end_material_process_description"] = True
-
-    data["quantification"]["crediting_activity_boundaries"] = True
-    data["quantification"]["storage_emissions_accounted"] = True
-
-    data["legal"] = {
-        "applicable_environmental_requirements": True,
-        "regulatory_measurement_methods": True,
-}
-
-    data["biochar"]["characterization"]["approach_description"] = True
-    data["biochar"]["characterization"]["ongoing_monitoring_plan"] = True
     }
 
     return data
