@@ -2688,20 +2688,6 @@ def render_full_audit_mode():
                 for k, v in (summary.get("risk_counts", {}) or {}).items()
             ])
             st.dataframe(risk_df, hide_index=True, width="stretch")
-            
-
-c1, c2, c3, c4, c5, c6 = st.columns(6)
-
-c1.metric("Score", f'{score_data["score"]}%')
-c2.metric("Rating", score_label)
-c3.metric("Applicable", score_data["applicable_requirements"])
-c4.metric("Compliant", score_data["compliant"])
-c5.metric("Partial", score_data["partial"])
-c6.metric("Non-compliant", score_data["non_compliant"])
-
-st.caption(
-    f'Not applicable: {score_data["not_applicable"]} | Errors: {score_data["error"]}'
-)
 
         with tab_matrix:
             st.markdown(f"#### {t(lang, 'filters')}")
