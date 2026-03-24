@@ -2626,7 +2626,7 @@ def render_full_audit_mode():
             t(lang, "history_tab"),
         ])
 
-         with tab_summary:
+        with tab_summary:
             validation.render_executive_summary(summary)
 
             st.markdown("#### Compliance Score")
@@ -2674,6 +2674,20 @@ def render_full_audit_mode():
                     for mod in sorted(module_scores.keys())
                 ])
                 st.dataframe(module_df, hide_index=True, width="stretch")
+
+            st.markdown("#### Status")
+            status_df = pd.DataFrame([
+                {"Status": k, "Quantidade": v}
+                for k, v in (summary.get("status_counts", {}) or {}).items()
+            ])
+            st.dataframe(status_df, hide_index=True, width="stretch")
+
+            st.markdown("#### Risco")
+            risk_df = pd.DataFrame([
+                {"Risco": k, "Quantidade": v}
+                for k, v in (summary.get("risk_counts", {}) or {}).items()
+            ])
+            st.dataframe(risk_df, hide_index=True, width="stretch")
 
             st.markdown("#### Status")
             status_df = pd.DataFrame([
