@@ -139,7 +139,6 @@ def get_demo_project_data():
     data["production"]["material_selection_justification"] = True
     data["production"]["engineering_design_diagram"] = True
     data["production"]["end_material_process_description"] = True
-
     data["quantification"]["crediting_activity_boundaries"] = True
     data["quantification"]["storage_emissions_accounted"] = True
 
