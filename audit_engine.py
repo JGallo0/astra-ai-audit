@@ -9,6 +9,11 @@ from compliance_rules import (
     calculate_confidence,
     classify_status,
     classify_risk,
+
+from smart_search import normalize_sources, rank_sources, build_smart_context
+from engine.document_mapper import extract_project_data_from_contexts
+from engine.requirement_logic import run_engine
+from scoring import calculate_compliance_score, classify_compliance_score
 )
 
 
@@ -433,6 +438,130 @@ class AuditEngine:
             "estimated_max_cost": max_cost,
             "estimated_cost": est_cost,
         }
+
+    # =========================================================
+    # STRUCTURED ENGINE AUDIT (V2)
+    # =========================================================
+
+    def _call_llm_json_extraction(self, prompt: str) -> str:
+        """
+        Wrapper dedicado para extração estruturada.
+        Reaproveita o mesmo cliente/modelo do engine atual.
+        """
+        return self._call_llm_json(prompt)
+
+    def _build_structured_query_bundle(self) -> List[str]:
+        return [
+            "reactor design diagram",
+            "maintenance plan",
+            "sampling plan",
+            "durability option",
+            "chain of custody",
+            "biochar chemical analysis",
+            "required measurements",
+            "emissions monitoring",
+            "environmental legal requirements",
+            "product standard compliance",
+            "deployment method",
+        ]
+
+    def _build_structured_contexts(
+        self,
+        query_bundle: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
+        queries = query_bundle or self._build_structured_query_bundle()
+
+        project_hits = self._run_multi_query_file_search(
+            vector_store_id=self.project_vector_store_id,
+            queries=queries,
+            max_num_results=self.project_max_results_per_query,
+            source_label="project",
+        )
+
+        methodology_hits = self._run_multi_query_file_search(
+            vector_store_id=self.methodology_vector_store_id,
+            queries=queries,
+            max_num_results=self.methodology_max_results_per_query,
+            source_label="methodology",
+        )
+
+        project_sources = normalize_sources(project_hits, "project")
+        methodology_sources = normalize_sources(methodology_hits, "methodology")
+
+        ranked_project = rank_sources(" ".join(queries), project_sources)
+        ranked_methodology = rank_sources(" ".join(queries), methodology_sources)
+
+        project_context = build_smart_context(
+            query="Structured project evidence extraction",
+            ranked_sources=ranked_project,
+            max_items=self.max_project_hits_in_prompt,
+        )
+
+        methodology_context = build_smart_context(
+            query="Methodology requirements extraction",
+            ranked_sources=ranked_methodology,
+            max_items=self.max_methodology_hits_in_prompt,
+        )
+
+        return {
+            "queries": queries,
+            "project_hits": project_hits,
+            "methodology_hits": methodology_hits,
+            "project_context": project_context,
+            "methodology_context": methodology_context,
+        }
+
+    def run_structured_engine_audit(
+        self,
+        selected_modules: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Nova rota de auditoria:
+        vector stores -> contextos -> mapper -> schema -> engine determinística
+        """
+        if not self.requirements:
+            raise ValueError("Nenhum requisito estruturado foi carregado para a metodologia selecionada.")
+
+        filtered_requirements = [
+            req for req in self.requirements
+            if not selected_modules or req.get("module") in selected_modules
+        ]
+
+        contexts = self._build_structured_contexts()
+
+        mapped = extract_project_data_from_contexts(
+            ai_client=self._call_llm_json_extraction,
+            project_context=contexts["project_context"],
+            methodology_context=contexts["methodology_context"],
+        )
+
+        project_data = mapped["project_data"]
+        results = run_engine(project_data, filtered_requirements)
+        score_data = calculate_compliance_score(results)
+        score_label = classify_compliance_score(score_data["score"])
+
+        self.last_run_stats = {
+            "mode": "structured_engine_v2",
+            "queries": contexts["queries"],
+            "project_hits_count": len(contexts["project_hits"]),
+            "methodology_hits_count": len(contexts["methodology_hits"]),
+            "score": score_data["score"],
+            "applicable_requirements": score_data["applicable_requirements"],
+        }
+
+        return {
+            "project_data": project_data,
+            "results": results,
+            "score_data": score_data,
+            "score_label": score_label,
+            "project_context": contexts["project_context"],
+            "methodology_context": contexts["methodology_context"],
+            "project_hits": contexts["project_hits"],
+            "methodology_hits": contexts["methodology_hits"],
+            "normalized_fields": mapped.get("normalized_fields", []),
+            "raw_extraction": mapped.get("raw_extraction", {}),
+        }
+    
 
     # =========================================================
     # MODULE AUDIT
