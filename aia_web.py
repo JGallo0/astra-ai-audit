@@ -2465,18 +2465,12 @@ def render_full_audit_mode():
             selected_scopes=selected_scopes,
         )
 
-        selected_modules = resolve_selected_modules_from_scope(
-            requirements=requirements,
-            selected_scopes=selected_scopes,
-        )
-
-st.session_state["structured_selected_modules"] = selected_modules
+        st.session_state["structured_selected_modules"] = selected_modules
 
         selected_requirements = [
             r for r in requirements
             if r["module"] in selected_modules
         ]
-
         st.caption(
             "Modules covered in this run: "
             + (", ".join(selected_modules) if selected_modules else "none")
