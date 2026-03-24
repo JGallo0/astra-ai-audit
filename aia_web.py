@@ -1607,20 +1607,44 @@ st.markdown("### Auditoria Estruturada V2")
 project_vs_id = st.session_state.get("current_project_vector_store_id")
 methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
 project_name = st.session_state.get("current_project_name")
+current_methodology = st.session_state.get("current_methodology")
 
-run_v2 = st.button("Rodar auditoria estruturada V2", key="run_v2_real")
+st.caption(f"Projeto ativo: {project_name or '-'}")
+st.caption(f"Metodologia ativa: {current_methodology or '-'}")
+st.caption(f"Project VS ID: {project_vs_id or '-'}")
+st.caption(f"Methodology VS ID: {methodology_vs_id or '-'}")
 
-if run_v2:
+if st.button("Rodar auditoria estruturada V2", key="run_structured_v2_real"):
 
     if not project_vs_id:
-        st.error("Projeto não possui vector store.")
+        st.error("Projeto não possui vector store ativo.")
         st.stop()
 
     if not methodology_vs_id:
-        st.error("Metodologia não possui vector store.")
+        st.error("Metodologia não possui vector store ativo.")
+        st.stop()
+
+    if not project_name:
+        st.error("Nenhum projeto ativo selecionado.")
+        st.stop()
+
+    if not current_methodology:
+        st.error("Nenhuma metodologia ativa selecionada.")
         st.stop()
 
     try:
+        # =========================
+        # CARREGAR REQUIREMENTS (CORREÇÃO PRINCIPAL)
+        # =========================
+        requirements = get_requirements()
+
+        if not requirements:
+            st.error("Nenhum requisito estruturado foi carregado.")
+            st.stop()
+
+        # =========================
+        # RODAR ENGINE
+        # =========================
         with st.spinner("Executando auditoria estruturada V2..."):
 
             engine = AuditEngine(
@@ -1629,11 +1653,14 @@ if run_v2:
                 project_vector_store_id=project_vs_id,
                 methodology_vector_store_id=methodology_vs_id,
                 project_name=project_name,
+                requirements=requirements,  # 🔥 CORREÇÃO CRÍTICA
             )
 
             output = engine.run_structured_engine_audit()
 
-            st.session_state["v2_output"] = output
+            st.session_state["structured_v2_output"] = output
+
+        st.success("Auditoria estruturada V2 executada com sucesso.")
 
     except Exception as e:
         st.error(f"Erro na auditoria V2: {e}")
@@ -1643,18 +1670,18 @@ if run_v2:
 # RENDER RESULTADO V2
 # =========================================================
 
-v2_output = st.session_state.get("v2_output")
+structured_v2_output = st.session_state.get("structured_v2_output")
 
-if v2_output:
+if structured_v2_output:
 
     st.markdown("---")
     st.subheader("Resultado da Auditoria Estruturada")
 
-    results = v2_output.get("results", [])
-    project_data = v2_output.get("project_data", {})
-    normalized_fields = v2_output.get("normalized_fields", {})
-    score_data = v2_output.get("score_data", {})
-    score_label = v2_output.get("score_label", "")
+    results = structured_v2_output.get("results", [])
+    project_data = structured_v2_output.get("project_data", {})
+    normalized_fields = structured_v2_output.get("normalized_fields", [])
+    score_data = structured_v2_output.get("score_data", {})
+    score_label = structured_v2_output.get("score_label", "")
 
     # =========================
     # SCORE
@@ -1679,17 +1706,18 @@ if v2_output:
         st.warning("Nenhum resultado retornado pela engine.")
 
     # =========================
-    # DEBUG (CRÍTICO PRA EVOLUÇÃO)
+    # DEBUG
     # =========================
 
     with st.expander("Project Data (extraído)", expanded=False):
-        st.json(project_data)
+        st.write(project_data)
 
     with st.expander("Normalized Fields", expanded=False):
-        st.json(normalized_fields)
+        st.write(normalized_fields)
 
     with st.expander("Payload completo", expanded=False):
-        st.json(v2_output)
+        st.write(structured_v2_output)
+        
 active_methodology_label = METHODOLOGY_REGISTRY.get(
     st.session_state.get("current_methodology", ""),
     {}
