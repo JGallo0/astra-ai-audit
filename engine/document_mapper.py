@@ -1,14 +1,14 @@
 # engine/document_mapper.py
 
 import json
-from copy import deepcopy
+from typing import Any, Dict, List
 
 from engine.extraction_schema import EXTRACTION_FIELDS
 from engine.normalization import normalize_field_value
 from schemas.project_schema import get_empty_project_data
 
 
-def set_nested_value(data, path, value):
+def set_nested_value(data: Dict[str, Any], path: str, value: Any) -> None:
     keys = path.split(".")
     cursor = data
 
@@ -20,8 +20,9 @@ def set_nested_value(data, path, value):
     cursor[keys[-1]] = value
 
 
-def build_extraction_prompt(fields):
+def build_extraction_prompt(fields: List[Dict[str, Any]]) -> str:
     field_specs = []
+
     for f in fields:
         item = {
             "path": f["path"],
@@ -33,11 +34,13 @@ def build_extraction_prompt(fields):
         field_specs.append(item)
 
     return f"""
-You are extracting structured carbon project data.
+You are extracting structured carbon project data from documentary evidence.
 
 Return ONLY valid JSON.
-Do not add commentary.
+Do not add commentary, markdown, or explanations.
 If a field is not supported by evidence, return null.
+For list_string fields, return an array of strings.
+For boolean fields, return true, false, or null.
 
 Required output format:
 {{
@@ -45,46 +48,21 @@ Required output format:
     {{
       "path": "methodology.standard",
       "value": "Isometric",
-      "evidence": "short quote or summary",
-      "source": "project or methodology"
+      "evidence": "short quote or concise evidence summary",
+      "source": "project"
     }}
   ]
 }}
 
 Fields to extract:
-{json.dumps(field_specs, indent=2)}
+{json.dumps(field_specs, ensure_ascii=False, indent=2)}
 """.strip()
 
 
-def extract_fields_with_ai(
-    ai_client,
-    project_context,
-    methodology_context,
-    fields,
-):
-    """
-    ai_client should be a callable or wrapper you already use in the app.
-    It must return a raw string containing JSON.
-    """
-
-    prompt = build_extraction_prompt(fields)
-
-    full_prompt = f"""
-Project evidence:
-{project_context}
-
-Methodology evidence:
-{methodology_context}
-
-{prompt}
-""".strip()
-
-    raw = ai_client(full_prompt)
-    parsed = json.loads(raw)
-    return parsed
-
-
-def normalize_extracted_fields(extracted_payload, fields):
+def normalize_extracted_fields(
+    extracted_payload: Dict[str, Any],
+    fields: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
     field_map = {f["path"]: f for f in fields}
     normalized = []
 
@@ -106,34 +84,51 @@ def normalize_extracted_fields(extracted_payload, fields):
     return normalized
 
 
-def build_project_data_from_extraction(normalized_fields):
+def build_project_data_from_extraction(
+    normalized_fields: List[Dict[str, Any]],
+) -> Dict[str, Any]:
     data = get_empty_project_data()
 
     for item in normalized_fields:
-        if item["value"] is None:
+        value = item["value"]
+        if value is None:
             continue
-        set_nested_value(data, item["path"], item["value"])
+        set_nested_value(data, item["path"], value)
 
     return data
 
 
 def extract_project_data_from_contexts(
     ai_client,
-    project_context,
-    methodology_context,
-):
-    extracted = extract_fields_with_ai(
-        ai_client=ai_client,
-        project_context=project_context,
-        methodology_context=methodology_context,
-        fields=EXTRACTION_FIELDS,
-    )
+    project_context: str,
+    methodology_context: str,
+) -> Dict[str, Any]:
+    prompt = build_extraction_prompt(EXTRACTION_FIELDS)
 
-    normalized = normalize_extracted_fields(extracted, EXTRACTION_FIELDS)
+    full_prompt = f"""
+PROJECT EVIDENCE
+----------------
+{project_context}
+
+METHODOLOGY EVIDENCE
+--------------------
+{methodology_context}
+
+{prompt}
+""".strip()
+
+    raw = ai_client(full_prompt)
+
+    if isinstance(raw, dict):
+        extracted_payload = raw
+    else:
+        extracted_payload = json.loads(raw)
+
+    normalized = normalize_extracted_fields(extracted_payload, EXTRACTION_FIELDS)
     project_data = build_project_data_from_extraction(normalized)
 
     return {
         "project_data": project_data,
         "normalized_fields": normalized,
-        "raw_extraction": extracted,
+        "raw_extraction": extracted_payload,
     }
