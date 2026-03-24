@@ -554,6 +554,8 @@ class AuditEngine:
             "results": results,
             "score_data": score_data,
             "score_label": score_label,
+            "selected_modules": selected_modules or [],
+            "queries": contexts["queries"],
             "project_context": contexts["project_context"],
             "methodology_context": contexts["methodology_context"],
             "project_hits": contexts["project_hits"],
