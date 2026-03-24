@@ -2626,7 +2626,7 @@ def render_full_audit_mode():
             t(lang, "history_tab"),
         ])
 
-        with tab_summary:
+         with tab_summary:
             validation.render_executive_summary(summary)
 
             st.markdown("#### Compliance Score")
