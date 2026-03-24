@@ -825,6 +825,85 @@ def storage_system_boundary(data):
 
     except Exception:
         return "error"
+
+def environmental_legal_requirements(data):
+    try:
+        legal = data.get("legal", {})
+
+        if not legal.get("applicable_environmental_requirements"):
+            return "non_compliant"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def regulatory_measurement_methods(data):
+    try:
+        legal = data.get("legal", {})
+
+        if not legal.get("regulatory_measurement_methods"):
+            return "non_compliant"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def biochar_characterization_approach(data):
+    try:
+        bio = data.get("biochar", {}).get("characterization", {})
+
+        if not bio.get("approach_description"):
+            return "non_compliant"
+
+        if not bio.get("ongoing_monitoring_plan"):
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def product_standard_compliance(data):
+    try:
+        product = data.get("product", {})
+
+        standard = product.get("standard_compliance")
+        certification = product.get("certification_scheme")
+
+        if not standard:
+            return "non_compliant"
+
+        if not certification:
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
+
+
+def contaminant_monitoring_plan(data):
+    try:
+        bio = data.get("biochar", {}).get("characterization", {})
+
+        contaminants = bio.get("contaminant_testing")
+        frequency = bio.get("contaminant_testing_frequency")
+
+        if not contaminants:
+            return "non_compliant"
+
+        if not frequency:
+            return "partial"
+
+        return "compliant"
+
+    except Exception:
+        return "error"
         
 # =========================
 # LOGIC REGISTRY
@@ -871,5 +950,11 @@ LOGIC_MAP = {
     "end_material_process_description": end_material_process_description,
     "crediting_activity_boundaries": crediting_activity_boundaries,
     "storage_system_boundary": storage_system_boundary,
+
+    "environmental_legal_requirements": environmental_legal_requirements,
+    "regulatory_measurement_methods": regulatory_measurement_methods,
+    "biochar_characterization_approach": biochar_characterization_approach,
+    "product_standard_compliance": product_standard_compliance,
+    "contaminant_monitoring_plan": contaminant_monitoring_plan,
     
 }
