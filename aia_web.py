@@ -446,6 +446,9 @@ if "current_filters" not in st.session_state:
         "risk": [],
     }
 
+if "structured_selected_modules" not in st.session_state:
+    st.session_state["structured_selected_modules"] = []
+
 # =========================================================
 # THEME / VISUAL
 # =========================================================
@@ -1658,7 +1661,8 @@ if st.session_state.get("run_structured"):
             )
 
             output = engine.run_structured_engine_audit(
-                audit_mode=audit_mode
+                selected_modules=st.session_state.get("structured_selected_modules") or None,
+                audit_mode=audit_mode,
             )
 
             st.session_state["structured_v2_output"] = output
@@ -2460,6 +2464,13 @@ def render_full_audit_mode():
             requirements=requirements,
             selected_scopes=selected_scopes,
         )
+
+        selected_modules = resolve_selected_modules_from_scope(
+            requirements=requirements,
+            selected_scopes=selected_scopes,
+        )
+
+st.session_state["structured_selected_modules"] = selected_modules
 
         selected_requirements = [
             r for r in requirements
