@@ -1598,22 +1598,98 @@ st.session_state["language"] = lang
 
 render_header(lang)
 
-st.markdown("### Teste da Engine V2")
+# =========================================================
+# AUDITORIA ESTRUTURADA V2 (REAL)
+# =========================================================
 
-if st.button("Rodar teste V2"):
+st.markdown("### Auditoria Estruturada V2")
+
+project_vs_id = st.session_state.get("current_project_vector_store_id")
+methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
+project_name = st.session_state.get("current_project_name")
+
+run_v2 = st.button("Rodar auditoria estruturada V2", key="run_v2_real")
+
+if run_v2:
+
+    if not project_vs_id:
+        st.error("Projeto não possui vector store.")
+        st.stop()
+
+    if not methodology_vs_id:
+        st.error("Metodologia não possui vector store.")
+        st.stop()
+
     try:
-        project_data = get_demo_project_data()
-        requirements = get_requirements()
-        results = run_engine(project_data, requirements)
+        with st.spinner("Executando auditoria estruturada V2..."):
 
-        st.success("Engine V2 executada com sucesso")
+            engine = AuditEngine(
+                api_key=OPENAI_API_KEY,
+                model=MODEL_NAME,
+                project_vector_store_id=project_vs_id,
+                methodology_vector_store_id=methodology_vs_id,
+                project_name=project_name,
+            )
 
-        df_results = pd.DataFrame(results)
-        st.dataframe(df_results, hide_index=True, width="stretch")
+            output = engine.run_structured_engine_audit()
+
+            st.session_state["v2_output"] = output
 
     except Exception as e:
-        st.error(f"Erro ao rodar engine V2: {e}")
+        st.error(f"Erro na auditoria V2: {e}")
 
+
+# =========================================================
+# RENDER RESULTADO V2
+# =========================================================
+
+v2_output = st.session_state.get("v2_output")
+
+if v2_output:
+
+    st.markdown("---")
+    st.subheader("Resultado da Auditoria Estruturada")
+
+    results = v2_output.get("results", [])
+    project_data = v2_output.get("project_data", {})
+    normalized_fields = v2_output.get("normalized_fields", {})
+    score_data = v2_output.get("score_data", {})
+    score_label = v2_output.get("score_label", "")
+
+    # =========================
+    # SCORE
+    # =========================
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric("Compliance Score", f"{score_data.get('score', 0):.1f}")
+
+    with col2:
+        st.metric("Rating", score_label)
+
+    # =========================
+    # MATRIZ
+    # =========================
+
+    if results:
+        df = pd.DataFrame(results)
+        st.dataframe(df, hide_index=True, width="stretch")
+    else:
+        st.warning("Nenhum resultado retornado pela engine.")
+
+    # =========================
+    # DEBUG (CRÍTICO PRA EVOLUÇÃO)
+    # =========================
+
+    with st.expander("Project Data (extraído)", expanded=False):
+        st.json(project_data)
+
+    with st.expander("Normalized Fields", expanded=False):
+        st.json(normalized_fields)
+
+    with st.expander("Payload completo", expanded=False):
+        st.json(v2_output)
 active_methodology_label = METHODOLOGY_REGISTRY.get(
     st.session_state.get("current_methodology", ""),
     {}
