@@ -120,6 +120,7 @@ def apply_local_heuristics(
         r"1000[- ]year durability pathway",
         r"1000[- ]year durability classification",
         r"durability threshold.{0,20}1000",
+        r"at least 1000 years",
     ]
     durability_200_patterns = [
         r"\+?\s*200[- ]year durability",
@@ -128,6 +129,7 @@ def apply_local_heuristics(
         r"durability threshold.{0,20}200",
         r"fully support the \+?200[- ]year durability pathway",
         r"applies the \+?200[- ]year durability classification",
+        r"targets the \+?200[- ]year durability class",
     ]
 
     if any(re.search(p, combined_text, re.IGNORECASE | re.DOTALL) for p in combined_200_1000_patterns):
