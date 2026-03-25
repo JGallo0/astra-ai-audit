@@ -12,6 +12,7 @@ from engine.mappers.storage_mapper import run_storage_mapper
 from engine.mappers.quantification_mapper import run_quantification_mapper
 from engine.mappers.traceability_mapper import run_traceability_mapper
 from engine.mappers.fallback_mapper import run_fallback_mapper
+from engine.mappers.emissions_mapper import run_emissions_mapper
 
 
 REQUIREMENT_HINTS = {
@@ -333,6 +334,38 @@ REQUIREMENT_HINTS = {
         "secure digital systems",
         "regular backups",
     ],
+    
+    # -------------------------
+    # EMISSIONS
+    # -------------------------    
+    
+    "emissions.stack_monitoring_method": [
+        "annual emission testing",
+        "stack emissions",
+        "air emissions",
+        "emissions monitoring",
+        "atmospheric emissions",
+    ],
+    "emissions.testing_frequency": [
+        "annual emission testing",
+        "annual",
+        "periodic testing",
+        "regular testing",
+    ],
+    "emissions.pyrolysis_gas_end_use_approach": [
+        "combustion gases burned in an integrated furnace",
+        "controlled combustion of pyrolysis gases",
+        "gas burners",
+        "integrated furnace",
+        "heat is partially reused to sustain the process",
+    ],
+    "emissions.emissions_control_system": [
+        "controlled combustion",
+        "integrated furnace",
+        "gas burners",
+        "controlled combustion systems for process gases",
+        "thermal control",
+    ],
 }
 
 
@@ -392,6 +425,12 @@ DOMAIN_REQUIREMENTS = {
     "traceability": [
         "traceability.chain_of_custody",
         "traceability.records_archived",
+    ],
+    "emissions": [
+        "emissions.stack_monitoring_method",
+        "emissions.testing_frequency",
+        "emissions.pyrolysis_gas_end_use_approach",
+        "emissions.emissions_control_system",
     ],
 }
 
@@ -536,6 +575,7 @@ def _build_domain_contexts(
         "quantification": _build_domain_context_from_hits(project_hits, methodology_context, "quantification"),
         "traceability": _build_domain_context_from_hits(project_hits, methodology_context, "traceability"),
         "global": project_context or "",
+        "emissions": _build_domain_context_from_hits(project_hits, methodology_context, "emissions"),
     }
 
 
@@ -568,6 +608,7 @@ def run_mapper_pipeline(
         ("storage_mapper", run_storage_mapper, "storage"),
         ("quantification_mapper", run_quantification_mapper, "quantification"),
         ("traceability_mapper", run_traceability_mapper, "traceability"),
+        ("emissions_mapper", run_emissions_mapper, "emissions"),
     ]
 
     for name, fn, domain in mapper_runs:
