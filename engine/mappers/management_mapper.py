@@ -230,3 +230,36 @@ def run_management_mapper(
         "normalized_fields": normalized,
         "raw_extraction": payload,
     }
+
+    # ------------------------------------------------------------
+    # INFERRED adaptive_management_plan (CRITICAL FIX)
+    # ------------------------------------------------------------
+    current = field_map.get("management.adaptive_management_plan", {}).get("value")
+
+    if current in (None, False, "", []):
+        info = field_map.get("management.information_sharing_plan", {}).get("value")
+        emergency = field_map.get("management.emergency_response_plan", {}).get("value")
+        pause = field_map.get("management.pause_or_stop_conditions", {}).get("value")
+        triggers = field_map.get("management.monitoring_triggers", {}).get("value")
+
+        # CORE LOGIC:
+        # if at least 2 structural components exist → adaptive management exists
+        components_true = sum([
+            bool(info),
+            bool(emergency),
+            bool(pause),
+            bool(triggers),
+        ])
+
+        if components_true >= 2:
+            upsert_field(
+                field_map,
+                path="management.adaptive_management_plan",
+                value=True,
+                evidence="Inferred: adaptive management system exists because multiple components (information sharing, emergency response, pause/stop conditions, monitoring triggers) are explicitly documented.",
+                extractor="management_mapper",
+                fill_method="heuristic_inference",
+                confidence=0.93,
+                evidence_strength="strong",
+                evidence_mode="inferred",
+            )
