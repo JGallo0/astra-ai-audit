@@ -25,8 +25,35 @@ FILL_METHOD_ORDER = {
     "llm": 3,
 }
 
+CRITICAL_TRUE_HEURISTIC_PATHS = {
+    "eligibility.net_negative_claim",
+    "production.reactor_design_diagram",
+    "production.engineering_design_diagram",
+    "production.maintenance_plan",
+    "production.maintenance_schedule",
+    "production.sensor_inventory",
+    "production.sensor_locations",
+    "sampling.batch_definition_days",
+    "sampling.sampling_plan_defined",
+}
 
-def clean_evidence(text: Any, max_len: int = 220) -> str:
+ABSENCE_PATTERNS = [
+    r"\bno evidence\b",
+    r"\bno explicit evidence\b",
+    r"\bno mention\b",
+    r"\bnot mentioned\b",
+    r"\bnot described\b",
+    r"\bnot provided\b",
+    r"\bnot specified\b",
+    r"\bnot identified\b",
+    r"\bnot found\b",
+    r"\bno explicit reference\b",
+    r"\bno direct evidence\b",
+    r"\bno clear evidence\b",
+]
+
+
+def clean_evidence(text: Any, max_len: int = 280) -> str:
     if text is None:
         return ""
     cleaned = re.sub(r"\s+", " ", str(text)).strip()
@@ -104,10 +131,23 @@ def filter_fields_by_paths(
 def infer_evidence_mode(evidence: str) -> str:
     txt = (evidence or "").lower()
 
-    if any(k in txt for k in ["annex", "appendix", "attached", "attachment", "supporting document"]):
+    if any(k in txt for k in [
+        "annex",
+        "appendix",
+        "attached",
+        "attachment",
+        "supporting document",
+        "technical annex",
+        "uploaded file",
+        "included in annex",
+    ]):
         return "referenced_attachment"
 
-    if any(k in txt for k in ["heuristic match", "inferred", "implied"]):
+    if any(k in txt for k in [
+        "heuristic match",
+        "inferred",
+        "implied",
+    ]):
         return "inferred"
 
     return "direct"
@@ -126,11 +166,17 @@ def infer_evidence_strength(evidence: str, value: Any) -> str:
         "p&id",
         "maintenance schedule",
         "production batch",
+        "batch-level",
         "net removals",
+        "net negative",
+        "kgco2eq",
         "iso/iec 17025",
         "lab report",
         "chain of custody",
         "lca",
+        "temperature sensors",
+        "pressure monitoring",
+        "gas flow measurement",
     ]
     moderate_markers = [
         "documented",
@@ -139,6 +185,9 @@ def infer_evidence_strength(evidence: str, value: Any) -> str:
         "provided",
         "attached",
         "evidenced",
+        "monitoring",
+        "testing",
+        "archived",
     ]
 
     if any(k in txt for k in strong_markers):
@@ -147,6 +196,17 @@ def infer_evidence_strength(evidence: str, value: Any) -> str:
         return "moderate"
 
     return "moderate" if value is not None else "weak"
+
+
+def _is_absence_style_evidence(evidence: str) -> bool:
+    txt = (evidence or "").lower()
+    return any(re.search(p, txt, re.IGNORECASE) for p in ABSENCE_PATTERNS)
+
+
+def _normalize_absence_false_to_none(value: Any, evidence: str) -> Any:
+    if value is False and _is_absence_style_evidence(evidence):
+        return None
+    return value
 
 
 def normalize_domain_fields(
@@ -164,8 +224,10 @@ def normalize_domain_fields(
             continue
 
         field_def = field_map[path]
-        value = normalize_field_value(field_def, item.get("value"))
         evidence = clean_evidence(item.get("evidence"))
+        value = normalize_field_value(field_def, item.get("value"))
+        value = _normalize_absence_false_to_none(value, evidence)
+
         confidence = safe_float(item.get("confidence"))
         source = item.get("source") or "project"
 
@@ -221,13 +283,51 @@ def upsert_field(
 
 
 def _rank_item(item: Dict[str, Any]) -> tuple:
+    path = item.get("path")
+    value = item.get("value")
+    fill_method = item.get("fill_method", "fallback")
+    extractor = item.get("extractor", "")
+    evidence = item.get("evidence", "") or ""
+    confidence = safe_float(item.get("confidence")) or 0.0
+
+    evidence_strength_rank = EVIDENCE_STRENGTH_ORDER.get(item.get("evidence_strength", "weak"), 0)
+    evidence_mode_rank = EVIDENCE_MODE_ORDER.get(item.get("evidence_mode", "inferred"), 0)
+    fill_method_rank = FILL_METHOD_ORDER.get(fill_method, 0)
+
+    # Penalize nulls and absence-style false responses from LLM
+    value_presence_rank = 1 if value is not None else 0
+    absence_false_penalty = 1 if (value is False and _is_absence_style_evidence(evidence)) else 0
+
+    # Critical-path override:
+    # explicit heuristic true should beat LLM false/null for these paths
+    critical_true_boost = 0
+    if (
+        path in CRITICAL_TRUE_HEURISTIC_PATHS
+        and value not in (None, False, "", [])
+        and fill_method == "heuristic"
+    ):
+        critical_true_boost = 5
+
+    # Heuristic explicit/direct strong signals should outrank generic LLM negatives
+    explicit_positive_boost = 0
+    if value not in (None, False, "", []):
+        if evidence_mode_rank >= 2:
+            explicit_positive_boost += 1
+        if evidence_strength_rank >= 2:
+            explicit_positive_boost += 1
+
+    fallback_penalty = 0 if extractor == "fallback_mapper" else 1
+
     return (
-        EVIDENCE_STRENGTH_ORDER.get(item.get("evidence_strength", "weak"), 0),
-        EVIDENCE_MODE_ORDER.get(item.get("evidence_mode", "inferred"), 0),
-        1 if item.get("value") is not None else 0,
-        safe_float(item.get("confidence")) or 0.0,
-        FILL_METHOD_ORDER.get(item.get("fill_method", "fallback"), 0),
-        0 if item.get("extractor") == "fallback_mapper" else 1,
+        critical_true_boost,
+        explicit_positive_boost,
+        value_presence_rank,
+        -absence_false_penalty,
+        evidence_strength_rank,
+        evidence_mode_rank,
+        fill_method_rank,
+        confidence,
+        fallback_penalty,
     )
 
 
@@ -292,8 +392,11 @@ RULES:
    - true only when evidence clearly supports the field
    - false only when the text clearly indicates contradiction/absence
    - null when uncertain
-6. Include short evidence text and confidence between 0 and 1.
-7. Use source="project" unless the field is clearly methodological in nature.
+6. If the document is pre-operational, do NOT assume measured operational evidence exists.
+7. Do NOT output false merely because the evidence was not found in the provided excerpt.
+   If not found or unclear, return null.
+8. Include short evidence text and confidence between 0 and 1.
+9. Use source="project" unless the field is clearly methodological in nature.
 
 DOMAIN INSTRUCTIONS:
 {domain_instructions}
