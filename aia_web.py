@@ -1622,9 +1622,40 @@ methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
 project_name = st.session_state.get("current_project_name")
 current_methodology = st.session_state.get("current_methodology")
 
+structured_requirements = get_requirements()
+available_structured_scopes = get_available_audit_scopes(structured_requirements)
+default_structured_scopes = get_default_audit_scopes(available_structured_scopes)
+
+if "structured_selected_scopes" not in st.session_state:
+    st.session_state["structured_selected_scopes"] = default_structured_scopes
+
 if project_vs_id and methodology_vs_id and project_name and current_methodology:
 
     st.markdown("### Auditorias disponíveis")
+
+    structured_selected_scopes = st.multiselect(
+        "Escopo da auditoria estruturada",
+        options=available_structured_scopes,
+        default=st.session_state.get("structured_selected_scopes", default_structured_scopes),
+        help=(
+            "Core Integrity is the methodological foundation of the audit. "
+            "Eligibility is always enforced internally even if scope selection changes."
+        ),
+        key="structured_scope_selector_v2",
+    )
+
+    structured_selected_modules = resolve_selected_modules_from_scope(
+        requirements=structured_requirements,
+        selected_scopes=structured_selected_scopes,
+    )
+
+    st.session_state["structured_selected_scopes"] = structured_selected_scopes
+    st.session_state["structured_selected_modules"] = structured_selected_modules
+
+    st.caption(
+        "Módulos aplicados na V2: "
+        + (", ".join(structured_selected_modules) if structured_selected_modules else "none")
+    )
 
     c1, c2, c3 = st.columns(3)
 
@@ -1644,7 +1675,7 @@ if project_vs_id and methodology_vs_id and project_name and current_methodology:
             st.session_state["run_structured"] = True
 
 else:
-    st.info("Selecione e ative um projeto e uma metodologia para iniciar a auditoria.")
+    st.info("Selecione e ative um projeto e uma metodologia para iniciar a auditoria.")info("Selecione e ative um projeto e uma metodologia para iniciar a auditoria.")
 
 # =========================================================
 # EXECUÇÃO DA AUDITORIA ESTRUTURADA
@@ -1675,7 +1706,8 @@ if st.session_state.get("run_structured"):
             selected_modules_for_v2 = st.session_state.get("structured_selected_modules") or None
 
             st.caption(f"selected_modules V2: {selected_modules_for_v2}")
-            st.caption(f"total requirements carregados: {len(requirements)}")
+            st.caption(f"n módulos selecionados: {len(selected_modules_for_v2 or [])}")
+            st.caption(f"total requirements carregados: {len(engine.requirements)}")
 
             output = engine.run_structured_engine_audit(
                 selected_modules=selected_modules_for_v2,
