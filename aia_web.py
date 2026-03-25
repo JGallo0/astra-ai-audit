@@ -1536,26 +1536,6 @@ def render_project_manager(user_email: str):
         st.rerun()
 
 # =========================================================
-# DEFAULT SCOPE (CRÍTICO)
-# =========================================================
-
-if not st.session_state.get("structured_selected_modules"):
-
-    requirements = get_requirements()
-
-    default_modules = list({r["module"] for r in requirements})
-
-    st.session_state["structured_selected_modules"] = default_modules
-
-    if st.session_state.get("current_project_name") or st.session_state.get("current_methodology"):
-        st.sidebar.markdown("---")
-        st.sidebar.success(
-            f"Projeto ativo: **{st.session_state.get('current_project_name') or '-'}**"
-        )
-        st.sidebar.info(
-            f"Metodologia ativa: **{METHODOLOGY_REGISTRY.get(st.session_state.get('current_methodology', ''), {}).get('label', '-')}**"
-        )
-# =========================================================
 # AUTH GATE
 # =========================================================
 init_project_session()
@@ -1675,7 +1655,7 @@ if project_vs_id and methodology_vs_id and project_name and current_methodology:
             st.session_state["run_structured"] = True
 
 else:
-    st.info("Selecione e ative um projeto e uma metodologia para iniciar a auditoria.")info("Selecione e ative um projeto e uma metodologia para iniciar a auditoria.")
+    st.info("Selecione e ative um projeto e uma metodologia para iniciar a auditoria.")
 
 # =========================================================
 # EXECUÇÃO DA AUDITORIA ESTRUTURADA
@@ -1743,7 +1723,7 @@ if structured_v2_output:
     selected_modules_for_v2 = st.session_state.get("structured_selected_modules") or None
 
     st.caption(f"selected_modules V2: {selected_modules_for_v2}")
-    st.caption(f"requirements carregados na V2: {len(requirements)}")
+    st.caption(f"requirements carregados na V2: {len(structured_requirements)}")
 
     # =========================
     # SCORE
@@ -1785,11 +1765,6 @@ active_methodology_label = METHODOLOGY_REGISTRY.get(
     {}
 ).get("label", "-")
 
-active_methodology_label = METHODOLOGY_REGISTRY.get(
-    st.session_state.get("current_methodology", ""),
-    {}
-).get("label", "-")
-
 if st.session_state.get("current_project_name"):
     st.info(
         f"Projeto ativo: {st.session_state.get('current_project_name')} | "
@@ -1806,6 +1781,13 @@ with st.sidebar:
         render_project_manager(current_user["email"])
 
     st.markdown("### Configurações")
+
+    if st.session_state.get("current_project_name"):
+        st.markdown("---")
+        st.success(f"Projeto ativo: {st.session_state['current_project_name']}")
+
+    if st.session_state.get("current_methodology"):
+        st.info(f"Metodologia: {st.session_state['current_methodology']}")
 
     language_choice = st.selectbox(
         t(lang, "language_label"),
