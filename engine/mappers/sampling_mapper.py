@@ -32,16 +32,12 @@ Focus on sampling evidence:
 
 Important interpretation rules:
 - Count sampling.sampling_plan_defined when the project explicitly describes regular analysis,
-  analytical procedures, sampling frequency in an annex, per-batch records, archived samples,
+  analytical procedures and sampling frequency in an annex, per-batch records, archived samples,
   or batch-level laboratory monitoring.
 - Count sampling.batch_definition_days when the text explicitly states a 24-hour production window,
-  or when continuous 24 h/day operation is clearly used as the practical batch window in the project context.
-- Do not guess sampling.method A/B unless the project explicitly names a method.
-
-Evidence grading:
-- strong: "per batch", "batch-level", "sampling plan", "sampling frequency", "archived samples"
-- moderate: recurring lab analysis and annexed analytical procedures
-- weak: generic mention of quality analysis only
+  or when continuous 24 h/day operation is clearly used as the practical batch window.
+- Do not guess sampling.method A/B unless explicitly named.
+- If unclear, return null, not false.
 """
 
 
@@ -58,21 +54,21 @@ def apply_local_heuristics(
     current = field_map.get("sampling.batch_definition_days", {}).get("value")
     if current is None:
         hour_match = re.search(
-            r"(\d+(?:\.\d+)?)\s*[- ]?\s*hour production window",
+            r"(within\s+a\s+maximum\s+)?(\d+(?:\.\d+)?)\s*[- ]?\s*hour production window",
             text,
-            re.IGNORECASE,
+            re.IGNORECASE | re.DOTALL,
         )
         if hour_match:
-            hours = float(hour_match.group(1))
+            hours = float(hour_match.group(2))
             days = max(1, int(round(hours / 24.0)))
             upsert_field(
                 field_map,
                 path="sampling.batch_definition_days",
                 value=days,
-                evidence=f"Heuristic match: explicit {hour_match.group(1)}-hour production window found.",
+                evidence=f"Heuristic match: explicit {hour_match.group(2)}-hour production window found.",
                 extractor="sampling_mapper",
                 fill_method="heuristic",
-                confidence=0.93,
+                confidence=0.95,
                 evidence_strength="strong",
                 evidence_mode="direct",
             )
@@ -84,7 +80,7 @@ def apply_local_heuristics(
                 evidence="Heuristic match: project describes continuous 24 h/day operation, used conservatively as a 1-day batch window.",
                 extractor="sampling_mapper",
                 fill_method="heuristic",
-                confidence=0.72,
+                confidence=0.74,
                 evidence_strength="moderate",
                 evidence_mode="inferred",
             )
@@ -97,20 +93,20 @@ def apply_local_heuristics(
         strong_patterns = [
             r"sampling plan",
             r"sampling frequency",
+            r"analytical procedures and sampling frequency are included",
+            r"at least once per production batch",
             r"per production batch",
             r"batch-level",
-            r"per batch",
-            r"samples are archived",
             r"biochar samples are archived",
-            r"analytical procedures and sampling frequency are included",
+            r"operational and laboratory data are collected per batch",
         ]
         moderate_patterns = [
             r"regularly analyzed",
             r"laboratory analysis",
             r"sample monitoring",
             r"records are archived",
-            r"per batch",
-            r"operational and laboratory data are collected per batch",
+            r"analytical procedures",
+            r"ongoing monitoring",
         ]
 
         if any(re.search(p, text, re.IGNORECASE | re.DOTALL) for p in strong_patterns):
@@ -118,10 +114,10 @@ def apply_local_heuristics(
                 field_map,
                 path="sampling.sampling_plan_defined",
                 value=True,
-                evidence="Heuristic match: explicit sampling-plan / frequency / batch-level wording found.",
+                evidence="Heuristic match: explicit sampling-plan / frequency / per-batch wording found.",
                 extractor="sampling_mapper",
                 fill_method="heuristic",
-                confidence=0.91,
+                confidence=0.94,
                 evidence_strength="strong",
                 evidence_mode="direct",
             )
@@ -130,10 +126,10 @@ def apply_local_heuristics(
                 field_map,
                 path="sampling.sampling_plan_defined",
                 value=True,
-                evidence="Heuristic match: recurring laboratory analysis plus batch/archiving language implies a defined sampling plan.",
+                evidence="Heuristic match: recurring laboratory analysis and archiving language imply a defined sampling plan.",
                 extractor="sampling_mapper",
                 fill_method="heuristic",
-                confidence=0.78,
+                confidence=0.79,
                 evidence_strength="moderate",
                 evidence_mode="inferred",
             )
@@ -151,7 +147,7 @@ def apply_local_heuristics(
                 evidence="Heuristic match: explicit reference to Method A.",
                 extractor="sampling_mapper",
                 fill_method="heuristic",
-                confidence=0.88,
+                confidence=0.89,
                 evidence_strength="strong",
                 evidence_mode="direct",
             )
@@ -163,7 +159,7 @@ def apply_local_heuristics(
                 evidence="Heuristic match: explicit reference to Method B.",
                 extractor="sampling_mapper",
                 fill_method="heuristic",
-                confidence=0.88,
+                confidence=0.89,
                 evidence_strength="strong",
                 evidence_mode="direct",
             )
