@@ -686,18 +686,18 @@ def feedstock_moisture_management(data):
         failed_fields = []
         notes = []
 
-        moisture_control = feedstock.get("moisture_control_plan")
+        moisture_plan = feedstock.get("moisture_control_plan")
         moisture_measurement = feedstock.get("moisture_measurement")
 
-        if not moisture_control:
+        if not moisture_plan:
             missing_fields.append("feedstock.moisture_control_plan")
             notes.append("Feedstock moisture control plan is missing.")
 
-        if not moisture_measurement:
+        if moisture_measurement is not True:
             missing_fields.append("feedstock.moisture_measurement")
-            notes.append("Feedstock moisture measurement method is missing.")
+            notes.append("Feedstock moisture measurement method is missing or not evidenced.")
 
-        if "feedstock.moisture_control_plan" in missing_fields:
+        if len(missing_fields) == 2:
             return build_logic_result(
                 status="non_compliant",
                 missing_fields=missing_fields,
@@ -715,7 +715,7 @@ def feedstock_moisture_management(data):
 
         return build_logic_result(
             status="compliant",
-            notes=["Feedstock moisture control and measurement are documented."],
+            notes=["Feedstock moisture control plan and moisture measurement are documented."],
         )
 
     except Exception as e:
@@ -724,6 +724,102 @@ def feedstock_moisture_management(data):
             notes=[f"feedstock_moisture_management execution error: {str(e)}"],
         )
 
+
+def contaminant_monitoring_plan(data):
+    """
+    R-HE38-0 | Contaminant monitoring plan specified
+    """
+    try:
+        characterization = data.get("biochar", {}).get("characterization", {})
+        safeguards = data.get("safeguards", {})
+
+        missing_fields = []
+        failed_fields = []
+        notes = []
+
+        contaminants = characterization.get("contaminant_testing")
+        frequency = characterization.get("contaminant_testing_frequency")
+
+        # backward-compatible support in case future mapper/schema moves this to safeguards
+        safeguards_plan = safeguards.get("contaminant_monitoring_plan")
+        safeguards_frequency = safeguards.get("testing_frequency")
+
+        if contaminants is not True and safeguards_plan is not True:
+            missing_fields.append("biochar.characterization.contaminant_testing")
+            notes.append("Contaminant testing or contaminant monitoring plan is not documented.")
+            return build_logic_result(
+                status="non_compliant",
+                missing_fields=missing_fields,
+                failed_fields=failed_fields,
+                notes=notes,
+            )
+
+        if not frequency and not safeguards_frequency:
+            missing_fields.append("biochar.characterization.contaminant_testing_frequency")
+            notes.append("Contaminant testing frequency is missing.")
+            return build_logic_result(
+                status="partial",
+                missing_fields=missing_fields,
+                failed_fields=failed_fields,
+                notes=notes,
+            )
+
+        return build_logic_result(
+            status="compliant",
+            notes=["Contaminant testing and monitoring frequency are documented."],
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"contaminant_monitoring_plan execution error: {str(e)}"],
+        )
+
+
+def product_standard_compliance(data):
+    """
+    R-9KKF-0 | Compliance with relevant product standards evidenced
+    """
+    try:
+        product = data.get("product", {})
+
+        missing_fields = []
+        failed_fields = []
+        notes = []
+
+        standard = product.get("standard_compliance")
+        certification = product.get("certification_scheme")
+
+        if standard is not True:
+            missing_fields.append("product.standard_compliance")
+            notes.append("Compliance with relevant product standards is not evidenced.")
+            return build_logic_result(
+                status="non_compliant",
+                missing_fields=missing_fields,
+                failed_fields=failed_fields,
+                notes=notes,
+            )
+
+        if not certification:
+            missing_fields.append("product.certification_scheme")
+            notes.append("Certification scheme or reference standard is missing.")
+            return build_logic_result(
+                status="partial",
+                missing_fields=missing_fields,
+                failed_fields=failed_fields,
+                notes=notes,
+            )
+
+        return build_logic_result(
+            status="compliant",
+            notes=["Product standard compliance and certification scheme are documented."],
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"product_standard_compliance execution error: {str(e)}"],
+        )
 
 def fuel_use_reversal_risk(data):
     """
@@ -1459,6 +1555,101 @@ def contaminant_monitoring_plan(data):
             status="error",
             notes=[f"contaminant_monitoring_plan execution error: {str(e)}"],
         )
+
+def pyrolysis_gas_end_use_accounting(data):
+    """
+    R-E8H6-0 | Pyrolysis gas end-use accounting approach selected
+    """
+    try:
+        emissions = data.get("emissions", {})
+        production = data.get("production", {})
+
+        missing_fields = []
+        failed_fields = []
+        notes = []
+
+        approach = emissions.get("pyrolysis_gas_end_use_approach")
+        control_system = emissions.get("emissions_control_system")
+
+        # backward-compatible support if this evidence is described operationally in production
+        if not control_system:
+            control_system = production.get("gas_burner_present") or production.get("combustion_gas_control")
+
+        if not approach:
+            missing_fields.append("emissions.pyrolysis_gas_end_use_approach")
+            notes.append("Pyrolysis gas end-use accounting approach is missing.")
+
+        if not control_system:
+            missing_fields.append("emissions.emissions_control_system")
+            notes.append("Emissions control system for pyrolysis gas end-use is missing.")
+
+        if len(missing_fields) == 2:
+            return build_logic_result(
+                status="non_compliant",
+                missing_fields=missing_fields,
+                failed_fields=failed_fields,
+                notes=notes,
+            )
+
+        if missing_fields:
+            return build_logic_result(
+                status="partial",
+                missing_fields=missing_fields,
+                failed_fields=failed_fields,
+                notes=notes,
+            )
+
+        return build_logic_result(
+            status="compliant",
+            notes=["Pyrolysis gas end-use accounting approach and emissions control system are documented."],
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"pyrolysis_gas_end_use_accounting execution error: {str(e)}"],
+        )
+
+
+def biochar_incorporation_documentation(data):
+    """
+    Logic for biochar incorporation / built-environment incorporation documentation
+    """
+    try:
+        storage = data.get("storage", {})
+        soil = storage.get("soil", {})
+        built = storage.get("built_environment", {})
+
+        missing_fields = []
+        failed_fields = []
+        notes = []
+
+        soil_evidence = soil.get("direct_application_evidence_pathway") or soil.get("deployment_methods")
+        built_evidence = (
+            built.get("incorporation_documentation")
+            if isinstance(built, dict) else None
+        ) or storage.get("built_environment_incorporation_evidence")
+
+        if not soil_evidence and not built_evidence:
+            missing_fields.append("storage.built_environment_incorporation_evidence")
+            notes.append("No documentation of biochar incorporation pathway was found.")
+            return build_logic_result(
+                status="non_compliant",
+                missing_fields=missing_fields,
+                failed_fields=failed_fields,
+                notes=notes,
+            )
+
+        return build_logic_result(
+            status="compliant",
+            notes=["Biochar incorporation pathway documentation is present."],
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"biochar_incorporation_documentation execution error: {str(e)}"],
+        )
         
 # =========================
 # LOGIC REGISTRY
@@ -1486,6 +1677,7 @@ LOGIC_MAP = {
 
     "reactor_maintenance_plan": reactor_maintenance_plan,
     "stack_emissions_monitoring_method": stack_emissions_monitoring_method,
+    "pyrolysis_gas_end_use_accounting": pyrolysis_gas_end_use_accounting,
     "biochar_required_measurements": biochar_required_measurements,
     "deployment_method_selected": deployment_method_selected,
     "direct_soil_application_evidence": direct_soil_application_evidence,
@@ -1501,4 +1693,5 @@ LOGIC_MAP = {
     "biochar_characterization_approach": biochar_characterization_approach,
     "product_standard_compliance": product_standard_compliance,
     "contaminant_monitoring_plan": contaminant_monitoring_plan,
+    "biochar_incorporation_documentation": biochar_incorporation_documentation,
 }
