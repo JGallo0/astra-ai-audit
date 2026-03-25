@@ -32,45 +32,20 @@ Focus on general eligibility and applicability signals.
 
 Important interpretation rules:
 - Count net-negative as supported when the project explicitly states that removals exceed emissions,
-  or when the LCA / GHG statement clearly shows a negative carbon footprint or positive net removals.
+  when the climate impact is described as net negative, or when an LCA / GHG statement clearly shows
+  a negative carbon footprint.
 - Count methodology.standard as supported when the project explicitly names the Isometric standard.
-- Count methodology.pathway as supported when the project explicitly identifies biochar as the project pathway.
-- Count methodology.production_subpathway only when the project clearly indicates batch / continuous /
-  distributed / centralized production mode. Do not guess from generic pyrolysis wording alone.
+- Count methodology.pathway as supported when the project explicitly identifies biochar as the pathway.
+- Count methodology.production_subpathway only when the project clearly indicates batch / continuous
+  production mode. Do not guess from generic pyrolysis wording alone.
 
 Evidence grading:
-- strong: explicit quantitative or formal methodological statement (e.g. "net negative", "-2,720.97 kgCO2eq.",
-  "Isometric", "biochar pathway")
-- moderate: clear narrative statement without quantified support
+- strong: explicit quantitative or formal statement
+- moderate: clear narrative statement without full quantified support
 - weak: indirect inference only
 
-Be conservative:
-- The project is pre-operational, so do not invent measured operational evidence.
-- Prefer null over false when eligibility wording is incomplete or only implied.
+The project may be pre-operational. Do not require measured operational data for these fields.
 """
-
-
-def _set_if_missing(
-    field_map: Dict[str, Dict[str, Any]],
-    path: str,
-    value: Any,
-    evidence: str,
-    confidence: float,
-    evidence_strength: str,
-    evidence_mode: str,
-) -> None:
-    if field_map.get(path, {}).get("value") is None:
-        upsert_field(
-            field_map,
-            path=path,
-            value=value,
-            evidence=evidence,
-            extractor="eligibility_mapper",
-            fill_method="heuristic",
-            confidence=confidence,
-            evidence_strength=evidence_strength,
-            evidence_mode=evidence_mode,
-        )
 
 
 def apply_local_heuristics(
@@ -91,11 +66,13 @@ def apply_local_heuristics(
     if current is not True:
         strong_patterns = [
             r"net[- ]negative",
-            r"project removals?.{0,40}>\s*emissions?",
-            r"removals?.{0,40}exceed.{0,25}emissions?",
+            r"project removals?.{0,60}>\s*emissions?",
+            r"removals?.{0,60}exceed.{0,40}emissions?",
             r"positive net removals?",
             r"negative carbon footprint",
-            r"-\s*2[,\.]?[0-9]{3}",  # catches values like -2720.97 / -2,720.97
+            r"-\s*2[,\.]?[0-9]{3}",
+            r"3\.72\s*t\/t",
+            r"3[,\.]72\s*t\/t",
             r"kgco2eq",
             r"tco2e\/t",
         ]
@@ -107,7 +84,7 @@ def apply_local_heuristics(
                 evidence="Heuristic match: explicit net-negative / negative-carbon-footprint evidence found in project or LCA text.",
                 extractor="eligibility_mapper",
                 fill_method="heuristic",
-                confidence=0.93,
+                confidence=0.94,
                 evidence_strength="strong",
                 evidence_mode="direct",
             )
@@ -115,16 +92,19 @@ def apply_local_heuristics(
     # ------------------------------------------------------------------
     # methodology.standard
     # ------------------------------------------------------------------
-    _set_if_missing(
-        field_map=field_map,
-        path="methodology.standard",
-        value="Isometric" if "isometric" in combined_text else None,
-        evidence="Heuristic match: project explicitly references the Isometric standard."
-        if "isometric" in combined_text else "",
-        confidence=0.95,
-        evidence_strength="strong",
-        evidence_mode="direct",
-    )
+    if field_map.get("methodology.standard", {}).get("value") is None:
+        if "isometric" in combined_text:
+            upsert_field(
+                field_map,
+                path="methodology.standard",
+                value="Isometric",
+                evidence="Heuristic match: project explicitly references the Isometric standard.",
+                extractor="eligibility_mapper",
+                fill_method="heuristic",
+                confidence=0.96,
+                evidence_strength="strong",
+                evidence_mode="direct",
+            )
 
     # ------------------------------------------------------------------
     # methodology.pathway
@@ -138,7 +118,7 @@ def apply_local_heuristics(
                 evidence="Heuristic match: project explicitly identifies the pathway as biochar.",
                 extractor="eligibility_mapper",
                 fill_method="heuristic",
-                confidence=0.95,
+                confidence=0.96,
                 evidence_strength="strong",
                 evidence_mode="direct",
             )
@@ -147,7 +127,6 @@ def apply_local_heuristics(
     # methodology.production_subpathway
     # ------------------------------------------------------------------
     if field_map.get("methodology.production_subpathway", {}).get("value") is None:
-        # conservative: only fill when clear wording exists
         if re.search(r"\bcontinuous pyrolysis\b|\bcontinuous reactor\b|\bcontinuous operation\b", combined_text):
             upsert_field(
                 field_map,
@@ -156,7 +135,7 @@ def apply_local_heuristics(
                 evidence="Heuristic match: project text explicitly describes continuous pyrolysis / continuous operation.",
                 extractor="eligibility_mapper",
                 fill_method="heuristic",
-                confidence=0.82,
+                confidence=0.83,
                 evidence_strength="moderate",
                 evidence_mode="direct",
             )
@@ -168,7 +147,7 @@ def apply_local_heuristics(
                 evidence="Heuristic match: project text explicitly describes batch-mode kiln operation.",
                 extractor="eligibility_mapper",
                 fill_method="heuristic",
-                confidence=0.80,
+                confidence=0.82,
                 evidence_strength="moderate",
                 evidence_mode="direct",
             )
