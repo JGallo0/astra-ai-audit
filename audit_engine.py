@@ -509,8 +509,9 @@ class AuditEngine:
             "methodology_hits": methodology_hits,
             "project_context": project_context,
             "methodology_context": methodology_context,
+            "ranked_project_sources": ranked_project,
+            "ranked_methodology_sources": ranked_methodology,
         }
-
     def run_structured_engine_audit(
         self,
         selected_modules: Optional[List[str]] = None,
