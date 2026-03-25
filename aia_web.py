@@ -2446,7 +2446,7 @@ def render_full_audit_mode():
 
     st.markdown(f"### {t(lang, 'full_audit_mode')}")
 
-       requirements = get_requirements()
+    requirements = get_requirements()
 
     all_modules = sorted(list({r["module"] for r in requirements})) if requirements else []
     available_scopes = get_available_audit_scopes(requirements)
