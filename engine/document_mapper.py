@@ -1,6 +1,4 @@
-# engine/document_mapper.py
-
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from schemas.project_schema import get_empty_project_data
 
@@ -41,11 +39,15 @@ def extract_project_data_from_contexts(
     ai_client,
     project_context: str,
     methodology_context: str,
+    project_hits: Optional[List[Dict[str, Any]]] = None,
+    methodology_hits: Optional[List[Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     pipeline_output = run_mapper_pipeline(
         ai_client=ai_client,
         project_context=project_context,
         methodology_context=methodology_context,
+        project_hits=project_hits or [],
+        methodology_hits=methodology_hits or [],
     )
 
     normalized_fields = pipeline_output.get("normalized_fields", []) or []
