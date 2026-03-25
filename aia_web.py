@@ -2491,7 +2491,6 @@ def render_full_audit_mode():
             r for r in requirements
             if r["module"] in selected_modules
         ]
-        ]
         st.caption(
             "Modules covered in this run: "
             + (", ".join(selected_modules) if selected_modules else "none")
