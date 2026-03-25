@@ -539,6 +539,8 @@ class AuditEngine:
             ai_client=self._call_llm_json_extraction,
             project_context=contexts["project_context"],
             methodology_context=contexts["methodology_context"],
+            project_hits=contexts["project_hits"],
+            methodology_hits=contexts["methodology_hits"],
         )
 
         project_data = mapped["project_data"]
