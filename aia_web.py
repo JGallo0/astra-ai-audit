@@ -69,12 +69,7 @@ from app_pages.validation_utils import (
     risk_badge,
 )
 from schemas.project_schema import get_demo_project_data
-from versioning.methodology_manager import (
-    get_requirements,
-    get_available_audit_scopes,
-    get_default_audit_scopes,
-    resolve_selected_modules_from_scope,
-)
+from versioning.methodology_manager import get_requirements
 from engine.requirement_logic import run_engine
 
 
