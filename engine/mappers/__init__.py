@@ -13,6 +13,7 @@ from engine.mappers.quantification_mapper import run_quantification_mapper
 from engine.mappers.traceability_mapper import run_traceability_mapper
 from engine.mappers.fallback_mapper import run_fallback_mapper
 from engine.mappers.emissions_mapper import run_emissions_mapper
+from engine.mappers.management_mapper import run_management_mapper
 
 
 REQUIREMENT_HINTS = {
@@ -366,6 +367,44 @@ REQUIREMENT_HINTS = {
         "controlled combustion systems for process gases",
         "thermal control",
     ],
+
+    # -------------------------
+    # EMISSIONS
+    # -------------------------
+    
+    "management.adaptive_management_plan": [
+        "adaptive management",
+        "adaptive management framework",
+        "review operational assumptions",
+        "revise monitoring approach",
+    ],
+    "management.information_sharing_plan": [
+        "information sharing",
+        "communication",
+        "report findings",
+        "share results",
+        "internal review",
+    ],
+    "management.emergency_response_plan": [
+        "emergency response",
+        "incident response",
+        "contingency",
+        "response procedures",
+    ],
+    "management.pause_or_stop_conditions": [
+        "pause",
+        "stop operations",
+        "suspend operations",
+        "conditions for resumption",
+        "operations may be paused",
+    ],
+    "management.monitoring_triggers": [
+        "trigger",
+        "threshold",
+        "exceedance",
+        "review points",
+        "conditions for resumption",
+    ],
 }
 
 
@@ -431,6 +470,13 @@ DOMAIN_REQUIREMENTS = {
         "emissions.testing_frequency",
         "emissions.pyrolysis_gas_end_use_approach",
         "emissions.emissions_control_system",
+    ],
+    "management": [
+        "management.adaptive_management_plan",
+        "management.information_sharing_plan",
+        "management.emergency_response_plan",
+        "management.pause_or_stop_conditions",
+        "management.monitoring_triggers",
     ],
 }
 
@@ -576,6 +622,7 @@ def _build_domain_contexts(
         "traceability": _build_domain_context_from_hits(project_hits, methodology_context, "traceability"),
         "global": project_context or "",
         "emissions": _build_domain_context_from_hits(project_hits, methodology_context, "emissions"),
+        "management": _build_domain_context_from_hits(project_hits, methodology_context, "management"),
     }
 
 
@@ -609,6 +656,7 @@ def run_mapper_pipeline(
         ("quantification_mapper", run_quantification_mapper, "quantification"),
         ("traceability_mapper", run_traceability_mapper, "traceability"),
         ("emissions_mapper", run_emissions_mapper, "emissions"),
+        ("management_mapper", run_management_mapper, "management"),
     ]
 
     for name, fn, domain in mapper_runs:
