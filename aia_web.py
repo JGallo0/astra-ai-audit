@@ -1535,6 +1535,18 @@ def render_project_manager(user_email: str):
         )
         st.rerun()
 
+# =========================================================
+# DEFAULT SCOPE (CRÍTICO)
+# =========================================================
+
+if not st.session_state.get("structured_selected_modules"):
+
+    requirements = get_requirements()
+
+    default_modules = list({r["module"] for r in requirements})
+
+    st.session_state["structured_selected_modules"] = default_modules
+
     if st.session_state.get("current_project_name") or st.session_state.get("current_methodology"):
         st.sidebar.markdown("---")
         st.sidebar.success(
