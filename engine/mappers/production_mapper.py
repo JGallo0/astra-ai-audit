@@ -34,17 +34,14 @@ Focus on production system evidence:
 Important interpretation rules:
 - Count production.pyrolysis_technology when the project explicitly names the technology
   (e.g. BST-30, rectangular kilns, continuous reactor, pyrolysis reactor).
-- Count reactor/engineering diagram fields not only for explicit PFD/P&ID wording, but also when the
-  project clearly references a technical annex, engineering package, layout/map, or detailed engineered system
-  description with sensors, dimensions, and controlled process design.
-- Count maintenance_plan / maintenance_schedule when the project describes structured operational routines,
-  annual testing, preventive monitoring, inspection cadence, or formal process-control procedures.
-- The project is pre-operational, so do not infer measured performance from planned equipment.
-
-Evidence grading:
-- strong: explicit PFD/P&ID, annex, drawing, engineering package, maintenance schedule wording
-- moderate: clear technical system description with sensors, dimensions, monitoring, annual testing
-- weak: vague technical description only
+- Count reactor/engineering diagram fields for explicit PFD/P&ID wording, engineering package,
+  layout drawings, technical annex references, or a clearly engineered system description with
+  dimensions, sensors, and process-control points.
+- Count maintenance fields when the project describes structured maintenance routines, recurring inspections,
+  calibration schedules, annual testing, or clearly organized operational maintenance procedures.
+- Count sensor inventory / sensor locations when the project explicitly lists sensor types, locations,
+  or monitoring points (e.g. temperature sensors, pressure monitoring points, gas-flow measurement points).
+- The project may be pre-operational. Do not require real measured performance to fill engineering fields.
 """
 
 
@@ -60,7 +57,7 @@ def apply_local_heuristics(
     # ------------------------------------------------------------------
     current = field_map.get("production.pyrolysis_technology", {}).get("value")
     if current in (None, "", []):
-        if re.search(r"\bbst-30\b", text) and re.search(r"\b(pyrolysis reactor|continuous pyrolysis|reactor)\b", text):
+        if re.search(r"\bbst-30\b", text) and re.search(r"\b(pyrolysis reactor|continuous pyrolysis|continuous reactor|reactor)\b", text):
             upsert_field(
                 field_map,
                 path="production.pyrolysis_technology",
@@ -68,7 +65,7 @@ def apply_local_heuristics(
                 evidence="Heuristic match: explicit BST-30 pyrolysis reactor wording found.",
                 extractor="production_mapper",
                 fill_method="heuristic",
-                confidence=0.93,
+                confidence=0.94,
                 evidence_strength="strong",
                 evidence_mode="direct",
             )
@@ -80,7 +77,7 @@ def apply_local_heuristics(
                 evidence="Heuristic match: project explicitly describes rectangular kilns with controlled thermal operation.",
                 extractor="production_mapper",
                 fill_method="heuristic",
-                confidence=0.88,
+                confidence=0.89,
                 evidence_strength="moderate",
                 evidence_mode="direct",
             )
@@ -90,25 +87,27 @@ def apply_local_heuristics(
     # ------------------------------------------------------------------
     current = field_map.get("production.reactor_design_diagram", {}).get("value")
     if current is not True:
-        # strong case: explicit diagram language
         strong_patterns = [
             r"\bpfd\b",
             r"\bp&id\b",
-            r"process flow diagram",
+            r"process flow diagrams?",
+            r"piping and instrumentation diagrams?",
             r"engineering design package",
             r"reactor drawing",
-            r"layout drawing",
+            r"layout drawings?",
             r"technical annex",
-            r"reference map",
         ]
         moderate_patterns = [
+            r"temperature sensors?",
+            r"pressure monitoring points?",
+            r"gas flow measurement",
             r"thermocouples",
             r"pressure sensors",
             r"real-time digital monitoring",
             r"controlled incomplete combustion",
-            r"\b6×3×3\b",
-            r"\b6x3x3\b",
             r"batch capacity",
+            r"\b6x3x3\b",
+            r"\b6×3×3\b",
         ]
 
         if any(re.search(p, text, re.IGNORECASE | re.DOTALL) for p in strong_patterns):
@@ -116,22 +115,22 @@ def apply_local_heuristics(
                 field_map,
                 path="production.reactor_design_diagram",
                 value=True,
-                evidence="Heuristic match: explicit diagram / annex / engineering-reference wording found.",
+                evidence="Heuristic match: explicit PFD/P&ID/layout/engineering-package wording found.",
                 extractor="production_mapper",
                 fill_method="heuristic",
-                confidence=0.90,
+                confidence=0.93,
                 evidence_strength="strong",
                 evidence_mode="referenced_attachment",
             )
-        elif sum(bool(re.search(p, text, re.IGNORECASE | re.DOTALL)) for p in moderate_patterns) >= 2:
+        elif sum(bool(re.search(p, text, re.IGNORECASE | re.DOTALL)) for p in moderate_patterns) >= 3:
             upsert_field(
                 field_map,
                 path="production.reactor_design_diagram",
                 value=True,
-                evidence="Heuristic match: detailed engineered-system description found (dimensions, sensors, controlled operation).",
+                evidence="Heuristic match: detailed engineered-system description found (dimensions, sensors, monitoring points, controlled operation).",
                 extractor="production_mapper",
                 fill_method="heuristic",
-                confidence=0.76,
+                confidence=0.80,
                 evidence_strength="moderate",
                 evidence_mode="inferred",
             )
@@ -142,7 +141,7 @@ def apply_local_heuristics(
     current = field_map.get("production.engineering_design_diagram", {}).get("value")
     if current is not True:
         if re.search(
-            r"\b(pfd|p&id|engineering design package|process flow diagram|layout drawing|technical annex)\b",
+            r"\b(pfd|p&id|process flow diagrams?|piping and instrumentation diagrams?|engineering design package|layout drawings?|technical annex)\b",
             text,
             re.IGNORECASE | re.DOTALL,
         ):
@@ -153,7 +152,7 @@ def apply_local_heuristics(
                 evidence="Heuristic match: explicit engineering-diagram / annex wording found.",
                 extractor="production_mapper",
                 fill_method="heuristic",
-                confidence=0.88,
+                confidence=0.92,
                 evidence_strength="strong",
                 evidence_mode="referenced_attachment",
             )
@@ -165,18 +164,21 @@ def apply_local_heuristics(
     if current is not True:
         strong_patterns = [
             r"maintenance plan",
-            r"maintenance schedule",
+            r"the maintenance plan is structured around",
+            r"maintenance schedule summary",
             r"preventive maintenance",
             r"routine maintenance",
         ]
         moderate_patterns = [
             r"annual emission testing",
+            r"calibration",
+            r"semi-annual calibration",
             r"real-time digital monitoring",
-            r"thermocouples",
-            r"pressure sensors",
             r"process monitoring",
+            r"inspection",
+            r"daily inspection",
+            r"weekly inspection",
             r"mrv",
-            r"operational procedures",
         ]
 
         if any(re.search(p, text, re.IGNORECASE | re.DOTALL) for p in strong_patterns):
@@ -187,7 +189,7 @@ def apply_local_heuristics(
                 evidence="Heuristic match: explicit maintenance-plan wording found.",
                 extractor="production_mapper",
                 fill_method="heuristic",
-                confidence=0.90,
+                confidence=0.94,
                 evidence_strength="strong",
                 evidence_mode="direct",
             )
@@ -196,10 +198,10 @@ def apply_local_heuristics(
                 field_map,
                 path="production.maintenance_plan",
                 value=True,
-                evidence="Heuristic match: structured operational monitoring and annual testing strongly imply a maintenance plan.",
+                evidence="Heuristic match: structured inspections, calibration, testing, and process-monitoring language imply a maintenance plan.",
                 extractor="production_mapper",
                 fill_method="heuristic",
-                confidence=0.75,
+                confidence=0.81,
                 evidence_strength="moderate",
                 evidence_mode="inferred",
             )
@@ -209,21 +211,78 @@ def apply_local_heuristics(
     # ------------------------------------------------------------------
     current = field_map.get("production.maintenance_schedule", {}).get("value")
     if current is not True:
-        if re.search(
-            r"(maintenance schedule)|(annual emission testing)|(real-time digital monitoring)|(process monitoring)",
-            text,
-            re.IGNORECASE | re.DOTALL,
-        ):
+        schedule_patterns = [
+            r"maintenance schedule",
+            r"maintenance schedule summary",
+            r"daily inspection",
+            r"weekly inspection",
+            r"monthly inspection",
+            r"annual servicing",
+            r"semi-annual calibration",
+            r"annual emission testing",
+        ]
+        if any(re.search(p, text, re.IGNORECASE | re.DOTALL) for p in schedule_patterns):
             upsert_field(
                 field_map,
                 path="production.maintenance_schedule",
                 value=True,
-                evidence="Heuristic match: project describes recurring operational monitoring/testing consistent with a maintenance schedule.",
+                evidence="Heuristic match: explicit recurring inspection/calibration/testing cadence found.",
                 extractor="production_mapper",
                 fill_method="heuristic",
-                confidence=0.73,
+                confidence=0.91,
+                evidence_strength="strong",
+                evidence_mode="direct",
+            )
+
+    # ------------------------------------------------------------------
+    # production.sensor_inventory
+    # ------------------------------------------------------------------
+    current = field_map.get("production.sensor_inventory", {}).get("value")
+    if current is not True:
+        inventory_patterns = [
+            r"temperature sensors?",
+            r"pressure monitoring points?",
+            r"gas flow measurement",
+            r"thermocouples",
+            r"pressure sensors",
+            r"real-time digital monitoring",
+        ]
+        if sum(bool(re.search(p, text, re.IGNORECASE | re.DOTALL)) for p in inventory_patterns) >= 2:
+            upsert_field(
+                field_map,
+                path="production.sensor_inventory",
+                value=True,
+                evidence="Heuristic match: explicit sensor/instrumentation inventory elements found.",
+                extractor="production_mapper",
+                fill_method="heuristic",
+                confidence=0.90,
+                evidence_strength="strong",
+                evidence_mode="direct",
+            )
+
+    # ------------------------------------------------------------------
+    # production.sensor_locations
+    # ------------------------------------------------------------------
+    current = field_map.get("production.sensor_locations", {}).get("value")
+    if current is not True:
+        location_patterns = [
+            r"pressure monitoring points?",
+            r"gas flow measurement",
+            r"sensor locations?",
+            r"points? of measurement",
+            r"located at",
+        ]
+        if any(re.search(p, text, re.IGNORECASE | re.DOTALL) for p in location_patterns):
+            upsert_field(
+                field_map,
+                path="production.sensor_locations",
+                value=True,
+                evidence="Heuristic match: explicit monitoring points / measurement-location wording found.",
+                extractor="production_mapper",
+                fill_method="heuristic",
+                confidence=0.84,
                 evidence_strength="moderate",
-                evidence_mode="inferred",
+                evidence_mode="direct",
             )
 
     return merge_normalized_fields(list(field_map.values()))
