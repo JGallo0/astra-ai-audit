@@ -1660,8 +1660,13 @@ if st.session_state.get("run_structured"):
                 requirements=requirements,
             )
 
+            selected_modules_for_v2 = st.session_state.get("structured_selected_modules") or None
+
+            st.caption(f"selected_modules V2: {selected_modules_for_v2}")
+            st.caption(f"total requirements carregados: {len(requirements)}")
+
             output = engine.run_structured_engine_audit(
-                selected_modules=st.session_state.get("structured_selected_modules") or None,
+                selected_modules=selected_modules_for_v2,
                 audit_mode=audit_mode,
             )
 
@@ -1690,6 +1695,11 @@ if structured_v2_output:
     normalized_fields = structured_v2_output.get("normalized_fields", [])
     score_data = structured_v2_output.get("score_data", {})
     score_label = structured_v2_output.get("score_label", "")
+
+    selected_modules_for_v2 = st.session_state.get("structured_selected_modules") or None
+
+    st.caption(f"selected_modules V2: {selected_modules_for_v2}")
+    st.caption(f"requirements carregados na V2: {len(requirements)}")
 
     # =========================
     # SCORE
@@ -2436,9 +2446,7 @@ def render_full_audit_mode():
 
     st.markdown(f"### {t(lang, 'full_audit_mode')}")
 
-    requirements = get_requirements_for_methodology(
-        st.session_state.get("current_methodology")
-    )
+       requirements = get_requirements()
 
     all_modules = sorted(list({r["module"] for r in requirements})) if requirements else []
     available_scopes = get_available_audit_scopes(requirements)
