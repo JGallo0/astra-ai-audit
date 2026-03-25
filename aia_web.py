@@ -1587,12 +1587,133 @@ def render_header(lang: str):
 inject_custom_css()
 lang = st.session_state.get("language", "pt")
 st.session_state["language"] = lang
+
 # =========================================================
 # HEADER
 # =========================================================
 
 render_header(lang)
 
+# =========================================================
+# AUDIT SCOPE CONFIG
+# =========================================================
+
+AUDIT_SCOPE_CONFIG = {
+    "Core Integrity": {
+        "label": "Core Integrity",
+        "help": "Foundational methodological integrity: eligibility, ownership, additionality, baseline, and system boundary.",
+        "modules": [
+            "Eligibility",
+            "Ownership",
+            "Additionality",
+            "Baseline",
+            "System Boundary",
+        ],
+        "default": True,
+    },
+    "Carbon Accounting": {
+        "label": "Carbon Accounting",
+        "help": "Net removals logic, carbon quantification, leakage, uncertainty, and lifecycle accounting.",
+        "modules": [
+            "Carbon Accounting",
+            "Biochar Carbon Quantification",
+            "Leakage",
+            "Uncertainty",
+            "LCA",
+        ],
+        "default": True,
+    },
+    "MRV & Verification": {
+        "label": "MRV & Verification",
+        "help": "Monitoring, traceability, data integrity, and audit readiness.",
+        "modules": [
+            "MRV",
+            "Traceability",
+        ],
+        "default": True,
+    },
+    "Durability & Storage": {
+        "label": "Durability & Storage",
+        "help": "Durability logic, storage integrity, reversal risk, and biochar quality.",
+        "modules": [
+            "Durability",
+            "Storage/End Use",
+            "Reversal Risk",
+            "Biochar Quality",
+        ],
+        "default": True,
+    },
+    "Operations": {
+        "label": "Operations",
+        "help": "Operational evidence for feedstock sourcing and technology configuration.",
+        "modules": [
+            "Feedstock",
+            "Technology",
+        ],
+        "default": False,
+    },
+    "Safeguards & Compliance": {
+        "label": "Safeguards & Compliance",
+        "help": "Environmental and social safeguards, permits, and legal compliance.",
+        "modules": [
+            "Safeguards",
+            "Regulatory Compliance",
+        ],
+        "default": False,
+    },
+}
+
+
+def resolve_selected_modules_from_scope(
+    requirements: List[Dict[str, Any]],
+    selected_scopes: List[str],
+) -> List[str]:
+    available_modules = {r["module"] for r in requirements}
+    resolved_modules: List[str] = []
+
+    for scope in selected_scopes:
+        scope_config = AUDIT_SCOPE_CONFIG.get(scope, {})
+        for module in scope_config.get("modules", []):
+            if module in available_modules and module not in resolved_modules:
+                resolved_modules.append(module)
+
+    # base obrigatória independentemente da escolha explícita do usuário
+    mandatory_modules = ["Eligibility"]
+
+    for mandatory_module in mandatory_modules:
+        if mandatory_module in available_modules and mandatory_module not in resolved_modules:
+            resolved_modules.insert(0, mandatory_module)
+
+    return resolved_modules
+
+def get_available_audit_scopes(requirements: List[Dict[str, Any]]) -> List[str]:
+    available_modules = {r["module"] for r in requirements}
+    available_scopes: List[str] = []
+
+    for scope_name, scope_config in AUDIT_SCOPE_CONFIG.items():
+        scope_modules = scope_config.get("modules", [])
+        if any(module in available_modules for module in scope_modules):
+            available_scopes.append(scope_name)
+
+    return available_scopes
+
+
+def get_default_audit_scopes(available_scopes: List[str]) -> List[str]:
+    return [
+        scope_name
+        for scope_name in available_scopes
+        if AUDIT_SCOPE_CONFIG.get(scope_name, {}).get("default", False)
+    ]
+
+
+def get_scope_help_text(selected_scopes: List[str]) -> str:
+    parts = []
+    for scope in selected_scopes:
+        help_text = AUDIT_SCOPE_CONFIG.get(scope, {}).get("help")
+        if help_text:
+            parts.append(f"**{scope}:** {help_text}")
+    return "\n\n".join(parts)
+    
 # =========================================================
 # AUDITORIAS DISPONÍVEIS
 # =========================================================
@@ -2342,125 +2463,6 @@ def make_progress_callback(progress_container, status_container):
 # AUDIT SCOPE MAPPING
 # =========================================================
 
-# =========================================================
-# AUDIT SCOPE CONFIG
-# =========================================================
-
-AUDIT_SCOPE_CONFIG = {
-    "Core Integrity": {
-        "label": "Core Integrity",
-        "help": "Foundational methodological integrity: eligibility, ownership, additionality, baseline, and system boundary.",
-        "modules": [
-            "Eligibility",
-            "Ownership",
-            "Additionality",
-            "Baseline",
-            "System Boundary",
-        ],
-        "default": True,
-    },
-    "Carbon Accounting": {
-        "label": "Carbon Accounting",
-        "help": "Net removals logic, carbon quantification, leakage, uncertainty, and lifecycle accounting.",
-        "modules": [
-            "Carbon Accounting",
-            "Biochar Carbon Quantification",
-            "Leakage",
-            "Uncertainty",
-            "LCA",
-        ],
-        "default": True,
-    },
-    "MRV & Verification": {
-        "label": "MRV & Verification",
-        "help": "Monitoring, traceability, data integrity, and audit readiness.",
-        "modules": [
-            "MRV",
-            "Traceability",
-        ],
-        "default": True,
-    },
-    "Durability & Storage": {
-        "label": "Durability & Storage",
-        "help": "Durability logic, storage integrity, reversal risk, and biochar quality.",
-        "modules": [
-            "Durability",
-            "Storage/End Use",
-            "Reversal Risk",
-            "Biochar Quality",
-        ],
-        "default": True,
-    },
-    "Operations": {
-        "label": "Operations",
-        "help": "Operational evidence for feedstock sourcing and technology configuration.",
-        "modules": [
-            "Feedstock",
-            "Technology",
-        ],
-        "default": False,
-    },
-    "Safeguards & Compliance": {
-        "label": "Safeguards & Compliance",
-        "help": "Environmental and social safeguards, permits, and legal compliance.",
-        "modules": [
-            "Safeguards",
-            "Regulatory Compliance",
-        ],
-        "default": False,
-    },
-}
-
-
-def resolve_selected_modules_from_scope(
-    requirements: List[Dict[str, Any]],
-    selected_scopes: List[str],
-) -> List[str]:
-    available_modules = {r["module"] for r in requirements}
-    resolved_modules: List[str] = []
-
-    for scope in selected_scopes:
-        scope_config = AUDIT_SCOPE_CONFIG.get(scope, {})
-        for module in scope_config.get("modules", []):
-            if module in available_modules and module not in resolved_modules:
-                resolved_modules.append(module)
-
-    # base obrigatória independentemente da escolha explícita do usuário
-    mandatory_modules = ["Eligibility"]
-
-    for mandatory_module in mandatory_modules:
-        if mandatory_module in available_modules and mandatory_module not in resolved_modules:
-            resolved_modules.insert(0, mandatory_module)
-
-    return resolved_modules
-
-def get_available_audit_scopes(requirements: List[Dict[str, Any]]) -> List[str]:
-    available_modules = {r["module"] for r in requirements}
-    available_scopes: List[str] = []
-
-    for scope_name, scope_config in AUDIT_SCOPE_CONFIG.items():
-        scope_modules = scope_config.get("modules", [])
-        if any(module in available_modules for module in scope_modules):
-            available_scopes.append(scope_name)
-
-    return available_scopes
-
-
-def get_default_audit_scopes(available_scopes: List[str]) -> List[str]:
-    return [
-        scope_name
-        for scope_name in available_scopes
-        if AUDIT_SCOPE_CONFIG.get(scope_name, {}).get("default", False)
-    ]
-
-
-def get_scope_help_text(selected_scopes: List[str]) -> str:
-    parts = []
-    for scope in selected_scopes:
-        help_text = AUDIT_SCOPE_CONFIG.get(scope, {}).get("help")
-        if help_text:
-            parts.append(f"**{scope}:** {help_text}")
-    return "\n\n".join(parts)
     
 def render_full_audit_mode():
     project_vs_id = st.session_state.get("current_project_vector_store_id")
