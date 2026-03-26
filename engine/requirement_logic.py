@@ -128,7 +128,6 @@ def score_boolean_field(
     value,
     weight,
     *,
-    required=True,
     note_if_missing=None,
 ):
     if value is True:
@@ -329,6 +328,9 @@ def run_engine(project_data, requirements):
                 "notes": ["Requirement not applicable to this project configuration."],
                 "logic_key": logic_key,
                 "fields_evaluated": fields_evaluated,
+                "requirement_score": None,
+                "field_scores": [],
+                "requirement_rating": None,
             })
             continue
 
@@ -346,6 +348,9 @@ def run_engine(project_data, requirements):
                 "notes": [f"Logic function '{logic_key}' not found."],
                 "logic_key": logic_key,
                 "fields_evaluated": fields_evaluated,
+                "requirement_score": 0,
+                "field_scores": [],
+                "requirement_rating": "weak",
             })
             continue
 
@@ -363,9 +368,11 @@ def run_engine(project_data, requirements):
                 "notes": [f"Logic execution error: {str(e)}"],
                 "logic_key": logic_key,
                 "fields_evaluated": fields_evaluated,
+                "requirement_score": 0,
+                "field_scores": [],
+                "requirement_rating": "weak",
             })
             continue
-
         if isinstance(logic_output, dict):
             status = logic_output.get("status", "error")
             missing_fields = logic_output.get("missing_fields", [])
