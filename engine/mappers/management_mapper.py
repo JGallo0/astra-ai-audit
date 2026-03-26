@@ -186,10 +186,11 @@ def apply_local_heuristics(
                 evidence_mode="direct",
             )
 
-    # ------------------------------------------------------------
-    # Inferred management.adaptive_management_plan
-    # ------------------------------------------------------------
+    # ============================================================
+    # 🔥 CRITICAL FIX — INFER AFTER ALL COMPONENTS
+    # ============================================================
     current = field_map.get("management.adaptive_management_plan", {}).get("value")
+
     if current in (None, False, "", []):
         info = field_map.get("management.information_sharing_plan", {}).get("value")
         emergency = field_map.get("management.emergency_response_plan", {}).get("value")
@@ -203,21 +204,21 @@ def apply_local_heuristics(
             bool(triggers),
         ])
 
+        # 🔥 REQUIRE AT LEAST 2 STRONG COMPONENTS
         if components_true >= 2:
             upsert_field(
                 field_map,
                 path="management.adaptive_management_plan",
                 value=True,
-                evidence="Inferred: adaptive management system exists because multiple management components (information sharing, emergency response, pause/stop conditions, monitoring triggers) are explicitly documented.",
+                evidence="Inferred: adaptive management system exists because multiple components (pause/stop conditions, monitoring triggers, emergency response, or information sharing) are explicitly documented.",
                 extractor="management_mapper",
-                fill_method="heuristic",
-                confidence=0.93,
+                fill_method="heuristic_inference",
+                confidence=0.95,
                 evidence_strength="strong",
                 evidence_mode="inferred",
             )
 
     return merge_normalized_fields(list(field_map.values()))
-
 def run_management_mapper(
     ai_client,
     project_context: str,
