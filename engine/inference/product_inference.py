@@ -71,24 +71,28 @@ class ProductInference(BaseInferenceRule):
                         overwrite=True,
                     )
 
-                    if not feedstock_cert:
-                        updated_fields = append_inference_field(
-                            updated_fields,
-                            inference_events,
-                            path="feedstock.certification_scheme",
-                            value=raw_value,
-                            evidence=(
-                                "Reclassified from product certification to feedstock certification because the detected schemes are associated with biomass sourcing."
-                            ),
-                            source="project",
-                            confidence=0.91,
-                            evidence_strength="strong",
-                            extractor="product_inference",
-                            inference_rule_id="INF-PRODCT-002",
-                            inputs_used=[
-                                "product.certification_scheme",
-                            ],
-                        )
+                if not feedstock_cert:
+                    updated_fields = append_inference_field(
+                        updated_fields,
+                        inference_events,
+                        path="feedstock.certification_scheme",
+                        value=raw_value,
+                        evidence=(
+                            "Reclassified from product certification to feedstock certification because the detected schemes are associated with biomass sourcing."
+                        ),
+                        source="project",
+                        confidence=0.91,
+                        evidence_strength="strong",
+                        extractor="product_inference",
+                        inference_rule_id="INF-PRODCT-002",
+                        inputs_used=[
+                            "product.certification_scheme",
+                        ],
+                    )
+
+                    # 🔴 Metadados de reclassificação (ESSENCIAL)
+                    updated_fields[-1]["resolution_action"] = "reclassify"
+                    updated_fields[-1]["reclassify_from"] = "product.certification_scheme"
 
         return {
             "normalized_fields": updated_fields,
