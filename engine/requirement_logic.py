@@ -12,7 +12,7 @@ def eval_biochar_applicability(data):
         if data["eligibility"]["additionality_claim"] is not True:
             return "partial"
 
-        if (data["eligibility"]["durability_years"] or 0) <= 200:
+        if (data["eligibility"].get("durability_years") or 0) < 200:
             return "non_compliant"
 
         if not data["production"]["pyrolysis_technology"]:
@@ -1465,96 +1465,6 @@ def storage_system_boundary(data):
             notes=[f"storage_system_boundary execution error: {str(e)}"],
         )
 
-def product_standard_compliance(data):
-    """
-    R-9KKF-0 | Compliance with relevant product standards evidenced
-    """
-    try:
-        product = data.get("product", {})
-
-        missing_fields = []
-        failed_fields = []
-        notes = []
-
-        standard = product.get("standard_compliance")
-        certification = product.get("certification_scheme")
-
-        if not standard:
-            missing_fields.append("product.standard_compliance")
-            notes.append("Compliance with relevant product standards is not evidenced.")
-            return build_logic_result(
-                status="non_compliant",
-                missing_fields=missing_fields,
-                failed_fields=failed_fields,
-                notes=notes,
-            )
-
-        if not certification:
-            missing_fields.append("product.certification_scheme")
-            notes.append("Certification scheme or reference standard is missing.")
-            return build_logic_result(
-                status="partial",
-                missing_fields=missing_fields,
-                failed_fields=failed_fields,
-                notes=notes,
-            )
-
-        return build_logic_result(
-            status="compliant",
-            notes=["Product standard compliance and certification scheme are documented."],
-        )
-
-    except Exception as e:
-        return build_logic_result(
-            status="error",
-            notes=[f"product_standard_compliance execution error: {str(e)}"],
-        )
-
-
-def contaminant_monitoring_plan(data):
-    """
-    R-HE38-0 | Contaminant monitoring plan specified
-    """
-    try:
-        characterization = data.get("biochar", {}).get("characterization", {})
-
-        missing_fields = []
-        failed_fields = []
-        notes = []
-
-        contaminants = characterization.get("contaminant_testing")
-        frequency = characterization.get("contaminant_testing_frequency")
-
-        if not contaminants:
-            missing_fields.append("biochar.characterization.contaminant_testing")
-            notes.append("Contaminant testing is not documented.")
-            return build_logic_result(
-                status="non_compliant",
-                missing_fields=missing_fields,
-                failed_fields=failed_fields,
-                notes=notes,
-            )
-
-        if not frequency:
-            missing_fields.append("biochar.characterization.contaminant_testing_frequency")
-            notes.append("Contaminant testing frequency is missing.")
-            return build_logic_result(
-                status="partial",
-                missing_fields=missing_fields,
-                failed_fields=failed_fields,
-                notes=notes,
-            )
-
-        return build_logic_result(
-            status="compliant",
-            notes=["Contaminant testing and frequency are documented."],
-        )
-
-    except Exception as e:
-        return build_logic_result(
-            status="error",
-            notes=[f"contaminant_monitoring_plan execution error: {str(e)}"],
-        )
 
 def pyrolysis_gas_end_use_accounting(data):
     """
