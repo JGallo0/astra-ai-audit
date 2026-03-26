@@ -1668,7 +1668,11 @@ def resolve_selected_modules_from_scope(
     requirements: List[Dict[str, Any]],
     selected_scopes: List[str],
 ) -> List[str]:
-    available_modules = {r["module"] for r in requirements}
+    available_modules = {
+    r.get("module")
+    for r in requirements
+    if isinstance(r, dict) and r.get("module")
+}
     resolved_modules: List[str] = []
 
     for scope in selected_scopes:
@@ -1687,7 +1691,12 @@ def resolve_selected_modules_from_scope(
     return resolved_modules
 
 def get_available_audit_scopes(requirements: List[Dict[str, Any]]) -> List[str]:
-    available_modules = {r["module"] for r in requirements}
+    available_modules = {
+        r.get("module")
+        for r in requirements
+        if isinstance(r, dict) and r.get("module")
+    }
+
     available_scopes: List[str] = []
 
     for scope_name, scope_config in AUDIT_SCOPE_CONFIG.items():
@@ -1723,7 +1732,21 @@ methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
 project_name = st.session_state.get("current_project_name")
 current_methodology = st.session_state.get("current_methodology")
 
-structured_requirements = get_requirements()
+# ✅ CORREÇÃO PRINCIPAL
+structured_requirements = get_requirements_for_methodology(current_methodology)
+
+# ✅ DEBUG CRÍTICO (inserir aqui)
+st.caption(f"DEBUG requirements loaded: {len(structured_requirements)}")
+
+sample_modules = [
+    r.get("module")
+    for r in structured_requirements[:10]
+    if isinstance(r, dict)
+]
+
+st.caption(f"DEBUG sample modules: {sample_modules}")
+
+# fluxo continua normal
 available_structured_scopes = get_available_audit_scopes(structured_requirements)
 default_structured_scopes = get_default_audit_scopes(available_structured_scopes)
 
