@@ -181,7 +181,7 @@ OPENAI_API_KEY = get_config_value("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY não encontrada em st.secrets nem no .env")
 
-MODEL_NAME = get_config_value("OPENAI_MODEL", "gpt-4.1")
+MODEL_NAME = get_config_value("OPENAI_MODEL", "gpt-4o-mini")
 
 PROJECT_MAX_RESULTS = get_int_config("PROJECT_MAX_RESULTS", 5)
 METHODOLOGY_MAX_RESULTS = get_int_config("METHODOLOGY_MAX_RESULTS", 5)
@@ -1810,7 +1810,7 @@ if st.session_state.get("run_structured"):
     audit_mode = st.session_state.get("audit_mode", "development")
 
     try:
-        requirements = get_requirements()
+        requirements = get_requirements_for_methodology(current_methodology)
 
         if not requirements:
             st.error("Nenhum requisito estruturado foi carregado.")
