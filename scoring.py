@@ -539,7 +539,7 @@ def calculate_compliance_score(results):
     for r in results:
         status = safe_str(r.get("status", "")).strip().lower()
 
-        if status == "not_applicable":
+        if status in ["not_applicable", "não aplicável", "nao aplicavel"]:
             not_applicable += 1
             continue
 
@@ -560,9 +560,6 @@ def calculate_compliance_score(results):
         else:
             error += 1
 
-        if requirement_score is not None:
-            weighted_points += get_engine_requirement_score_fraction(r)
-        else:
         if requirement_score is not None:
             weighted_points += get_engine_requirement_score_fraction(r)
         else:
@@ -594,7 +591,6 @@ def calculate_compliance_score(results):
         "not_applicable": not_applicable,
         "error": error,
     }
-
 def classify_compliance_score(score):
     """
     Classificação executiva alinhada com lógica interna do motor.
