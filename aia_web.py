@@ -1832,6 +1832,8 @@ if st.session_state.get("run_structured"):
             st.caption(f"selected_modules V2: {selected_modules_for_v2}")
             st.caption(f"n módulos selecionados: {len(selected_modules_for_v2 or [])}")
             st.caption(f"total requirements carregados: {len(engine.requirements)}")
+            estimated_cost = len(engine.requirements) * 0.01
+            st.caption(f"Estimated cost: ~US$ {estimated_cost:.2f}")
 
             output = engine.run_structured_engine_audit(
                 selected_modules=selected_modules_for_v2,
