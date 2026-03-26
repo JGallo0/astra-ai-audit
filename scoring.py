@@ -391,7 +391,7 @@ def calculate_weighted_overall_score(results: List[Dict[str, Any]]) -> float:
     for item in results:
         status = safe_str(item.get("status", "")).strip().lower()
 
-        if status == "not_applicable":
+        if status in ["not_applicable", "não aplicável", "nao aplicavel"]:
             continue
 
         score = get_engine_requirement_score(item)
@@ -444,7 +444,7 @@ def summarize_module_scores(results: List[Dict[str, Any]]) -> Dict[str, float]:
     for item in results:
         status = safe_str(item.get("status", "")).strip().lower()
 
-        if status == "not_applicable":
+        if status in ["not_applicable", "não aplicável", "nao aplicavel"]:
             continue
 
         module = safe_str(item.get("module", "Sem módulo"))
@@ -558,20 +558,23 @@ def calculate_compliance_score(results):
         elif status in ["error", "erro de análise", "erro de analise"]:
             error += 1
         else:
-            error += 11
+            error += 1
 
         if requirement_score is not None:
             weighted_points += get_engine_requirement_score_fraction(r)
         else:
-            if status == "compliant":
+        if requirement_score is not None:
+            weighted_points += get_engine_requirement_score_fraction(r)
+        else:
+            if status in ["compliant", "conforme"]:
                 weighted_points += 1.0
-            elif status == "partial":
+            elif status in ["partial", "parcialmente conforme"]:
                 weighted_points += 0.5
-            elif status == "future_evidence_required":
+            elif status in ["future_evidence_required"]:
                 weighted_points += 0.35
-            elif status == "non_compliant":
+            elif status in ["non_compliant", "não conforme", "nao conforme"]:
                 weighted_points += 0.0
-            elif status == "error":
+            elif status in ["error", "erro de análise", "erro de analise"]:
                 weighted_points += 0.0
             else:
                 weighted_points += 0.0
