@@ -544,7 +544,10 @@ class AuditEngine:
         )
 
         project_data = mapped["project_data"]
-        results = run_engine(project_data, filtered_requirements)
+        results = run_engine(
+            project_data,
+            filtered_requirements
+        )
 
         # =========================================================
         # AJUSTE INICIAL POR MODO DE AUDITORIA
