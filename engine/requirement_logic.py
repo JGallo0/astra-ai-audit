@@ -1962,35 +1962,78 @@ def biochar_required_measurements(data):
 
 def deployment_method_selected(data):
     """
-    Ensures a valid biochar deployment/storage pathway is selected
+    R-T2X2-0 | Deployment method specified
     """
     try:
-        storage = data.get("storage", {})
+        soil = data.get("storage", {}).get("soil", {})
 
-        pathway = storage.get("storage_pathway")
+        deployment_methods = soil.get("deployment_methods")
 
-        field_scores = [
-            score_presence_field(
-                "storage.storage_pathway",
-                pathway,
-                100,
-                note_if_missing="Storage pathway is not defined.",
-            )
-        ]
+        field_scores = []
+
+        if not deployment_methods:
+            field_scores.append({
+                "path": "storage.soil.deployment_methods",
+                "weight": 100,
+                "score": 0,
+                "status": "missing",
+                "notes": ["No deployment method is specified."],
+            })
+            status = "non_compliant"
+
+        elif not isinstance(deployment_methods, list):
+            field_scores.append({
+                "path": "storage.soil.deployment_methods",
+                "weight": 100,
+                "score": 0,
+                "status": "fail",
+                "notes": ["Deployment methods must be a list."],
+            })
+            status = "non_compliant"
+
+        elif len(deployment_methods) == 0:
+            field_scores.append({
+                "path": "storage.soil.deployment_methods",
+                "weight": 100,
+                "score": 0,
+                "status": "missing",
+                "notes": ["Deployment methods list is empty."],
+            })
+            status = "non_compliant"
+
+        else:
+            field_scores.append({
+                "path": "storage.soil.deployment_methods",
+                "weight": 100,
+                "score": 100,
+                "status": "pass",
+                "notes": [],
+            })
+            status = "compliant"
 
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if not pathway:
-            status = "non_compliant"
-        else:
-            status = "compliant"
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Deployment method is specified.")
 
         return build_logic_result(
             status=status,
-            missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
-            failed_fields=[i["path"] for i in field_scores if i["status"] == "fail"],
-            notes=collect_field_score_notes(field_scores),
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
             requirement_score=requirement_score,
             field_scores=field_scores,
             requirement_rating=requirement_rating,
@@ -2007,47 +2050,77 @@ def deployment_method_selected(data):
 
 def direct_soil_application_evidence(data):
     """
-    Evidence for direct soil application pathway
+    R-8PBP-0 | Direct soil application evidence pathway confirmed
     """
     try:
-        storage = data.get("storage", {})
+        soil = data.get("storage", {}).get("soil", {})
 
-        pathway = storage.get("storage_pathway")
-        evidence = storage.get("soil_application_evidence")
+        deployment_methods = soil.get("deployment_methods", [])
+        evidence = soil.get("direct_application_evidence_pathway")
 
         field_scores = []
 
-        if pathway == "soil":
-            field_scores.append(
-                score_boolean_field(
-                    "storage.soil_application_evidence",
-                    evidence,
-                    100,
-                    note_if_missing="Soil application evidence is missing.",
-                )
-            )
-        else:
+        if "direct_soil_application" not in deployment_methods:
             field_scores.append({
-                "path": "storage.soil_application_evidence",
+                "path": "storage.soil.direct_application_evidence_pathway",
                 "weight": 100,
                 "score": 100,
                 "status": "not_applicable",
                 "notes": [],
             })
+            status = "not_applicable"
+
+        else:
+            field_scores.append(
+                score_boolean_field(
+                    "storage.soil.direct_application_evidence_pathway",
+                    evidence,
+                    100,
+                    note_if_missing="Evidence for direct soil application pathway is missing.",
+                )
+            )
+
+            requirement_score = summarize_field_scores(field_scores)
+            requirement_rating = derive_requirement_rating(requirement_score)
+
+            if evidence is not True:
+                status = "non_compliant"
+            else:
+                status = "compliant"
+
+            missing_fields = [
+                item["path"]
+                for item in field_scores
+                if item["status"] == "missing"
+            ]
+            failed_fields = [
+                item["path"]
+                for item in field_scores
+                if item["status"] == "fail"
+            ]
+            notes = collect_field_score_notes(field_scores)
+
+            if status == "compliant":
+                notes.append("Direct soil application evidence pathway is documented.")
+
+            return build_logic_result(
+                status=status,
+                missing_fields=missing_fields,
+                failed_fields=failed_fields,
+                notes=notes,
+                requirement_score=requirement_score,
+                field_scores=field_scores,
+                requirement_rating=requirement_rating,
+            )
 
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if pathway == "soil" and evidence is not True:
-            status = "non_compliant"
-        else:
-            status = "compliant"
-
         return build_logic_result(
             status=status,
-            missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
-            failed_fields=[i["path"] for i in field_scores if i["status"] == "fail"],
-            notes=collect_field_score_notes(field_scores),
+            missing_fields=[],
+            failed_fields=[],
+            notes=["Direct soil application is not part of the deployment pathway."],
             requirement_score=requirement_score,
             field_scores=field_scores,
             requirement_rating=requirement_rating,
@@ -2287,38 +2360,6 @@ def regulatory_measurement_methods(data):
             if item["status"] == "missing"
         ]
         failed_fields = [
-            item["path"]def regulatory_measurement_methods(data):
-    """
-    R-RQTJ-0 | Regulatory measurements approach described
-    """
-    try:
-        legal = data.get("legal", {})
-
-        methods = legal.get("regulatory_measurement_methods")
-
-        field_scores = [
-            score_boolean_field(
-                "legal.regulatory_measurement_methods",
-                methods,
-                100,
-                note_if_missing="Regulatory measurement methods are not documented.",
-            )
-        ]
-
-        requirement_score = summarize_field_scores(field_scores)
-        requirement_rating = derive_requirement_rating(requirement_score)
-
-        if methods is not True:
-            status = "non_compliant"
-        else:
-            status = "compliant"
-
-        missing_fields = [
-            item["path"]
-            for item in field_scores
-            if item["status"] == "missing"
-        ]
-        failed_fields = [
             item["path"]
             for item in field_scores
             if item["status"] == "fail"
@@ -2346,33 +2387,6 @@ def regulatory_measurement_methods(data):
             field_scores=[],
             requirement_rating="weak",
         )
-            for item in field_scores
-            if item["status"] == "fail"
-        ]
-        notes = collect_field_score_notes(field_scores)
-
-        if status == "compliant":
-            notes.append("Regulatory measurement methods are documented.")
-
-        return build_logic_result(
-            status=status,
-            missing_fields=missing_fields,
-            failed_fields=failed_fields,
-            notes=notes,
-            requirement_score=requirement_score,
-            field_scores=field_scores,
-            requirement_rating=requirement_rating,
-        )
-
-    except Exception as e:
-        return build_logic_result(
-            status="error",
-            notes=[f"regulatory_measurement_methods execution error: {str(e)}"],
-            requirement_score=0,
-            field_scores=[],
-            requirement_rating="weak",
-        ))
-
 def biochar_characterization_approach(data):
     """
     R-NYQT-0 | Biochar characterization and ongoing monitoring approach described
@@ -2626,33 +2640,37 @@ def storage_system_boundary(data):
 
 def pyrolysis_gas_end_use_accounting(data):
     """
-    Ensures pyrolysis gas end-use is properly accounted
+    R-E8H6-0 | Pyrolysis gas end-use accounting approach selected
     """
     try:
         emissions = data.get("emissions", {})
+        production = data.get("production", {})
 
-        gas_handling = emissions.get("pyrolysis_gas_handling")
-        accounting = emissions.get("gas_end_use_accounted")
+        approach = emissions.get("pyrolysis_gas_end_use_approach")
+        control_system = emissions.get("emissions_control_system")
+
+        if not control_system:
+            control_system = production.get("gas_burner_present") or production.get("combustion_gas_control")
 
         field_scores = [
             score_presence_field(
-                "emissions.pyrolysis_gas_handling",
-                gas_handling,
+                "emissions.pyrolysis_gas_end_use_approach",
+                approach,
                 60,
-                note_if_missing="Pyrolysis gas handling is not described.",
+                note_if_missing="Pyrolysis gas end-use accounting approach is missing.",
             ),
-            score_boolean_field(
-                "emissions.gas_end_use_accounted",
-                accounting,
+            score_presence_field(
+                "emissions.emissions_control_system",
+                control_system,
                 40,
-                note_if_missing="Gas end-use accounting is missing.",
+                note_if_missing="Emissions control system for pyrolysis gas end-use is missing.",
             ),
         ]
 
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if not gas_handling:
+        if not approach:
             status = "non_compliant"
         else:
             status = derive_requirement_status_from_score(
@@ -2661,11 +2679,26 @@ def pyrolysis_gas_end_use_accounting(data):
                 compliant_threshold=100,
             )
 
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Pyrolysis gas end-use accounting approach and emissions control system are documented.")
+
         return build_logic_result(
             status=status,
-            missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
-            failed_fields=[i["path"] for i in field_scores if i["status"] == "fail"],
-            notes=collect_field_score_notes(field_scores),
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
             requirement_score=requirement_score,
             field_scores=field_scores,
             requirement_rating=requirement_rating,
@@ -2679,7 +2712,6 @@ def pyrolysis_gas_end_use_accounting(data):
             field_scores=[],
             requirement_rating="weak",
         )
-
 def biochar_incorporation_documentation(data):
     """
     Logic for biochar incorporation / built-environment incorporation documentation
@@ -2689,35 +2721,100 @@ def biochar_incorporation_documentation(data):
         soil = storage.get("soil", {})
         built = storage.get("built_environment", {})
 
-        missing_fields = []
-        failed_fields = []
-        notes = []
-
-        soil_evidence = soil.get("direct_application_evidence_pathway") or soil.get("deployment_methods")
+        soil_evidence = soil.get("direct_application_evidence_pathway")
+        soil_methods = soil.get("deployment_methods")
         built_evidence = (
             built.get("incorporation_documentation")
             if isinstance(built, dict) else None
         ) or storage.get("built_environment_incorporation_evidence")
 
-        if not soil_evidence and not built_evidence:
-            missing_fields.append("storage.built_environment_incorporation_evidence")
-            notes.append("No documentation of biochar incorporation pathway was found.")
-            return build_logic_result(
-                status="non_compliant",
-                missing_fields=missing_fields,
-                failed_fields=failed_fields,
-                notes=notes,
+        field_scores = []
+
+        soil_pathway_present = bool(soil_methods)
+        built_pathway_present = bool(built_evidence)
+
+        if soil_pathway_present:
+            field_scores.append(
+                score_boolean_field(
+                    "storage.soil.direct_application_evidence_pathway",
+                    soil_evidence,
+                    50,
+                    note_if_missing="Evidence for soil incorporation pathway is missing.",
+                )
+            )
+        else:
+            field_scores.append({
+                "path": "storage.soil.direct_application_evidence_pathway",
+                "weight": 50,
+                "score": 50,
+                "status": "not_applicable",
+                "notes": [],
+            })
+
+        if built_pathway_present:
+            field_scores.append({
+                "path": "storage.built_environment_incorporation_evidence",
+                "weight": 50,
+                "score": 50,
+                "status": "pass",
+                "notes": [],
+            })
+        else:
+            field_scores.append({
+                "path": "storage.built_environment_incorporation_evidence",
+                "weight": 50,
+                "score": 0 if not soil_pathway_present else 50,
+                "status": "missing" if not soil_pathway_present else "not_applicable",
+                "notes": (
+                    ["No documentation of built-environment incorporation pathway was found."]
+                    if not soil_pathway_present else []
+                ),
+            })
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if not soil_pathway_present and not built_pathway_present:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=50,
+                compliant_threshold=100,
             )
 
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Biochar incorporation pathway documentation is present.")
+
         return build_logic_result(
-            status="compliant",
-            notes=["Biochar incorporation pathway documentation is present."],
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
         )
 
     except Exception as e:
         return build_logic_result(
             status="error",
             notes=[f"biochar_incorporation_documentation execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
         )
         
 # =========================
