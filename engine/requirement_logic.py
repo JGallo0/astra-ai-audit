@@ -366,17 +366,22 @@ def run_engine(project_data, requirements):
             })
             continue
 
-        # Aceita formato antigo (string) e novo (dict)
         if isinstance(logic_output, dict):
             status = logic_output.get("status", "error")
             missing_fields = logic_output.get("missing_fields", [])
             failed_fields = logic_output.get("failed_fields", [])
             notes = logic_output.get("notes", [])
+            requirement_score = logic_output.get("requirement_score")
+            field_scores = logic_output.get("field_scores", [])
+            requirement_rating = logic_output.get("requirement_rating")
         else:
             status = logic_output
             missing_fields = []
             failed_fields = []
             notes = []
+            requirement_score = None
+            field_scores = []
+            requirement_rating = None
 
         # 4) Monta saída estruturada
         if status == "compliant":
@@ -400,6 +405,9 @@ def run_engine(project_data, requirements):
             "notes": notes,
             "logic_key": logic_key,
             "fields_evaluated": fields_evaluated,
+            "requirement_score": requirement_score,
+            "field_scores": field_scores,
+            "requirement_rating": requirement_rating,
         })
 
     return results
