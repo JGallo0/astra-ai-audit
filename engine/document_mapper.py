@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional
 
 from schemas.project_schema import get_empty_project_data
 
+from engine.inference import run_inference_layer
 from engine.mappers import run_mapper_pipeline
 from engine.mappers.consistency import run_consistency_checks
 
@@ -53,6 +54,16 @@ def extract_project_data_from_contexts(
     normalized_fields = pipeline_output.get("normalized_fields", []) or []
     raw_extraction_bundle = pipeline_output.get("raw_extraction_bundle", {}) or {}
 
+    inference_output = run_inference_layer(
+        normalized_fields=normalized_fields,
+        raw_extraction_bundle=raw_extraction_bundle,
+        project_context=project_context,
+        methodology_context=methodology_context,
+    )
+
+    normalized_fields = inference_output.get("normalized_fields", []) or normalized_fields
+    inference_events = inference_output.get("inference_events", []) or []
+
     project_data = build_project_data_from_extraction(normalized_fields)
 
     consistency_output = run_consistency_checks(
@@ -64,6 +75,7 @@ def extract_project_data_from_contexts(
         "project_data": project_data,
         "normalized_fields": normalized_fields,
         "raw_extraction": raw_extraction_bundle,
+        "inference_events": inference_events,
         "consistency_flags": consistency_output.get("consistency_flags", []),
         "consistency_notes": consistency_output.get("consistency_notes", []),
     }
