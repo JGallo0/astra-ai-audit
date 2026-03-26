@@ -52,7 +52,7 @@ class QuantificationInference(BaseInferenceRule):
 
         feedstock_defined = get_best_value(
             normalized_fields,
-            "feedstock.feedstock_type",
+            "feedstock.biomass_type",
         )
 
         production_defined = get_best_value(
@@ -167,7 +167,7 @@ class QuantificationInference(BaseInferenceRule):
                     inference_rule_id="INF-QUANT-001",
                     inputs_used=[
                         "project.project_boundary_defined",
-                        "feedstock.feedstock_type",
+                        "feedstock.biomass_type",
                         "production.pyrolysis_technology",
                         "methodology.storage_pathway",
                         "emissions.emissions_sources_identified",
