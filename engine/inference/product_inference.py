@@ -2,27 +2,51 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 from .base import (
     BaseInferenceRule,
     append_inference_field,
     get_best_field,
     get_best_value,
+    has_strong_evidence,
     normalize_text,
-    safe_float,
 )
 
 
 class ProductInference(BaseInferenceRule):
     rule_set_name = "product_inference"
 
-    FEEDSTOCK_CERT_SCHEMES = {
+    FEEDSTOCK_CERT_SCHEMES: Set[str] = {
         "fsc",
         "sbp",
         "pefc",
         "sfi",
     }
+
+    def _extract_cert_tokens(self, raw_value: Any) -> Set[str]:
+        raw_text = normalize_text(raw_value)
+
+        return {
+            token.strip().lower()
+            for token in raw_text.replace(";", ",").split(",")
+            if token.strip()
+        }
+
+    def _is_feedstock_certification_misclassified(
+        self,
+        product_cert_field: Optional[Dict[str, Any]],
+    ) -> bool:
+        if not product_cert_field:
+            return False
+
+        raw_value = product_cert_field.get("value")
+        tokens = self._extract_cert_tokens(raw_value)
+
+        if not tokens:
+            return False
+
+        return tokens.issubset(self.FEEDSTOCK_CERT_SCHEMES)
 
     def run(
         self,
@@ -34,65 +58,40 @@ class ProductInference(BaseInferenceRule):
         updated_fields = list(normalized_fields or [])
         inference_events: List[Dict[str, Any]] = []
 
-        product_cert = get_best_field(updated_fields, "product.certification_scheme")
-        feedstock_cert = get_best_value(updated_fields, "feedstock.certification_scheme")
+        product_cert_field = get_best_field(
+            updated_fields,
+            "product.certification_scheme",
+        )
 
-        if product_cert:
-            raw_value = product_cert.get("value")
-            raw_text = normalize_text(raw_value)
+        feedstock_cert_value = get_best_value(
+            updated_fields,
+            "feedstock.certification_scheme",
+        )
 
-            tokens = {
-                x.strip().lower()
-                for x in raw_text.replace(";", ",").split(",")
-                if x.strip()
-            }
+        if self._is_feedstock_certification_misclassified(product_cert_field):
+            raw_value = product_cert_field.get("value")
 
-            if tokens and tokens.issubset(self.FEEDSTOCK_CERT_SCHEMES):
-                product_conf = safe_float(product_cert.get("confidence")) or 0.0
-                product_mode = normalize_text(product_cert.get("evidence_mode"))
-
-                if product_mode != "direct" or product_conf < 0.90:
-                    updated_fields = append_inference_field(
-                        updated_fields,
-                        inference_events,
-                        path="product.certification_scheme",
-                        value=None,
-                        evidence=(
-                            "Corrected by inference: detected certification schemes are typical biomass/feedstock sourcing certifications, not product-level biochar certification schemes."
-                        ),
-                        source="project",
-                        confidence=0.92,
-                        evidence_strength="strong",
-                        extractor="product_inference",
-                        inference_rule_id="INF-PRODCT-001",
-                        inputs_used=[
-                            "product.certification_scheme",
-                        ],
-                        overwrite=True,
-                    )
-
-                if not feedstock_cert:
+            if not has_strong_evidence(updated_fields, "feedstock.certification_scheme"):
+                if not feedstock_cert_value:
                     updated_fields = append_inference_field(
                         updated_fields,
                         inference_events,
                         path="feedstock.certification_scheme",
                         value=raw_value,
                         evidence=(
-                            "Reclassified from product certification to feedstock certification because the detected schemes are associated with biomass sourcing."
+                            "Reclassified from product certification to feedstock certification because the detected schemes are associated with biomass sourcing rather than product-level biochar certification."
                         ),
                         source="project",
                         confidence=0.91,
                         evidence_strength="strong",
                         extractor="product_inference",
-                        inference_rule_id="INF-PRODCT-002",
+                        inference_rule_id="INF-PRODCT-001",
                         inputs_used=[
                             "product.certification_scheme",
                         ],
+                        resolution_action="reclassify",
+                        reclassify_from="product.certification_scheme",
                     )
-
-                    # 🔴 Metadados de reclassificação (ESSENCIAL)
-                    updated_fields[-1]["resolution_action"] = "reclassify"
-                    updated_fields[-1]["reclassify_from"] = "product.certification_scheme"
 
         return {
             "normalized_fields": updated_fields,
