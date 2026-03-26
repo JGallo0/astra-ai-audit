@@ -17,60 +17,87 @@ from engine.mappers.management_mapper import run_management_mapper
 
 
 REQUIREMENT_HINTS = {
-    # -------------------------
+    # =========================================================
     # ELIGIBILITY
-    # -------------------------
+    # =========================================================
     "eligibility.net_negative_claim": [
         "net negative",
+        "net-negative",
         "negative carbon footprint",
         "project removals",
         "removals exceed emissions",
-        "3.72 t/t",
+        "removals are greater than emissions",
+        "positive net removals",
+        "net removals",
         "tco2e/t",
         "kgco2eq",
+        "kg co2eq",
+        "co2 removed",
+        "co2 removal",
+        "climate impact",
         "lca",
+        "life cycle assessment",
         "environmental additionality",
+        "baseline emissions",
+        "leakage emissions",
+        "project emissions",
     ],
     "methodology.standard": [
         "isometric",
         "isometric standard",
-        "protocol",
         "isometric protocol",
+        "isometric bicrs",
+        "bicrs",
+        "under the isometric protocol",
     ],
     "methodology.pathway": [
         "biochar",
         "biochar carbon removal",
         "biochar pathway",
+        "co2 removal by biochar",
+        "biochar project",
     ],
     "methodology.production_subpathway": [
         "continuous pyrolysis",
         "continuous reactor",
         "continuous operation",
+        "continuous rotary",
+        "rotary kiln",
         "batch mode",
         "batch capacity",
+        "batch operation",
         "rectangular kilns",
+        "kilns operate in batch mode",
         "bst-30",
+        "standard production subpathway",
     ],
 
-    # -------------------------
+    # =========================================================
     # ADDITIONALITY
-    # -------------------------
+    # =========================================================
     "eligibility.additionality_claim": [
         "financial additionality",
         "regulatory additionality",
         "environmental additionality",
         "common practice",
+        "common-practice",
+        "common practice analysis",
         "baseline",
         "counterfactual",
         "irr",
         "carbon credit revenues",
         "economic barriers",
         "pricing scenarios",
+        "not common practice",
+        "not widely adopted",
+        "would not occur without",
+        "viability depends on carbon credits",
+        "additionality demonstration",
     ],
 
-    # -------------------------
+    # =========================================================
     # DURABILITY
-    # -------------------------
+    # =========================================================
     "eligibility.durability_years": [
         "200-year durability",
         "+200-year durability",
@@ -79,6 +106,24 @@ REQUIREMENT_HINTS = {
         "durability classification",
         "durability pathway",
         "durability threshold",
+        "durability class",
+        "permanence threshold",
+        "permanence category",
+        "carbon permanence",
+        "long-term storage",
+        "long term storage",
+        "biochar stability",
+        "stable carbon",
+        "biochar persistence",
+        "remains stable",
+        "stable over centuries",
+        "hundreds of years",
+        "at least 200 years",
+        "at least 1000 years",
+        "under the +200-year threshold",
+        "under the 200-year threshold",
+        "selected durability threshold",
+        "selected permanence threshold",
     ],
     "methodology.durability_option": [
         "200-year durability",
@@ -86,41 +131,71 @@ REQUIREMENT_HINTS = {
         "1000-year durability",
         "+1000-year durability",
         "combined 200 1000",
+        "combined_200_1000",
         "200/1000",
         "durability option",
         "durability classification",
         "durability pathway",
+        "durability threshold",
+        "durability class",
+        "permanence threshold",
+        "permanence category",
+        "selected durability threshold",
+        "selected permanence threshold",
+        "project applies the +200-year durability classification",
+        "project applies the 200-year durability classification",
     ],
 
-    # -------------------------
+    # =========================================================
     # PRODUCTION
-    # -------------------------
+    # =========================================================
     "production.pyrolysis_technology": [
         "bst-30",
         "pyrolysis reactor",
         "continuous rotary",
         "continuous carbonization reactor",
-        "rectangular kilns",
+        "continuous rotary carbonization reactor",
+        "continuous rotary pyrolysis reactor",
+        "rotary kiln",
+        "carbonization furnace",
+        "cogeneration system",
+        "gasification system",
+        "thermochemical conversion",
+        "biochar production system",
+        "industrial biochar system",
+        "retort",
+        "kiln",
+        "reactor",
         "gas burners",
         "thermal control",
+        "integrated gas recovery",
+        "sealed combustion system",
     ],
     "production.reactor_design_diagram": [
         "engineering design package",
         "pfd",
         "p&id",
         "process flow diagram",
+        "process flow diagrams",
         "piping and instrumentation diagrams",
         "layout drawings",
         "reactor drawing",
         "technical annex",
+        "supporting documentation",
+        "engineering diagram",
+        "reactor layout",
     ],
     "production.engineering_design_diagram": [
         "engineering design package",
         "pfd",
         "p&id",
         "process flow diagram",
+        "process flow diagrams",
+        "piping and instrumentation diagrams",
         "layout drawings",
+        "reactor drawing",
         "technical annex",
+        "engineering diagram",
     ],
     "production.maintenance_plan": [
         "maintenance plan",
@@ -128,8 +203,14 @@ REQUIREMENT_HINTS = {
         "preventive maintenance",
         "routine maintenance",
         "inspection",
+        "routine visual inspection",
+        "negative-pressure system verification",
+        "leakage verification",
+        "annual leakage verification",
         "calibration",
         "annual emission testing",
+        "mechanical integrity",
+        "seal inspection",
     ],
     "production.maintenance_schedule": [
         "maintenance schedule",
@@ -137,31 +218,47 @@ REQUIREMENT_HINTS = {
         "daily inspection",
         "weekly inspection",
         "monthly inspection",
+        "quarterly inspection",
         "annual servicing",
+        "biannual sensor calibration",
         "semi-annual calibration",
         "annual emission testing",
+        "frequency activity",
     ],
     "production.sensor_inventory": [
         "temperature sensors",
         "pressure sensors",
         "pressure monitoring points",
         "gas flow measurement",
+        "gas flow measurement points",
         "thermocouples",
         "real-time digital monitoring",
+        "real time digital monitoring",
+        "monitoring points",
+        "instrumentation",
     ],
     "production.sensor_locations": [
         "pressure monitoring points",
-        "gas flow measurement",
+        "gas flow measurement points",
         "sensor locations",
         "points of measurement",
         "located at",
+        "multiple zones along reactor length",
+        "combustion chamber interface",
+        "inlet, outlet",
     ],
     "production.reactor_components": [
         "reactor components",
-        "combustion gases",
+        "overall reactor length",
+        "diameter and wall thickness",
+        "feed inlet",
+        "biochar discharge",
+        "gas outlet",
+        "combustion chamber interface",
+        "insulation layers",
+        "refractory lining",
         "integrated furnace",
         "gas burners",
-        "thermal control",
         "pressure sensors",
         "thermocouples",
     ],
@@ -169,27 +266,39 @@ REQUIREMENT_HINTS = {
         "material selection",
         "selected materials",
         "materials used",
+        "304 stainless steel",
         "reactor manufacturing",
         "equipment lifespan",
+        "fabricated in 304 stainless steel",
+        "corrosion resistance",
+        "thermal resistance",
     ],
     "production.end_material_process_description": [
         "post-processing",
+        "post processing",
         "cooling",
         "screening",
+        "biochar discharge",
         "storage in big bags",
         "soil application",
+        "end material",
+        "biochar is regularly analyzed",
     ],
 
-    # -------------------------
+    # =========================================================
     # SAMPLING
-    # -------------------------
+    # =========================================================
     "sampling.batch_definition_days": [
         "24-hour production window",
+        "24 hour production window",
         "hour production window",
         "within a maximum 24-hour production window",
+        "within a maximum 24 hour production window",
         "production batch",
         "batch-level",
         "per production batch",
+        "batch is defined as",
+        "maximum 30 tonnes of biochar",
     ],
     "sampling.sampling_plan_defined": [
         "sampling plan",
@@ -199,16 +308,21 @@ REQUIREMENT_HINTS = {
         "at least once per production batch",
         "batch-level",
         "biochar samples are archived",
+        "samples are archived",
         "operational and laboratory data are collected per batch",
+        "sampling is conducted",
+        "sampling frequency are included in the biochar annex",
     ],
     "sampling.method": [
         "method a",
         "method b",
+        "sampling method a",
+        "sampling method b",
     ],
 
-    # -------------------------
+    # =========================================================
     # FEEDSTOCK
-    # -------------------------
+    # =========================================================
     "feedstock.biomass_type": [
         "eucalyptus residues",
         "harvest residues",
@@ -217,6 +331,12 @@ REQUIREMENT_HINTS = {
         "leaves",
         "bark",
         "whole trees may also be used",
+        "forestry residues",
+        "downstream processing residues",
+        "sawmill residue",
+        "wood residues",
+        "forest residues",
+        "sawmill byproducts",
     ],
     "feedstock.pre_project_biomass_use": [
         "controlled open-air burning",
@@ -224,27 +344,52 @@ REQUIREMENT_HINTS = {
         "burned in the field",
         "natural decay",
         "residue disposal",
+        "controlled burning",
+        "consumed as fuel",
+        "would have been fully combusted",
+        "no viable alternative commercial applications",
+        "no other productive use",
+        "not fit for use in building materials",
     ],
     "feedstock.feedstock_accounting_module_compliance": [
         "residue",
         "cut-off approach",
         "byproduct",
         "no land use change",
+        "records are archived",
+        "transport receipts",
+        "harvest records",
+        "cross-check against transport logs",
+        "qa/qc procedures",
+        "traceable feedstock records",
     ],
     "feedstock.moisture_measurement": [
         "moisture",
         "wet shredded biomass",
         "dry mass basis",
+        "moisture content",
+        "astm d1762-84",
+        "moisture measurement",
+    ],
+    "feedstock.moisture_control_plan": [
+        "moisture control plan",
+        "feedstock drying plan",
+        "moisture management plan",
+        "target moisture range",
+        "moisture control procedures",
     ],
 
-    # -------------------------
+    # =========================================================
     # STORAGE
-    # -------------------------
+    # =========================================================
     "methodology.storage_pathway": [
         "soil application",
         "applied to soil",
         "soil",
         "storage pathway",
+        "storage in soil",
+        "soil environments",
+        "biochar spreading and storage in soil environments",
     ],
     "storage.storage_environment_stable": [
         "stable storage",
@@ -252,6 +397,9 @@ REQUIREMENT_HINTS = {
         "soil application",
         "agricultural soil",
         "mixed into soil",
+        "long-term stability in soil",
+        "contaminant concentrations remain below thresholds",
+        "post-application monitoring",
     ],
     "storage.soil.deployment_methods": [
         "deployment methods",
@@ -259,51 +407,144 @@ REQUIREMENT_HINTS = {
         "applied back to the plantation area",
         "applied in eucalyptus fields",
         "application is supervised",
+        "agronomic rates",
+        "soil application at agronomic rates",
+        "spreading",
+        "incorporation",
+        "injection",
     ],
     "storage.stockpiling_documented": [
         "stockpiling",
         "storage in big bags",
         "stored in big bags",
+        "stockpiled before end use",
+        "temporary storage prior to application",
+    ],
+    "storage.stockpiled_before_end_use": [
+        "stockpiled before end use",
+        "temporary storage prior to application",
+        "stored before application",
+        "stockpiling of biochar",
+    ],
+    "storage.soil.direct_application_evidence_pathway": [
+        "direct soil application",
+        "biochar soil application",
+        "application only to suitable soils at agronomic rates",
+        "baseline soil sampling before application",
+        "post-application monitoring",
     ],
 
-    # -------------------------
-    # QUANTIFICATION
-    # -------------------------
+    # =========================================================
+    # QUANTIFICATION / GHG
+    # =========================================================
     "ghg_accounting.system_boundary_defined": [
         "system boundary",
         "project boundary",
         "boundaries",
         "figure 2",
         "sources, sinks and reservoirs",
+        "ssrs",
+        "included ssrs",
+        "boundary includes",
+        "operational emissions",
+        "storage emissions",
+        "biochar application",
+        "embodied emissions",
+        "transport emissions",
     ],
     "ghg_accounting.baseline_defined": [
         "baseline",
         "counterfactual",
         "open burning of residues",
         "absence of the project",
+        "baseline scenario",
+        "without the project",
+        "would have been fully combusted",
+        "consumed as fuel",
     ],
     "monitoring_reporting.uncertainty_method": [
         "uncertainty",
         "monte carlo",
         "variance propagation",
         "conservative parameter selection",
+        "conservative assumptions",
+        "conservative values",
+        "sensitivity analysis",
+        "uncertainty treatment",
+    ],
+    "quantification.input_variables": [
+        "input variables",
+        "model inputs",
+        "assumptions",
+        "limitations are disclosed",
+        "equation 6.1",
+        "ghg protocol",
+        "organic carbon content",
+        "fixed carbon",
+        "yield",
+        "biochar yield",
+        "parameters used",
+    ],
+    "quantification.input_uncertainties": [
+        "uncertainty",
+        "monte carlo",
+        "variance propagation",
+        "conservative assumptions",
+        "conservative values",
+        "conservative parameter selection",
+        "sensitivity analysis",
+        "additional sensitivity analysis",
+        "input uncertainty",
+    ],
+    "quantification.crediting_activity_boundaries": [
+        "all steps involved in the product system",
+        "collection and chipping",
+        "production and post processing",
+        "application in soil",
+        "transport stages",
+        "crediting activity boundaries",
+        "construction/manufacturing boundaries",
+        "operation boundaries",
+        "closure/disposal boundaries",
+        "activities leading to credits",
+    ],
+    "quantification.storage_emissions_accounted": [
+        "storage emissions",
+        "soil application emissions",
+        "storage pathway emissions",
+        "biochar storage - operational emissions",
+        "biochar application",
+        "storage emissions are included",
+        "soil application is included in the boundary",
+        "storage pathway included in lca",
     ],
     "biochar.characterization.chemical_analysis_performed": [
         "laboratory analysis",
         "chemical analysis",
         "biochar is regularly analyzed",
+        "characterized using internationally recognized analytical standards",
+        "iso/iec 17025",
     ],
     "biochar.characterization.lab_reports": [
         "lab report",
         "laboratory analysis",
         "accredited laboratories",
         "iso/iec 17025",
+        "batch-linked through the project mrv system",
+        "laboratory certificate",
     ],
     "biochar.characterization.required_measurements_complete": [
-        "batch-level elemental laboratory analysis",
-        "c, h, o",
         "required measurements",
-        "measurement values",
+        "all relevant chemical properties",
+        "batch-level elemental laboratory analysis",
+        "fixed carbon",
+        "ash content",
+        "pahs",
+        "ph",
+        "cec",
+        "required properties",
+        "ultimate analysis",
+        "proximate analysis",
     ],
     "biochar.characterization.measurement_values": [
         "measurement values",
@@ -311,6 +552,45 @@ REQUIREMENT_HINTS = {
         "h/corg",
         "o/c",
         "carbon content",
+        "fixed carbon",
+        "ash content",
+        "paHs",
+        "ph",
+        "cec",
+        "measured and reported",
+        "parameters measured",
+    ],
+    "biochar.characterization.approach_description": [
+        "characterization approach",
+        "sampling frequency",
+        "methodology",
+        "batch traceability",
+        "accredited laboratories",
+        "standardized analytical methods",
+    ],
+    "biochar.characterization.ongoing_monitoring_plan": [
+        "ongoing monitoring",
+        "regularly analyzed",
+        "annual emission testing",
+        "biochar annex",
+        "monitoring plan",
+        "annual laboratory analysis frequency",
+    ],
+    "biochar.characterization.contaminant_testing": [
+        "heavy metals",
+        "contaminants",
+        "pah",
+        "epa 8270d",
+        "en 16181",
+        "din 38414-s4",
+        "each batch is tested for contaminants",
+        "contaminant testing results are archived",
+    ],
+    "biochar.characterization.contaminant_testing_frequency": [
+        "contaminant analysis per 100 tonnes",
+        "minimum annual laboratory analysis frequency",
+        "proximate/ultimate analysis per batch",
+        "full contaminant analysis per",
     ],
     "product.standard_compliance": [
         "astm",
@@ -318,15 +598,27 @@ REQUIREMENT_HINTS = {
         "en 16181",
         "product standard",
         "standard compliance",
+        "internationally recognized analytical standards",
+        "isometric bicrs",
+    ],
+    "product.certification_scheme": [
+        "world biochar certificate",
+        "ebc",
+        "isometric bicrs",
+        "puro standard",
+        "certification scheme",
+        "protocol",
     ],
 
-    # -------------------------
+    # =========================================================
     # TRACEABILITY
-    # -------------------------
+    # =========================================================
     "traceability.chain_of_custody": [
         "chain of custody",
         "traceability",
         "prevent double counting",
+        "coc",
+        "chain-of-custody",
     ],
     "traceability.records_archived": [
         "records are archived",
@@ -334,24 +626,34 @@ REQUIREMENT_HINTS = {
         "samples are archived",
         "secure digital systems",
         "regular backups",
+        "batch-linked",
+        "archived and made available for audit",
     ],
-    
-    # -------------------------
+    "traceability.chain_of_custody_diagram": [
+        "chain of custody diagram",
+        "diagrammatic representation of chain of custody",
+        "flow diagram of custody",
+        "coc diagram",
+    ],
+
+    # =========================================================
     # EMISSIONS
-    # -------------------------    
-    
+    # =========================================================
     "emissions.stack_monitoring_method": [
         "annual emission testing",
         "stack emissions",
         "air emissions",
         "emissions monitoring",
         "atmospheric emissions",
+        "stack monitoring",
+        "periodic stack emissions testing",
     ],
     "emissions.testing_frequency": [
         "annual emission testing",
         "annual",
         "periodic testing",
         "regular testing",
+        "testing frequency",
     ],
     "emissions.pyrolysis_gas_end_use_approach": [
         "combustion gases burned in an integrated furnace",
@@ -359,6 +661,9 @@ REQUIREMENT_HINTS = {
         "gas burners",
         "integrated furnace",
         "heat is partially reused to sustain the process",
+        "combusted in integrated furnace",
+        "sealed combustion system",
+        "gas recovery and sealed combustion",
     ],
     "emissions.emissions_control_system": [
         "controlled combustion",
@@ -366,17 +671,19 @@ REQUIREMENT_HINTS = {
         "gas burners",
         "controlled combustion systems for process gases",
         "thermal control",
+        "sealed combustion system",
+        "real-time digital monitoring",
     ],
 
-    # -------------------------
-    # EMISSIONS
-    # -------------------------
-    
+    # =========================================================
+    # MANAGEMENT
+    # =========================================================
     "management.adaptive_management_plan": [
         "adaptive management",
         "adaptive management framework",
         "review operational assumptions",
         "revise monitoring approach",
+        "corrective action framework",
     ],
     "management.information_sharing_plan": [
         "information sharing",
@@ -384,12 +691,14 @@ REQUIREMENT_HINTS = {
         "report findings",
         "share results",
         "internal review",
+        "information sharing plan",
     ],
     "management.emergency_response_plan": [
         "emergency response",
         "incident response",
         "contingency",
         "response procedures",
+        "emergency response plan",
     ],
     "management.pause_or_stop_conditions": [
         "pause",
@@ -397,6 +706,7 @@ REQUIREMENT_HINTS = {
         "suspend operations",
         "conditions for resumption",
         "operations may be paused",
+        "pause or stop conditions",
     ],
     "management.monitoring_triggers": [
         "trigger",
@@ -404,9 +714,10 @@ REQUIREMENT_HINTS = {
         "exceedance",
         "review points",
         "conditions for resumption",
+        "corrective actions",
+        "monitoring obligations",
     ],
 }
-
 
 DOMAIN_REQUIREMENTS = {
     "eligibility": [
@@ -444,26 +755,39 @@ DOMAIN_REQUIREMENTS = {
         "feedstock.pre_project_biomass_use",
         "feedstock.feedstock_accounting_module_compliance",
         "feedstock.moisture_measurement",
+        "feedstock.moisture_control_plan",
     ],
     "storage": [
         "methodology.storage_pathway",
         "storage.storage_environment_stable",
         "storage.soil.deployment_methods",
         "storage.stockpiling_documented",
+        "storage.stockpiled_before_end_use",
+        "storage.soil.direct_application_evidence_pathway",
     ],
     "quantification": [
         "ghg_accounting.system_boundary_defined",
         "ghg_accounting.baseline_defined",
         "monitoring_reporting.uncertainty_method",
+        "quantification.input_variables",
+        "quantification.input_uncertainties",
+        "quantification.crediting_activity_boundaries",
+        "quantification.storage_emissions_accounted",
         "biochar.characterization.chemical_analysis_performed",
         "biochar.characterization.lab_reports",
         "biochar.characterization.required_measurements_complete",
         "biochar.characterization.measurement_values",
+        "biochar.characterization.approach_description",
+        "biochar.characterization.ongoing_monitoring_plan",
+        "biochar.characterization.contaminant_testing",
+        "biochar.characterization.contaminant_testing_frequency",
         "product.standard_compliance",
+        "product.certification_scheme",
     ],
     "traceability": [
         "traceability.chain_of_custody",
         "traceability.records_archived",
+        "traceability.chain_of_custody_diagram",
     ],
     "emissions": [
         "emissions.stack_monitoring_method",
