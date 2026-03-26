@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from schemas.project_schema import get_empty_project_data
 from engine.inference import run_inference_layer
 from engine.mappers import run_mapper_pipeline
@@ -17,6 +17,7 @@ def set_nested_value(data: Dict[str, Any], path: str, value: Any) -> None:
         cursor = cursor[key]
 
     cursor[keys[-1]] = value
+    
 
 def _build_field_schema_index() -> Dict[str, Dict[str, Any]]:
     return {
@@ -174,7 +175,6 @@ def _resolve_field_candidates(
     resolution_log: List[Dict[str, Any]] = []
 
     for path, candidates in grouped.items():
-        active_candidates = list(candidates)
 
         if path in invalidated_paths:
             resolution_log.append(
