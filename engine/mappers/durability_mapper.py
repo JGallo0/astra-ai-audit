@@ -27,22 +27,23 @@ def _instructions() -> str:
 Focus only on durability and declared durability option.
 
 Important interpretation rules:
-- Count methodology.durability_option when the project explicitly states the durability
-  classification/pathway/threshold selected under Isometric.
-- Count eligibility.durability_years when the project explicitly references a +200-year or
-  +1000-year durability pathway/classification/threshold.
-- Use only these allowed durability_option values when supported:
+- Count methodology.durability_option when the project explicitly states the selected
+  durability classification, durability pathway, durability threshold, permanence threshold,
+  or equivalent under the methodology.
+- Count eligibility.durability_years when the project explicitly references a 200-year or
+  1000-year durability class/pathway/threshold, even if written with symbols like +200-year.
+- Use only these allowed methodology.durability_option values:
   "200", "1000", "combined_200_1000"
-- Do not require operational data; narrative and methodological statements are acceptable here
-  if they are explicit.
-- Prefer null over false if the evidence is unclear.
+- Narrative and methodological statements are sufficient if explicit.
+- Prefer null over false if unclear.
 
-Strong signals:
+Examples of strong signals:
 - "+200-year durability classification"
 - "+200-year durability pathway"
-- "The project applies the +200-year durability classification under the Isometric protocol"
-- "Fully support the +200-year durability pathway"
-- equivalent wording for +1000-year or combined 200/1000
+- "200-year durability threshold"
+- "the project applies the +200-year durability classification"
+- "permanence is demonstrated under the 200-year threshold"
+- equivalent wording for 1000-year or combined 200/1000
 """
 
 
@@ -51,10 +52,10 @@ def _set_durability_200(field_map: Dict[str, Dict[str, Any]]) -> None:
         field_map,
         path="methodology.durability_option",
         value="200",
-        evidence="Heuristic match: explicit +200-year durability classification/pathway wording found.",
+        evidence="Heuristic match: explicit 200-year durability threshold/classification/pathway found.",
         extractor="durability_mapper",
         fill_method="heuristic",
-        confidence=0.97,
+        confidence=0.98,
         evidence_strength="strong",
         evidence_mode="direct",
     )
@@ -63,10 +64,10 @@ def _set_durability_200(field_map: Dict[str, Dict[str, Any]]) -> None:
         field_map,
         path="eligibility.durability_years",
         value=200,
-        evidence="Heuristic match: explicit +200-year durability classification/pathway wording found.",
+        evidence="Heuristic match: explicit 200-year durability threshold/classification/pathway found.",
         extractor="durability_mapper",
         fill_method="heuristic",
-        confidence=0.97,
+        confidence=0.98,
         evidence_strength="strong",
         evidence_mode="direct",
     )
@@ -77,10 +78,10 @@ def _set_durability_1000(field_map: Dict[str, Dict[str, Any]]) -> None:
         field_map,
         path="methodology.durability_option",
         value="1000",
-        evidence="Heuristic match: explicit +1000-year durability classification/pathway wording found.",
+        evidence="Heuristic match: explicit 1000-year durability threshold/classification/pathway found.",
         extractor="durability_mapper",
         fill_method="heuristic",
-        confidence=0.97,
+        confidence=0.98,
         evidence_strength="strong",
         evidence_mode="direct",
     )
@@ -89,10 +90,10 @@ def _set_durability_1000(field_map: Dict[str, Dict[str, Any]]) -> None:
         field_map,
         path="eligibility.durability_years",
         value=1000,
-        evidence="Heuristic match: explicit +1000-year durability classification/pathway wording found.",
+        evidence="Heuristic match: explicit 1000-year durability threshold/classification/pathway found.",
         extractor="durability_mapper",
         fill_method="heuristic",
-        confidence=0.97,
+        confidence=0.98,
         evidence_strength="strong",
         evidence_mode="direct",
     )
@@ -114,22 +115,34 @@ def apply_local_heuristics(
         r"combined 200 1000",
         r"200/1000",
         r"200-year and 1000-year",
+        r"both 200[- ]year and 1000[- ]year",
     ]
+
     durability_1000_patterns = [
         r"\+?\s*1000[- ]year durability",
         r"1000[- ]year durability pathway",
         r"1000[- ]year durability classification",
-        r"durability threshold.{0,20}1000",
+        r"1000[- ]year durability threshold",
+        r"durability threshold.{0,30}1000",
+        r"permanence threshold.{0,30}1000",
         r"at least 1000 years",
+        r"demonstrat(?:e|es|ed).{0,40}1000[- ]year",
     ]
+
     durability_200_patterns = [
         r"\+?\s*200[- ]year durability",
         r"200[- ]year durability pathway",
         r"200[- ]year durability classification",
-        r"durability threshold.{0,20}200",
+        r"200[- ]year durability threshold",
+        r"durability threshold.{0,30}200",
+        r"permanence threshold.{0,30}200",
         r"fully support the \+?200[- ]year durability pathway",
         r"applies the \+?200[- ]year durability classification",
         r"targets the \+?200[- ]year durability class",
+        r"demonstrat(?:e|es|ed).{0,40}200[- ]year",
+        r"under the \+?200[- ]year threshold",
+        r"selected durability threshold.{0,30}200",
+        r"durability class.{0,30}200",
     ]
 
     if any(re.search(p, combined_text, re.IGNORECASE | re.DOTALL) for p in combined_200_1000_patterns):
@@ -140,7 +153,7 @@ def apply_local_heuristics(
             evidence="Heuristic match: explicit combined 200/1000 durability wording found.",
             extractor="durability_mapper",
             fill_method="heuristic",
-            confidence=0.96,
+            confidence=0.97,
             evidence_strength="strong",
             evidence_mode="direct",
         )
