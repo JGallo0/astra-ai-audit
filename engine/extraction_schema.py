@@ -1,6 +1,9 @@
 # engine/extraction_schema.py
 
 EXTRACTION_FIELDS = [
+    # =========================================================
+    # METHODOLOGY
+    # =========================================================
     {
         "path": "methodology.standard",
         "type": "string",
@@ -31,6 +34,19 @@ EXTRACTION_FIELDS = [
         "allowed_values": ["200", "1000", "combined_200_1000"],
         "description": "Declared durability option.",
     },
+
+    # =========================================================
+    # PROJECT
+    # =========================================================
+    {
+        "path": "project.project_boundary_defined",
+        "type": "boolean",
+        "description": "Whether the project boundary is explicitly defined.",
+    },
+
+    # =========================================================
+    # ELIGIBILITY
+    # =========================================================
     {
         "path": "eligibility.net_negative_claim",
         "type": "boolean",
@@ -44,12 +60,31 @@ EXTRACTION_FIELDS = [
     {
         "path": "eligibility.durability_years",
         "type": "integer",
-        "description": "Durability duration in years when stated.",
+        "description": "Durability duration in years when stated or inferred.",
     },
+    {
+        "path": "eligibility.permanence_claim",
+        "type": "boolean",
+        "description": "Whether the project explicitly claims permanence or long-term carbon storage.",
+    },
+
+    # =========================================================
+    # PRODUCTION
+    # =========================================================
     {
         "path": "production.pyrolysis_technology",
         "type": "string",
         "description": "Pyrolysis technology type used in the project.",
+    },
+    {
+        "path": "production.thermal_process_type",
+        "type": "string",
+        "description": "Thermal conversion process type described by the project.",
+    },
+    {
+        "path": "production.system_description",
+        "type": "string",
+        "description": "Narrative description of the production system or technology configuration.",
     },
     {
         "path": "production.reactor_design_diagram",
@@ -96,6 +131,10 @@ EXTRACTION_FIELDS = [
         "type": "boolean",
         "description": "Whether the end material process description is evidenced.",
     },
+
+    # =========================================================
+    # SAMPLING
+    # =========================================================
     {
         "path": "sampling.method",
         "type": "string",
@@ -112,10 +151,19 @@ EXTRACTION_FIELDS = [
         "type": "boolean",
         "description": "Whether a sampling plan is evidenced.",
     },
+
+    # =========================================================
+    # FEEDSTOCK
+    # =========================================================
     {
         "path": "feedstock.biomass_type",
         "type": "string",
         "description": "Biomass/feedstock type.",
+    },
+    {
+        "path": "feedstock.certification_scheme",
+        "type": "string",
+        "description": "Feedstock or biomass sourcing certification scheme, when applicable.",
     },
     {
         "path": "feedstock.pre_project_biomass_use",
@@ -137,6 +185,10 @@ EXTRACTION_FIELDS = [
         "type": "boolean",
         "description": "Whether feedstock moisture measurement is evidenced.",
     },
+
+    # =========================================================
+    # QUANTIFICATION / GHG ACCOUNTING
+    # =========================================================
     {
         "path": "quantification.input_variables",
         "type": "boolean",
@@ -156,6 +208,35 @@ EXTRACTION_FIELDS = [
         "path": "quantification.storage_emissions_accounted",
         "type": "boolean",
         "description": "Whether storage emissions are accounted for.",
+    },
+    {
+        "path": "quantification.lca_performed",
+        "type": "boolean",
+        "description": "Whether an LCA or equivalent lifecycle quantification study is evidenced.",
+    },
+    {
+        "path": "ghg_accounting.system_boundary_defined",
+        "type": "boolean",
+        "description": "Whether the GHG accounting system boundary is defined.",
+    },
+
+    # =========================================================
+    # STORAGE
+    # =========================================================
+    {
+        "path": "storage.storage_module",
+        "type": "string",
+        "description": "Storage module or storage category used by the project.",
+    },
+    {
+        "path": "storage.storage_location",
+        "type": "string",
+        "description": "Storage location or storage destination described by the project.",
+    },
+    {
+        "path": "storage.storage_monitoring_plan",
+        "type": "boolean",
+        "description": "Whether a storage monitoring plan is evidenced.",
     },
     {
         "path": "storage.storage_environment_stable",
@@ -182,11 +263,19 @@ EXTRACTION_FIELDS = [
         "type": "boolean",
         "description": "Whether evidence exists for direct soil application pathway.",
     },
+
+    # =========================================================
+    # TRACEABILITY
+    # =========================================================
     {
         "path": "traceability.chain_of_custody_diagram",
         "type": "boolean",
         "description": "Whether a chain of custody diagram or equivalent is evidenced.",
     },
+
+    # =========================================================
+    # MANAGEMENT
+    # =========================================================
     {
         "path": "management.adaptive_management_plan",
         "type": "boolean",
@@ -198,6 +287,34 @@ EXTRACTION_FIELDS = [
         "description": "Whether monitoring triggers are documented.",
     },
     {
+        "path": "management.pause_or_stop_conditions",
+        "type": "boolean",
+        "description": "Whether pause or stop conditions are documented.",
+    },
+
+    # =========================================================
+    # MONITORING / REPORTING
+    # =========================================================
+    {
+        "path": "monitoring_reporting.monitoring_plan",
+        "type": "boolean",
+        "description": "Whether a monitoring plan is evidenced.",
+    },
+    {
+        "path": "monitoring_reporting.uncertainty_method",
+        "type": "string",
+        "description": "Method used to address or quantify uncertainty.",
+    },
+    {
+        "path": "monitoring_reporting.verification_ready",
+        "type": "boolean",
+        "description": "Whether the project appears verification-ready from a monitoring/reporting perspective.",
+    },
+
+    # =========================================================
+    # RISK ASSESSMENT
+    # =========================================================
+    {
         "path": "risk_assessment.fuel_use_reversal_risk",
         "type": "boolean",
         "description": "Whether fuel-use reversal risk assessment is evidenced.",
@@ -206,6 +323,20 @@ EXTRACTION_FIELDS = [
         "path": "risk_assessment.mitigation_plan",
         "type": "boolean",
         "description": "Whether a mitigation plan is documented.",
+    },
+
+    # =========================================================
+    # EMISSIONS
+    # =========================================================
+    {
+        "path": "emissions.syngas_handling",
+        "type": "string",
+        "description": "How pyrolysis gases or syngas are handled, combusted, flared, or otherwise treated.",
+    },
+    {
+        "path": "emissions.emissions_sources_identified",
+        "type": "boolean",
+        "description": "Whether emissions sources are identified in the project documentation.",
     },
     {
         "path": "emissions.stack_monitoring_method",
@@ -217,6 +348,10 @@ EXTRACTION_FIELDS = [
         "type": "string",
         "description": "Testing frequency for stack emissions monitoring.",
     },
+
+    # =========================================================
+    # LEGAL
+    # =========================================================
     {
         "path": "legal.applicable_environmental_requirements",
         "type": "boolean",
@@ -227,6 +362,10 @@ EXTRACTION_FIELDS = [
         "type": "boolean",
         "description": "Whether regulatory measurement methods are documented.",
     },
+
+    # =========================================================
+    # BIOCHAR CHARACTERIZATION
+    # =========================================================
     {
         "path": "biochar.characterization.chemical_analysis_performed",
         "type": "boolean",
@@ -267,6 +406,10 @@ EXTRACTION_FIELDS = [
         "type": "string",
         "description": "Frequency of contaminant testing.",
     },
+
+    # =========================================================
+    # PRODUCT
+    # =========================================================
     {
         "path": "product.standard_compliance",
         "type": "boolean",
@@ -275,6 +418,11 @@ EXTRACTION_FIELDS = [
     {
         "path": "product.certification_scheme",
         "type": "string",
-        "description": "Certification scheme or reference standard used.",
+        "description": "Certification scheme or reference standard used at product level.",
+    },
+    {
+        "path": "product.end_use",
+        "type": "string",
+        "description": "Declared end use of the biochar product.",
     },
 ]
