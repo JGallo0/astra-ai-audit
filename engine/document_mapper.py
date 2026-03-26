@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from schemas.project_schema import get_empty_project_data
 
@@ -19,19 +19,230 @@ def set_nested_value(data: Dict[str, Any], path: str, value: Any) -> None:
     cursor[keys[-1]] = value
 
 
-def build_project_data_from_extraction(
+def _normalize_list(value: Any) -> List[str]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(x).strip() for x in value if str(x).strip()]
+    if isinstance(value, str):
+        return [value.strip()] if value.strip() else []
+    return [str(value).strip()]
+
+
+def _safe_float(value: Any, default: float = 0.0) -> float:
+    try:
+        if value is None or value == "":
+            return default
+        return float(value)
+    except Exception:
+        return default
+
+
+def _normalize_text(value: Any) -> str:
+    if value is None:
+        return ""
+    return str(value).strip().lower()
+
+
+def _action_priority(action: str) -> int:
+    action = _normalize_text(action)
+
+    priorities = {
+        "semantic_override": 60,
+        "override": 55,
+        "reclassify": 50,
+        "set": 40,
+        "fill": 35,
+        "fallback": 10,
+        "invalidate": 0,
+        "clear": 0,
+        "ignore": 0,
+    }
+    return priorities.get(action, 30)
+
+
+def _evidence_mode_priority(mode: str) -> int:
+    mode = _normalize_text(mode)
+
+    priorities = {
+        "direct": 40,
+        "inferred": 25,
+        "fallback": 10,
+    }
+    return priorities.get(mode, 15)
+
+
+def _evidence_strength_priority(strength: str) -> int:
+    strength = _normalize_text(strength)
+
+    priorities = {
+        "strong": 30,
+        "moderate": 20,
+        "weak": 10,
+    }
+    return priorities.get(strength, 0)
+
+
+def _candidate_score(item: Dict[str, Any]) -> float:
+    confidence = _safe_float(item.get("confidence"), 0.0)
+    action = item.get("resolution_action", "set")
+    evidence_mode = item.get("evidence_mode", "")
+    evidence_strength = item.get("evidence_strength", "")
+
+    score = 0.0
+    score += _action_priority(action)
+    score += _evidence_mode_priority(evidence_mode)
+    score += _evidence_strength_priority(evidence_strength)
+    score += confidence * 100.0
+
+    if item.get("fill_method") == "fallback":
+        score -= 15.0
+
+    if item.get("value") is None:
+        score -= 1000.0
+
+    return score
+
+
+def _collect_invalidated_paths(
     normalized_fields: List[Dict[str, Any]],
-) -> Dict[str, Any]:
-    data = get_empty_project_data()
+) -> Dict[str, List[Dict[str, Any]]]:
+    invalidated: Dict[str, List[Dict[str, Any]]] = {}
 
     for item in normalized_fields:
-        value = item.get("value")
-        path = item.get("path")
+        action = _normalize_text(item.get("resolution_action", "set"))
 
-        if value is None or not path:
+        related_paths: List[str] = []
+        related_paths.extend(_normalize_list(item.get("invalidates_paths")))
+        related_paths.extend(_normalize_list(item.get("supersedes_paths")))
+
+        reclassify_from = item.get("reclassify_from")
+        if reclassify_from:
+            related_paths.append(str(reclassify_from).strip())
+
+        if action in {"reclassify", "semantic_override", "override", "invalidate", "clear"}:
+            for path in related_paths:
+                invalidated.setdefault(path, []).append(
+                    {
+                        "by_path": item.get("path"),
+                        "action": action,
+                        "rule": item.get("inference_rule_id") or item.get("extractor"),
+                        "confidence": item.get("confidence"),
+                    }
+                )
+
+    return invalidated
+
+
+def _group_candidates_by_path(
+    normalized_fields: List[Dict[str, Any]],
+) -> Dict[str, List[Dict[str, Any]]]:
+    grouped: Dict[str, List[Dict[str, Any]]] = {}
+
+    for item in normalized_fields:
+        path = item.get("path")
+        if not path:
             continue
 
+        action = _normalize_text(item.get("resolution_action", "set"))
+
+        if action in {"invalidate", "clear", "ignore"}:
+            continue
+
+        if item.get("value") is None:
+            continue
+
+        grouped.setdefault(path, []).append(item)
+
+    return grouped
+
+
+def _resolve_field_candidates(
+    normalized_fields: List[Dict[str, Any]],
+) -> Tuple[Dict[str, Any], List[Dict[str, Any]], Dict[str, List[Dict[str, Any]]]]:
+    invalidated_paths = _collect_invalidated_paths(normalized_fields)
+    grouped = _group_candidates_by_path(normalized_fields)
+
+    resolved_fields: Dict[str, Any] = {}
+    resolution_log: List[Dict[str, Any]] = []
+
+    for path, candidates in grouped.items():
+        active_candidates = list(candidates)
+
+        if path in invalidated_paths:
+            resolution_log.append(
+                {
+                    "path": path,
+                    "status": "invalidated_by_other_rule",
+                    "invalidated_by": invalidated_paths[path],
+                    "candidate_count": len(candidates),
+                }
+            )
+            continue
+
+        ranked = sorted(
+            active_candidates,
+            key=_candidate_score,
+            reverse=True,
+        )
+
+        winner = ranked[0]
+        resolved_fields[path] = winner.get("value")
+
+        resolution_log.append(
+            {
+                "path": path,
+                "status": "resolved",
+                "winner": {
+                    "value": winner.get("value"),
+                    "extractor": winner.get("extractor"),
+                    "confidence": winner.get("confidence"),
+                    "evidence_mode": winner.get("evidence_mode"),
+                    "evidence_strength": winner.get("evidence_strength"),
+                    "fill_method": winner.get("fill_method"),
+                    "resolution_action": winner.get("resolution_action", "set"),
+                    "inference_rule_id": winner.get("inference_rule_id"),
+                },
+                "losers": [
+                    {
+                        "value": item.get("value"),
+                        "extractor": item.get("extractor"),
+                        "confidence": item.get("confidence"),
+                        "evidence_mode": item.get("evidence_mode"),
+                        "evidence_strength": item.get("evidence_strength"),
+                        "fill_method": item.get("fill_method"),
+                        "resolution_action": item.get("resolution_action", "set"),
+                        "inference_rule_id": item.get("inference_rule_id"),
+                    }
+                    for item in ranked[1:]
+                ],
+                "candidate_count": len(ranked),
+            }
+        )
+
+    return resolved_fields, resolution_log, invalidated_paths
+
+
+def build_project_data_from_extraction(
+    normalized_fields: List[Dict[str, Any]],
+    return_resolution_artifacts: bool = False,
+) -> Any:
+    data = get_empty_project_data()
+
+    resolved_fields, resolution_log, invalidated_paths = _resolve_field_candidates(
+        normalized_fields
+    )
+
+    for path, value in resolved_fields.items():
         set_nested_value(data, path, value)
+
+    if return_resolution_artifacts:
+        return {
+            "project_data": data,
+            "resolved_fields": resolved_fields,
+            "field_resolution_log": resolution_log,
+            "invalidated_paths": invalidated_paths,
+        }
 
     return data
 
@@ -64,7 +275,12 @@ def extract_project_data_from_contexts(
     normalized_fields = inference_output.get("normalized_fields", []) or normalized_fields
     inference_events = inference_output.get("inference_events", []) or []
 
-    project_data = build_project_data_from_extraction(normalized_fields)
+    build_output = build_project_data_from_extraction(
+        normalized_fields,
+        return_resolution_artifacts=True,
+    )
+
+    project_data = build_output["project_data"]
 
     consistency_output = run_consistency_checks(
         project_data=project_data,
@@ -76,6 +292,9 @@ def extract_project_data_from_contexts(
         "normalized_fields": normalized_fields,
         "raw_extraction": raw_extraction_bundle,
         "inference_events": inference_events,
+        "resolved_fields": build_output.get("resolved_fields", {}),
+        "field_resolution_log": build_output.get("field_resolution_log", []),
+        "invalidated_paths": build_output.get("invalidated_paths", {}),
         "consistency_flags": consistency_output.get("consistency_flags", []),
         "consistency_notes": consistency_output.get("consistency_notes", []),
     }
