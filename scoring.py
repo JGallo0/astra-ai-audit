@@ -35,7 +35,44 @@ def clip_int(
         out = default
     return max(min_value, min(max_value, out))
 
+def get_engine_requirement_score(item: Dict[str, Any]) -> int:
+    """
+    Prioriza o score estruturado da V2 do requirement_logic.py.
+    Fallback:
+    1) requirement_score
+    2) score
+    3) status -> score heurístico simples
+    """
+    requirement_score = item.get("requirement_score")
+    if requirement_score is not None:
+        return clip_int(requirement_score, default=0)
 
+    legacy_score = item.get("score")
+    if legacy_score is not None:
+        return clip_int(legacy_score, default=0)
+
+    status = safe_str(item.get("status", "")).strip().lower()
+
+    # Normaliza ambos padrões (engine + scoring)
+    if status in ["compliant", "conforme"]:
+        return 100
+    if status in ["partial", "parcialmente conforme"]:
+        return 50
+    if status in ["future_evidence_required"]:
+        return 35
+    if status in ["not_applicable", "não aplicável", "nao aplicavel"]:
+        return 0
+    if status in ["non_compliant", "não conforme", "nao conforme"]:
+        return 0
+    return 0
+
+
+def get_engine_requirement_score_fraction(item: Dict[str, Any]) -> float:
+    """
+    Mesmo helper acima, mas em escala 0.0–1.0.
+    """
+    return round(get_engine_requirement_score(item) / 100.0, 4)
+    
 def normalize_status(status: str) -> str:
     raw = safe_str(status).lower()
 
@@ -352,7 +389,12 @@ def calculate_weighted_overall_score(results: List[Dict[str, Any]]) -> float:
     total_weight = 0.0
 
     for item in results:
-        score = clip_int(item.get("score", 0), default=0)
+        status = safe_str(item.get("status", "")).strip().lower()
+
+        if status in ["not_applicable", "não aplicável", "nao aplicavel"]:
+            continue
+
+        score = get_engine_requirement_score(item)
         weight = item.get("weight", 1)
 
         try:
@@ -400,8 +442,13 @@ def summarize_module_scores(results: List[Dict[str, Any]]) -> Dict[str, float]:
     grouped: Dict[str, List[int]] = {}
 
     for item in results:
+        status = safe_str(item.get("status", "")).strip().lower()
+
+        if status in ["not_applicable", "não aplicável", "nao aplicavel"]:
+            continue
+
         module = safe_str(item.get("module", "Sem módulo"))
-        score = clip_int(item.get("score", 0), default=0)
+        score = get_engine_requirement_score(item)
         grouped.setdefault(module, []).append(score)
 
     return {
@@ -436,6 +483,8 @@ def summarize_results(results: List[Dict[str, Any]]) -> Dict[str, Any]:
             "module_confidence": {},
         }
 
+    compliance_summary = calculate_compliance_score(results)
+
     return {
         "total_requirements": len(results),
         "overall_score": calculate_weighted_overall_score(results),
@@ -444,4 +493,112 @@ def summarize_results(results: List[Dict[str, Any]]) -> Dict[str, Any]:
         "risk_counts": summarize_risk_counts(results),
         "module_scores": summarize_module_scores(results),
         "module_confidence": summarize_module_confidence(results),
+        "compliance_score": compliance_summary.get("score", 0.0),
+        "compliance_classification": classify_compliance_score(
+            compliance_summary.get("score", 0.0)
+        ),
     }
+
+# scoring.py
+
+def calculate_compliance_score(results):
+    """
+    Calcula score agregado da auditoria com base nos resultados da engine.
+
+    Prioridade:
+    1) requirement_score (V2 do requirement_logic.py)
+    2) score legado
+    3) fallback por status
+
+    Regras:
+    - not_applicable = excluído do denominador
+    - score final em escala 0-100
+    """
+    if not results:
+        return {
+            "score": 0.0,
+            "applicable_requirements": 0,
+            "compliant": 0,
+            "partial": 0,
+            "future_evidence_required": 0,
+            "non_compliant": 0,
+            "not_applicable": 0,
+            "error": 0,
+        }
+
+    compliant = 0
+    partial = 0
+    future_evidence_required = 0
+    non_compliant = 0
+    not_applicable = 0
+    error = 0
+
+    weighted_points = 0.0
+    applicable_requirements = 0
+
+    for r in results:
+        status = safe_str(r.get("status", "")).strip().lower()
+
+        if status in ["not_applicable", "não aplicável", "nao aplicavel"]:
+            not_applicable += 1
+            continue
+
+        applicable_requirements += 1
+
+        requirement_score = r.get("requirement_score")
+
+        if status in ["compliant", "conforme"]:
+            compliant += 1
+        elif status in ["partial", "parcialmente conforme"]:
+            partial += 1
+        elif status in ["future_evidence_required"]:
+            future_evidence_required += 1
+        elif status in ["non_compliant", "não conforme", "nao conforme"]:
+            non_compliant += 1
+        elif status in ["error", "erro de análise", "erro de analise"]:
+            error += 1
+        else:
+            error += 1
+
+        if requirement_score is not None:
+            weighted_points += get_engine_requirement_score_fraction(r)
+        else:
+            if status in ["compliant", "conforme"]:
+                weighted_points += 1.0
+            elif status in ["partial", "parcialmente conforme"]:
+                weighted_points += 0.5
+            elif status in ["future_evidence_required"]:
+                weighted_points += 0.35
+            elif status in ["non_compliant", "não conforme", "nao conforme"]:
+                weighted_points += 0.0
+            elif status in ["error", "erro de análise", "erro de analise"]:
+                weighted_points += 0.0
+            else:
+                weighted_points += 0.0
+
+    if applicable_requirements == 0:
+        score = 0.0
+    else:
+        score = round((weighted_points / applicable_requirements) * 100, 2)
+
+    return {
+        "score": score,
+        "applicable_requirements": applicable_requirements,
+        "compliant": compliant,
+        "partial": partial,
+        "future_evidence_required": future_evidence_required,
+        "non_compliant": non_compliant,
+        "not_applicable": not_applicable,
+        "error": error,
+    }
+def classify_compliance_score(score):
+    """
+    Classificação executiva alinhada com lógica interna do motor.
+    """
+    if score >= 90:
+        return "Strong"
+    if score >= 75:
+        return "Good"
+    if score >= 50:
+        return "Moderate"
+    return "Weak"

@@ -15,6 +15,7 @@ from project_config import (
     get_methodology_config,
     get_methodology_vector_store_id,
 )
+from scoring import calculate_compliance_score, classify_compliance_score
 from project_service import (
     create_project_record,
     list_projects_by_owner,
@@ -30,6 +31,7 @@ from docx.shared import Pt
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
+
 
 from smart_search import normalize_sources, rank_sources, build_smart_context
 from audit_engine import AuditEngine
@@ -66,9 +68,15 @@ from app_pages.validation_utils import (
     status_badge,
     risk_badge,
 )
+from schemas.project_schema import get_demo_project_data
+from versioning.methodology_manager import get_requirements
+from engine.requirement_logic import run_engine
+
+
 from app_pages.audit_runner import (
     execute_full_audit,
     execute_rerun_failures,
+
 )
 def safe_str(value):
     if value is None:
@@ -173,7 +181,7 @@ OPENAI_API_KEY = get_config_value("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY não encontrada em st.secrets nem no .env")
 
-MODEL_NAME = get_config_value("OPENAI_MODEL", "gpt-4.1")
+MODEL_NAME = get_config_value("OPENAI_MODEL", "gpt-4o-mini")
 
 PROJECT_MAX_RESULTS = get_int_config("PROJECT_MAX_RESULTS", 5)
 METHODOLOGY_MAX_RESULTS = get_int_config("METHODOLOGY_MAX_RESULTS", 5)
@@ -437,6 +445,9 @@ if "current_filters" not in st.session_state:
         "status": [],
         "risk": [],
     }
+
+if "structured_selected_modules" not in st.session_state:
+    st.session_state["structured_selected_modules"] = []
 
 # =========================================================
 # THEME / VISUAL
@@ -1524,14 +1535,6 @@ def render_project_manager(user_email: str):
         )
         st.rerun()
 
-    if st.session_state.get("current_project_name") or st.session_state.get("current_methodology"):
-        st.sidebar.markdown("---")
-        st.sidebar.success(
-            f"Projeto ativo: **{st.session_state.get('current_project_name') or '-'}**"
-        )
-        st.sidebar.info(
-            f"Metodologia ativa: **{METHODOLOGY_REGISTRY.get(st.session_state.get('current_methodology', ''), {}).get('label', '-')}**"
-        )
 # =========================================================
 # AUTH GATE
 # =========================================================
@@ -1584,17 +1587,325 @@ def render_header(lang: str):
 inject_custom_css()
 lang = st.session_state.get("language", "pt")
 st.session_state["language"] = lang
+
 # =========================================================
 # HEADER
 # =========================================================
 
 render_header(lang)
 
-active_methodology_label = METHODOLOGY_REGISTRY.get(
-    st.session_state.get("current_methodology", ""),
-    {}
-).get("label", "-")
+# =========================================================
+# AUDIT SCOPE CONFIG
+# =========================================================
 
+AUDIT_SCOPE_CONFIG = {
+    "Core Integrity": {
+        "label": "Core Integrity",
+        "help": "Foundational methodological integrity: eligibility, ownership, additionality, baseline, and system boundary.",
+        "modules": [
+            "Eligibility",
+            "Ownership",
+            "Additionality",
+            "Baseline",
+            "System Boundary",
+        ],
+        "default": True,
+    },
+    "Carbon Accounting": {
+        "label": "Carbon Accounting",
+        "help": "Net removals logic, carbon quantification, leakage, uncertainty, and lifecycle accounting.",
+        "modules": [
+            "Carbon Accounting",
+            "Biochar Carbon Quantification",
+            "Leakage",
+            "Uncertainty",
+            "LCA",
+        ],
+        "default": True,
+    },
+    "MRV & Verification": {
+        "label": "MRV & Verification",
+        "help": "Monitoring, traceability, data integrity, and audit readiness.",
+        "modules": [
+            "MRV",
+            "Traceability",
+        ],
+        "default": True,
+    },
+    "Durability & Storage": {
+        "label": "Durability & Storage",
+        "help": "Durability logic, storage integrity, reversal risk, and biochar quality.",
+        "modules": [
+            "Durability",
+            "Storage/End Use",
+            "Reversal Risk",
+            "Biochar Quality",
+        ],
+        "default": True,
+    },
+    "Operations": {
+        "label": "Operations",
+        "help": "Operational evidence for feedstock sourcing and technology configuration.",
+        "modules": [
+            "Feedstock",
+            "Technology",
+        ],
+        "default": False,
+    },
+    "Safeguards & Compliance": {
+        "label": "Safeguards & Compliance",
+        "help": "Environmental and social safeguards, permits, and legal compliance.",
+        "modules": [
+            "Safeguards",
+            "Regulatory Compliance",
+        ],
+        "default": False,
+    },
+}
+
+
+def resolve_selected_modules_from_scope(
+    requirements: List[Dict[str, Any]],
+    selected_scopes: List[str],
+) -> List[str]:
+    available_modules = {
+    r.get("module")
+    for r in requirements
+    if isinstance(r, dict) and r.get("module")
+}
+    resolved_modules: List[str] = []
+
+    for scope in selected_scopes:
+        scope_config = AUDIT_SCOPE_CONFIG.get(scope, {})
+        for module in scope_config.get("modules", []):
+            if module in available_modules and module not in resolved_modules:
+                resolved_modules.append(module)
+
+    # base obrigatória independentemente da escolha explícita do usuário
+    mandatory_modules = ["Eligibility"]
+
+    for mandatory_module in mandatory_modules:
+        if mandatory_module in available_modules and mandatory_module not in resolved_modules:
+            resolved_modules.insert(0, mandatory_module)
+
+    return resolved_modules
+
+def get_available_audit_scopes(requirements: List[Dict[str, Any]]) -> List[str]:
+    available_modules = {
+        r.get("module")
+        for r in requirements
+        if isinstance(r, dict) and r.get("module")
+    }
+
+    available_scopes: List[str] = []
+
+    for scope_name, scope_config in AUDIT_SCOPE_CONFIG.items():
+        scope_modules = scope_config.get("modules", [])
+        if any(module in available_modules for module in scope_modules):
+            available_scopes.append(scope_name)
+
+    return available_scopes
+
+
+def get_default_audit_scopes(available_scopes: List[str]) -> List[str]:
+    return [
+        scope_name
+        for scope_name in available_scopes
+        if AUDIT_SCOPE_CONFIG.get(scope_name, {}).get("default", False)
+    ]
+
+
+def get_scope_help_text(selected_scopes: List[str]) -> str:
+    parts = []
+    for scope in selected_scopes:
+        help_text = AUDIT_SCOPE_CONFIG.get(scope, {}).get("help")
+        if help_text:
+            parts.append(f"**{scope}:** {help_text}")
+    return "\n\n".join(parts)
+    
+# =========================================================
+# AUDITORIAS DISPONÍVEIS
+# =========================================================
+
+project_vs_id = st.session_state.get("current_project_vector_store_id")
+methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
+project_name = st.session_state.get("current_project_name")
+current_methodology = st.session_state.get("current_methodology")
+
+# ✅ CORREÇÃO PRINCIPAL
+structured_requirements = get_requirements_for_methodology(current_methodology)
+
+# ✅ DEBUG CRÍTICO (inserir aqui)
+st.caption(f"DEBUG requirements loaded: {len(structured_requirements)}")
+
+sample_modules = [
+    r.get("module")
+    for r in structured_requirements[:10]
+    if isinstance(r, dict)
+]
+
+st.caption(f"DEBUG sample modules: {sample_modules}")
+
+# fluxo continua normal
+available_structured_scopes = get_available_audit_scopes(structured_requirements)
+default_structured_scopes = get_default_audit_scopes(available_structured_scopes)
+
+if "structured_selected_scopes" not in st.session_state:
+    st.session_state["structured_selected_scopes"] = default_structured_scopes
+
+if project_vs_id and methodology_vs_id and project_name and current_methodology:
+
+    st.markdown("### Auditorias disponíveis")
+
+    structured_selected_scopes = st.multiselect(
+        "Escopo da auditoria estruturada",
+        options=available_structured_scopes,
+        default=st.session_state.get("structured_selected_scopes", default_structured_scopes),
+        help=(
+            "Core Integrity is the methodological foundation of the audit. "
+            "Eligibility is always enforced internally even if scope selection changes."
+        ),
+        key="structured_scope_selector_v2",
+    )
+
+    structured_selected_modules = resolve_selected_modules_from_scope(
+        requirements=structured_requirements,
+        selected_scopes=structured_selected_scopes,
+    )
+
+    st.session_state["structured_selected_scopes"] = structured_selected_scopes
+    st.session_state["structured_selected_modules"] = structured_selected_modules
+
+    st.caption(
+        "Módulos aplicados na V2: "
+        + (", ".join(structured_selected_modules) if structured_selected_modules else "none")
+    )
+
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
+        if st.button("Análise Exploratória", width="stretch", key="run_exploratory_button"):
+            st.session_state["audit_mode"] = "exploratory"
+            st.session_state["run_exploratory"] = True
+
+    with c2:
+        if st.button("Auditar projeto em desenvolvimento", width="stretch", key="run_development_button"):
+            st.session_state["audit_mode"] = "development"
+            st.session_state["run_structured"] = True
+
+    with c3:
+        if st.button("Auditar projeto em operação", width="stretch", key="run_operational_button"):
+            st.session_state["audit_mode"] = "operational"
+            st.session_state["run_structured"] = True
+
+else:
+    st.info("Selecione e ative um projeto e uma metodologia para iniciar a auditoria.")
+
+# =========================================================
+# EXECUÇÃO DA AUDITORIA ESTRUTURADA
+# =========================================================
+
+if st.session_state.get("run_structured"):
+
+    audit_mode = st.session_state.get("audit_mode", "development")
+
+    try:
+        requirements = get_requirements_for_methodology(current_methodology)
+
+        if not requirements:
+            st.error("Nenhum requisito estruturado foi carregado.")
+            st.stop()
+
+        with st.spinner("Executando auditoria estruturada..."):
+
+            engine = AuditEngine(
+                api_key=OPENAI_API_KEY,
+                model=MODEL_NAME,
+                project_vector_store_id=project_vs_id,
+                methodology_vector_store_id=methodology_vs_id,
+                project_name=project_name,
+                requirements=requirements,
+            )
+
+            selected_modules_for_v2 = st.session_state.get("structured_selected_modules") or None
+
+            st.caption(f"selected_modules V2: {selected_modules_for_v2}")
+            st.caption(f"n módulos selecionados: {len(selected_modules_for_v2 or [])}")
+            st.caption(f"total requirements carregados: {len(engine.requirements)}")
+            estimated_cost = len(engine.requirements) * 0.01
+            st.caption(f"Estimated cost: ~US$ {estimated_cost:.2f}")
+
+            output = engine.run_structured_engine_audit(
+                selected_modules=selected_modules_for_v2,
+                audit_mode=audit_mode,
+            )
+
+            st.session_state["structured_v2_output"] = output
+            st.session_state["run_structured"] = False
+
+        st.success("Auditoria concluída com sucesso.")
+
+    except Exception as e:
+        st.session_state["run_structured"] = False
+        st.error(f"Erro na auditoria estruturada: {e}")
+
+# =========================================================
+# RENDER RESULTADO V2
+# =========================================================
+
+structured_v2_output = st.session_state.get("structured_v2_output")
+
+if structured_v2_output:
+
+    st.markdown("---")
+    st.subheader("Resultado da Auditoria Estruturada")
+
+    results = structured_v2_output.get("results", [])
+    project_data = structured_v2_output.get("project_data", {})
+    normalized_fields = structured_v2_output.get("normalized_fields", [])
+    score_data = structured_v2_output.get("score_data", {})
+    score_label = structured_v2_output.get("score_label", "")
+
+    selected_modules_for_v2 = st.session_state.get("structured_selected_modules") or None
+
+    st.caption(f"selected_modules V2: {selected_modules_for_v2}")
+    st.caption(f"requirements carregados na V2: {len(structured_requirements)}")
+
+    # =========================
+    # SCORE
+    # =========================
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric("Compliance Score", f"{score_data.get('score', 0):.1f}")
+
+    with col2:
+        st.metric("Rating", score_label)
+
+    # =========================
+    # MATRIZ
+    # =========================
+
+    if results:
+        df = pd.DataFrame(results)
+        st.dataframe(df, hide_index=True, width="stretch")
+    else:
+        st.warning("Nenhum resultado retornado pela engine.")
+
+    # =========================
+    # DEBUG
+    # =========================
+
+    with st.expander("Project Data (extraído)", expanded=False):
+        st.write(project_data)
+
+    with st.expander("Normalized Fields", expanded=False):
+        st.write(normalized_fields)
+
+    with st.expander("Payload completo", expanded=False):
+        st.write(structured_v2_output)
+        
 active_methodology_label = METHODOLOGY_REGISTRY.get(
     st.session_state.get("current_methodology", ""),
     {}
@@ -1616,6 +1927,13 @@ with st.sidebar:
         render_project_manager(current_user["email"])
 
     st.markdown("### Configurações")
+
+    if st.session_state.get("current_project_name"):
+        st.markdown("---")
+        st.success(f"Projeto ativo: {st.session_state['current_project_name']}")
+
+    if st.session_state.get("current_methodology"):
+        st.info(f"Metodologia: {st.session_state['current_methodology']}")
 
     language_choice = st.selectbox(
         t(lang, "language_label"),
@@ -2170,125 +2488,6 @@ def make_progress_callback(progress_container, status_container):
 # AUDIT SCOPE MAPPING
 # =========================================================
 
-# =========================================================
-# AUDIT SCOPE CONFIG
-# =========================================================
-
-AUDIT_SCOPE_CONFIG = {
-    "Core Integrity": {
-        "label": "Core Integrity",
-        "help": "Foundational methodological integrity: eligibility, ownership, additionality, baseline, and system boundary.",
-        "modules": [
-            "Eligibility",
-            "Ownership",
-            "Additionality",
-            "Baseline",
-            "System Boundary",
-        ],
-        "default": True,
-    },
-    "Carbon Accounting": {
-        "label": "Carbon Accounting",
-        "help": "Net removals logic, carbon quantification, leakage, uncertainty, and lifecycle accounting.",
-        "modules": [
-            "Carbon Accounting",
-            "Biochar Carbon Quantification",
-            "Leakage",
-            "Uncertainty",
-            "LCA",
-        ],
-        "default": True,
-    },
-    "MRV & Verification": {
-        "label": "MRV & Verification",
-        "help": "Monitoring, traceability, data integrity, and audit readiness.",
-        "modules": [
-            "MRV",
-            "Traceability",
-        ],
-        "default": True,
-    },
-    "Durability & Storage": {
-        "label": "Durability & Storage",
-        "help": "Durability logic, storage integrity, reversal risk, and biochar quality.",
-        "modules": [
-            "Durability",
-            "Storage/End Use",
-            "Reversal Risk",
-            "Biochar Quality",
-        ],
-        "default": True,
-    },
-    "Operations": {
-        "label": "Operations",
-        "help": "Operational evidence for feedstock sourcing and technology configuration.",
-        "modules": [
-            "Feedstock",
-            "Technology",
-        ],
-        "default": False,
-    },
-    "Safeguards & Compliance": {
-        "label": "Safeguards & Compliance",
-        "help": "Environmental and social safeguards, permits, and legal compliance.",
-        "modules": [
-            "Safeguards",
-            "Regulatory Compliance",
-        ],
-        "default": False,
-    },
-}
-
-
-def resolve_selected_modules_from_scope(
-    requirements: List[Dict[str, Any]],
-    selected_scopes: List[str],
-) -> List[str]:
-    available_modules = {r["module"] for r in requirements}
-    resolved_modules: List[str] = []
-
-    for scope in selected_scopes:
-        scope_config = AUDIT_SCOPE_CONFIG.get(scope, {})
-        for module in scope_config.get("modules", []):
-            if module in available_modules and module not in resolved_modules:
-                resolved_modules.append(module)
-
-    # base obrigatória independentemente da escolha explícita do usuário
-    mandatory_modules = ["Eligibility"]
-
-    for mandatory_module in mandatory_modules:
-        if mandatory_module in available_modules and mandatory_module not in resolved_modules:
-            resolved_modules.insert(0, mandatory_module)
-
-    return resolved_modules
-
-def get_available_audit_scopes(requirements: List[Dict[str, Any]]) -> List[str]:
-    available_modules = {r["module"] for r in requirements}
-    available_scopes: List[str] = []
-
-    for scope_name, scope_config in AUDIT_SCOPE_CONFIG.items():
-        scope_modules = scope_config.get("modules", [])
-        if any(module in available_modules for module in scope_modules):
-            available_scopes.append(scope_name)
-
-    return available_scopes
-
-
-def get_default_audit_scopes(available_scopes: List[str]) -> List[str]:
-    return [
-        scope_name
-        for scope_name in available_scopes
-        if AUDIT_SCOPE_CONFIG.get(scope_name, {}).get("default", False)
-    ]
-
-
-def get_scope_help_text(selected_scopes: List[str]) -> str:
-    parts = []
-    for scope in selected_scopes:
-        help_text = AUDIT_SCOPE_CONFIG.get(scope, {}).get("help")
-        if help_text:
-            parts.append(f"**{scope}:** {help_text}")
-    return "\n\n".join(parts)
     
 def render_full_audit_mode():
     project_vs_id = st.session_state.get("current_project_vector_store_id")
@@ -2300,9 +2499,7 @@ def render_full_audit_mode():
 
     st.markdown(f"### {t(lang, 'full_audit_mode')}")
 
-    requirements = get_requirements_for_methodology(
-        st.session_state.get("current_methodology")
-    )
+    requirements = get_requirements()
 
     all_modules = sorted(list({r["module"] for r in requirements})) if requirements else []
     available_scopes = get_available_audit_scopes(requirements)
@@ -2329,11 +2526,12 @@ def render_full_audit_mode():
             selected_scopes=selected_scopes,
         )
 
+        st.session_state["structured_selected_modules"] = selected_modules
+
         selected_requirements = [
             r for r in requirements
             if r["module"] in selected_modules
         ]
-
         st.caption(
             "Modules covered in this run: "
             + (", ".join(selected_modules) if selected_modules else "none")
@@ -2590,6 +2788,10 @@ def render_full_audit_mode():
         run_id = st.session_state["last_full_audit_run_id"]
         project_name = st.session_state.get("current_project_name") or "Projeto sem nome"
 
+        engine_results = st.session_state.get("last_full_audit_results", [])
+        score_data = calculate_compliance_score(engine_results)
+        score_label = classify_compliance_score(score_data["score"])        
+
         tab_summary, tab_matrix, tab_details, tab_downloads, tab_history = st.tabs([
             t(lang, "summary_tab"),
             t(lang, "matrix_tab"),
@@ -2600,6 +2802,20 @@ def render_full_audit_mode():
 
         with tab_summary:
             validation.render_executive_summary(summary)
+
+            st.markdown("#### Compliance Score")
+
+            c1, c2, c3, c4, c5, c6 = st.columns(6)
+            c1.metric("Score", f'{score_data["score"]}%')
+            c2.metric("Rating", score_label)
+            c3.metric("Applicable", score_data["applicable_requirements"])
+            c4.metric("Compliant", score_data["compliant"])
+            c5.metric("Partial", score_data["partial"])
+            c6.metric("Non-compliant", score_data["non_compliant"])
+
+            st.caption(
+                f'Not applicable: {score_data["not_applicable"]} | Errors: {score_data["error"]}'
+            )
 
             s1, s2, s3, s4 = st.columns(4)
             s1.metric("Requisitos", summary.get("total_requirements", 0))
@@ -2632,6 +2848,20 @@ def render_full_audit_mode():
                     for mod in sorted(module_scores.keys())
                 ])
                 st.dataframe(module_df, hide_index=True, width="stretch")
+
+            st.markdown("#### Status")
+            status_df = pd.DataFrame([
+                {"Status": k, "Quantidade": v}
+                for k, v in (summary.get("status_counts", {}) or {}).items()
+            ])
+            st.dataframe(status_df, hide_index=True, width="stretch")
+
+            st.markdown("#### Risco")
+            risk_df = pd.DataFrame([
+                {"Risco": k, "Quantidade": v}
+                for k, v in (summary.get("risk_counts", {}) or {}).items()
+            ])
+            st.dataframe(risk_df, hide_index=True, width="stretch")
 
             st.markdown("#### Status")
             status_df = pd.DataFrame([

@@ -1,0 +1,2862 @@
+# engine/requirement_logic.py
+
+# =========================
+# LOGIC FUNCTIONS
+# =========================
+
+def eval_biochar_applicability(data):
+    """
+    Determines whether the project qualifies as a biochar CDR activity
+    """
+    try:
+        eligibility = data.get("eligibility", {})
+        production = data.get("production", {})
+        storage = data.get("storage", {})
+
+        net_negative = eligibility.get("net_negative_claim")
+        additionality = eligibility.get("additionality_claim")
+        durability_years = eligibility.get("durability_years")
+        pyrolysis_tech = production.get("pyrolysis_technology")
+        storage_stable = storage.get("storage_environment_stable")
+
+        field_scores = [
+            score_boolean_field(
+                "eligibility.net_negative_claim",
+                net_negative,
+                25,
+                note_if_missing="Project does not demonstrate net-negative emissions.",
+            ),
+            score_boolean_field(
+                "eligibility.additionality_claim",
+                additionality,
+                20,
+                note_if_missing="Additionality is not demonstrated.",
+            ),
+            {
+                "path": "eligibility.durability_years",
+                "weight": 25,
+                "score": 25 if (durability_years or 0) >= 200 else 0,
+                "status": "pass" if (durability_years or 0) >= 200 else "fail",
+                "notes": [] if (durability_years or 0) >= 200 else ["Durability must be at least 200 years."],
+            },
+            score_presence_field(
+                "production.pyrolysis_technology",
+                pyrolysis_tech,
+                15,
+                note_if_missing="Pyrolysis technology is not defined.",
+            ),
+            score_boolean_field(
+                "storage.storage_environment_stable",
+                storage_stable,
+                15,
+                note_if_missing="Storage environment stability is not demonstrated.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        # HARD eligibility gate
+        if (
+            net_negative is not True
+            or (durability_years or 0) < 200
+            or not pyrolysis_tech
+        ):
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=60,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [i["path"] for i in field_scores if i["status"] == "missing"]
+        failed_fields = [i["path"] for i in field_scores if i["status"] == "fail"]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Project meets core eligibility criteria for biochar carbon removal.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"eval_biochar_applicability execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+
+def eval_reactor_requirements(data):
+    """
+    Ensures reactor system and monitoring are properly defined
+    """
+    try:
+        production = data.get("production", {})
+
+        pyrolysis = production.get("pyrolysis_technology")
+        diagram = production.get("reactor_design_diagram")
+        sensors = production.get("sensor_inventory")
+
+        field_scores = [
+            score_presence_field(
+                "production.pyrolysis_technology",
+                pyrolysis,
+                40,
+                note_if_missing="Pyrolysis technology is not defined.",
+            ),
+            score_boolean_field(
+                "production.reactor_design_diagram",
+                diagram,
+                30,
+                note_if_missing="Reactor design diagram is missing.",
+            ),
+            score_boolean_field(
+                "production.sensor_inventory",
+                sensors,
+                30,
+                note_if_missing="Sensor inventory is missing.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if not pyrolysis:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=50,
+                compliant_threshold=100,
+            )
+
+        return build_logic_result(
+            status=status,
+            missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+            failed_fields=[i["path"] for i in field_scores if i["status"] == "fail"],
+            notes=collect_field_score_notes(field_scores),
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"eval_reactor_requirements execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+def eval_storage_requirements(data):
+    try:
+        storage = data.get("storage", {})
+
+        storage_module = storage.get("storage_module")
+        storage_location = storage.get("storage_location")
+        storage_monitoring_plan = storage.get("storage_monitoring_plan")
+
+        field_scores = [
+            score_presence_field(
+                "storage.storage_module",
+                storage_module,
+                50,
+                note_if_missing="Storage module is not defined.",
+            ),
+            score_presence_field(
+                "storage.storage_location",
+                storage_location,
+                25,
+                note_if_missing="Storage location is not defined.",
+            ),
+            score_boolean_field(
+                "storage.storage_monitoring_plan",
+                storage_monitoring_plan,
+                25,
+                note_if_missing="Storage monitoring plan is missing.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if not storage_module:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=50,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Storage module, location, and monitoring plan are present.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"eval_storage_requirements execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+def eval_feedstock_requirements(data):
+    try:
+        feedstock = data.get("feedstock", {})
+
+        biomass_type = feedstock.get("biomass_type")
+        pre_project_biomass_use = feedstock.get("pre_project_biomass_use")
+        accounting_compliance = feedstock.get("feedstock_accounting_module_compliance")
+
+        field_scores = [
+            score_presence_field(
+                "feedstock.biomass_type",
+                biomass_type,
+                50,
+                note_if_missing="Biomass/feedstock type is not defined.",
+            ),
+            score_presence_field(
+                "feedstock.pre_project_biomass_use",
+                pre_project_biomass_use,
+                20,
+                note_if_missing="Pre-project biomass use is not defined.",
+            ),
+            score_boolean_field(
+                "feedstock.feedstock_accounting_module_compliance",
+                accounting_compliance,
+                30,
+                note_if_missing="Feedstock accounting module compliance is not evidenced.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if not biomass_type:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=50,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Feedstock type, pre-project use, and accounting module compliance are present.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"eval_feedstock_requirements execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+
+def eval_monitoring_requirements(data):
+    try:
+        monitoring = data.get("monitoring_reporting", {})
+
+        monitoring_plan = monitoring.get("monitoring_plan")
+        uncertainty_method = monitoring.get("uncertainty_method")
+        verification_ready = monitoring.get("verification_ready")
+
+        field_scores = [
+            score_boolean_field(
+                "monitoring_reporting.monitoring_plan",
+                monitoring_plan,
+                50,
+                note_if_missing="Monitoring plan is missing.",
+            ),
+            score_presence_field(
+                "monitoring_reporting.uncertainty_method",
+                uncertainty_method,
+                20,
+                note_if_missing="Uncertainty method is missing.",
+            ),
+            score_boolean_field(
+                "monitoring_reporting.verification_ready",
+                verification_ready,
+                30,
+                note_if_missing="Verification readiness is not evidenced.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if monitoring_plan is not True:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=50,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Monitoring plan, uncertainty method, and verification readiness are present.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"eval_monitoring_requirements execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+# =========================
+# ENGINE RUNNER
+# =========================
+
+def build_logic_result(
+    status,
+    missing_fields=None,
+    failed_fields=None,
+    notes=None,
+    requirement_score=None,
+    field_scores=None,
+    requirement_rating=None,
+):
+    return {
+        "status": status,
+        "missing_fields": missing_fields or [],
+        "failed_fields": failed_fields or [],
+        "notes": notes or [],
+        "requirement_score": requirement_score,
+        "field_scores": field_scores or [],
+        "requirement_rating": requirement_rating,
+    }
+
+def score_boolean_field(
+    path,
+    value,
+    weight,
+    *,
+    note_if_missing=None,
+):
+    if value is True:
+        return {
+            "path": path,
+            "weight": weight,
+            "score": weight,
+            "status": "pass",
+            "notes": [],
+        }
+
+    if value in [False, None]:
+        status = "missing" if value is None else "fail"
+        notes = [note_if_missing] if note_if_missing else []
+        return {
+            "path": path,
+            "weight": weight,
+            "score": 0,
+            "status": status,
+            "notes": notes,
+        }
+
+    return {
+        "path": path,
+        "weight": weight,
+        "score": 0,
+        "status": "fail",
+        "notes": [f"Unexpected value for {path}: {value}"],
+    }
+
+
+def score_presence_field(
+    path,
+    value,
+    weight,
+    *,
+    note_if_missing=None,
+):
+    has_value = value not in [None, "", [], {}]
+
+    if has_value:
+        return {
+            "path": path,
+            "weight": weight,
+            "score": weight,
+            "status": "pass",
+            "notes": [],
+        }
+
+    notes = [note_if_missing] if note_if_missing else []
+
+    return {
+        "path": path,
+        "weight": weight,
+        "score": 0,
+        "status": "missing",
+        "notes": notes,
+    }
+
+
+def summarize_field_scores(field_scores):
+    total_weight = sum(item.get("weight", 0) for item in field_scores)
+    earned_score = sum(item.get("score", 0) for item in field_scores)
+
+    if total_weight <= 0:
+        return 0
+
+    return round((earned_score / total_weight) * 100, 2)
+
+
+def derive_requirement_status_from_score(
+    requirement_score,
+    *,
+    non_compliant_threshold=50,
+    compliant_threshold=100,
+):
+    if requirement_score >= compliant_threshold:
+        return "compliant"
+
+    if requirement_score < non_compliant_threshold:
+        return "non_compliant"
+
+    return "partial"
+
+
+def derive_requirement_rating(requirement_score):
+    if requirement_score >= 90:
+        return "strong"
+    if requirement_score >= 75:
+        return "good"
+    if requirement_score >= 50:
+        return "moderate"
+    return "weak"
+
+
+def collect_field_score_notes(field_scores):
+    notes = []
+
+    for item in field_scores:
+        notes.extend(item.get("notes", []))
+
+    return notes
+
+# =========================
+# ENGINE RUNNER
+# =========================
+
+def get_value(data, path):
+    """
+    Resolve dotted paths dentro do project_data.
+    Exemplo:
+        get_value(project_data, "methodology.storage_pathway")
+    """
+    keys = path.split(".")
+    value = data
+
+    for key in keys:
+        if not isinstance(value, dict):
+            return None
+        value = value.get(key)
+
+    return value
+
+
+def requirement_applies(project_data, applies_if):
+    """
+    Avalia se um requirement é aplicável ao projeto.
+
+    Suporta:
+    1) igualdade simples
+       ex: "methodology.storage_pathway": "soil"
+
+    2) __contains
+       ex: "storage.soil.deployment_methods__contains": "direct_soil_application"
+
+    3) __contains_any
+       ex: "storage.soil.deployment_methods__contains_any": ["on_site_mixing", "third_party_mixing"]
+    """
+    if not applies_if:
+        return True
+
+    for key, expected in applies_if.items():
+
+        # Operador: __contains_any
+        if key.endswith("__contains_any"):
+            field = key.replace("__contains_any", "")
+            value = get_value(project_data, field)
+
+            if not isinstance(value, list):
+                return False
+
+            if not isinstance(expected, list):
+                return False
+
+            if not any(item in value for item in expected):
+                return False
+
+        # Operador: __contains
+        elif key.endswith("__contains"):
+            field = key.replace("__contains", "")
+            value = get_value(project_data, field)
+
+            if not isinstance(value, list):
+                return False
+
+            if expected not in value:
+                return False
+
+        # Igualdade simples
+        else:
+            value = get_value(project_data, key)
+
+            if value != expected:
+                return False
+
+    return True
+
+
+def run_engine(project_data, requirements):
+    results = []
+
+    for req in requirements:
+        req_id = req.get("id")
+        req_name = req.get("title") or req.get("name")
+        logic_key = req.get("logic")
+        applies_if = req.get("applies_if", {})
+        fields_evaluated = req.get("fields", [])
+
+        # 1) Verifica aplicabilidade
+        if not requirement_applies(project_data, applies_if):
+            results.append({
+                "requirement_id": req_id,
+                "requirement_name": req_name,
+                "status": "not_applicable",
+                "confidence": 1.0,
+                "missing_fields": [],
+                "failed_fields": [],
+                "notes": ["Requirement not applicable to this project configuration."],
+                "logic_key": logic_key,
+                "fields_evaluated": fields_evaluated,
+                "requirement_score": None,
+                "field_scores": [],
+                "requirement_rating": None,
+            })
+            continue
+
+        # 2) Busca a função de lógica
+        try:
+            logic_fn = get_logic(logic_key)
+        except Exception:
+            results.append({
+                "requirement_id": req_id,
+                "requirement_name": req_name,
+                "status": "error",
+                "confidence": 0.0,
+                "missing_fields": [],
+                "failed_fields": [],
+                "notes": [f"Logic function '{logic_key}' not found."],
+                "logic_key": logic_key,
+                "fields_evaluated": fields_evaluated,
+                "requirement_score": 0,
+                "field_scores": [],
+                "requirement_rating": "weak",
+            })
+            continue
+
+        # 3) Executa a lógica
+        try:
+            logic_output = logic_fn(project_data)
+        except Exception as e:
+            results.append({
+                "requirement_id": req_id,
+                "requirement_name": req_name,
+                "status": "error",
+                "confidence": 0.0,
+                "missing_fields": [],
+                "failed_fields": [],
+                "notes": [f"Logic execution error: {str(e)}"],
+                "logic_key": logic_key,
+                "fields_evaluated": fields_evaluated,
+                "requirement_score": 0,
+                "field_scores": [],
+                "requirement_rating": "weak",
+            })
+            continue
+        if isinstance(logic_output, dict):
+            status = logic_output.get("status", "error")
+            missing_fields = logic_output.get("missing_fields", [])
+            failed_fields = logic_output.get("failed_fields", [])
+            notes = logic_output.get("notes", [])
+            requirement_score = logic_output.get("requirement_score")
+            field_scores = logic_output.get("field_scores", [])
+            requirement_rating = logic_output.get("requirement_rating")
+        else:
+            status = logic_output
+            missing_fields = []
+            failed_fields = []
+            notes = []
+            requirement_score = None
+            field_scores = []
+            requirement_rating = None
+
+        # 4) Monta saída estruturada
+        if status == "compliant":
+            confidence = 0.95
+        elif status == "partial":
+            confidence = 0.75
+        elif status == "non_compliant":
+            confidence = 0.90
+        elif status == "not_applicable":
+            confidence = 1.0
+        else:
+            confidence = 0.0
+
+        results.append({
+            "requirement_id": req_id,
+            "requirement_name": req_name,
+            "status": status,
+            "confidence": confidence,
+            "missing_fields": missing_fields,
+            "failed_fields": failed_fields,
+            "notes": notes,
+            "logic_key": logic_key,
+            "fields_evaluated": fields_evaluated,
+            "requirement_score": requirement_score,
+            "field_scores": field_scores,
+            "requirement_rating": requirement_rating,
+        })
+
+    return results
+
+def reactor_design_diagram(data):
+    """
+    R-6AQG-1 | P&ID or engineering design diagram with sensors
+    """
+    try:
+        production = data.get("production", {})
+
+        has_diagram = production.get("reactor_design_diagram")
+        has_sensor_inventory = production.get("sensor_inventory")
+        has_sensor_locations = production.get("sensor_locations")
+
+        field_scores = [
+            score_boolean_field(
+                "production.reactor_design_diagram",
+                has_diagram,
+                50,
+                note_if_missing="Reactor design diagram or P&ID is missing.",
+            ),
+            score_boolean_field(
+                "production.sensor_inventory",
+                has_sensor_inventory,
+                25,
+                note_if_missing="Sensor inventory is missing.",
+            ),
+            score_boolean_field(
+                "production.sensor_locations",
+                has_sensor_locations,
+                25,
+                note_if_missing="Sensor locations are missing.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if has_diagram is not True:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=50,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Reactor design diagram and sensor documentation are present.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"reactor_design_diagram execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+
+def durability_option_declared(data):
+    """
+    R-BFEE-0 | Durability option declared
+    """
+    try:
+        methodology = data.get("methodology", {})
+
+        durability_option = methodology.get("durability_option")
+        allowed = ["200", "1000", "combined_200_1000"]
+
+        field_scores = []
+
+        if not durability_option:
+            field_scores.append({
+                "path": "methodology.durability_option",
+                "weight": 100,
+                "score": 0,
+                "status": "missing",
+                "notes": ["Durability option is not declared."],
+            })
+        elif durability_option not in allowed:
+            field_scores.append({
+                "path": "methodology.durability_option",
+                "weight": 100,
+                "score": 0,
+                "status": "fail",
+                "notes": ["Durability option must be one of: 200, 1000, combined_200_1000."],
+            })
+        else:
+            field_scores.append({
+                "path": "methodology.durability_option",
+                "weight": 100,
+                "score": 100,
+                "status": "pass",
+                "notes": [],
+            })
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if not durability_option or durability_option not in allowed:
+            status = "non_compliant"
+        else:
+            status = "compliant"
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append(f"Durability option declared as '{durability_option}'.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"durability_option_declared execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+def sampling_batch_definition(data):
+    """
+    R-6YSW-0 | Production batch definition within allowed threshold
+    """
+    try:
+        methodology = data.get("methodology", {})
+        sampling = data.get("sampling", {})
+
+        production_subpathway = methodology.get("production_subpathway")
+        batch_definition_days = sampling.get("batch_definition_days")
+
+        field_scores = []
+
+        if batch_definition_days is None:
+            field_scores.append({
+                "path": "sampling.batch_definition_days",
+                "weight": 100,
+                "score": 0,
+                "status": "missing",
+                "notes": ["Batch definition in days is not provided."],
+            })
+        else:
+            limit = 7 if production_subpathway == "combustion_coproduct" else 31
+
+            if batch_definition_days <= limit:
+                field_scores.append({
+                    "path": "sampling.batch_definition_days",
+                    "weight": 100,
+                    "score": 100,
+                    "status": "pass",
+                    "notes": [],
+                })
+            else:
+                if production_subpathway == "combustion_coproduct":
+                    note = "Combustion co-product systems must define batches within 7 days."
+                else:
+                    note = "Production batch definition exceeds the 31-day threshold."
+
+                field_scores.append({
+                    "path": "sampling.batch_definition_days",
+                    "weight": 100,
+                    "score": 0,
+                    "status": "fail",
+                    "notes": [note],
+                })
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if batch_definition_days is None:
+            status = "non_compliant"
+        else:
+            limit = 7 if production_subpathway == "combustion_coproduct" else 31
+            if batch_definition_days > limit:
+                status = "non_compliant"
+            else:
+                status = "compliant"
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            if production_subpathway == "combustion_coproduct":
+                notes.append("Batch definition is within the 7-day threshold for combustion co-product systems.")
+            else:
+                notes.append("Batch definition is within the allowed threshold.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"sampling_batch_definition execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+        
+def chain_of_custody_diagram(data):
+    """
+    R-3MYN-0 | Chain of custody diagram or equivalent provided
+    """
+    try:
+        traceability = data.get("traceability", {})
+
+        diagram = traceability.get("chain_of_custody_diagram")
+
+        field_scores = [
+            score_boolean_field(
+                "traceability.chain_of_custody_diagram",
+                diagram,
+                100,
+                note_if_missing="Chain of custody diagram or equivalent evidence is missing.",
+            )
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if diagram is not True:
+            status = "non_compliant"
+        else:
+            status = "compliant"
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Chain of custody diagram or equivalent evidence is present.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"chain_of_custody_diagram execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+def biochar_chemical_analysis(data):
+    """
+    R-6F0N-0 | Chemical analysis for biochar characterization performed
+    """
+    try:
+        characterization = data.get("biochar", {}).get("characterization", {})
+
+        chemical_analysis_performed = characterization.get("chemical_analysis_performed")
+        lab_reports = characterization.get("lab_reports")
+
+        field_scores = [
+            score_boolean_field(
+                "biochar.characterization.chemical_analysis_performed",
+                chemical_analysis_performed,
+                70,
+                note_if_missing="Chemical analysis for biochar characterization is not evidenced.",
+            ),
+            score_boolean_field(
+                "biochar.characterization.lab_reports",
+                lab_reports,
+                30,
+                note_if_missing="Lab reports supporting chemical analysis are missing.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if chemical_analysis_performed is not True:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=70,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Chemical analysis and supporting lab reports are present.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"biochar_chemical_analysis execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+def uncertainty_inputs(data):
+    """
+    R-Z106-1 | Uncertainty inputs disclosed
+    """
+    try:
+        quant = data.get("quantification", {})
+
+        input_variables = quant.get("input_variables")
+        input_uncertainties = quant.get("input_uncertainties")
+
+        field_scores = [
+            score_boolean_field(
+                "quantification.input_variables",
+                input_variables,
+                60,
+                note_if_missing="Input variables used in quantification are not disclosed.",
+            ),
+            score_boolean_field(
+                "quantification.input_uncertainties",
+                input_uncertainties,
+                40,
+                note_if_missing="Input uncertainties are not disclosed.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if input_variables is not True:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=60,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Input variables and uncertainties are disclosed.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"uncertainty_inputs execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+
+def stockpiling_disclosure(data):
+    """
+    R-6E1D-0 | Biochar stockpiling disclosed
+    """
+    try:
+        storage = data.get("storage", {})
+
+        stockpiled = storage.get("stockpiled_before_end_use")
+        disclosure = storage.get("stockpiling_documented")
+
+        field_scores = []
+
+        # Campo 1: status de stockpiling
+        if stockpiled is True or stockpiled is False:
+            field_scores.append({
+                "path": "storage.stockpiled_before_end_use",
+                "weight": 60,
+                "score": 60,
+                "status": "pass",
+                "notes": [],
+            })
+        else:
+            field_scores.append({
+                "path": "storage.stockpiled_before_end_use",
+                "weight": 60,
+                "score": 0,
+                "status": "missing",
+                "notes": ["Stockpiling status before end use is not defined."],
+            })
+
+        # Campo 2: documentação só importa se stockpiling existir
+        if stockpiled is True:
+            field_scores.append(
+                score_boolean_field(
+                    "storage.stockpiling_documented",
+                    disclosure,
+                    40,
+                    note_if_missing="Stockpiling occurs before end use but is not documented.",
+                )
+            )
+        else:
+            field_scores.append({
+                "path": "storage.stockpiling_documented",
+                "weight": 40,
+                "score": 40,
+                "status": "not_applicable",
+                "notes": [],
+            })
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if stockpiled is None:
+            status = "partial"
+        elif stockpiled is True and disclosure is not True:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=50,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            if stockpiled is True:
+                notes.append("Stockpiling before end use is documented.")
+            else:
+                notes.append("No stockpiling before end use is reported.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"stockpiling_disclosure execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+def adaptive_management_plan(data):
+    """
+    R-BC4H-1 | Adaptive management plan in place
+    """
+    try:
+        management = data.get("management", {})
+
+        plan = management.get("adaptive_management_plan")
+        triggers = management.get("monitoring_triggers")
+        pause_or_stop = management.get("pause_or_stop_conditions")
+
+        field_scores = [
+            score_boolean_field(
+                "management.adaptive_management_plan",
+                plan,
+                50,
+                note_if_missing="Adaptive management plan is missing.",
+            ),
+            score_boolean_field(
+                "management.monitoring_triggers",
+                triggers,
+                25,
+                note_if_missing="Monitoring triggers for adaptive management are missing.",
+            ),
+            score_boolean_field(
+                "management.pause_or_stop_conditions",
+                pause_or_stop,
+                25,
+                note_if_missing="Pause or stop conditions are missing.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if plan is not True:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=50,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append(
+                "Adaptive management plan, monitoring triggers, and pause/stop conditions are present."
+            )
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"adaptive_management_plan execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+def feedstock_moisture_management(data):
+    """
+    R-NJ8G-0 | Feedstock moisture management and verification
+    """
+    try:
+        feedstock = data.get("feedstock", {})
+
+        moisture_plan = feedstock.get("moisture_control_plan")
+        moisture_measurement = feedstock.get("moisture_measurement")
+
+        field_scores = [
+            score_boolean_field(
+                "feedstock.moisture_control_plan",
+                moisture_plan,
+                60,
+                note_if_missing="Feedstock moisture control plan is missing.",
+            ),
+            score_boolean_field(
+                "feedstock.moisture_measurement",
+                moisture_measurement,
+                40,
+                note_if_missing="Feedstock moisture measurement method is missing or not evidenced.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if moisture_plan is not True and moisture_measurement is not True:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=50,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Feedstock moisture control plan and moisture measurement are documented.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"feedstock_moisture_management execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+def contaminant_monitoring_plan(data):
+    """
+    R-HE38-0 | Contaminant monitoring plan specified
+    """
+    try:
+        characterization = data.get("biochar", {}).get("characterization", {})
+        safeguards = data.get("safeguards", {})
+
+        contaminants = characterization.get("contaminant_testing")
+        frequency = characterization.get("contaminant_testing_frequency")
+
+        # backward-compatible support in case future mapper/schema moves this to safeguards
+        safeguards_plan = safeguards.get("contaminant_monitoring_plan")
+        safeguards_frequency = safeguards.get("testing_frequency")
+
+        contaminants_present = (contaminants is True) or (safeguards_plan is True)
+        frequency_present = bool(frequency) or bool(safeguards_frequency)
+
+        field_scores = []
+
+        # Campo 1: testing / monitoring plan
+        if contaminants_present:
+            field_scores.append({
+                "path": "biochar.characterization.contaminant_testing",
+                "weight": 70,
+                "score": 70,
+                "status": "pass",
+                "notes": [],
+            })
+        else:
+            field_scores.append({
+                "path": "biochar.characterization.contaminant_testing",
+                "weight": 70,
+                "score": 0,
+                "status": "missing",
+                "notes": ["Contaminant testing or contaminant monitoring plan is not documented."],
+            })
+
+        # Campo 2: frequency
+        if frequency_present:
+            field_scores.append({
+                "path": "biochar.characterization.contaminant_testing_frequency",
+                "weight": 30,
+                "score": 30,
+                "status": "pass",
+                "notes": [],
+            })
+        else:
+            field_scores.append({
+                "path": "biochar.characterization.contaminant_testing_frequency",
+                "weight": 30,
+                "score": 0,
+                "status": "missing",
+                "notes": ["Contaminant testing frequency is missing."],
+            })
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if not contaminants_present:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=70,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Contaminant testing and monitoring frequency are documented.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"contaminant_monitoring_plan execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+def product_standard_compliance(data):
+    """
+    R-9KKF-0 | Compliance with relevant product standards evidenced
+    """
+    try:
+        product = data.get("product", {})
+
+        standard = product.get("standard_compliance")
+        certification = product.get("certification_scheme")
+
+        field_scores = [
+            score_boolean_field(
+                "product.standard_compliance",
+                standard,
+                70,
+                note_if_missing="Compliance with relevant product standards is not evidenced.",
+            ),
+            score_presence_field(
+                "product.certification_scheme",
+                certification,
+                30,
+                note_if_missing="Certification scheme or reference standard is missing.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if standard is not True:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=70,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Product standard compliance and certification scheme are documented.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"product_standard_compliance execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+def fuel_use_reversal_risk(data):
+    """
+    R-Z4A3-0 | Fuel-use reversal risk assessed
+    """
+    try:
+        risk = data.get("risk_assessment", {})
+
+        assessment = risk.get("fuel_use_reversal_risk")
+        mitigation = risk.get("mitigation_plan")
+
+        field_scores = [
+            score_boolean_field(
+                "risk_assessment.fuel_use_reversal_risk",
+                assessment,
+                65,
+                note_if_missing="Fuel-use reversal risk assessment is missing.",
+            ),
+            score_boolean_field(
+                "risk_assessment.mitigation_plan",
+                mitigation,
+                35,
+                note_if_missing="Mitigation plan for fuel-use reversal risk is missing.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if assessment is not True:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=65,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Fuel-use reversal risk assessment and mitigation plan are present.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"fuel_use_reversal_risk execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+        
+def sampling_plan_consistency(data):
+    """
+    R-S8K1-1 | Sampling plan consistent with Methods A/B
+    """
+    try:
+        sampling = data.get("sampling", {})
+
+        method = sampling.get("method")
+        plan_defined = sampling.get("sampling_plan_defined")
+
+        field_scores = []
+
+        # Campo 1: method
+        if method in ["A", "B"]:
+            field_scores.append({
+                "path": "sampling.method",
+                "weight": 60,
+                "score": 60,
+                "status": "pass",
+                "notes": [],
+            })
+        elif method in [None, ""]:
+            field_scores.append({
+                "path": "sampling.method",
+                "weight": 60,
+                "score": 0,
+                "status": "missing",
+                "notes": ["Sampling method is not documented."],
+            })
+        else:
+            field_scores.append({
+                "path": "sampling.method",
+                "weight": 60,
+                "score": 0,
+                "status": "fail",
+                "notes": ["Sampling method must be 'A' or 'B'."],
+            })
+
+        # Campo 2: sampling plan
+        field_scores.append(
+            score_boolean_field(
+                "sampling.sampling_plan_defined",
+                plan_defined,
+                40,
+                note_if_missing="Sampling plan is not documented.",
+            )
+        )
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if method not in ["A", "B"]:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=60,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Sampling method and sampling plan are properly defined.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"sampling_plan_consistency execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+        
+def reactor_maintenance_plan(data):
+    """
+    R-19AF-1 | Reactor maintenance plan evidenced
+    """
+    try:
+        production = data.get("production", {})
+
+        maintenance_plan = production.get("maintenance_plan")
+        maintenance_schedule = production.get("maintenance_schedule")
+
+        field_scores = [
+            score_boolean_field(
+                "production.maintenance_plan",
+                maintenance_plan,
+                70,
+                note_if_missing="Maintenance plan is missing.",
+            ),
+            score_boolean_field(
+                "production.maintenance_schedule",
+                maintenance_schedule,
+                30,
+                note_if_missing="Maintenance schedule is missing.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if maintenance_plan is not True:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=70,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Maintenance plan and schedule are present.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"reactor_maintenance_plan execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+def stack_emissions_monitoring_method(data):
+    """
+    R-TKNH-0 | Stack emissions monitoring method selected
+    """
+    try:
+        emissions = data.get("emissions", {})
+
+        method = emissions.get("stack_monitoring_method")
+        frequency = emissions.get("testing_frequency")
+
+        field_scores = [
+            score_presence_field(
+                "emissions.stack_monitoring_method",
+                method,
+                60,
+                note_if_missing="Stack emissions monitoring method is missing.",
+            ),
+            score_presence_field(
+                "emissions.testing_frequency",
+                frequency,
+                40,
+                note_if_missing="Testing frequency for stack emissions is missing.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if not method:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=60,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append(
+                "Stack emissions monitoring method and testing frequency are present."
+            )
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"stack_emissions_monitoring_method execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+def biochar_required_measurements(data):
+    """
+    R-VGXA-0 | All required physical and chemical measurements obtained or planned
+    """
+    try:
+        characterization = data.get("biochar", {}).get("characterization", {})
+
+        required_complete = characterization.get("required_measurements_complete")
+        measurement_values = characterization.get("measurement_values")
+
+        field_scores = [
+            score_boolean_field(
+                "biochar.characterization.required_measurements_complete",
+                required_complete,
+                70,
+                note_if_missing="Required physical and chemical measurements are not complete.",
+            ),
+            score_boolean_field(
+                "biochar.characterization.measurement_values",
+                measurement_values,
+                30,
+                note_if_missing="Measurement values are missing.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if required_complete is not True:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=70,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Required measurements and measurement values are present.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"biochar_required_measurements execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+def deployment_method_selected(data):
+    """
+    R-T2X2-0 | Deployment method specified
+    """
+    try:
+        soil = data.get("storage", {}).get("soil", {})
+
+        deployment_methods = soil.get("deployment_methods")
+
+        field_scores = []
+
+        if not deployment_methods:
+            field_scores.append({
+                "path": "storage.soil.deployment_methods",
+                "weight": 100,
+                "score": 0,
+                "status": "missing",
+                "notes": ["No deployment method is specified."],
+            })
+            status = "non_compliant"
+
+        elif isinstance(deployment_methods, str):
+            deployment_methods = [deployment_methods]
+
+            field_scores.append({
+                "path": "storage.soil.deployment_methods",
+                "weight": 100,
+                "score": 100,
+                "status": "pass",
+                "notes": ["Deployment method provided as string and normalized to list."],
+            })
+            status = "compliant"
+
+        elif len(deployment_methods) == 0:
+            field_scores.append({
+                "path": "storage.soil.deployment_methods",
+                "weight": 100,
+                "score": 0,
+                "status": "missing",
+                "notes": ["Deployment methods list is empty."],
+            })
+            status = "non_compliant"
+
+        else:
+            field_scores.append({
+                "path": "storage.soil.deployment_methods",
+                "weight": 100,
+                "score": 100,
+                "status": "pass",
+                "notes": [],
+            })
+            status = "compliant"
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Deployment method is specified.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"deployment_method_selected execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+def direct_soil_application_evidence(data):
+    """
+    R-8PBP-0 | Direct soil application evidence pathway confirmed
+    """
+    try:
+        soil = data.get("storage", {}).get("soil", {})
+
+        deployment_methods = soil.get("deployment_methods", [])
+        evidence = soil.get("direct_application_evidence_pathway")
+
+        field_scores = []
+
+        if "direct_soil_application" not in deployment_methods:
+            field_scores.append({
+                "path": "storage.soil.direct_application_evidence_pathway",
+                "weight": 100,
+                "score": 100,
+                "status": "not_applicable",
+                "notes": [],
+            })
+            status = "not_applicable"
+
+        else:
+            field_scores.append(
+                score_boolean_field(
+                    "storage.soil.direct_application_evidence_pathway",
+                    evidence,
+                    100,
+                    note_if_missing="Evidence for direct soil application pathway is missing.",
+                )
+            )
+
+            requirement_score = summarize_field_scores(field_scores)
+            requirement_rating = derive_requirement_rating(requirement_score)
+
+            if evidence is not True:
+                status = "non_compliant"
+            else:
+                status = "compliant"
+
+            missing_fields = [
+                item["path"]
+                for item in field_scores
+                if item["status"] == "missing"
+            ]
+            failed_fields = [
+                item["path"]
+                for item in field_scores
+                if item["status"] == "fail"
+            ]
+            notes = collect_field_score_notes(field_scores)
+
+            if status == "compliant":
+                notes.append("Direct soil application evidence pathway is documented.")
+
+            return build_logic_result(
+                status=status,
+                missing_fields=missing_fields,
+                failed_fields=failed_fields,
+                notes=notes,
+                requirement_score=requirement_score,
+                field_scores=field_scores,
+                requirement_rating=requirement_rating,
+            )
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        return build_logic_result(
+            status=status,
+            missing_fields=[],
+            failed_fields=[],
+            notes=["Direct soil application is not part of the deployment pathway."],
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"direct_soil_application_evidence execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+        
+def reactor_material_selection(data):
+    """
+    R-DMET-0 | Reactor material selection justified
+    """
+    try:
+        production = data.get("production", {})
+
+        components = production.get("reactor_components")
+        justification = production.get("material_selection_justification")
+
+        field_scores = [
+            score_boolean_field(
+                "production.reactor_components",
+                components,
+                60,
+                note_if_missing="Reactor components are not described.",
+            ),
+            score_boolean_field(
+                "production.material_selection_justification",
+                justification,
+                40,
+                note_if_missing="Material selection justification is missing.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if components is not True:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=60,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Reactor components and material selection justification are present.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"reactor_material_selection execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+
+def end_material_process_description(data):
+    """
+    R-V04V-0 | End material production process described in detail
+    """
+    try:
+        production = data.get("production", {})
+
+        description = production.get("end_material_process_description")
+
+        field_scores = [
+            score_boolean_field(
+                "production.end_material_process_description",
+                description,
+                100,
+                note_if_missing="End material production process description is missing.",
+            )
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if description is not True:
+            status = "non_compliant"
+        else:
+            status = "compliant"
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("End material production process is described.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"end_material_process_description execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+
+def environmental_legal_requirements(data):
+    """
+    R-52YX-0 | Applicable environmental legal requirements provided
+    """
+    try:
+        legal = data.get("legal", {})
+
+        requirements = legal.get("applicable_environmental_requirements")
+
+        field_scores = [
+            score_boolean_field(
+                "legal.applicable_environmental_requirements",
+                requirements,
+                100,
+                note_if_missing="Applicable environmental legal requirements are not documented.",
+            )
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if requirements is not True:
+            status = "non_compliant"
+        else:
+            status = "compliant"
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Applicable environmental legal requirements are documented.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"environmental_legal_requirements execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+def regulatory_measurement_methods(data):
+    """
+    R-RQTJ-0 | Regulatory measurements approach described
+    """
+    try:
+        legal = data.get("legal", {})
+
+        methods = legal.get("regulatory_measurement_methods")
+
+        field_scores = [
+            score_boolean_field(
+                "legal.regulatory_measurement_methods",
+                methods,
+                100,
+                note_if_missing="Regulatory measurement methods are not documented.",
+            )
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if methods is not True:
+            status = "non_compliant"
+        else:
+            status = "compliant"
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Regulatory measurement methods are documented.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"regulatory_measurement_methods execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+def biochar_characterization_approach(data):
+    """
+    R-NYQT-0 | Biochar characterization and ongoing monitoring approach described
+    """
+    try:
+        characterization = data.get("biochar", {}).get("characterization", {})
+
+        approach_description = characterization.get("approach_description")
+        ongoing_monitoring_plan = characterization.get("ongoing_monitoring_plan")
+
+        field_scores = [
+            score_presence_field(
+                "biochar.characterization.approach_description",
+                approach_description,
+                65,
+                note_if_missing="Biochar characterization approach is not documented.",
+            ),
+            score_boolean_field(
+                "biochar.characterization.ongoing_monitoring_plan",
+                ongoing_monitoring_plan,
+                35,
+                note_if_missing="Ongoing monitoring plan for biochar characterization is missing.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if not approach_description:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=65,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Biochar characterization approach and monitoring plan are documented.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"biochar_characterization_approach execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+def engineering_design_diagram(data):
+    """
+    R-29W5-0 | Engineering design diagram provided
+    """
+    try:
+        production = data.get("production", {})
+
+        diagram = production.get("engineering_design_diagram")
+
+        field_scores = [
+            score_boolean_field(
+                "production.engineering_design_diagram",
+                diagram,
+                100,
+                note_if_missing="Engineering design diagram is missing.",
+            )
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if diagram is not True:
+            status = "non_compliant"
+        else:
+            status = "compliant"
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Engineering design diagram is present.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"engineering_design_diagram execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+def crediting_activity_boundaries(data):
+    """
+    R-KPDH-0 | Crediting activity boundaries described in detail
+    """
+    try:
+        quant = data.get("quantification", {})
+
+        boundaries = quant.get("crediting_activity_boundaries")
+
+        field_scores = [
+            score_boolean_field(
+                "quantification.crediting_activity_boundaries",
+                boundaries,
+                100,
+                note_if_missing="Crediting activity boundaries are not documented.",
+            )
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if boundaries is not True:
+            status = "non_compliant"
+        else:
+            status = "compliant"
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Crediting activity boundaries are documented.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"crediting_activity_boundaries execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+def storage_system_boundary(data):
+    """
+    R-CCP7-0 | Storage emissions fully included in system boundary
+    """
+    try:
+        quant = data.get("quantification", {})
+
+        storage_emissions_accounted = quant.get("storage_emissions_accounted")
+
+        field_scores = [
+            score_boolean_field(
+                "quantification.storage_emissions_accounted",
+                storage_emissions_accounted,
+                100,
+                note_if_missing="Storage emissions are not accounted for in the system boundary.",
+            )
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if storage_emissions_accounted is not True:
+            status = "non_compliant"
+        else:
+            status = "compliant"
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Storage emissions are included in the system boundary.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"storage_system_boundary execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+def pyrolysis_gas_end_use_accounting(data):
+    """
+    R-E8H6-0 | Pyrolysis gas end-use accounting approach selected
+    """
+    try:
+        emissions = data.get("emissions", {})
+        production = data.get("production", {})
+
+        approach = emissions.get("pyrolysis_gas_end_use_approach")
+        control_system = emissions.get("emissions_control_system")
+
+        if not control_system:
+            control_system = production.get("gas_burner_present") or production.get("combustion_gas_control")
+
+        field_scores = [
+            score_presence_field(
+                "emissions.pyrolysis_gas_end_use_approach",
+                approach,
+                60,
+                note_if_missing="Pyrolysis gas end-use accounting approach is missing.",
+            ),
+            score_presence_field(
+                "emissions.emissions_control_system",
+                control_system,
+                40,
+                note_if_missing="Emissions control system for pyrolysis gas end-use is missing.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        status = derive_requirement_status_from_score(
+            requirement_score,
+            non_compliant_threshold=60,
+            compliant_threshold=100,
+        )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Pyrolysis gas end-use accounting approach and emissions control system are documented.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"pyrolysis_gas_end_use_accounting execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+def biochar_incorporation_documentation(data):
+    """
+    Logic for biochar incorporation / built-environment incorporation documentation
+    """
+    try:
+        storage = data.get("storage", {})
+        soil = storage.get("soil", {})
+        built = storage.get("built_environment", {})
+
+        soil_evidence = soil.get("direct_application_evidence_pathway")
+        soil_methods = soil.get("deployment_methods")
+        built_evidence = (
+            built.get("incorporation_documentation")
+            if isinstance(built, dict) else None
+        ) or storage.get("built_environment_incorporation_evidence")
+
+        field_scores = []
+
+        soil_pathway_present = bool(soil_methods)
+        built_pathway_present = bool(built_evidence)
+
+        if soil_pathway_present:
+            field_scores.append(
+                score_boolean_field(
+                    "storage.soil.direct_application_evidence_pathway",
+                    soil_evidence,
+                    50,
+                    note_if_missing="Evidence for soil incorporation pathway is missing.",
+                )
+            )
+        else:
+            field_scores.append({
+                "path": "storage.soil.direct_application_evidence_pathway",
+                "weight": 50,
+                "score": 50,
+                "status": "not_applicable",
+                "notes": [],
+            })
+
+        if built_pathway_present:
+            field_scores.append({
+                "path": "storage.built_environment_incorporation_evidence",
+                "weight": 50,
+                "score": 50,
+                "status": "pass",
+                "notes": [],
+            })
+        else:
+            field_scores.append({
+                "path": "storage.built_environment_incorporation_evidence",
+                "weight": 50,
+                "score": 0 if not soil_pathway_present else 50,
+                "status": "missing" if not soil_pathway_present else "not_applicable",
+                "notes": (
+                    ["No documentation of built-environment incorporation pathway was found."]
+                    if not soil_pathway_present else []
+                ),
+            })
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        if not soil_pathway_present and not built_pathway_present:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=50,
+                compliant_threshold=100,
+            )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Biochar incorporation pathway documentation is present.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"biochar_incorporation_documentation execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+        
+# =========================
+# LOGIC REGISTRY
+# =========================
+
+LOGIC_MAP = {
+    "biochar_applicability": eval_biochar_applicability,
+    "reactor_definition": eval_reactor_requirements,
+    "storage_pathway": eval_storage_requirements,
+    "feedstock_compliance": eval_feedstock_requirements,
+    "monitoring_system": eval_monitoring_requirements,
+
+    "reactor_design_diagram": reactor_design_diagram,
+    "durability_option_declared": durability_option_declared,
+    "sampling_batch_definition": sampling_batch_definition,
+    "chain_of_custody_diagram": chain_of_custody_diagram,
+    "biochar_chemical_analysis": biochar_chemical_analysis,
+
+    "uncertainty_inputs": uncertainty_inputs,
+    "stockpiling_disclosure": stockpiling_disclosure,
+    "adaptive_management_plan": adaptive_management_plan,
+    "feedstock_moisture_management": feedstock_moisture_management,
+    "fuel_use_reversal_risk": fuel_use_reversal_risk,
+    "sampling_plan_consistency": sampling_plan_consistency,
+
+    "reactor_maintenance_plan": reactor_maintenance_plan,
+    "stack_emissions_monitoring_method": stack_emissions_monitoring_method,
+    "pyrolysis_gas_end_use_accounting": pyrolysis_gas_end_use_accounting,
+    "biochar_required_measurements": biochar_required_measurements,
+    "deployment_method_selected": deployment_method_selected,
+    "direct_soil_application_evidence": direct_soil_application_evidence,
+
+    "reactor_material_selection": reactor_material_selection,
+    "engineering_design_diagram": engineering_design_diagram,
+    "end_material_process_description": end_material_process_description,
+    "crediting_activity_boundaries": crediting_activity_boundaries,
+    "storage_system_boundary": storage_system_boundary,
+
+    "environmental_legal_requirements": environmental_legal_requirements,
+    "regulatory_measurement_methods": regulatory_measurement_methods,
+    "biochar_characterization_approach": biochar_characterization_approach,
+    "product_standard_compliance": product_standard_compliance,
+    "contaminant_monitoring_plan": contaminant_monitoring_plan,
+    "biochar_incorporation_documentation": biochar_incorporation_documentation,
+}
