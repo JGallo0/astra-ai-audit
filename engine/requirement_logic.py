@@ -109,13 +109,128 @@ def build_logic_result(
     missing_fields=None,
     failed_fields=None,
     notes=None,
+    requirement_score=None,
+    field_scores=None,
+    requirement_rating=None,
 ):
     return {
         "status": status,
         "missing_fields": missing_fields or [],
         "failed_fields": failed_fields or [],
         "notes": notes or [],
+        "requirement_score": requirement_score,
+        "field_scores": field_scores or [],
+        "requirement_rating": requirement_rating,
     }
+
+def score_boolean_field(
+    path,
+    value,
+    weight,
+    *,
+    required=True,
+    note_if_missing=None,
+):
+    if value is True:
+        return {
+            "path": path,
+            "weight": weight,
+            "score": weight,
+            "status": "pass",
+            "notes": [],
+        }
+
+    if value in [False, None]:
+        status = "missing" if value is None else "fail"
+        notes = [note_if_missing] if note_if_missing else []
+        return {
+            "path": path,
+            "weight": weight,
+            "score": 0,
+            "status": status,
+            "notes": notes,
+        }
+
+    return {
+        "path": path,
+        "weight": weight,
+        "score": 0,
+        "status": "fail",
+        "notes": [f"Unexpected value for {path}: {value}"],
+    }
+
+
+def score_presence_field(
+    path,
+    value,
+    weight,
+    *,
+    note_if_missing=None,
+):
+    has_value = value not in [None, "", [], {}]
+
+    if has_value:
+        return {
+            "path": path,
+            "weight": weight,
+            "score": weight,
+            "status": "pass",
+            "notes": [],
+        }
+
+    notes = [note_if_missing] if note_if_missing else []
+
+    return {
+        "path": path,
+        "weight": weight,
+        "score": 0,
+        "status": "missing",
+        "notes": notes,
+    }
+
+
+def summarize_field_scores(field_scores):
+    total_weight = sum(item.get("weight", 0) for item in field_scores)
+    earned_score = sum(item.get("score", 0) for item in field_scores)
+
+    if total_weight <= 0:
+        return 0
+
+    return round((earned_score / total_weight) * 100, 2)
+
+
+def derive_requirement_status_from_score(
+    requirement_score,
+    *,
+    non_compliant_threshold=50,
+    compliant_threshold=100,
+):
+    if requirement_score >= compliant_threshold:
+        return "compliant"
+
+    if requirement_score < non_compliant_threshold:
+        return "non_compliant"
+
+    return "partial"
+
+
+def derive_requirement_rating(requirement_score):
+    if requirement_score >= 90:
+        return "strong"
+    if requirement_score >= 75:
+        return "good"
+    if requirement_score >= 50:
+        return "moderate"
+    return "weak"
+
+
+def collect_field_score_notes(field_scores):
+    notes = []
+
+    for item in field_scores:
+        notes.extend(item.get("notes", []))
+
+    return notes
 
 # =========================
 # ENGINE RUNNER
@@ -291,50 +406,80 @@ def run_engine(project_data, requirements):
 
 def reactor_design_diagram(data):
     """
-    Requirement logic for:
-    - R-6AQG-1 | P&ID or engineering design diagram with sensors
+    R-6AQG-1 | P&ID or engineering design diagram with sensors
     """
     try:
         production = data.get("production", {})
-
-        missing_fields = []
-        failed_fields = []
-        notes = []
 
         has_diagram = production.get("reactor_design_diagram")
         has_sensor_inventory = production.get("sensor_inventory")
         has_sensor_locations = production.get("sensor_locations")
 
-        if not has_diagram:
-            missing_fields.append("production.reactor_design_diagram")
-            notes.append("Reactor design diagram or P&ID is missing.")
+        field_scores = [
+            score_boolean_field(
+                "production.reactor_design_diagram",
+                has_diagram,
+                50,
+                note_if_missing="Reactor design diagram or P&ID is missing.",
+            ),
+            score_boolean_field(
+                "production.sensor_inventory",
+                has_sensor_inventory,
+                25,
+                note_if_missing="Sensor inventory is missing.",
+            ),
+            score_boolean_field(
+                "production.sensor_locations",
+                has_sensor_locations,
+                25,
+                note_if_missing="Sensor locations are missing.",
+            ),
+        ]
 
-        if not has_sensor_inventory:
-            missing_fields.append("production.sensor_inventory")
-            notes.append("Sensor inventory is missing.")
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
 
-        if not has_sensor_locations:
-            missing_fields.append("production.sensor_locations")
-            notes.append("Sensor locations are missing.")
-
-        if missing_fields:
-            status = "non_compliant" if "production.reactor_design_diagram" in missing_fields else "partial"
-            return build_logic_result(
-                status=status,
-                missing_fields=missing_fields,
-                failed_fields=failed_fields,
-                notes=notes,
+        if has_diagram is not True:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=50,
+                compliant_threshold=100,
             )
 
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Reactor design diagram and sensor documentation are present.")
+
         return build_logic_result(
-            status="compliant",
-            notes=["Reactor design diagram and sensor documentation are present."],
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
         )
 
     except Exception as e:
         return build_logic_result(
             status="error",
             notes=[f"reactor_design_diagram execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
         )
 
 
@@ -682,48 +827,69 @@ def feedstock_moisture_management(data):
     try:
         feedstock = data.get("feedstock", {})
 
-        missing_fields = []
-        failed_fields = []
-        notes = []
-
         moisture_plan = feedstock.get("moisture_control_plan")
         moisture_measurement = feedstock.get("moisture_measurement")
 
-        if not moisture_plan:
-            missing_fields.append("feedstock.moisture_control_plan")
-            notes.append("Feedstock moisture control plan is missing.")
+        field_scores = [
+            score_boolean_field(
+                "feedstock.moisture_control_plan",
+                moisture_plan,
+                60,
+                note_if_missing="Feedstock moisture control plan is missing.",
+            ),
+            score_boolean_field(
+                "feedstock.moisture_measurement",
+                moisture_measurement,
+                40,
+                note_if_missing="Feedstock moisture measurement method is missing or not evidenced.",
+            ),
+        ]
 
-        if moisture_measurement is not True:
-            missing_fields.append("feedstock.moisture_measurement")
-            notes.append("Feedstock moisture measurement method is missing or not evidenced.")
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
 
-        if len(missing_fields) == 2:
-            return build_logic_result(
-                status="non_compliant",
-                missing_fields=missing_fields,
-                failed_fields=failed_fields,
-                notes=notes,
+        if moisture_plan is not True and moisture_measurement is not True:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=50,
+                compliant_threshold=100,
             )
 
-        if missing_fields:
-            return build_logic_result(
-                status="partial",
-                missing_fields=missing_fields,
-                failed_fields=failed_fields,
-                notes=notes,
-            )
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Feedstock moisture control plan and moisture measurement are documented.")
 
         return build_logic_result(
-            status="compliant",
-            notes=["Feedstock moisture control plan and moisture measurement are documented."],
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
         )
 
     except Exception as e:
         return build_logic_result(
             status="error",
             notes=[f"feedstock_moisture_management execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
         )
-
 
 def contaminant_monitoring_plan(data):
     """
@@ -928,46 +1094,68 @@ def reactor_maintenance_plan(data):
     try:
         production = data.get("production", {})
 
-        missing_fields = []
-        failed_fields = []
-        notes = []
-
         maintenance_plan = production.get("maintenance_plan")
         maintenance_schedule = production.get("maintenance_schedule")
 
-        if not maintenance_plan:
-            missing_fields.append("production.maintenance_plan")
-            notes.append("Maintenance plan is missing.")
+        field_scores = [
+            score_boolean_field(
+                "production.maintenance_plan",
+                maintenance_plan,
+                70,
+                note_if_missing="Maintenance plan is missing.",
+            ),
+            score_boolean_field(
+                "production.maintenance_schedule",
+                maintenance_schedule,
+                30,
+                note_if_missing="Maintenance schedule is missing.",
+            ),
+        ]
 
-        if not maintenance_schedule:
-            missing_fields.append("production.maintenance_schedule")
-            notes.append("Maintenance schedule is missing.")
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
 
-        if "production.maintenance_plan" in missing_fields:
-            return build_logic_result(
-                status="non_compliant",
-                missing_fields=missing_fields,
-                failed_fields=failed_fields,
-                notes=notes,
+        if maintenance_plan is not True:
+            status = "non_compliant"
+        else:
+            status = derive_requirement_status_from_score(
+                requirement_score,
+                non_compliant_threshold=70,
+                compliant_threshold=100,
             )
 
-        if missing_fields:
-            return build_logic_result(
-                status="partial",
-                missing_fields=missing_fields,
-                failed_fields=failed_fields,
-                notes=notes,
-            )
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Maintenance plan and schedule are present.")
 
         return build_logic_result(
-            status="compliant",
-            notes=["Maintenance plan and schedule are present."],
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
         )
 
     except Exception as e:
         return build_logic_result(
             status="error",
             notes=[f"reactor_maintenance_plan execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
         )
 
 def stack_emissions_monitoring_method(data):
