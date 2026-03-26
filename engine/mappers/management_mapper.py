@@ -186,8 +186,37 @@ def apply_local_heuristics(
                 evidence_mode="direct",
             )
 
-    return merge_normalized_fields(list(field_map.values()))
+    # ------------------------------------------------------------
+    # Inferred management.adaptive_management_plan
+    # ------------------------------------------------------------
+    current = field_map.get("management.adaptive_management_plan", {}).get("value")
+    if current in (None, False, "", []):
+        info = field_map.get("management.information_sharing_plan", {}).get("value")
+        emergency = field_map.get("management.emergency_response_plan", {}).get("value")
+        pause = field_map.get("management.pause_or_stop_conditions", {}).get("value")
+        triggers = field_map.get("management.monitoring_triggers", {}).get("value")
 
+        components_true = sum([
+            bool(info),
+            bool(emergency),
+            bool(pause),
+            bool(triggers),
+        ])
+
+        if components_true >= 2:
+            upsert_field(
+                field_map,
+                path="management.adaptive_management_plan",
+                value=True,
+                evidence="Inferred: adaptive management system exists because multiple management components (information sharing, emergency response, pause/stop conditions, monitoring triggers) are explicitly documented.",
+                extractor="management_mapper",
+                fill_method="heuristic",
+                confidence=0.93,
+                evidence_strength="strong",
+                evidence_mode="inferred",
+            )
+
+    return merge_normalized_fields(list(field_map.values()))
 
 def run_management_mapper(
     ai_client,
