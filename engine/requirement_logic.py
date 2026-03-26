@@ -1981,15 +1981,17 @@ def deployment_method_selected(data):
             })
             status = "non_compliant"
 
-        elif not isinstance(deployment_methods, list):
+        elif isinstance(deployment_methods, str):
+            deployment_methods = [deployment_methods]
+
             field_scores.append({
                 "path": "storage.soil.deployment_methods",
                 "weight": 100,
-                "score": 0,
-                "status": "fail",
-                "notes": ["Deployment methods must be a list."],
+                "score": 100,
+                "status": "pass",
+                "notes": ["Deployment method provided as string and normalized to list."],
             })
-            status = "non_compliant"
+            status = "compliant"
 
         elif len(deployment_methods) == 0:
             field_scores.append({
@@ -2670,14 +2672,11 @@ def pyrolysis_gas_end_use_accounting(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if not approach:
-            status = "non_compliant"
-        else:
-            status = derive_requirement_status_from_score(
-                requirement_score,
-                non_compliant_threshold=60,
-                compliant_threshold=100,
-            )
+        status = derive_requirement_status_from_score(
+            requirement_score,
+            non_compliant_threshold=60,
+            compliant_threshold=100,
+        )
 
         missing_fields = [
             item["path"]
