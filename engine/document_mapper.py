@@ -1,10 +1,10 @@
 from typing import Any, Dict, List, Optional, Set, Tuple
-
 from schemas.project_schema import get_empty_project_data
-
 from engine.inference import run_inference_layer
 from engine.mappers import run_mapper_pipeline
 from engine.mappers.consistency import run_consistency_checks
+from engine.extraction_schema import EXTRACTION_FIELDS
+from engine.normalization import normalize_field_value
 
 
 def set_nested_value(data: Dict[str, Any], path: str, value: Any) -> None:
@@ -17,6 +17,13 @@ def set_nested_value(data: Dict[str, Any], path: str, value: Any) -> None:
         cursor = cursor[key]
 
     cursor[keys[-1]] = value
+
+def _build_field_schema_index() -> Dict[str, Dict[str, Any]]:
+    return {
+        field["path"]: field
+        for field in EXTRACTION_FIELDS
+        if field.get("path")
+    }
 
 
 def _normalize_list(value: Any) -> List[str]:
@@ -233,8 +240,20 @@ def build_project_data_from_extraction(
         normalized_fields
     )
 
+    field_schema_index = _build_field_schema_index()
+
     for path, value in resolved_fields.items():
-        set_nested_value(data, path, value)
+        field_def = field_schema_index.get(path)
+
+        if field_def:
+            normalized_value = normalize_field_value(value, field_def)
+        else:
+            normalized_value = value
+
+        if normalized_value is None:
+            continue
+
+        set_nested_value(data, path, normalized_value)
 
     if return_resolution_artifacts:
         return {
