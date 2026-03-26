@@ -53,15 +53,16 @@ def get_engine_requirement_score(item: Dict[str, Any]) -> int:
 
     status = safe_str(item.get("status", "")).strip().lower()
 
-    if status == "compliant":
+    # Normaliza ambos padrões (engine + scoring)
+    if status in ["compliant", "conforme"]:
         return 100
-    if status == "partial":
+    if status in ["partial", "parcialmente conforme"]:
         return 50
-    if status == "future_evidence_required":
+    if status in ["future_evidence_required"]:
         return 35
-    if status == "not_applicable":
+    if status in ["not_applicable", "não aplicável", "nao aplicavel"]:
         return 0
-    if status == "non_compliant":
+    if status in ["non_compliant", "não conforme", "nao conforme"]:
         return 0
     return 0
 
@@ -546,18 +547,18 @@ def calculate_compliance_score(results):
 
         requirement_score = r.get("requirement_score")
 
-        if status == "compliant":
+        if status in ["compliant", "conforme"]:
             compliant += 1
-        elif status == "partial":
+        elif status in ["partial", "parcialmente conforme"]:
             partial += 1
-        elif status == "future_evidence_required":
+        elif status in ["future_evidence_required"]:
             future_evidence_required += 1
-        elif status == "non_compliant":
+        elif status in ["non_compliant", "não conforme", "nao conforme"]:
             non_compliant += 1
-        elif status == "error":
+        elif status in ["error", "erro de análise", "erro de analise"]:
             error += 1
         else:
-            error += 1
+            error += 11
 
         if requirement_score is not None:
             weighted_points += get_engine_requirement_score_fraction(r)
@@ -593,12 +594,12 @@ def calculate_compliance_score(results):
 
 def classify_compliance_score(score):
     """
-    Classificação simples do score para exibição executiva.
+    Classificação executiva alinhada com lógica interna do motor.
     """
     if score >= 90:
         return "Strong"
     if score >= 75:
-        return "Moderate"
+        return "Good"
     if score >= 50:
-        return "Weak"
-    return "Critical"
+        return "Moderate"
+    return "Weak"
