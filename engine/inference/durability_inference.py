@@ -11,12 +11,96 @@ from .base import (
     get_best_value,
     has_strong_evidence,
     normalize_text,
-    safe_float,
+    safe_bool,
 )
 
 
 class DurabilityInference(BaseInferenceRule):
     rule_set_name = "durability_inference"
+
+    DURABILITY_SIGNAL_KEYWORDS = [
+        "200 years",
+        ">200 years",
+        "at least 200 years",
+        "minimum 200 years",
+        "minimum durability of 200 years",
+        "durable carbon storage",
+        "permanent carbon storage",
+        "long-term storage",
+        "long term storage",
+        "permanence",
+        "recalcitrant carbon",
+        "stable carbon",
+        "stable form of carbon",
+        "h/corg",
+        "h/c",
+    ]
+
+    SOIL_STORAGE_TERMS = {
+        "soil",
+        "soil application",
+        "soil storage",
+        "agricultural soil",
+        "soil amendment",
+        "soil use",
+    }
+
+    def _get_signal_bundle(
+        self,
+        normalized_fields: List[Dict[str, Any]],
+        project_context: str,
+    ) -> Dict[str, Any]:
+        storage_pathway = get_best_value(normalized_fields, "methodology.storage_pathway")
+        stable_storage = get_best_value(normalized_fields, "storage.storage_environment_stable")
+        product_use = get_best_value(normalized_fields, "product.end_use")
+        permanence_claim = get_best_value(normalized_fields, "eligibility.permanence_claim")
+
+        project_text = normalize_text(project_context)
+
+        keyword_hits = count_project_keyword_hits(
+            project_text,
+            self.DURABILITY_SIGNAL_KEYWORDS,
+        )
+
+        storage_pathway_norm = normalize_text(storage_pathway)
+        product_use_norm = normalize_text(product_use)
+        stable_storage_bool = safe_bool(stable_storage)
+        permanence_claim_bool = safe_bool(permanence_claim)
+
+        strong_storage_signal = (
+            storage_pathway_norm in self.SOIL_STORAGE_TERMS
+            or product_use_norm in self.SOIL_STORAGE_TERMS
+        )
+
+        stable_storage_signal = stable_storage_bool is True
+
+        permanence_signal = (
+            permanence_claim_bool is True
+            or "permanence" in project_text
+            or "permanent carbon storage" in project_text
+        )
+
+        return {
+            "storage_pathway": storage_pathway,
+            "stable_storage": stable_storage,
+            "product_use": product_use,
+            "permanence_claim": permanence_claim,
+            "project_text": project_text,
+            "keyword_hits": keyword_hits,
+            "strong_storage_signal": strong_storage_signal,
+            "stable_storage_signal": stable_storage_signal,
+            "permanence_signal": permanence_signal,
+        }
+
+    def _should_infer_200_year_durability(self, signals: Dict[str, Any]) -> bool:
+        return (
+            signals["keyword_hits"] >= 2
+            and (
+                signals["strong_storage_signal"]
+                or signals["stable_storage_signal"]
+                or signals["permanence_signal"]
+            )
+        )
 
     def run(
         self,
@@ -28,47 +112,17 @@ class DurabilityInference(BaseInferenceRule):
         updated_fields = list(normalized_fields or [])
         inference_events: List[Dict[str, Any]] = []
 
-        durability_option = get_best_value(updated_fields, "methodology.durability_option")
-        durability_years = get_best_value(updated_fields, "eligibility.durability_years")
-        storage_pathway = get_best_value(updated_fields, "methodology.storage_pathway")
-        stable_storage = get_best_value(updated_fields, "storage.storage_environment_stable")
-        product_use = get_best_value(updated_fields, "product.end_use")
-        permanence_claim = get_best_value(updated_fields, "eligibility.permanence_claim")
-
-        project_text = normalize_text(project_context)
-        methodology_text = normalize_text(methodology_context)
-
-        durability_signals = [
-            "200 years",
-            ">200 years",
-            "at least 200 years",
-            "minimum 200 years",
-            "durable carbon storage",
-            "permanent carbon storage",
-            "long-term storage",
-            "permanence",
-            "recalcitrant carbon",
-            "stable carbon",
-            "h/corg",
-            "h/c",
-        ]
-
-        hit_count = count_project_keyword_hits(project_text, durability_signals)
-
-        strong_storage_signal = (
-            normalize_text(storage_pathway) in {"soil", "soil application", "soil storage", "agricultural soil"}
-            or normalize_text(product_use) in {"soil application", "soil amendment", "soil use"}
+        signals = self._get_signal_bundle(
+            normalized_fields=updated_fields,
+            project_context=project_context,
         )
 
-        stable_storage_signal = str(stable_storage).lower() == "true"
+        should_infer_200 = self._should_infer_200_year_durability(signals)
 
-        permanence_signal = bool(permanence_claim) or ("permanence" in project_text)
-
-        should_infer_200 = (
-            hit_count >= 2
-            and (strong_storage_signal or stable_storage_signal or permanence_signal)
-        )
-
+        # -----------------------------------------------------
+        # INF-DUR-001
+        # Infer methodology.durability_option = "200"
+        # -----------------------------------------------------
         if not has_strong_evidence(updated_fields, "methodology.durability_option"):
             if should_infer_200:
                 updated_fields = append_inference_field(
@@ -77,7 +131,7 @@ class DurabilityInference(BaseInferenceRule):
                     path="methodology.durability_option",
                     value="200",
                     evidence=(
-                        "Inferred from durability/permanence wording combined with stable biochar storage pathway signals."
+                        "Inferred from durability/permanence wording combined with stable storage pathway signals consistent with a 200-year durability framing."
                     ),
                     source="project",
                     confidence=0.88,
@@ -91,10 +145,16 @@ class DurabilityInference(BaseInferenceRule):
                         "eligibility.permanence_claim",
                         "project_context: durability/permanence wording",
                     ],
+                    resolution_action="fill",
                 )
 
+        # -----------------------------------------------------
+        # INF-DUR-002
+        # Infer eligibility.durability_years = 200
+        # -----------------------------------------------------
         if not has_strong_evidence(updated_fields, "eligibility.durability_years"):
             inferred_option = get_best_value(updated_fields, "methodology.durability_option")
+
             if normalize_text(inferred_option) == "200" or should_infer_200:
                 updated_fields = append_inference_field(
                     updated_fields,
@@ -102,7 +162,7 @@ class DurabilityInference(BaseInferenceRule):
                     path="eligibility.durability_years",
                     value=200,
                     evidence=(
-                        "Inferred from the selected durability framing and project permanence language consistent with 200-year storage."
+                        "Inferred from the selected durability framing and project permanence language consistent with a minimum 200-year durability requirement."
                     ),
                     source="project",
                     confidence=0.86,
@@ -111,9 +171,11 @@ class DurabilityInference(BaseInferenceRule):
                     inference_rule_id="INF-DUR-002",
                     inputs_used=[
                         "methodology.durability_option",
-                        "project_context: permanence wording",
                         "storage.storage_environment_stable",
+                        "eligibility.permanence_claim",
+                        "project_context: permanence wording",
                     ],
+                    resolution_action="fill",
                 )
 
         return {
