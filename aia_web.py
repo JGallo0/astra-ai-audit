@@ -1848,6 +1848,13 @@ if st.session_state.get("run_structured"):
                 req for req in requirements
                 if not selected_modules_for_v2 or req.get("module") in selected_modules_for_v2
             ]
+            st.markdown("### DEBUG REQUIREMENTS")
+
+            if filtered_requirements:
+                st.write("Primeiro requirement:")
+                st.json(filtered_requirements[0])
+            else:
+                st.warning("Nenhum requirement filtrado.")
 
             results = run_engine(project_data, filtered_requirements)
 
