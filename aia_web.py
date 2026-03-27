@@ -1898,8 +1898,13 @@ if st.session_state.get("run_structured"):
         st.success("Auditoria estruturada concluída com sucesso.")
 
     except Exception as e:
+        import traceback
+
         st.session_state["run_structured"] = False
         st.error(f"Erro na auditoria estruturada: {e}")
+
+        st.markdown("### DEBUG TRACEBACK")
+        st.code(traceback.format_exc(), language="python")
 
 # =========================================================
 # RENDER RESULTADO V2
