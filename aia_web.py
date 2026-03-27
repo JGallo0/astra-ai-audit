@@ -1732,21 +1732,8 @@ methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
 project_name = st.session_state.get("current_project_name")
 current_methodology = st.session_state.get("current_methodology")
 
-# ✅ CORREÇÃO PRINCIPAL
 structured_requirements = get_requirements_for_methodology(current_methodology)
 
-# ✅ DEBUG CRÍTICO (inserir aqui)
-st.caption(f"DEBUG requirements loaded: {len(structured_requirements)}")
-
-sample_modules = [
-    r.get("module")
-    for r in structured_requirements[:10]
-    if isinstance(r, dict)
-]
-
-st.caption(f"DEBUG sample modules: {sample_modules}")
-
-# fluxo continua normal
 available_structured_scopes = get_available_audit_scopes(structured_requirements)
 default_structured_scopes = get_default_audit_scopes(available_structured_scopes)
 
@@ -1756,11 +1743,19 @@ if "structured_selected_scopes" not in st.session_state:
 if project_vs_id and methodology_vs_id and project_name and current_methodology:
 
     st.markdown("### Auditorias disponíveis")
+    st.caption(
+        "Selecione abaixo o tipo de análise a executar. "
+        "O modo exploratório é assistido por IA. "
+        "Os modos de auditoria estruturada usam critérios metodológicos explícitos."
+    )
 
     structured_selected_scopes = st.multiselect(
         "Escopo da auditoria estruturada",
         options=available_structured_scopes,
-        default=st.session_state.get("structured_selected_scopes", default_structured_scopes),
+        default=st.session_state.get(
+            "structured_selected_scopes",
+            default_structured_scopes,
+        ),
         help=(
             "Core Integrity is the methodological foundation of the audit. "
             "Eligibility is always enforced internally even if scope selection changes."
@@ -1777,24 +1772,40 @@ if project_vs_id and methodology_vs_id and project_name and current_methodology:
     st.session_state["structured_selected_modules"] = structured_selected_modules
 
     st.caption(
-        "Módulos aplicados na V2: "
-        + (", ".join(structured_selected_modules) if structured_selected_modules else "none")
+        "Módulos estruturados selecionados: "
+        + (
+            ", ".join(structured_selected_modules)
+            if structured_selected_modules
+            else "nenhum"
+        )
     )
 
     c1, c2, c3 = st.columns(3)
 
     with c1:
-        if st.button("Análise Exploratória", width="stretch", key="run_exploratory_button"):
+        if st.button(
+            "Exploratory AI Review",
+            width="stretch",
+            key="run_exploratory_button",
+        ):
             st.session_state["audit_mode"] = "exploratory"
             st.session_state["run_exploratory"] = True
 
     with c2:
-        if st.button("Auditar projeto em desenvolvimento", width="stretch", key="run_development_button"):
+        if st.button(
+            "Structured Audit — Development",
+            width="stretch",
+            key="run_development_button",
+        ):
             st.session_state["audit_mode"] = "development"
             st.session_state["run_structured"] = True
 
     with c3:
-        if st.button("Auditar projeto em operação", width="stretch", key="run_operational_button"):
+        if st.button(
+            "Structured Audit — Operating",
+            width="stretch",
+            key="run_operational_button",
+        ):
             st.session_state["audit_mode"] = "operational"
             st.session_state["run_structured"] = True
 
@@ -1818,32 +1829,45 @@ if st.session_state.get("run_structured"):
 
         with st.spinner("Executando auditoria estruturada..."):
 
-            engine = AuditEngine(
-                api_key=OPENAI_API_KEY,
-                model=MODEL_NAME,
-                project_vector_store_id=project_vs_id,
-                methodology_vector_store_id=methodology_vs_id,
-                project_name=project_name,
-                requirements=requirements,
-            )
-
             selected_modules_for_v2 = st.session_state.get("structured_selected_modules") or None
 
-            st.caption(f"selected_modules V2: {selected_modules_for_v2}")
-            st.caption(f"n módulos selecionados: {len(selected_modules_for_v2 or [])}")
-            st.caption(f"total requirements carregados: {len(engine.requirements)}")
-            estimated_cost = len(engine.requirements) * 0.01
-            st.caption(f"Estimated cost: ~US$ {estimated_cost:.2f}")
+            st.caption(f"Módulos estruturados aplicados: {selected_modules_for_v2}")
+            st.caption(f"Quantidade de módulos selecionados: {len(selected_modules_for_v2 or [])}")
+            st.caption(f"Total de requisitos carregados: {len(requirements)}")
 
-            output = engine.run_structured_engine_audit(
-                selected_modules=selected_modules_for_v2,
-                audit_mode=audit_mode,
-            )
+            project_data = {
+                "project": {},
+                "eligibility": {},
+                "feedstock": {},
+                "production": {},
+                "storage": {},
+                "monitoring_reporting": {},
+            }
 
-            st.session_state["structured_v2_output"] = output
+            filtered_requirements = [
+                req for req in requirements
+                if not selected_modules_for_v2 or req.get("module") in selected_modules_for_v2
+            ]
+
+            results = run_engine(project_data, filtered_requirements)
+
+            score_data = calculate_compliance_score(results)
+            score_label = classify_compliance_score(score_data["score"])
+
+            structured_v2_output = {
+                "project_data": project_data,
+                "results": results,
+                "score_data": score_data,
+                "score_label": score_label,
+                "audit_mode": audit_mode,
+                "selected_modules": selected_modules_for_v2 or [],
+                "normalized_fields": [],
+            }
+
+            st.session_state["structured_v2_output"] = structured_v2_output
             st.session_state["run_structured"] = False
 
-        st.success("Auditoria concluída com sucesso.")
+        st.success("Auditoria estruturada concluída com sucesso.")
 
     except Exception as e:
         st.session_state["run_structured"] = False
@@ -1868,12 +1892,8 @@ if structured_v2_output:
 
     selected_modules_for_v2 = st.session_state.get("structured_selected_modules") or None
 
-    st.caption(f"selected_modules V2: {selected_modules_for_v2}")
-    st.caption(f"requirements carregados na V2: {len(structured_requirements)}")
-
-    # =========================
-    # SCORE
-    # =========================
+    st.caption(f"Módulos estruturados aplicados: {selected_modules_for_v2}")
+    st.caption(f"Requisitos avaliados nesta execução: {len(results)}")
 
     col1, col2 = st.columns(2)
 
@@ -1883,19 +1903,11 @@ if structured_v2_output:
     with col2:
         st.metric("Rating", score_label)
 
-    # =========================
-    # MATRIZ
-    # =========================
-
     if results:
         df = pd.DataFrame(results)
         st.dataframe(df, hide_index=True, width="stretch")
     else:
         st.warning("Nenhum resultado retornado pela engine.")
-
-    # =========================
-    # DEBUG
-    # =========================
 
     with st.expander("Project Data (extraído)", expanded=False):
         st.write(project_data)
@@ -1905,8 +1917,6 @@ if structured_v2_output:
 
     with st.expander("Payload completo", expanded=False):
         st.write(structured_v2_output)
-        
-active_methodology_label = METHODOLOGY_REGISTRY.get(
     st.session_state.get("current_methodology", ""),
     {}
 ).get("label", "-")
