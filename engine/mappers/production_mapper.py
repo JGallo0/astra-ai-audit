@@ -45,6 +45,19 @@ Important interpretation rules:
 """
 
 
+def sanitize_production_fields(
+    normalized_fields: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    field_map = {item["path"]: dict(item) for item in normalized_fields}
+
+    value = field_map.get("production.pyrolysis_technology", {}).get("value")
+
+    if isinstance(value, str) and value.lower() in {"true", "false"}:
+        field_map.pop("production.pyrolysis_technology", None)
+
+    return list(field_map.values())
+
+
 def apply_local_heuristics(
     project_context: str,
     normalized_fields: List[Dict[str, Any]],
@@ -81,20 +94,6 @@ def apply_local_heuristics(
                 evidence_strength="moderate",
                 evidence_mode="direct",
             )
-
-    def sanitize_production_fields(
-    normalized_fields: List[Dict[str, Any]],
-) -> List[Dict[str, Any]]:
-    field_map = {item["path"]: dict(item) for item in normalized_fields}
-
-    # Corrigir pyrolysis_technology inválido
-    value = field_map.get("production.pyrolysis_technology", {}).get("value")
-
-    if isinstance(value, str) and value.lower() in {"true", "false"}:
-        # remove valor inválido
-        field_map.pop("production.pyrolysis_technology", None)
-
-    return list(field_map.values())
 
     # ------------------------------------------------------------------
     # production.reactor_design_diagram
@@ -327,6 +326,8 @@ def run_production_mapper(
         fill_method="llm",
     )
 
+    normalized = sanitize_production_fields(normalized)
+
     normalized = apply_local_heuristics(
         project_context=project_context,
         normalized_fields=normalized,
@@ -336,4 +337,3 @@ def run_production_mapper(
         "normalized_fields": normalized,
         "raw_extraction": payload,
     }
-    normalized = sanitize_production_fields(normalized)
