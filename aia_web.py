@@ -1869,7 +1869,30 @@ if st.session_state.get("run_structured"):
                 audit_mode=audit_mode,
             )
 
-            st.session_state["structured_v2_output"] = output
+            # DEBUG — entender formato de retorno
+            st.markdown("### DEBUG ENGINE OUTPUT TYPE")
+            st.write(type(output))
+            st.write(output)
+
+            # Normalizar formato do output
+            if isinstance(output, tuple):
+                results, score_data = output
+
+                structured_v2_output = {
+                    "results": results,
+                    "score_data": score_data,
+                    "score_label": classify_compliance_score(
+                        score_data.get("score", 0)
+                    ),
+                }
+
+            elif isinstance(output, dict):
+                structured_v2_output = output
+
+            else:
+                raise ValueError("Unexpected output format from engine")
+
+            st.session_state["structured_v2_output"] = structured_v2_output
             st.session_state["run_structured"] = False
 
         st.success("Auditoria estruturada concluída com sucesso.")
