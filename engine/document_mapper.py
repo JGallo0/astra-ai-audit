@@ -246,7 +246,7 @@ def build_project_data_from_extraction(
         field_def = field_schema_index.get(path)
 
         if field_def:
-            normalized_value = normalize_field_value(value, field_def)
+            normalized_value = normalize_field_value(field_def, value)
         else:
             normalized_value = value
 
