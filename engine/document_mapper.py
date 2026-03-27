@@ -188,7 +188,7 @@ def _resolve_field_candidates(
             continue
 
         ranked = sorted(
-            active_candidates,
+            candidates,
             key=_candidate_score,
             reverse=True,
         )
