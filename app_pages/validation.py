@@ -256,6 +256,7 @@ def _render_structured_mode():
 
     from methodology_requirements import get_requirements_for_methodology
     from audit_engine import AuditEngine
+    from engine.document_mapper import extract_project_data_from_contexts
     import os
 
     st.markdown("---")
@@ -275,20 +276,16 @@ def _render_structured_mode():
             st.error("Vector stores não conectados.")
             return
 
-        with st.spinner("Executando Structured Audit (V2)..."):
+        with st.spinner("Executando mapeamento estruturado (V2)..."):
 
             try:
-                # 1. Carregar requirements (novo sistema)
                 requirements = get_requirements_for_methodology(current_methodology)
 
-                # 2. API KEY (mesmo padrão do app)
                 api_key = os.getenv("OPENAI_API_KEY")
-
                 if not api_key:
                     st.error("OPENAI_API_KEY não encontrada.")
                     return
 
-                # 3. Instanciar engine
                 engine = AuditEngine(
                     api_key=api_key,
                     model="gpt-4o-mini",
@@ -298,32 +295,96 @@ def _render_structured_mode():
                     requirements=requirements,
                 )
 
-                # 4. Criar project_data mínimo (temporário)
-                project_data = {
-                    "project": {},
-                    "eligibility": {},
-                    "feedstock": {},
-                    "production": {},
-                    "storage": {},
-                    "monitoring_reporting": {},
+                contexts = engine._build_structured_contexts()
+
+                mapping_output = extract_project_data_from_contexts(
+                    ai_client=engine._call_llm_json_extraction,
+                    project_context=contexts["project_context"],
+                    methodology_context=contexts["methodology_context"],
+                    project_hits=contexts["project_hits"],
+                    methodology_hits=contexts["methodology_hits"],
+                )
+
+                st.session_state["structured_mapping_output"] = {
+                    "queries": contexts.get("queries", []),
+                    "project_context": contexts.get("project_context", ""),
+                    "methodology_context": contexts.get("methodology_context", ""),
+                    "project_hits": contexts.get("project_hits", []),
+                    "methodology_hits": contexts.get("methodology_hits", []),
+                    "project_data": mapping_output.get("project_data", {}),
+                    "normalized_fields": mapping_output.get("normalized_fields", []),
+                    "raw_extraction": mapping_output.get("raw_extraction", {}),
+                    "inference_events": mapping_output.get("inference_events", []),
+                    "resolved_fields": mapping_output.get("resolved_fields", {}),
+                    "field_resolution_log": mapping_output.get("field_resolution_log", []),
+                    "invalidated_paths": mapping_output.get("invalidated_paths", {}),
+                    "consistency_flags": mapping_output.get("consistency_flags", []),
+                    "consistency_notes": mapping_output.get("consistency_notes", []),
                 }
 
-                # 5. Rodar engine determinística (V2 real)
-                from engine.requirement_logic import run_engine
-
-                results = run_engine(project_data, requirements)
-
-                if not results:
-                    st.warning("Nenhum resultado foi gerado.")
-                    return
-
-                st.success("Structured Audit executado com sucesso.")
-
-                st.markdown("### Resultados")
-                st.json(results)
+                st.success("Mapeamento estruturado executado com sucesso.")
 
             except Exception as e:
-                st.error(f"Erro na execução do Structured Audit: {str(e)}")
+                st.error(f"Erro no mapeamento estruturado: {str(e)}")
+
+    mapping_output = st.session_state.get("structured_mapping_output")
+
+    if mapping_output:
+        st.markdown("### Debug do mapper estruturado")
+
+        project_hits = mapping_output.get("project_hits", []) or []
+        methodology_hits = mapping_output.get("methodology_hits", []) or []
+        normalized_fields = mapping_output.get("normalized_fields", []) or []
+        inference_events = mapping_output.get("inference_events", []) or []
+        consistency_flags = mapping_output.get("consistency_flags", []) or []
+        consistency_notes = mapping_output.get("consistency_notes", []) or []
+
+        metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
+
+        with metric_col1:
+            st.metric("Project hits", len(project_hits))
+
+        with metric_col2:
+            st.metric("Methodology hits", len(methodology_hits))
+
+        with metric_col3:
+            st.metric("Normalized fields", len(normalized_fields))
+
+        with metric_col4:
+            st.metric("Inference events", len(inference_events))
+
+        with st.expander("Queries utilizadas", expanded=False):
+            st.write(mapping_output.get("queries", []))
+
+        with st.expander("Project Data", expanded=True):
+            st.write(mapping_output.get("project_data", {}))
+
+        with st.expander("Normalized Fields", expanded=False):
+            st.write(normalized_fields)
+
+        with st.expander("Inference Events", expanded=False):
+            st.write(inference_events)
+
+        with st.expander("Resolved Fields", expanded=False):
+            st.write(mapping_output.get("resolved_fields", {}))
+
+        with st.expander("Field Resolution Log", expanded=False):
+            st.write(mapping_output.get("field_resolution_log", []))
+
+        with st.expander("Invalidated Paths", expanded=False):
+            st.write(mapping_output.get("invalidated_paths", {}))
+
+        with st.expander("Consistency Flags", expanded=False):
+            st.write(consistency_flags)
+
+        with st.expander("Consistency Notes", expanded=False):
+            st.write(consistency_notes)
+
+        with st.expander("Project Context", expanded=False):
+            st.text(mapping_output.get("project_context", ""))
+
+        with st.expander("Methodology Context", expanded=False):
+            st.text(mapping_output.get("methodology_context", ""))
 
 def render():
     st.markdown("## Validation")
