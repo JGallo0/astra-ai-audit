@@ -298,13 +298,20 @@ def _render_structured_mode():
                     requirements=requirements,
                 )
 
-                # 4. Rodar auditoria estruturada
-                output = engine.run_structured_engine_audit(
-                    selected_modules=None,
-                    execution_mode="Completo",
-                )
+                # 4. Criar project_data mínimo (temporário)
+                project_data = {
+                    "project": {},
+                    "eligibility": {},
+                    "feedstock": {},
+                    "production": {},
+                    "storage": {},
+                    "monitoring_reporting": {},
+                }
 
-                results = output.get("results", [])
+                # 5. Rodar engine determinística (V2 real)
+                from engine.requirement_logic import run_engine
+
+                results = run_engine(project_data, requirements)
 
                 if not results:
                     st.warning("Nenhum resultado foi gerado.")
