@@ -1917,6 +1917,8 @@ if structured_v2_output:
 
     with st.expander("Payload completo", expanded=False):
         st.write(structured_v2_output)
+
+active_methodology_label = METHODOLOGY_REGISTRY.get(
     st.session_state.get("current_methodology", ""),
     {}
 ).get("label", "-")
