@@ -254,11 +254,69 @@ def _render_structured_mode():
             )
         )
 
-    st.warning(
-        "A execução do Structured Audit será conectada ao pipeline V2 no próximo passo. "
-        "Nesta etapa, o objetivo é separar com segurança os modos da página Validation."
-    )
+    from methodology_requirements import get_requirements_for_methodology
+    from audit_engine import AuditEngine
+    import os
 
+    st.markdown("---")
+
+    if st.button("Rodar Structured Audit (V2)", use_container_width=True):
+
+        current_methodology = st.session_state.get("current_methodology")
+        project_vs_id = st.session_state.get("current_project_vector_store_id")
+        methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
+        project_name = st.session_state.get("current_project_name")
+
+        if not current_methodology:
+            st.error("Metodologia não selecionada.")
+            return
+
+        if not project_vs_id or not methodology_vs_id:
+            st.error("Vector stores não conectados.")
+            return
+
+        with st.spinner("Executando Structured Audit (V2)..."):
+
+            try:
+                # 1. Carregar requirements (novo sistema)
+                requirements = get_requirements_for_methodology(current_methodology)
+
+                # 2. API KEY (mesmo padrão do app)
+                api_key = os.getenv("OPENAI_API_KEY")
+
+                if not api_key:
+                    st.error("OPENAI_API_KEY não encontrada.")
+                    return
+
+                # 3. Instanciar engine
+                engine = AuditEngine(
+                    api_key=api_key,
+                    model="gpt-4o-mini",
+                    project_vector_store_id=project_vs_id,
+                    methodology_vector_store_id=methodology_vs_id,
+                    project_name=project_name,
+                    requirements=requirements,
+                )
+
+                # 4. Rodar auditoria estruturada
+                output = engine.run_structured_engine_audit(
+                    selected_modules=None,
+                    execution_mode="Completo",
+                )
+
+                results = output.get("results", [])
+
+                if not results:
+                    st.warning("Nenhum resultado foi gerado.")
+                    return
+
+                st.success("Structured Audit executado com sucesso.")
+
+                st.markdown("### Resultados")
+                st.json(results)
+
+            except Exception as e:
+                st.error(f"Erro na execução do Structured Audit: {str(e)}")
 
 def render():
     st.markdown("## Validation")
