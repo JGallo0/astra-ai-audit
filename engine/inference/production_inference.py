@@ -152,7 +152,25 @@ class ProductionInference(BaseInferenceRule):
         # INF-PROD-001
         # Infer production.pyrolysis_technology
         # -----------------------------------------------------
-        if not has_strong_evidence(updated_fields, "production.pyrolysis_technology"):
+        current_value = get_best_value(
+            updated_fields,
+            "production.pyrolysis_technology",
+        )
+
+        is_weak_value = normalize_text(current_value) in {
+            "",
+            "biochar production",
+            "production of biochar",
+            "biochar system",
+            "biochar technology",
+            "carbon removal technology",
+            "pyrolysis",
+        }
+
+        if (
+            not has_strong_evidence(updated_fields, "production.pyrolysis_technology")
+            or is_weak_value
+        ):
             if should_infer:
                 inferred_value = self._infer_technology_label(
                     signals["project_text"]
@@ -177,7 +195,9 @@ class ProductionInference(BaseInferenceRule):
                         "production.system_description",
                         "emissions.syngas_handling",
                     ],
-                    resolution_action="fill",
+                    resolution_action="semantic_override" if is_weak_value else "fill",
+                    invalidates_paths=["production.pyrolysis_technology"] if is_weak_value else [],
+                    overwrite=is_weak_value,
                 )
 
         return {
