@@ -61,10 +61,38 @@ def sanitize_emissions_fields(
 ) -> List[Dict[str, Any]]:
     field_map = {item["path"]: dict(item) for item in normalized_fields}
 
-    value = field_map.get("emissions.stack_monitoring_method", {}).get("value")
+    # ------------------------------------------------------------
+    # emissions.stack_monitoring_method
+    # ------------------------------------------------------------
+    stack_method = field_map.get("emissions.stack_monitoring_method", {}).get("value")
 
-    if isinstance(value, str) and value.lower() in {"true", "false"}:
-        field_map.pop("emissions.stack_monitoring_method", None)
+    if isinstance(stack_method, str):
+        text = stack_method.strip().lower()
+
+        if text in {
+            "true",
+            "false",
+            "emissions monitoring",
+            "monitoring",
+            "emission monitoring",
+            "stack monitoring",
+        }:
+            field_map.pop("emissions.stack_monitoring_method", None)
+
+    # ------------------------------------------------------------
+    # emissions.testing_frequency
+    # ------------------------------------------------------------
+    testing_freq = field_map.get("emissions.testing_frequency", {}).get("value")
+
+    if isinstance(testing_freq, str):
+        text = testing_freq.strip().lower()
+
+        if text in {
+            "sampling plan",
+            "monitoring plan",
+            "test plan",
+        }:
+            field_map.pop("emissions.testing_frequency", None)
 
     return list(field_map.values())
 
@@ -90,6 +118,7 @@ def apply_local_heuristics(
             or re.search(r"emissions are maintained within applicable regulatory limits", combined_text)
             or re.search(r"air emissions", combined_text)
             or re.search(r"stack emissions", combined_text)
+            or ("emissions" in project_text and "monitoring" in project_text)
         ):
             upsert_field(
                 field_map,
@@ -108,7 +137,7 @@ def apply_local_heuristics(
     # ------------------------------------------------------------
     current = field_map.get("emissions.testing_frequency", {}).get("value")
     if current in (None, False, "", []):
-        if re.search(r"annual emission testing", combined_text):
+        if re.search(r"annual emission testing", combined_text) or "annual" in project_text:
             upsert_field(
                 field_map,
                 path="emissions.testing_frequency",
@@ -130,6 +159,18 @@ def apply_local_heuristics(
                 fill_method="heuristic",
                 confidence=0.82,
                 evidence_strength="moderate",
+                evidence_mode="direct",
+            )
+        elif "monthly" in project_text:
+            upsert_field(
+                field_map,
+                path="emissions.testing_frequency",
+                value="monthly",
+                evidence="Heuristic match: monthly testing frequency explicitly referenced.",
+                extractor="emissions_mapper",
+                fill_method="heuristic",
+                confidence=0.90,
+                evidence_strength="strong",
                 evidence_mode="direct",
             )
 
@@ -208,7 +249,6 @@ def run_emissions_mapper(
     payload = parse_extraction_payload(raw)
 
     normalized = normalize_domain_fields(
-    normalized = sanitize_emissions_fields(normalized)
         extracted_payload=payload,
         fields=fields,
         extractor_name="emissions_mapper",
@@ -216,105 +256,14 @@ def run_emissions_mapper(
     )
 
     normalized = sanitize_emissions_fields(normalized)
+
     normalized = apply_local_heuristics(
         project_context=project_context,
         methodology_context=methodology_context,
         normalized_fields=normalized,
     )
-    text = (project_context or "").lower()
-    field_map = {item["path"]: dict(item) for item in normalized_fields}
-
-    # -------------------------------
-    # stack_monitoring_method
-    # -------------------------------
-    current_method = field_map.get("emissions.stack_monitoring_method", {}).get("value")
-
-    if current_method in (None, "", False):
-        if "emissions" in text and "monitoring" in text:
-            upsert_field(
-                field_map,
-                path="emissions.stack_monitoring_method",
-                value="periodic_stack_emissions_testing",
-                evidence="Heuristic: emissions monitoring referenced in project context.",
-                extractor="emissions_mapper",
-                fill_method="heuristic",
-                confidence=0.85,
-                evidence_strength="moderate",
-                evidence_mode="direct",
-            )
-
-    # -------------------------------
-    # testing_frequency
-    # -------------------------------
-    current_freq = field_map.get("emissions.testing_frequency", {}).get("value")
-
-    if current_freq in (None, "", False):
-        if "annual" in text:
-            upsert_field(
-                field_map,
-                path="emissions.testing_frequency",
-                value="annual",
-                evidence="Heuristic: annual frequency explicitly mentioned.",
-                extractor="emissions_mapper",
-                fill_method="heuristic",
-                confidence=0.9,
-                evidence_strength="strong",
-                evidence_mode="direct",
-            )
-        elif "monthly" in text:
-            upsert_field(
-                field_map,
-                path="emissions.testing_frequency",
-                value="monthly",
-                evidence="Heuristic: monthly frequency explicitly mentioned.",
-                extractor="emissions_mapper",
-                fill_method="heuristic",
-                confidence=0.9,
-                evidence_strength="strong",
-                evidence_mode="direct",
-            )
-
-    return merge_normalized_fields(list(field_map.values()))
 
     return {
         "normalized_fields": normalized,
         "raw_extraction": payload,
     }
-
-def sanitize_emissions_fields(
-    normalized_fields: List[Dict[str, Any]],
-) -> List[Dict[str, Any]]:
-    field_map = {item["path"]: dict(item) for item in normalized_fields}
-
-    # -------------------------------
-    # stack_monitoring_method
-    # -------------------------------
-    stack_method = field_map.get("emissions.stack_monitoring_method", {}).get("value")
-
-    if isinstance(stack_method, str):
-        text = stack_method.strip().lower()
-
-        if text in {
-            "emissions monitoring",
-            "monitoring",
-            "emission monitoring",
-            "stack monitoring",
-        }:
-            field_map.pop("emissions.stack_monitoring_method", None)
-
-    # -------------------------------
-    # testing_frequency
-    # -------------------------------
-    testing_freq = field_map.get("emissions.testing_frequency", {}).get("value")
-
-    if isinstance(testing_freq, str):
-        text = testing_freq.strip().lower()
-
-        if text in {
-            "sampling plan",
-            "monitoring plan",
-            "test plan",
-        }:
-            field_map.pop("emissions.testing_frequency", None)
-
-    return list(field_map.values())
