@@ -273,56 +273,61 @@ def extract_project_data_from_contexts(
     project_hits: Optional[List[Dict[str, Any]]] = None,
     methodology_hits: Optional[List[Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
-    pipeline_output = run_mapper_pipeline(
-        ai_client=ai_client,
-        project_context=project_context,
-        methodology_context=methodology_context,
-        project_hits=project_hits or [],
-        methodology_hits=methodology_hits or [],
-    )
+    try:
+        pipeline_output = run_mapper_pipeline(
+            ai_client=ai_client,
+            project_context=project_context,
+            methodology_context=methodology_context,
+            project_hits=project_hits or [],
+            methodology_hits=methodology_hits or [],
+        )
 
-    # 🔒 proteção contra retorno inválido
-    if not isinstance(pipeline_output, dict):
-        print("DEBUG mapper_pipeline_output INVALID:", type(pipeline_output))
-        pipeline_output = {}
+        if not isinstance(pipeline_output, dict):
+            raise TypeError(
+                f"run_mapper_pipeline returned {type(pipeline_output).__name__}, expected dict"
+            )
 
-    normalized_fields = pipeline_output.get("normalized_fields", []) or []
-    raw_extraction_bundle = pipeline_output.get("raw_extraction_bundle", {}) or {}
+        normalized_fields = pipeline_output.get("normalized_fields", []) or []
+        raw_extraction_bundle = pipeline_output.get("raw_extraction_bundle", {}) or {}
 
-    inference_output = run_inference_layer(
-        normalized_fields=normalized_fields,
-        raw_extraction_bundle=raw_extraction_bundle,
-        project_context=project_context,
-        methodology_context=methodology_context,
-    )
+        inference_output = run_inference_layer(
+            normalized_fields=normalized_fields,
+            raw_extraction_bundle=raw_extraction_bundle,
+            project_context=project_context,
+            methodology_context=methodology_context,
+        )
 
-    if not isinstance(inference_output, dict):
-        print("DEBUG inference_output INVALID:", type(inference_output))
-        inference_output = {}
+        if not isinstance(inference_output, dict):
+            raise TypeError(
+                f"run_inference_layer returned {type(inference_output).__name__}, expected dict"
+            )
 
-    normalized_fields = inference_output.get("normalized_fields", []) or normalized_fields
-    inference_events = inference_output.get("inference_events", []) or []
+        normalized_fields = inference_output.get("normalized_fields", []) or normalized_fields
+        inference_events = inference_output.get("inference_events", []) or []
 
-    build_output = build_project_data_from_extraction(
-        normalized_fields,
-        return_resolution_artifacts=True,
-    )
+        build_output = build_project_data_from_extraction(
+            normalized_fields,
+            return_resolution_artifacts=True,
+        )
 
-    project_data = build_output["project_data"]
+        project_data = build_output["project_data"]
 
-    consistency_output = run_consistency_checks(
-        project_data=project_data,
-        normalized_fields=normalized_fields,
-    )
+        consistency_output = run_consistency_checks(
+            project_data=project_data,
+            normalized_fields=normalized_fields,
+        )
 
-    return {
-        "project_data": project_data,
-        "normalized_fields": normalized_fields,
-        "raw_extraction": raw_extraction_bundle,
-        "inference_events": inference_events,
-        "resolved_fields": build_output.get("resolved_fields", {}),
-        "field_resolution_log": build_output.get("field_resolution_log", []),
-        "invalidated_paths": build_output.get("invalidated_paths", {}),
-        "consistency_flags": consistency_output.get("consistency_flags", []),
-        "consistency_notes": consistency_output.get("consistency_notes", []),
-    }
+        return {
+            "project_data": project_data,
+            "normalized_fields": normalized_fields,
+            "raw_extraction": raw_extraction_bundle,
+            "inference_events": inference_events,
+            "resolved_fields": build_output.get("resolved_fields", {}),
+            "field_resolution_log": build_output.get("field_resolution_log", []),
+            "invalidated_paths": build_output.get("invalidated_paths", {}),
+            "consistency_flags": consistency_output.get("consistency_flags", []),
+            "consistency_notes": consistency_output.get("consistency_notes", []),
+        }
+
+    except Exception as e:
+        raise RuntimeError(f"extract_project_data_from_contexts failed: {e}")
