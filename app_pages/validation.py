@@ -325,7 +325,11 @@ def _render_structured_mode():
                 st.success("Mapeamento estruturado executado com sucesso.")
 
             except Exception as e:
+                import traceback
+
                 st.error(f"Erro no mapeamento estruturado: {str(e)}")
+                st.markdown("### DEBUG TRACEBACK")
+                st.code(traceback.format_exc(), language="python")
 
     mapping_output = st.session_state.get("structured_mapping_output")
 
