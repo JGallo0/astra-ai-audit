@@ -55,6 +55,18 @@ def sanitize_production_fields(
     if isinstance(value, str) and value.lower() in {"true", "false"}:
         field_map.pop("production.pyrolysis_technology", None)
 
+    invalid_generic_values = {
+        "biochar production",
+        "production of biochar",
+        "biochar system",
+        "biochar technology",
+        "carbon removal technology",
+        "pyrolysis",
+    }
+
+    if isinstance(value, str) and value.strip().lower() in invalid_generic_values:
+        field_map.pop("production.pyrolysis_technology", None)
+
     return list(field_map.values())
 
 
@@ -82,6 +94,20 @@ def apply_local_heuristics(
                 evidence_strength="strong",
                 evidence_mode="direct",
             )
+
+        elif re.search(r"\b(continuous pyrolysis|continuous reactor|pyrolysis reactor|rotary reactor)\b", text):
+            upsert_field(
+                field_map,
+                path="production.pyrolysis_technology",
+                value="continuous pyrolysis reactor",
+                evidence="Heuristic match: explicit continuous pyrolysis / reactor wording found.",
+                extractor="production_mapper",
+                fill_method="heuristic",
+                confidence=0.88,
+                evidence_strength="strong",
+                evidence_mode="direct",
+            )
+            
         elif re.search(r"\brectangular kilns?\b", text):
             upsert_field(
                 field_map,
