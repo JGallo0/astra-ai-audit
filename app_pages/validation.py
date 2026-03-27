@@ -207,15 +207,76 @@ def render_trails_section(trails):
             st.markdown("**Resultado interpretado**")
             st.json(trail.get("parsed_result", {}))
 
-def render():
-    st.warning("Validation page ainda em transição. Usando renderer legado.")
+def _render_exploratory_mode():
+    st.markdown("### Exploratory AI Review")
+    st.caption(
+        "Modo assistido por IA para exploração documental, diagnóstico inicial e análise narrativa."
+    )
 
     legacy_renderer = st.session_state.get("_validation_legacy_renderer")
 
     if callable(legacy_renderer):
         legacy_renderer()
     else:
-        st.error("Renderer legado não encontrado.")
+        st.error("Exploratory renderer não encontrado em session_state.")
+
+
+def _render_structured_mode():
+    st.markdown("### Structured Audit (V2)")
+    st.caption(
+        "Modo estruturado, rastreável e repetitível. Nesta etapa, a interface já está separada do fluxo exploratório."
+    )
+
+    current_methodology = st.session_state.get("current_methodology")
+    current_project_name = st.session_state.get("current_project_name")
+    current_project_vector_store_id = st.session_state.get("current_project_vector_store_id")
+    current_methodology_vector_store_id = st.session_state.get("current_methodology_vector_store_id")
+
+    info_col1, info_col2 = st.columns(2)
+
+    with info_col1:
+        st.info(
+            "\n".join(
+                [
+                    f"**Projeto:** {current_project_name or 'Não selecionado'}",
+                    f"**Metodologia:** {current_methodology or 'Não selecionada'}",
+                ]
+            )
+        )
+
+    with info_col2:
+        st.info(
+            "\n".join(
+                [
+                    f"**Project VS:** {'Conectado' if current_project_vector_store_id else 'Não conectado'}",
+                    f"**Methodology VS:** {'Conectado' if current_methodology_vector_store_id else 'Não conectado'}",
+                ]
+            )
+        )
+
+    st.warning(
+        "A execução do Structured Audit será conectada ao pipeline V2 no próximo passo. "
+        "Nesta etapa, o objetivo é separar com segurança os modos da página Validation."
+    )
+
+
+def render():
+    st.markdown("## Validation")
+
+    mode = st.radio(
+        "Selecione o modo de validação",
+        options=[
+            "Exploratory AI Review",
+            "Structured Audit (V2)",
+        ],
+        horizontal=True,
+        key="validation_mode_router",
+    )
+
+    if mode == "Exploratory AI Review":
+        _render_exploratory_mode()
+    else:
+        _render_structured_mode()
 
 def render_history_tab(history, lang, t, theme, safe_str, badge_html):
     st.markdown(f"#### {t(lang, 'history')}")
