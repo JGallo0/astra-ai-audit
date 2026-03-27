@@ -80,6 +80,8 @@ class DurabilityInference(BaseInferenceRule):
             or "permanent carbon storage" in project_text
         )
 
+        is_biochar_project = "biochar" in project_text
+
         return {
             "storage_pathway": storage_pathway,
             "stable_storage": stable_storage,
@@ -90,17 +92,23 @@ class DurabilityInference(BaseInferenceRule):
             "strong_storage_signal": strong_storage_signal,
             "stable_storage_signal": stable_storage_signal,
             "permanence_signal": permanence_signal,
+            "is_biochar_project": is_biochar_project,
         }
 
     def _should_infer_200_year_durability(self, signals: Dict[str, Any]) -> bool:
-        return (
-            signals["keyword_hits"] >= 2
-            and (
-                signals["strong_storage_signal"]
-                or signals["stable_storage_signal"]
-                or signals["permanence_signal"]
-            )
-        )
+        # Caso 1 — evidência explícita (mesmo que fraca)
+        if signals["keyword_hits"] >= 1:
+            return True
+
+        # Caso 2 — inferência estrutural (biochar + soil)
+        if signals["strong_storage_signal"]:
+            return True
+
+        # Caso 3 — permanência declarada
+        if signals["permanence_signal"]:
+            return True
+
+        return False
 
     def run(
         self,
