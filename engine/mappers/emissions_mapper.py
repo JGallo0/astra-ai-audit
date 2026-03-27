@@ -199,6 +199,7 @@ def run_emissions_mapper(
         fields=fields,
         extractor_name="emissions_mapper",
         fill_method="llm",
+    normalized = sanitize_emissions_fields(normalized)
     )
 
     normalized = apply_local_heuristics(
@@ -211,3 +212,16 @@ def run_emissions_mapper(
         "normalized_fields": normalized,
         "raw_extraction": payload,
     }
+
+def sanitize_emissions_fields(
+    normalized_fields: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    field_map = {item["path"]: dict(item) for item in normalized_fields}
+
+    # Corrigir stack_monitoring_method inválido
+    value = field_map.get("emissions.stack_monitoring_method", {}).get("value")
+
+    if isinstance(value, str) and value.lower() in {"true", "false"}:
+        field_map.pop("emissions.stack_monitoring_method", None)
+
+    return list(field_map.values())
