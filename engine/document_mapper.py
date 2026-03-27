@@ -281,6 +281,11 @@ def extract_project_data_from_contexts(
         methodology_hits=methodology_hits or [],
     )
 
+    # 🔒 proteção contra retorno inválido
+    if not isinstance(pipeline_output, dict):
+        print("DEBUG mapper_pipeline_output INVALID:", type(pipeline_output))
+        pipeline_output = {}
+
     normalized_fields = pipeline_output.get("normalized_fields", []) or []
     raw_extraction_bundle = pipeline_output.get("raw_extraction_bundle", {}) or {}
 
@@ -290,6 +295,10 @@ def extract_project_data_from_contexts(
         project_context=project_context,
         methodology_context=methodology_context,
     )
+
+    if not isinstance(inference_output, dict):
+        print("DEBUG inference_output INVALID:", type(inference_output))
+        inference_output = {}
 
     normalized_fields = inference_output.get("normalized_fields", []) or normalized_fields
     inference_events = inference_output.get("inference_events", []) or []
