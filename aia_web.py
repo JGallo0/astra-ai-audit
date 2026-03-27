@@ -1836,20 +1836,20 @@ if st.session_state.get("run_structured"):
 
         with st.spinner("Executando auditoria estruturada..."):
 
+            engine = AuditEngine(
+                api_key=OPENAI_API_KEY,
+                model=MODEL_NAME,
+                project_vector_store_id=project_vs_id,
+                methodology_vector_store_id=methodology_vs_id,
+                project_name=project_name,
+                requirements=requirements,
+            )
+
             selected_modules_for_v2 = st.session_state.get("structured_selected_modules") or None
 
             st.caption(f"Módulos estruturados aplicados: {selected_modules_for_v2}")
             st.caption(f"Quantidade de módulos selecionados: {len(selected_modules_for_v2 or [])}")
             st.caption(f"Total de requisitos carregados: {len(requirements)}")
-
-            project_data = {
-                "project": {},
-                "eligibility": {},
-                "feedstock": {},
-                "production": {},
-                "storage": {},
-                "monitoring_reporting": {},
-            }
 
             filtered_requirements = [
                 req for req in requirements
@@ -1864,29 +1864,16 @@ if st.session_state.get("run_structured"):
             else:
                 st.warning("Nenhum requirement filtrado.")
 
-            results = run_engine(project_data, filtered_requirements)
+            output = engine.run_structured_engine_audit(
+                selected_modules=selected_modules_for_v2,
+                audit_mode=audit_mode,
+            )
 
-            score_data = calculate_compliance_score(results)
-            score_label = classify_compliance_score(score_data["score"])
-
-            structured_v2_output = {
-                "project_data": project_data,
-                "results": results,
-                "score_data": score_data,
-                "score_label": score_label,
-                "audit_mode": audit_mode,
-                "selected_modules": selected_modules_for_v2 or [],
-                "normalized_fields": [],
-            }
-
-            st.session_state["structured_v2_output"] = structured_v2_output
+            st.session_state["structured_v2_output"] = output
             st.session_state["run_structured"] = False
 
         st.success("Auditoria estruturada concluída com sucesso.")
 
-    except Exception as e:
-        st.session_state["run_structured"] = False
-        st.error(f"Erro na auditoria estruturada: {e}")
     except Exception as e:
         st.session_state["run_structured"] = False
         st.error(f"Erro na auditoria estruturada: {e}")
