@@ -116,18 +116,18 @@ class ProductionInference(BaseInferenceRule):
         return "pyrolysis-based biochar production system"
 
     def _should_infer_pyrolysis(self, signals: Dict[str, Any]) -> bool:
-        # Regra mais robusta:
-        # Se existe biochar + QUALQUER sinal térmico → inferir
-
         return (
-            signals["has_biochar_signal"]
-            and (
-                signals["has_technology_signal"]
-                or signals["thermal_signal"]
-                or signals["syngas_signal"]
-                or bool(signals["system_description"])
+            bool(signals["system_description"])
+            or (
+                signals["has_biochar_signal"]
+                and (
+                    signals["has_technology_signal"]
+                    or signals["thermal_signal"]
+                    or signals["syngas_signal"]
+                )
             )
         )
+        
     def run(
         self,
         normalized_fields: List[Dict[str, Any]],
