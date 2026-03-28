@@ -75,8 +75,33 @@ class ProductionInference(BaseInferenceRule):
             normalized_fields,
             "production.system_description",
         )
+        reactor_design_diagram = get_best_value(
+            normalized_fields,
+            "production.reactor_design_diagram",
+        )
+
+        maintenance_plan = get_best_value(
+            normalized_fields,
+            "production.maintenance_plan",
+        )
+
+        end_material_process_description = get_best_value(
+            normalized_fields,
+            "production.end_material_process_description",
+        )
+
+        methodology_pathway = get_best_value(
+            normalized_fields,
+            "methodology.pathway",
+        )  
 
         text = normalize_text(project_context)
+
+        structural_production_signal = any([
+            bool(reactor_design_diagram),
+            bool(maintenance_plan),
+            bool(end_material_process_description),
+        ])
 
         has_technology_signal = project_contains_any(text, self.TECHNOLOGY_TERMS)
         has_biochar_signal = project_contains_any(text, self.BIOCHAR_TERMS)
@@ -94,6 +119,11 @@ class ProductionInference(BaseInferenceRule):
             "has_biochar_signal": has_biochar_signal,
             "syngas_signal": syngas_signal,
             "thermal_signal": thermal_signal,
+            "reactor_design_diagram": reactor_design_diagram,
+            "maintenance_plan": maintenance_plan,
+            "end_material_process_description": end_material_process_description,
+            "methodology_pathway": methodology_pathway,
+            "structural_production_signal": structural_production_signal,
         }
 
     def _infer_technology_label(self, text: str) -> str:
@@ -117,15 +147,20 @@ class ProductionInference(BaseInferenceRule):
 
     def _should_infer_pyrolysis(self, signals: Dict[str, Any]) -> bool:
         return (
-            bool(signals["system_description"])
+            (
+                normalize_text(signals["methodology_pathway"]) == "biochar"
+                and signals["structural_production_signal"]
+            )
             or (
                 signals["has_biochar_signal"]
                 and (
                     signals["has_technology_signal"]
                     or signals["thermal_signal"]
                     or signals["syngas_signal"]
+                    or signals["structural_production_signal"]
                 )
             )
+            or bool(signals["system_description"])
         )
         
     def run(
