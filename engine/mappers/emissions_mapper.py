@@ -88,6 +88,8 @@ def sanitize_emissions_fields(
         text = testing_freq.strip().lower()
 
         if text in {
+            "true",
+            "false",
             "sampling plan",
             "monitoring plan",
             "test plan",
