@@ -156,6 +156,7 @@ class ProductionInference(BaseInferenceRule):
 
         is_weak_value = normalize_text(current_value) in {
             "",
+            "biochar",
             "biochar production",
             "production of biochar",
             "biochar system",
