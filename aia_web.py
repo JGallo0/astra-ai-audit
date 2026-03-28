@@ -1847,52 +1847,27 @@ if st.session_state.get("run_structured"):
 
             selected_modules_for_v2 = st.session_state.get("structured_selected_modules") or None
 
-            st.caption(f"Módulos estruturados aplicados: {selected_modules_for_v2}")
-            st.caption(f"Quantidade de módulos selecionados: {len(selected_modules_for_v2 or [])}")
-            st.caption(f"Total de requisitos carregados: {len(requirements)}")
-
-            filtered_requirements = [
-                req for req in requirements
-                if not selected_modules_for_v2 or req.get("module") in selected_modules_for_v2
-            ]
-
-            st.markdown("### DEBUG REQUIREMENTS")
-
-            if filtered_requirements:
-                st.write("Primeiro requirement:")
-                st.json(filtered_requirements[0])
-            else:
-                st.warning("Nenhum requirement filtrado.")
-
             output = engine.run_structured_engine_audit(
                 selected_modules=selected_modules_for_v2,
                 audit_mode=audit_mode,
             )
 
-            # DEBUG — entender formato de retorno
-            st.markdown("### DEBUG ENGINE OUTPUT TYPE")
-            st.write(type(output))
-            st.write(output)
+            if not isinstance(output, dict):
+                raise ValueError("Structured engine output must be a dict.")
 
-            # Normalizar formato do output
-            if isinstance(output, tuple):
-                results, score_data = output
+            if "results" not in output:
+                raise ValueError("Structured engine output missing 'results'.")
 
-                structured_v2_output = {
-                    "results": results,
-                    "score_data": score_data,
-                    "score_label": classify_compliance_score(
-                        score_data.get("score", 0)
-                    ),
-                }
+            if "score_data" not in output:
+                raise ValueError("Structured engine output missing 'score_data'.")
 
-            elif isinstance(output, dict):
-                structured_v2_output = output
+            if "score_label" not in output:
+                raise ValueError("Structured engine output missing 'score_label'.")
 
-            else:
-                raise ValueError("Unexpected output format from engine")
+            if not isinstance(output.get("results"), list):
+                raise ValueError("'results' must be a list.")
 
-            st.session_state["structured_v2_output"] = structured_v2_output
+            st.session_state["structured_v2_output"] = output
             st.session_state["run_structured"] = False
 
         st.success("Auditoria estruturada concluída com sucesso.")
@@ -1922,6 +1897,7 @@ if structured_v2_output:
     normalized_fields = structured_v2_output.get("normalized_fields", [])
     score_data = structured_v2_output.get("score_data", {})
     score_label = structured_v2_output.get("score_label", "")
+    audit_mode = structured_v2_output.get("audit_mode", st.session_state.get("audit_mode", "development"))
 
     col1, col2 = st.columns(2)
 
@@ -1930,9 +1906,6 @@ if structured_v2_output:
 
     with col2:
         st.metric("Rating", score_label)
-
-    st.write("DEBUG results type:", type(results))
-    st.write("DEBUG results len:", len(results))
 
     if results:
 
@@ -1944,19 +1917,10 @@ if structured_v2_output:
             item["confidence"] = item.get("confidence", 0)
             normalized_results.append(item)
 
-        if normalized_results:
-            st.markdown("### DEBUG FIRST NORMALIZED RESULT")
-            st.json(normalized_results[0])
-
-        debug_df = pd.DataFrame(normalized_results)
-
-        st.markdown("### DEBUG RAW DATAFRAME")
-        st.dataframe(debug_df, hide_index=True, width="stretch")
-
         try:
             df = build_audit_dataframe(normalized_results)
 
-            st.markdown("### MATRIZ FORMATADA")
+            st.markdown("### Matriz de Conformidade")
             st.dataframe(df, hide_index=True, width="stretch")
 
         except Exception as e:
@@ -1967,24 +1931,29 @@ if structured_v2_output:
 
         if df is not None:
             try:
-                matrix_pdf = matrix_to_pdf_bytes(df)
+                matrix_title = f"CO2mply | Compliance Matrix | {str(audit_mode).capitalize()}"
+                matrix_pdf = matrix_to_pdf_bytes(df, title=matrix_title)
                 matrix_docx = matrix_to_docx_bytes(df)
 
-                st.download_button(
-                    "Baixar Matriz (.pdf)",
-                    data=matrix_pdf,
-                    file_name="matriz_v2.pdf",
-                    mime="application/pdf",
-                    use_container_width=True
-                )
+                d1, d2 = st.columns(2)
 
-                st.download_button(
-                    "Baixar Matriz (.docx)",
-                    data=matrix_docx,
-                    file_name="matriz_v2.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    use_container_width=True
-                )
+                with d1:
+                    st.download_button(
+                        "Baixar Matriz (.pdf)",
+                        data=matrix_pdf,
+                        file_name=f"matriz_v2_{audit_mode}.pdf",
+                        mime="application/pdf",
+                        use_container_width=True
+                    )
+
+                with d2:
+                    st.download_button(
+                        "Baixar Matriz (.docx)",
+                        data=matrix_docx,
+                        file_name=f"matriz_v2_{audit_mode}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        use_container_width=True
+                    )
 
             except Exception as e:
                 import traceback
@@ -2002,7 +1971,6 @@ if structured_v2_output:
 
     with st.expander("Payload completo"):
         st.write(structured_v2_output)
-
 # =========================================================
 # SIDEBAR
 # =========================================================
