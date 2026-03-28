@@ -1931,55 +1931,63 @@ if structured_v2_output:
     with col2:
         st.metric("Rating", score_label)
 
+    if results:
 
-if results:
+        # =========================
+        # NORMALIZA RESULTADOS
+        # =========================
+        normalized_results = []
 
-    # =========================
-    # NORMALIZA RESULTADOS
-    # =========================
-    normalized_results = []
+        for r in results:
+            item = dict(r)
+            item["score"] = item.get("requirement_score", item.get("score", 0))
+            item["confidence"] = item.get("confidence", 0)
+            normalized_results.append(item)
 
-    for r in results:
-        item = dict(r)
-        item["score"] = item.get("requirement_score", item.get("score", 0))
-        item["confidence"] = item.get("confidence", 0)
-        normalized_results.append(item)
+        # =========================
+        # MATRIZ PADRÃO
+        # =========================
+        df = build_audit_dataframe(normalized_results)
 
-    # =========================
-    # MATRIZ PADRÃO
-    # =========================
-    df = build_audit_dataframe(normalized_results)
+        st.dataframe(
+            df,
+            hide_index=True,
+            width="stretch"
+        )
 
-    st.dataframe(
-        df,
-        hide_index=True,
-        width="stretch"
-    )
+        # =========================
+        # DOWNLOADS
+        # =========================
+        matrix_pdf = matrix_to_pdf_bytes(df)
+        matrix_docx = matrix_to_docx_bytes(df)
 
-    # =========================
-    # DOWNLOADS
-    # =========================
-    matrix_pdf = matrix_to_pdf_bytes(df)
-    matrix_docx = matrix_to_docx_bytes(df)
+        st.download_button(
+            "Baixar Matriz (.pdf)",
+            data=matrix_pdf,
+            file_name="matriz_v2.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
 
-    st.download_button(
-        "Baixar Matriz (.pdf)",
-        data=matrix_pdf,
-        file_name="matriz_v2.pdf",
-        mime="application/pdf",
-        use_container_width=True
-    )
+        st.download_button(
+            "Baixar Matriz (.docx)",
+            data=matrix_docx,
+            file_name="matriz_v2.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            use_container_width=True
+        )
 
-    st.download_button(
-        "Baixar Matriz (.docx)",
-        data=matrix_docx,
-        file_name="matriz_v2.docx",
-        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        use_container_width=True
-    )
+    else:
+        st.warning("Nenhum resultado retornado pela engine.")
 
-else:
-    st.warning("Nenhum resultado retornado pela engine.")
+    with st.expander("Project Data (extraído)"):
+        st.write(project_data)
+
+    with st.expander("Normalized Fields"):
+        st.write(normalized_fields)
+
+    with st.expander("Payload completo"):
+        st.write(structured_v2_output)
 
 # =========================
 # DEBUG / RASTREABILIDADE
