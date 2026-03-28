@@ -81,7 +81,19 @@ def apply_local_heuristics(
     # production.pyrolysis_technology
     # ------------------------------------------------------------------
     current = field_map.get("production.pyrolysis_technology", {}).get("value")
-    if current in (None, "", []):
+
+    invalid_string_values = {
+        "",
+        "pyrolysis",
+    }
+
+    if isinstance(current, str):
+        current_normalized = current.strip().lower()
+        is_invalid = current_normalized in invalid_string_values
+    else:
+        is_invalid = current in (None, [])
+
+    if is_invalid:
         if re.search(r"\bbst-30\b", text) and re.search(r"\b(pyrolysis reactor|continuous pyrolysis|continuous reactor|reactor)\b", text):
             upsert_field(
                 field_map,
@@ -107,7 +119,7 @@ def apply_local_heuristics(
                 evidence_strength="strong",
                 evidence_mode="direct",
             )
-            
+
         elif re.search(r"\brectangular kilns?\b", text):
             upsert_field(
                 field_map,
