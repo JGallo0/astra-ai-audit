@@ -1918,6 +1918,11 @@ if structured_v2_output:
     st.subheader("Resultado da Auditoria Estruturada")
 
     results = structured_v2_output.get("results", [])
+    st.write("DEBUG results type:", type(results))
+    st.write("DEBUG results len:", len(results))
+    if results:
+        st.write("DEBUG first result keys:", list(results[0].keys()))
+        st.json(results[0])
     project_data = structured_v2_output.get("project_data", {})
     normalized_fields = structured_v2_output.get("normalized_fields", [])
     score_data = structured_v2_output.get("score_data", {})
@@ -1947,35 +1952,46 @@ if structured_v2_output:
         # =========================
         # MATRIZ PADRÃO
         # =========================
-        df = build_audit_dataframe(normalized_results)
-
-        st.dataframe(
-            df,
-            hide_index=True,
-            width="stretch"
-        )
+        debug_df = pd.DataFrame(normalized_results)
+        st.markdown("### DEBUG RAW DATAFRAME")
+        st.dataframe(debug_df, hide_index=True, width="stretch")
+        
+try:
+    df = build_audit_dataframe(normalized_results)
+    st.markdown("### MATRIZ FORMATADA")
+    st.dataframe(df, hide_index=True, width="stretch")
+except Exception as e:
+    import traceback
+    st.error(f"Erro ao montar matriz: {e}")
+    st.code(traceback.format_exc(), language="python")
 
         # =========================
         # DOWNLOADS
         # =========================
-        matrix_pdf = matrix_to_pdf_bytes(df)
-        matrix_docx = matrix_to_docx_bytes(df)
+        try:
+            matrix_pdf = matrix_to_pdf_bytes(df)
+            matrix_docx = matrix_to_docx_bytes(df)
 
-        st.download_button(
-            "Baixar Matriz (.pdf)",
-            data=matrix_pdf,
-            file_name="matriz_v2.pdf",
-            mime="application/pdf",
-            use_container_width=True
-        )
+            st.download_button(
+                "Baixar Matriz (.pdf)",
+                data=matrix_pdf,
+                file_name="matriz_v2.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
 
-        st.download_button(
-            "Baixar Matriz (.docx)",
-            data=matrix_docx,
-            file_name="matriz_v2.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            use_container_width=True
-        )
+            st.download_button(
+                "Baixar Matriz (.docx)",
+                data=matrix_docx,
+                file_name="matriz_v2.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                use_container_width=True
+            )
+
+        except Exception as e:
+            import traceback
+            st.error(f"Erro ao gerar downloads: {e}")
+            st.code(traceback.format_exc(), language="python")
 
     else:
         st.warning("Nenhum resultado retornado pela engine.")
