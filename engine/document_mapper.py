@@ -176,16 +176,56 @@ def _resolve_field_candidates(
 
     for path, candidates in grouped.items():
 
-        if path in invalidated_paths:
-            resolution_log.append(
-                {
-                    "path": path,
-                    "status": "invalidated_by_other_rule",
-                    "invalidated_by": invalidated_paths[path],
-                    "candidate_count": len(candidates),
-                }
-            )
-            continue
+if path in invalidated_paths:
+    override_candidates = [
+        c for c in candidates
+        if _normalize_text(c.get("resolution_action")) in {
+            "semantic_override",
+            "override",
+            "reclassify",
+        }
+    ]
+
+    if override_candidates:
+        ranked = sorted(
+            override_candidates,
+            key=_candidate_score,
+            reverse=True,
+        )
+
+        winner = ranked[0]
+        resolved_fields[path] = winner.get("value")
+
+        resolution_log.append(
+            {
+                "path": path,
+                "status": "resolved_via_override",
+                "winner": {
+                    "value": winner.get("value"),
+                    "extractor": winner.get("extractor"),
+                    "confidence": winner.get("confidence"),
+                    "evidence_mode": winner.get("evidence_mode"),
+                    "evidence_strength": winner.get("evidence_strength"),
+                    "fill_method": winner.get("fill_method"),
+                    "resolution_action": winner.get("resolution_action", "set"),
+                    "inference_rule_id": winner.get("inference_rule_id"),
+                },
+                "invalidated_by": invalidated_paths[path],
+                "candidate_count": len(candidates),
+            }
+        )
+        continue
+
+    # fallback (caso não haja override válido)
+    resolution_log.append(
+        {
+            "path": path,
+            "status": "invalidated_by_other_rule",
+            "invalidated_by": invalidated_paths[path],
+            "candidate_count": len(candidates),
+        }
+    )
+    continue
 
         ranked = sorted(
             candidates,
