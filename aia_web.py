@@ -1989,17 +1989,6 @@ if structured_v2_output:
     with st.expander("Payload completo"):
         st.write(structured_v2_output)
 
-# =========================
-# DEBUG / RASTREABILIDADE
-# =========================
-with st.expander("Project Data (extraído)"):
-    st.write(project_data)
-
-with st.expander("Normalized Fields"):
-    st.write(normalized_fields)
-
-with st.expander("Payload completo"):
-    st.write(structured_v2_output)
 # =========================================================
 # SIDEBAR
 # =========================================================
