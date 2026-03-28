@@ -481,6 +481,24 @@ def apply_local_heuristics(
 
     return merge_normalized_fields(list(field_map.values()))
 
+# ------------------------------------------------------------
+# SANITIZATION
+# ------------------------------------------------------------
+def sanitize_quantification_fields(
+    normalized_fields: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    field_map = {item["path"]: dict(item) for item in normalized_fields}
+
+    # ------------------------------------------------------------
+    # REMOVE weak / misleading FALSE values
+    # ------------------------------------------------------------
+    value = field_map.get("quantification.storage_emissions_accounted", {}).get("value")
+
+    if value is False:
+        field_map.pop("quantification.storage_emissions_accounted", None)
+
+    return list(field_map.values())
+
 
 def run_quantification_mapper(
     ai_client,
@@ -507,6 +525,7 @@ def run_quantification_mapper(
         fill_method="llm",
     )
 
+    normalized = sanitize_quantification_fields(normalized)
     normalized = apply_local_heuristics(
         project_context=project_context,
         methodology_context=methodology_context,
