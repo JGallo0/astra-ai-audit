@@ -1931,13 +1931,15 @@ if structured_v2_output:
         if df is not None:
             try:
                 matrix_title = f"CO2mply | Compliance Matrix | {str(audit_mode).capitalize()}"
+
                 matrix_pdf = matrix_to_pdf_bytes(
                     df,
-                    title="CO2mply | Matriz de Conformidade"
+                    title=matrix_title
                 )
+
                 matrix_docx = matrix_to_docx_bytes(
                     df,
-                    title="CO2mply | Matriz de Conformidade"
+                    title=matrix_title
                 )
 
                 d1, d2 = st.columns(2)
