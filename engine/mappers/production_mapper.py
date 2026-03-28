@@ -56,6 +56,7 @@ def sanitize_production_fields(
         field_map.pop("production.pyrolysis_technology", None)
 
     invalid_generic_values = {
+        "biochar",
         "biochar production",
         "production of biochar",
         "biochar system",
