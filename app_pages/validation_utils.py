@@ -106,7 +106,25 @@ def flatten_markdown_to_lines(text: str) -> List[str]:
 
 
 def build_audit_dataframe(results: List[Dict[str, Any]]) -> pd.DataFrame:
-    df = pd.DataFrame(results)
+    normalized = []
+
+    for r in results:
+        normalized.append({
+            "requirement_id": r.get("requirement_id"),
+            "module": r.get("module"),
+            "title": r.get("requirement_name") or r.get("title"),
+            "status": r.get("status"),
+            "risk": r.get("risk"),
+            "score": r.get("requirement_score", r.get("score")),
+            "confidence": r.get("confidence"),
+            "project_evidence": r.get("project_evidence"),
+            "methodology_basis": r.get("methodology_basis"),
+            "gap": r.get("gap"),
+            "recommendation": r.get("recommendation"),
+            "notes": r.get("notes"),
+        })
+
+    df = pd.DataFrame(normalized)
 
     preferred_order = [
         "requirement_id",
