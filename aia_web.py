@@ -1923,11 +1923,6 @@ if structured_v2_output:
     score_data = structured_v2_output.get("score_data", {})
     score_label = structured_v2_output.get("score_label", "")
 
-    selected_modules_for_v2 = st.session_state.get("structured_selected_modules") or None
-
-    st.caption(f"Módulos estruturados aplicados: {selected_modules_for_v2}")
-    st.caption(f"Requisitos avaliados nesta execução: {len(results)}")
-
     col1, col2 = st.columns(2)
 
     with col1:
@@ -1936,33 +1931,67 @@ if structured_v2_output:
     with col2:
         st.metric("Rating", score_label)
 
-    if results:
-        df = pd.DataFrame(results)
-        st.dataframe(df, hide_index=True, width="stretch")
-    else:
-        st.warning("Nenhum resultado retornado pela engine.")
 
-    with st.expander("Project Data (extraído)", expanded=False):
-        st.write(project_data)
+if results:
 
-    with st.expander("Normalized Fields", expanded=False):
-        st.write(normalized_fields)
+    # =========================
+    # NORMALIZA RESULTADOS
+    # =========================
+    normalized_results = []
 
-    with st.expander("Payload completo", expanded=False):
-        st.write(structured_v2_output)
+    for r in results:
+        item = dict(r)
+        item["score"] = item.get("requirement_score", item.get("score", 0))
+        item["confidence"] = item.get("confidence", 0)
+        normalized_results.append(item)
 
-active_methodology_label = METHODOLOGY_REGISTRY.get(
-    st.session_state.get("current_methodology", ""),
-    {}
-).get("label", "-")
+    # =========================
+    # MATRIZ PADRÃO
+    # =========================
+    df = build_audit_dataframe(normalized_results)
 
-if st.session_state.get("current_project_name"):
-    st.info(
-        f"Projeto ativo: {st.session_state.get('current_project_name')} | "
-        f"Metodologia: {active_methodology_label}"
+    st.dataframe(
+        df,
+        hide_index=True,
+        width="stretch"
     )
+
+    # =========================
+    # DOWNLOADS
+    # =========================
+    matrix_pdf = matrix_to_pdf_bytes(df)
+    matrix_docx = matrix_to_docx_bytes(df)
+
+    st.download_button(
+        "Baixar Matriz (.pdf)",
+        data=matrix_pdf,
+        file_name="matriz_v2.pdf",
+        mime="application/pdf",
+        use_container_width=True
+    )
+
+    st.download_button(
+        "Baixar Matriz (.docx)",
+        data=matrix_docx,
+        file_name="matriz_v2.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        use_container_width=True
+    )
+
 else:
-    st.warning("Nenhum projeto selecionado.")
+    st.warning("Nenhum resultado retornado pela engine.")
+
+# =========================
+# DEBUG / RASTREABILIDADE
+# =========================
+with st.expander("Project Data (extraído)"):
+    st.write(project_data)
+
+with st.expander("Normalized Fields"):
+    st.write(normalized_fields)
+
+with st.expander("Payload completo"):
+    st.write(structured_v2_output)
 # =========================================================
 # SIDEBAR
 # =========================================================
