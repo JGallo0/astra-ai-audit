@@ -2040,6 +2040,186 @@ def build_structured_audit_summary_text(
 
     return "\n".join(lines)
 
+def build_eligibility_dossier_text(
+    project_name: str,
+    audit_mode: str,
+    score_data: Dict[str, Any],
+    score_label: str,
+    results: List[Dict[str, Any]],
+    project_data: Dict[str, Any],
+) -> str:
+
+    score = score_data.get("score", 0)
+    compliant = score_data.get("compliant", 0)
+    partial = score_data.get("partial", 0)
+    non_compliant = score_data.get("non_compliant", 0)
+    error = score_data.get("error", 0)
+
+    # -------------------------
+    # Elegibilidade geral
+    # -------------------------
+    if score >= 70:
+        eligibility_status = "ELIGIBLE"
+    elif score >= 40:
+        eligibility_status = "CONDITIONALLY ELIGIBLE"
+    else:
+        eligibility_status = "NOT ELIGIBLE"
+
+    # -------------------------
+    # Extração de blocos chave
+    # -------------------------
+    eligibility = project_data.get("eligibility", {})
+    feedstock = project_data.get("feedstock", {})
+    production = project_data.get("production", {})
+    storage = project_data.get("storage", {})
+    ghg = project_data.get("ghg_accounting", {})
+    mrv = project_data.get("monitoring_reporting", {})
+
+    # -------------------------
+    # Itens críticos
+    # -------------------------
+    critical_issues = []
+    missing_logic = []
+
+    for r in results or []:
+        status = str(r.get("status", "")).lower()
+        req_id = r.get("requirement_id", "")
+        title = r.get("title", "")
+        notes = r.get("notes", []) or []
+
+        note_txt = " ".join([str(n) for n in notes]) if isinstance(notes, list) else str(notes)
+
+        if status == "non_compliant":
+            critical_issues.append(f"{req_id} — {title} | {note_txt}")
+
+        if status == "error":
+            missing_logic.append(f"{req_id} — {title}")
+
+    critical_issues = critical_issues[:8]
+    missing_logic = missing_logic[:8]
+
+    # -------------------------
+    # Construção do texto
+    # -------------------------
+    lines = []
+
+    lines.append("CO2mply | Eligibility Dossier")
+    lines.append("")
+    lines.append(f"Project: {project_name or 'Unnamed'}")
+    lines.append(f"Audit Mode: {str(audit_mode).capitalize()}")
+    lines.append("")
+    
+    # STATUS
+    lines.append("1. Eligibility Status")
+    lines.append(f"- Status: {eligibility_status}")
+    lines.append(f"- Compliance Score: {score}")
+    lines.append(f"- Rating: {score_label}")
+    lines.append("")
+
+    # INTERPRETAÇÃO
+    lines.append("2. Eligibility Interpretation")
+
+    if eligibility_status == "NOT ELIGIBLE":
+        lines.append(
+            "The project does not currently meet minimum eligibility requirements under the selected methodology. "
+            "Critical structural elements are missing or not evidenced."
+        )
+    elif eligibility_status == "CONDITIONALLY ELIGIBLE":
+        lines.append(
+            "The project may become eligible subject to targeted corrections and additional documentation."
+        )
+    else:
+        lines.append(
+            "The project demonstrates sufficient alignment with eligibility requirements and may proceed to validation."
+        )
+
+    lines.append("")
+
+    # COMPONENTES
+    lines.append("3. Core Eligibility Components")
+
+    lines.append(f"- Net-negative claim: {eligibility.get('net_negative_claim')}")
+    lines.append(f"- Additionality claim: {eligibility.get('additionality_claim')}")
+    lines.append(f"- Durability (years): {eligibility.get('durability_years')}")
+    lines.append("")
+
+    # FEEDSTOCK
+    lines.append("4. Feedstock Assessment")
+    lines.append(f"- Biomass type: {feedstock.get('biomass_type')}")
+    lines.append(f"- Pre-project use: {feedstock.get('pre_project_biomass_use')}")
+    lines.append("")
+
+    # PRODUÇÃO
+    lines.append("5. Production System")
+    lines.append(f"- Technology: {production.get('pyrolysis_technology')}")
+    lines.append(f"- Reactor diagram provided: {production.get('reactor_design_diagram')}")
+    lines.append("")
+
+    # STORAGE
+    lines.append("6. Storage & Permanence")
+    lines.append(f"- Storage module: {storage.get('storage_module')}")
+    lines.append(f"- Storage stability: {storage.get('storage_environment_stable')}")
+    lines.append("")
+
+    # GHG
+    lines.append("7. GHG Accounting Structure")
+    lines.append(f"- System boundary defined: {ghg.get('system_boundary_defined')}")
+    lines.append(f"- Baseline defined: {ghg.get('baseline_defined')}")
+    lines.append("")
+
+    # MRV
+    lines.append("8. MRV Readiness")
+    lines.append(f"- Monitoring plan: {mrv.get('monitoring_plan')}")
+    lines.append(f"- Verification readiness: {mrv.get('verification_ready')}")
+    lines.append("")
+
+    # RISCOS
+    lines.append("9. Key Eligibility Risks")
+
+    if critical_issues:
+        for c in critical_issues:
+            lines.append(f"- {c}")
+    else:
+        lines.append("- No critical risks identified.")
+
+    lines.append("")
+
+    # COBERTURA DA ENGINE
+    lines.append("10. Engine Coverage Limitations")
+    lines.append(
+        "Some requirements were not evaluated due to missing logic bindings in the engine. "
+        "These appear as 'error' and should not be interpreted as non-compliance."
+    )
+    lines.append(f"- Requirements not evaluated: {error}")
+    lines.append("")
+
+    # RECOMENDAÇÕES
+    lines.append("11. Recommended Actions")
+
+    if eligibility_status == "NOT ELIGIBLE":
+        actions = [
+            "Define storage pathway and permanence approach",
+            "Establish MRV system",
+            "Demonstrate net-negative emissions",
+        ]
+    elif eligibility_status == "CONDITIONALLY ELIGIBLE":
+        actions = [
+            "Complete missing documentation",
+            "Strengthen traceability and MRV",
+        ]
+    else:
+        actions = [
+            "Proceed to validation",
+            "Prepare audit documentation package",
+        ]
+
+    for a in actions:
+        lines.append(f"- {a}")
+
+    lines.append("")
+
+    return "\n".join(lines)
+
 # =========================================================
 # RENDER RESULTADO V2
 # =========================================================
@@ -2057,6 +2237,7 @@ if structured_v2_output:
     score_data = structured_v2_output.get("score_data", {})
     score_label = structured_v2_output.get("score_label", "")
     audit_mode = structured_v2_output.get("audit_mode", st.session_state.get("audit_mode", "development"))
+
     summary_text = build_structured_audit_summary_text(
         project_name=project_name,
         audit_mode=audit_mode,
@@ -2064,7 +2245,16 @@ if structured_v2_output:
         score_label=score_label,
         results=results,
     )
-    
+
+    dossier_text = build_eligibility_dossier_text(
+        project_name=project_name,
+        audit_mode=audit_mode,
+        score_data=score_data,
+        score_label=score_label,
+        results=results,
+        project_data=project_data,
+    )
+
     col1, col2 = st.columns(2)
 
     with col1:
@@ -2097,33 +2287,39 @@ if structured_v2_output:
 
         if df is not None:
             try:
+                # -------------------------
+                # TITLES
+                # -------------------------
                 matrix_title = f"CO2mply | Compliance Matrix | {str(audit_mode).capitalize()}"
-
-                matrix_pdf = matrix_to_pdf_bytes(
-                    df,
-                    title=matrix_title
-                )
                 summary_title = f"CO2mply | Audit Summary | {str(audit_mode).capitalize()}"
+                dossier_title = f"CO2mply | Eligibility Dossier | {str(audit_mode).capitalize()}"
 
-                summary_docx = docx_from_text(
-                    summary_title,
-                    summary_text
-                )
+                # -------------------------
+                # MATRIZ
+                # -------------------------
+                matrix_pdf = matrix_to_pdf_bytes(df, title=matrix_title)
+                matrix_docx = matrix_to_docx_bytes(df, title=matrix_title)
 
-                summary_pdf = pdf_from_text(
-                    summary_title,
-                    summary_text
-                )
-                matrix_docx = matrix_to_docx_bytes(
-                    df,
-                    title=matrix_title
-                )
+                # -------------------------
+                # SUMMARY
+                # -------------------------
+                summary_pdf = pdf_from_text(summary_title, summary_text)
+                summary_docx = docx_from_text(summary_title, summary_text)
 
-                d1, d2, d3, d4 = st.columns(4)
+                # -------------------------
+                # DOSSIER
+                # -------------------------
+                dossier_pdf = pdf_from_text(dossier_title, dossier_text)
+                dossier_docx = docx_from_text(dossier_title, dossier_text)
+
+                # -------------------------
+                # DOWNLOADS
+                # -------------------------
+                d1, d2, d3, d4, d5, d6 = st.columns(6)
 
                 with d1:
                     st.download_button(
-                        "Baixar Matriz (.pdf)",
+                        "Matriz (.pdf)",
                         data=matrix_pdf,
                         file_name=f"matriz_v2_{audit_mode}.pdf",
                         mime="application/pdf",
@@ -2132,7 +2328,7 @@ if structured_v2_output:
 
                 with d2:
                     st.download_button(
-                        "Baixar Matriz (.docx)",
+                        "Matriz (.docx)",
                         data=matrix_docx,
                         file_name=f"matriz_v2_{audit_mode}.docx",
                         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -2141,7 +2337,7 @@ if structured_v2_output:
 
                 with d3:
                     st.download_button(
-                        "Baixar Summary (.pdf)",
+                        "Summary (.pdf)",
                         data=summary_pdf,
                         file_name=f"audit_summary_v2_{audit_mode}.pdf",
                         mime="application/pdf",
@@ -2150,9 +2346,27 @@ if structured_v2_output:
 
                 with d4:
                     st.download_button(
-                        "Baixar Summary (.docx)",
+                        "Summary (.docx)",
                         data=summary_docx,
                         file_name=f"audit_summary_v2_{audit_mode}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        use_container_width=True
+                    )
+
+                with d5:
+                    st.download_button(
+                        "Dossier (.pdf)",
+                        data=dossier_pdf,
+                        file_name=f"eligibility_dossier_v2_{audit_mode}.pdf",
+                        mime="application/pdf",
+                        use_container_width=True
+                    )
+
+                with d6:
+                    st.download_button(
+                        "Dossier (.docx)",
+                        data=dossier_docx,
+                        file_name=f"eligibility_dossier_v2_{audit_mode}.docx",
                         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                         use_container_width=True
                     )
@@ -2165,8 +2379,14 @@ if structured_v2_output:
     else:
         st.warning("Nenhum resultado retornado pela engine.")
 
+    # -------------------------
+    # EXPANDERS
+    # -------------------------
     with st.expander("Audit Summary"):
         st.text(summary_text)
+
+    with st.expander("Eligibility Dossier"):
+        st.text(dossier_text)
 
     with st.expander("Project Data (extraído)"):
         st.write(project_data)
@@ -2176,7 +2396,6 @@ if structured_v2_output:
 
     with st.expander("Payload completo"):
         st.write(structured_v2_output)
-
 # =========================================================
 # SIDEBAR
 # =========================================================
