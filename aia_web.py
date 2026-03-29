@@ -1887,98 +1887,156 @@ def build_structured_audit_summary_text(
     score_label: str,
     results: List[Dict[str, Any]],
 ) -> str:
-    total_requirements = len(results or [])
 
+    total = len(results or [])
     compliant = score_data.get("compliant", 0)
     partial = score_data.get("partial", 0)
     non_compliant = score_data.get("non_compliant", 0)
-    not_applicable = score_data.get("not_applicable", 0)
     error = score_data.get("error", 0)
-    applicable_requirements = score_data.get("applicable_requirements", 0)
-    overall_score = score_data.get("score", 0)
+    score = score_data.get("score", 0)
 
-    critical_items = []
+    # -------------------------
+    # Classificação de risco
+    # -------------------------
+    if score >= 75:
+        risk_level = "LOW"
+    elif score >= 50:
+        risk_level = "MODERATE"
+    else:
+        risk_level = "HIGH"
+
+    # -------------------------
+    # Coleta de itens críticos
+    # -------------------------
+    critical = []
     partial_items = []
-    error_items = []
 
-    for item in results or []:
-        status = str(item.get("status", "")).strip().lower()
-        req_id = str(item.get("requirement_id", "")).strip()
-        req_name = str(item.get("requirement_name", "")).strip() or str(item.get("title", "")).strip()
-        notes = item.get("notes", []) or []
+    for r in results or []:
+        status = str(r.get("status", "")).lower()
+        req_id = r.get("requirement_id", "")
+        title = r.get("title", "")
+        notes = r.get("notes", []) or []
 
-        note_text = ""
-        if isinstance(notes, list):
-            note_text = " ".join([str(n) for n in notes if str(n).strip()])
-        else:
-            note_text = str(notes).strip()
+        note_txt = " ".join([str(n) for n in notes]) if isinstance(notes, list) else str(notes)
 
-        line = f"- {req_id} | {req_name}"
-        if note_text:
-            line += f" | {note_text}"
+        line = f"{req_id} — {title}"
+        if note_txt:
+            line += f" | {note_txt}"
 
         if status == "non_compliant":
-            critical_items.append(line)
+            critical.append(line)
         elif status == "partial":
             partial_items.append(line)
-        elif status == "error":
-            error_items.append(line)
 
-    critical_items = critical_items[:10]
-    partial_items = partial_items[:10]
-    error_items = error_items[:10]
+    critical = critical[:5]
+    partial_items = partial_items[:5]
 
-    lines = [
-        "CO2mply | Audit Summary",
-        "",
-        f"Project: {project_name or 'Unnamed project'}",
-        f"Audit mode: {str(audit_mode).capitalize()}",
-        "",
-        "1. Executive Summary",
-        f"- Compliance score: {overall_score}",
-        f"- Rating: {score_label}",
-        f"- Total requirements returned: {total_requirements}",
-        f"- Applicable requirements: {applicable_requirements}",
-        "",
-        "2. Status Overview",
-        f"- Compliant: {compliant}",
-        f"- Partial: {partial}",
-        f"- Non-compliant: {non_compliant}",
-        f"- Not applicable: {not_applicable}",
-        f"- Error: {error}",
-        "",
-        "3. Key Findings",
-    ]
+    # -------------------------
+    # Construção do texto
+    # -------------------------
+    lines = []
 
-    if critical_items:
-        lines.append("3.1 Non-compliant items")
-        lines.extend(critical_items)
-        lines.append("")
+    lines.append("CO2mply | Audit Summary (Investor View)")
+    lines.append("")
+    lines.append(f"Project: {project_name or 'Unnamed'}")
+    lines.append(f"Audit mode: {str(audit_mode).capitalize()}")
+    lines.append("")
+
+    # EXECUTIVE BLOCK
+    lines.append("1. Executive Overview")
+    lines.append(f"- Compliance Score: {score}")
+    lines.append(f"- Rating: {score_label}")
+    lines.append(f"- Risk Level: {risk_level}")
+    lines.append(f"- Requirements Assessed: {total}")
+    lines.append("")
+
+    # INTERPRETAÇÃO
+    lines.append("2. Strategic Interpretation")
+
+    if risk_level == "HIGH":
+        interpretation = (
+            "The project currently presents a high compliance risk. "
+            "Critical structural elements required by the methodology are either missing or not evidenced. "
+            "In its current state, the project is not ready for validation."
+        )
+    elif risk_level == "MODERATE":
+        interpretation = (
+            "The project demonstrates partial compliance but still contains material gaps. "
+            "Targeted improvements are required before proceeding to validation."
+        )
+    else:
+        interpretation = (
+            "The project demonstrates strong compliance alignment with the methodology. "
+            "Remaining gaps are limited and unlikely to compromise validation."
+        )
+
+    lines.append(interpretation)
+    lines.append("")
+
+    # BREAKDOWN
+    lines.append("3. Compliance Breakdown")
+    lines.append(f"- Compliant: {compliant}")
+    lines.append(f"- Partial: {partial}")
+    lines.append(f"- Non-compliant: {non_compliant}")
+    lines.append(f"- Not assessed (logic gaps): {error}")
+    lines.append("")
+
+    # PRINCIPAIS RISCOS
+    lines.append("4. Key Risk Drivers")
+
+    if critical:
+        for c in critical:
+            lines.append(f"- {c}")
+    else:
+        lines.append("- No critical non-compliance identified.")
+
+    lines.append("")
+
+    # ITENS PARCIAIS
+    lines.append("5. Improvement Opportunities")
 
     if partial_items:
-        lines.append("3.2 Partial items")
-        lines.extend(partial_items)
-        lines.append("")
+        for p in partial_items:
+            lines.append(f"- {p}")
+    else:
+        lines.append("- No partial gaps identified.")
 
-    if error_items:
-        lines.append("3.3 Error items")
-        lines.extend(error_items)
-        lines.append("")
+    lines.append("")
 
-    lines.extend([
-        "4. Interpretation",
-        (
-            "This summary reflects the current structured audit output generated from the deterministic "
-            "compliance engine. A high number of 'error' results usually indicates requirements that are "
-            "not yet connected to a specific logic function, not necessarily project non-conformance."
-        ),
-        "",
-        "5. Recommended Next Steps",
-        "- Resolve non-compliant items with priority.",
-        "- Review partial items and strengthen documentary evidence.",
-        "- Reduce logic coverage gaps for requirements still returning 'error'.",
-        "- Use this summary as the executive layer above the compliance matrix.",
-    ])
+    # LIMITAÇÃO DA ENGINE
+    lines.append("6. Engine Coverage Note")
+    lines.append(
+        "A portion of the requirements returned 'error' due to missing logic bindings. "
+        "These do not necessarily indicate project non-compliance, but rather areas not yet evaluated "
+        "by the deterministic engine."
+    )
+    lines.append("")
+
+    # PRÓXIMOS PASSOS
+    lines.append("7. Recommended Next Steps")
+
+    if risk_level == "HIGH":
+        steps = [
+            "Resolve all non-compliant items before any validation attempt",
+            "Define storage pathway and MRV structure",
+            "Strengthen core eligibility and permanence assumptions",
+        ]
+    elif risk_level == "MODERATE":
+        steps = [
+            "Address partial compliance gaps",
+            "Improve documentation completeness",
+            "Validate MRV and traceability structure",
+        ]
+    else:
+        steps = [
+            "Finalize remaining documentation",
+            "Prepare for third-party validation",
+        ]
+
+    for s in steps:
+        lines.append(f"- {s}")
+
+    lines.append("")
 
     return "\n".join(lines)
 
