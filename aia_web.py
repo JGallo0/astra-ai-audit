@@ -2612,7 +2612,7 @@ if structured_v2_output:
         st.write(normalized_fields)
 
     with st.expander("Payload completo"):
-        st.write(structured_v2_output))
+        st.write(structured_v2_output)
         
 # =========================================================
 # SIDEBAR
