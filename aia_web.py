@@ -1897,7 +1897,14 @@ if structured_v2_output:
     score_data = structured_v2_output.get("score_data", {})
     score_label = structured_v2_output.get("score_label", "")
     audit_mode = structured_v2_output.get("audit_mode", st.session_state.get("audit_mode", "development"))
-
+    summary_text = build_structured_audit_summary_text(
+        project_name=project_name,
+        audit_mode=audit_mode,
+        score_data=score_data,
+        score_label=score_label,
+        results=results,
+    )
+    
     col1, col2 = st.columns(2)
 
     with col1:
@@ -1936,13 +1943,23 @@ if structured_v2_output:
                     df,
                     title=matrix_title
                 )
+                summary_title = f"CO2mply | Audit Summary | {str(audit_mode).capitalize()}"
 
+                summary_docx = docx_from_text(
+                    summary_title,
+                    summary_text
+                )
+
+                summary_pdf = pdf_from_text(
+                    summary_title,
+                    summary_text
+                )
                 matrix_docx = matrix_to_docx_bytes(
                     df,
                     title=matrix_title
                 )
 
-                d1, d2 = st.columns(2)
+                d1, d2, d3, d4 = st.columns(4)
 
                 with d1:
                     st.download_button(
@@ -1962,6 +1979,24 @@ if structured_v2_output:
                         use_container_width=True
                     )
 
+                with d3:
+                    st.download_button(
+                        "Baixar Summary (.pdf)",
+                        data=summary_pdf,
+                        file_name=f"audit_summary_v2_{audit_mode}.pdf",
+                        mime="application/pdf",
+                        use_container_width=True
+                    )
+
+                with d4:
+                    st.download_button(
+                        "Baixar Summary (.docx)",
+                        data=summary_docx,
+                        file_name=f"audit_summary_v2_{audit_mode}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        use_container_width=True
+                    )
+
             except Exception as e:
                 import traceback
                 st.error(f"Erro ao gerar downloads: {e}")
@@ -1969,6 +2004,9 @@ if structured_v2_output:
 
     else:
         st.warning("Nenhum resultado retornado pela engine.")
+
+    with st.expander("Audit Summary"):
+        st.text(summary_text)
 
     with st.expander("Project Data (extraído)"):
         st.write(project_data)
@@ -1978,6 +2016,108 @@ if structured_v2_output:
 
     with st.expander("Payload completo"):
         st.write(structured_v2_output)
+
+def build_structured_audit_summary_text(
+    project_name: str,
+    audit_mode: str,
+    score_data: Dict[str, Any],
+    score_label: str,
+    results: List[Dict[str, Any]],
+) -> str:
+    total_requirements = len(results or [])
+
+    compliant = score_data.get("compliant", 0)
+    partial = score_data.get("partial", 0)
+    non_compliant = score_data.get("non_compliant", 0)
+    not_applicable = score_data.get("not_applicable", 0)
+    error = score_data.get("error", 0)
+    applicable_requirements = score_data.get("applicable_requirements", 0)
+    overall_score = score_data.get("score", 0)
+
+    critical_items = []
+    partial_items = []
+    error_items = []
+
+    for item in results or []:
+        status = str(item.get("status", "")).strip().lower()
+        req_id = str(item.get("requirement_id", "")).strip()
+        req_name = str(item.get("requirement_name", "")).strip() or str(item.get("title", "")).strip()
+        notes = item.get("notes", []) or []
+
+        note_text = ""
+        if isinstance(notes, list):
+            note_text = " ".join([str(n) for n in notes if str(n).strip()])
+        else:
+            note_text = str(notes).strip()
+
+        line = f"- {req_id} | {req_name}"
+        if note_text:
+            line += f" | {note_text}"
+
+        if status == "non_compliant":
+            critical_items.append(line)
+        elif status == "partial":
+            partial_items.append(line)
+        elif status == "error":
+            error_items.append(line)
+
+    critical_items = critical_items[:10]
+    partial_items = partial_items[:10]
+    error_items = error_items[:10]
+
+    lines = [
+        "CO2mply | Audit Summary",
+        "",
+        f"Project: {project_name or 'Unnamed project'}",
+        f"Audit mode: {str(audit_mode).capitalize()}",
+        "",
+        "1. Executive Summary",
+        f"- Compliance score: {overall_score}",
+        f"- Rating: {score_label}",
+        f"- Total requirements returned: {total_requirements}",
+        f"- Applicable requirements: {applicable_requirements}",
+        "",
+        "2. Status Overview",
+        f"- Compliant: {compliant}",
+        f"- Partial: {partial}",
+        f"- Non-compliant: {non_compliant}",
+        f"- Not applicable: {not_applicable}",
+        f"- Error: {error}",
+        "",
+        "3. Key Findings",
+    ]
+
+    if critical_items:
+        lines.append("3.1 Non-compliant items")
+        lines.extend(critical_items)
+        lines.append("")
+
+    if partial_items:
+        lines.append("3.2 Partial items")
+        lines.extend(partial_items)
+        lines.append("")
+
+    if error_items:
+        lines.append("3.3 Error items")
+        lines.extend(error_items)
+        lines.append("")
+
+    lines.extend([
+        "4. Interpretation",
+        (
+            "This summary reflects the current structured audit output generated from the deterministic "
+            "compliance engine. A high number of 'error' results usually indicates requirements that are "
+            "not yet connected to a specific logic function, not necessarily project non-conformance."
+        ),
+        "",
+        "5. Recommended Next Steps",
+        "- Resolve non-compliant items with priority.",
+        "- Review partial items and strengthen documentary evidence.",
+        "- Reduce logic coverage gaps for requirements still returning 'error'.",
+        "- Use this summary as the executive layer above the compliance matrix.",
+    ])
+
+    return "\n".join(lines)
 # =========================================================
 # SIDEBAR
 # =========================================================
