@@ -2613,6 +2613,7 @@ if structured_v2_output:
 
     with st.expander("Payload completo"):
         st.write(structured_v2_output))
+        
 # =========================================================
 # SIDEBAR
 # =========================================================
