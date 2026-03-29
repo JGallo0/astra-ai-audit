@@ -2220,6 +2220,183 @@ def build_eligibility_dossier_text(
 
     return "\n".join(lines)
 
+def build_investor_dossier_text(
+    project_name: str,
+    audit_mode: str,
+    score_data: Dict[str, Any],
+    score_label: str,
+    results: List[Dict[str, Any]],
+    project_data: Dict[str, Any],
+) -> str:
+
+    score = score_data.get("score", 0)
+    compliant = score_data.get("compliant", 0)
+    partial = score_data.get("partial", 0)
+    non_compliant = score_data.get("non_compliant", 0)
+    error = score_data.get("error", 0)
+    applicable = score_data.get("applicable_requirements", 0)
+
+    eligibility = project_data.get("eligibility", {})
+    feedstock = project_data.get("feedstock", {})
+    production = project_data.get("production", {})
+    storage = project_data.get("storage", {})
+    methodology = project_data.get("methodology", {})
+    monitoring = project_data.get("monitoring_reporting", {})
+    management = project_data.get("management", {})
+
+    if score >= 75:
+        investment_readiness = "HIGH"
+    elif score >= 50:
+        investment_readiness = "MODERATE"
+    else:
+        investment_readiness = "LOW"
+
+    major_risks = []
+    partial_gaps = []
+    logic_gaps = []
+
+    for r in results or []:
+        status = str(r.get("status", "")).strip().lower()
+        req_id = str(r.get("requirement_id", "")).strip()
+        req_name = str(r.get("requirement_name", "")).strip() or str(r.get("title", "")).strip()
+        notes = r.get("notes", []) or []
+
+        if isinstance(notes, list):
+            note_text = " ".join([str(n) for n in notes if str(n).strip()])
+        else:
+            note_text = str(notes).strip()
+
+        line = f"{req_id} — {req_name}"
+        if note_text:
+            line += f" | {note_text}"
+
+        if status == "non_compliant":
+            major_risks.append(line)
+        elif status == "partial":
+            partial_gaps.append(line)
+        elif status == "error":
+            logic_gaps.append(line)
+
+    major_risks = major_risks[:6]
+    partial_gaps = partial_gaps[:6]
+    logic_gaps = logic_gaps[:6]
+
+    lines = []
+
+    lines.append("CO2mply | Investor Dossier")
+    lines.append("")
+    lines.append(f"Project: {project_name or 'Unnamed project'}")
+    lines.append(f"Audit Mode: {str(audit_mode).capitalize()}")
+    lines.append("")
+
+    lines.append("1. Investment Snapshot")
+    lines.append(f"- Compliance Score: {score}")
+    lines.append(f"- Rating: {score_label}")
+    lines.append(f"- Investment Readiness: {investment_readiness}")
+    lines.append(f"- Applicable Requirements Reviewed: {applicable}")
+    lines.append("")
+
+    lines.append("2. Executive Positioning")
+    if investment_readiness == "LOW":
+        lines.append(
+            "The project is not yet positioned for investment-grade diligence. "
+            "Core compliance and documentation gaps remain material."
+        )
+    elif investment_readiness == "MODERATE":
+        lines.append(
+            "The project shows promising structural elements, but still requires targeted de-risking "
+            "before it can be considered investment-ready."
+        )
+    else:
+        lines.append(
+            "The project demonstrates strong compliance alignment and appears suitable for advanced diligence."
+        )
+    lines.append("")
+
+    lines.append("3. Structural Strengths")
+    lines.append(f"- Methodology standard: {methodology.get('standard')}")
+    lines.append(f"- Pathway: {methodology.get('pathway')}")
+    lines.append(f"- Feedstock defined: {feedstock.get('biomass_type')}")
+    lines.append(f"- Pre-project feedstock use: {feedstock.get('pre_project_biomass_use')}")
+    lines.append(f"- Technology defined: {production.get('pyrolysis_technology')}")
+    lines.append(f"- Reactor diagram provided: {production.get('reactor_design_diagram')}")
+    lines.append(f"- Durability years: {eligibility.get('durability_years')}")
+    lines.append("")
+
+    lines.append("4. Diligence Risk Profile")
+    lines.append(f"- Compliant requirements: {compliant}")
+    lines.append(f"- Partial requirements: {partial}")
+    lines.append(f"- Non-compliant requirements: {non_compliant}")
+    lines.append(f"- Logic coverage gaps: {error}")
+    lines.append("")
+
+    lines.append("5. Principal Risk Drivers")
+    if major_risks:
+        for item in major_risks:
+            lines.append(f"- {item}")
+    else:
+        lines.append("- No principal non-compliance drivers identified.")
+    lines.append("")
+
+    lines.append("6. Improvement Track")
+    if partial_gaps:
+        for item in partial_gaps:
+            lines.append(f"- {item}")
+    else:
+        lines.append("- No material partial gaps identified.")
+    lines.append("")
+
+    lines.append("7. Monitoring & Governance Signals")
+    lines.append(f"- Monitoring plan: {monitoring.get('monitoring_plan')}")
+    lines.append(f"- Verification readiness: {monitoring.get('verification_ready')}")
+    lines.append(f"- Adaptive management plan: {management.get('adaptive_management_plan')}")
+    lines.append(f"- Emergency response plan: {management.get('emergency_response_plan')}")
+    lines.append("")
+
+    lines.append("8. Storage & Permanence Signals")
+    lines.append(f"- Storage pathway: {methodology.get('storage_pathway')}")
+    lines.append(f"- Storage module: {storage.get('storage_module')}")
+    lines.append(f"- Storage environment stable: {storage.get('storage_environment_stable')}")
+    lines.append(f"- Storage monitoring plan: {storage.get('storage_monitoring_plan')}")
+    lines.append("")
+
+    lines.append("9. Engine Coverage Note")
+    lines.append(
+        "Some requirements remain outside active deterministic evaluation and are currently reported as logic gaps. "
+        "These should be interpreted as diligence blind spots rather than automatic project failure."
+    )
+    if logic_gaps:
+        lines.append("- Sample logic gaps:")
+        for item in logic_gaps:
+            lines.append(f"  - {item}")
+    lines.append("")
+
+    lines.append("10. Investor-Oriented Recommendation")
+    if investment_readiness == "LOW":
+        recommendations = [
+            "Do not position the project as validation-ready yet.",
+            "Prioritize resolution of non-compliant eligibility, storage, and MRV items.",
+            "Close critical documentary and governance gaps before external diligence.",
+        ]
+    elif investment_readiness == "MODERATE":
+        recommendations = [
+            "Advance with controlled diligence only.",
+            "Resolve core non-compliant items before investor-facing positioning.",
+            "Strengthen MRV, storage, and traceability evidence.",
+        ]
+    else:
+        recommendations = [
+            "Proceed to advanced diligence.",
+            "Package the project with methodology, MRV, and traceability evidence.",
+            "Prepare validation roadmap and investment memo.",
+        ]
+
+    for rec in recommendations:
+        lines.append(f"- {rec}")
+
+    lines.append("")
+    return "\n".join(lines)
+
 # =========================================================
 # RENDER RESULTADO V2
 # =========================================================
@@ -2247,6 +2424,15 @@ if structured_v2_output:
     )
 
     dossier_text = build_eligibility_dossier_text(
+        project_name=project_name,
+        audit_mode=audit_mode,
+        score_data=score_data,
+        score_label=score_label,
+        results=results,
+        project_data=project_data,
+    )
+
+    investor_dossier_text = build_investor_dossier_text(
         project_name=project_name,
         audit_mode=audit_mode,
         score_data=score_data,
@@ -2293,6 +2479,7 @@ if structured_v2_output:
                 matrix_title = f"CO2mply | Compliance Matrix | {str(audit_mode).capitalize()}"
                 summary_title = f"CO2mply | Audit Summary | {str(audit_mode).capitalize()}"
                 dossier_title = f"CO2mply | Eligibility Dossier | {str(audit_mode).capitalize()}"
+                investor_dossier_title = f"CO2mply | Investor Dossier | {str(audit_mode).capitalize()}"
 
                 # -------------------------
                 # MATRIZ
@@ -2313,9 +2500,21 @@ if structured_v2_output:
                 dossier_docx = docx_from_text(dossier_title, dossier_text)
 
                 # -------------------------
+                # INVESTOR DOSSIER
+                # -------------------------
+                investor_dossier_pdf = pdf_from_text(
+                    investor_dossier_title,
+                    investor_dossier_text
+                )
+                investor_dossier_docx = docx_from_text(
+                    investor_dossier_title,
+                    investor_dossier_text
+                )
+
+                # -------------------------
                 # DOWNLOADS
                 # -------------------------
-                d1, d2, d3, d4, d5, d6 = st.columns(6)
+                d1, d2, d3, d4, d5, d6, d7, d8 = st.columns(8)
 
                 with d1:
                     st.download_button(
@@ -2371,6 +2570,24 @@ if structured_v2_output:
                         use_container_width=True
                     )
 
+                with d7:
+                    st.download_button(
+                        "Investor (.pdf)",
+                        data=investor_dossier_pdf,
+                        file_name=f"investor_dossier_v2_{audit_mode}.pdf",
+                        mime="application/pdf",
+                        use_container_width=True
+                    )
+
+                with d8:
+                    st.download_button(
+                        "Investor (.docx)",
+                        data=investor_dossier_docx,
+                        file_name=f"investor_dossier_v2_{audit_mode}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        use_container_width=True
+                    )
+
             except Exception as e:
                 import traceback
                 st.error(f"Erro ao gerar downloads: {e}")
@@ -2379,14 +2596,14 @@ if structured_v2_output:
     else:
         st.warning("Nenhum resultado retornado pela engine.")
 
-    # -------------------------
-    # EXPANDERS
-    # -------------------------
     with st.expander("Audit Summary"):
         st.text(summary_text)
 
     with st.expander("Eligibility Dossier"):
         st.text(dossier_text)
+
+    with st.expander("Investor Dossier"):
+        st.text(investor_dossier_text)
 
     with st.expander("Project Data (extraído)"):
         st.write(project_data)
@@ -2395,7 +2612,7 @@ if structured_v2_output:
         st.write(normalized_fields)
 
     with st.expander("Payload completo"):
-        st.write(structured_v2_output)
+        st.write(structured_v2_output))
 # =========================================================
 # SIDEBAR
 # =========================================================
