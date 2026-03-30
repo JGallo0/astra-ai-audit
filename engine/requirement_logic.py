@@ -57,18 +57,18 @@ def eval_biochar_applicability(data):
         requirement_rating = derive_requirement_rating(requirement_score)
 
         # HARD eligibility gate
-        if (
+        hard_fail = (
             net_negative is not True
             or (durability_years or 0) < 200
             or not pyrolysis_tech
-        ):
-            status = "non_compliant"
-        else:
-            status = derive_requirement_status_from_score(
-                requirement_score,
-                non_compliant_threshold=60,
-                compliant_threshold=100,
-            )
+        )
+
+        status = derive_status_with_hard_gate(
+            requirement_score,
+            hard_fail=hard_fail,
+            non_compliant_threshold=60,
+            compliant_threshold=100,
+        )
 
         missing_fields = [i["path"] for i in field_scores if i["status"] == "missing"]
         failed_fields = [i["path"] for i in field_scores if i["status"] == "fail"]
@@ -76,6 +76,10 @@ def eval_biochar_applicability(data):
 
         if status == "compliant":
             notes.append("Project meets core eligibility criteria for biochar carbon removal.")
+        elif status == "partial":
+            notes.append("Core eligibility is partially evidenced but still contains material gaps.")
+        elif status == "non_compliant" and not notes:
+            notes.append("Core eligibility is not sufficiently evidenced.")
 
         return build_logic_result(
             status=status,
@@ -498,6 +502,25 @@ def derive_requirement_status_from_score(
 
     return "partial"
 
+def derive_status_with_hard_gate(
+    requirement_score,
+    *,
+    hard_fail: bool = False,
+    hard_partial: bool = False,
+    non_compliant_threshold=50,
+    compliant_threshold=100,
+):
+    if hard_fail:
+        return "non_compliant"
+
+    if hard_partial:
+        return "partial"
+
+    return derive_requirement_status_from_score(
+        requirement_score,
+        non_compliant_threshold=non_compliant_threshold,
+        compliant_threshold=compliant_threshold,
+    )
 
 def derive_requirement_rating(requirement_score):
     if requirement_score >= 90:
@@ -690,19 +713,44 @@ def run_engine(project_data, requirements):
         # 4) Monta saída estruturada
         if status == "compliant":
             confidence = 0.95
+            risk = "low"
         elif status == "partial":
             confidence = 0.75
+            risk = "medium"
         elif status == "non_compliant":
             confidence = 0.90
+            risk = "high"
         elif status == "not_applicable":
             confidence = 1.0
+            risk = "none"
         else:
             confidence = 0.0
+            risk = "unknown"
+
+        project_evidence = ""
+        methodology_basis = ""
+        gap = ""
+        recommendation = ""
+
+        if status == "compliant":
+            recommendation = "Maintain current evidence package and validation readiness."
+        elif status == "partial":
+            gap = "Partial evidence available, but material gaps remain."
+            recommendation = "Strengthen documentary evidence for the missing elements."
+        elif status == "non_compliant":
+            gap = "Core requirement not sufficiently evidenced."
+            recommendation = "Resolve this requirement before validation."
+        elif status == "error":
+            gap = "Requirement not evaluated due to missing or disconnected logic."
+            recommendation = "Connect or implement deterministic logic for this requirement."
 
         results.append({
             "requirement_id": req_id,
             "requirement_name": req_name,
+            "title": req_name,
+            "module": req.get("module"),
             "status": status,
+            "risk": risk,
             "confidence": confidence,
             "missing_fields": missing_fields,
             "failed_fields": failed_fields,
@@ -712,6 +760,10 @@ def run_engine(project_data, requirements):
             "requirement_score": requirement_score,
             "field_scores": field_scores,
             "requirement_rating": requirement_rating,
+            "project_evidence": project_evidence,
+            "methodology_basis": methodology_basis,
+            "gap": gap,
+            "recommendation": recommendation,
         })
 
     return results
@@ -2826,6 +2878,26 @@ def biochar_incorporation_documentation(data):
             field_scores=[],
             requirement_rating="weak",
         )
+
+def derive_status_with_hard_gate(
+    requirement_score,
+    *,
+    hard_fail: bool = False,
+    hard_partial: bool = False,
+    non_compliant_threshold=50,
+    compliant_threshold=100,
+):
+    if hard_fail:
+        return "non_compliant"
+
+    if hard_partial:
+        return "partial"
+
+    return derive_requirement_status_from_score(
+        requirement_score,
+        non_compliant_threshold=non_compliant_threshold,
+        compliant_threshold=compliant_threshold,
+    )
 
 def eval_project_ownership(data):
     try:
