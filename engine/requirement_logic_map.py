@@ -1,6 +1,7 @@
 REQUIREMENT_LOGIC_MAP = {
+
     # =========================
-    # CORE ELIGIBILITY
+    # ELIGIBILITY
     # =========================
     "ELIG_001": "eval_biochar_applicability",
     "ELIG_002": "eval_project_ownership",
@@ -25,7 +26,7 @@ REQUIREMENT_LOGIC_MAP = {
     "TECH_004": "crediting_activity_boundaries",
 
     # =========================
-    # BIOCHAR
+    # BIOCHAR QUALITY
     # =========================
     "BIOCHAR_001": "biochar_chemical_analysis",
     "BIOCHAR_002": "biochar_required_measurements",
@@ -34,23 +35,26 @@ REQUIREMENT_LOGIC_MAP = {
     "BCQ_001": "product_standard_compliance",
 
     # =========================
-    # STORAGE / END USE
+    # STORAGE
     # =========================
     "STOR_001": "eval_storage_requirements",
     "STOR_002": "stockpiling_disclosure",
     "STOR_003": "deployment_method_selected",
 
     # =========================
-    # MRV / MONITORING
+    # MRV
     # =========================
     "MRV_001": "eval_monitoring_requirements",
     "MRV_002": "regulatory_measurement_methods",
-    "MRV_004": "contaminant_monitoring_plan",
+    "MRV_003": "contaminant_monitoring_plan",
+    "MRV_004": "uncertainty_inputs",
 
     # =========================
     # TRACEABILITY
     # =========================
     "TRACE_001": "chain_of_custody_diagram",
+    "TRACE_002": "sampling_batch_definition",
+    "TRACE_003": "biochar_incorporation_documentation",
 
     # =========================
     # OWNERSHIP / ADDITIONALITY / BASELINE
@@ -63,11 +67,16 @@ REQUIREMENT_LOGIC_MAP = {
     "BOUND_001": "eval_system_boundary",
 
     # =========================
-    # LEAKAGE / UNCERTAINTY / CARBON ACCOUNTING
+    # LEAKAGE / UNCERTAINTY
     # =========================
     "LEAK_001": "eval_leakage_sources",
     "LEAK_002": "eval_leakage_treatment",
+    "UNC_001": "uncertainty_inputs",
     "UNC_002": "uncertainty_inputs",
+
+    # =========================
+    # CARBON ACCOUNTING
+    # =========================
     "CARB_001": "eval_carbon_accounting_structure",
     "CARB_002": "eval_emissions_accounting_method",
 
@@ -77,14 +86,4 @@ REQUIREMENT_LOGIC_MAP = {
     "REV_001": "fuel_use_reversal_risk",
     "SAFE_001": "adaptive_management_plan",
     "REG_001": "environmental_legal_requirements",
-
-    # =========================
-    # OPTIONAL / ADVANCED TECH
-    # =========================
-    "TECH_DIAG_001": "reactor_design_diagram",
-    "TECH_DIAG_002": "engineering_design_diagram",
-    "TECH_MAT_001": "reactor_material_selection",
-    "TECH_END_001": "end_material_process_description",
-    "STOR_SOIL_001": "direct_soil_application_evidence",
-    "STOR_BOUND_001": "storage_system_boundary",
 }
