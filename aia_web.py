@@ -1864,6 +1864,10 @@ if st.session_state.get("run_structured"):
                 raise ValueError("Structured engine output missing 'score_label'.")
 
             if not isinstance(output.get("results"), list):
+                st.write("DEBUG OUTPUT TYPE:", type(output))
+                st.write("DEBUG OUTPUT KEYS:", list(output.keys()) if isinstance(output, dict) else "not_a_dict")
+                st.write("DEBUG RESULTS TYPE:", type(output.get("results")) if isinstance(output, dict) else "no_results")
+                st.write("DEBUG RESULTS VALUE:", output.get("results") if isinstance(output, dict) else "no_results")
                 raise ValueError("'results' must be a list.")
 
             st.session_state["structured_v2_output"] = output
