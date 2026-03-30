@@ -618,12 +618,12 @@ def requirement_applies(project_data, applies_if):
 
     return True
 
-from engine.logic_registry import LOGIC_REGISTRY
-
-
 def get_logic(logic_key):
     if not logic_key:
         raise KeyError("Missing logic key")
+
+    from engine.logic_registry import LOGIC_REGISTRY
+
     logic_fn = LOGIC_REGISTRY.get(logic_key)
     if logic_fn is None:
         raise KeyError(f"Logic function '{logic_key}' not found.")
