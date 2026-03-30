@@ -642,20 +642,29 @@ def run_engine(project_data, requirements):
 
         # 1) Verifica aplicabilidade
         if not requirement_applies(project_data, applies_if):
-            results.append({
-                "requirement_id": req_id,
-                "requirement_name": req_name,
-                "status": "not_applicable",
-                "confidence": 1.0,
-                "missing_fields": [],
-                "failed_fields": [],
-                "notes": ["Requirement not applicable to this project configuration."],
-                "logic_key": logic_key,
-                "fields_evaluated": fields_evaluated,
-                "requirement_score": None,
-                "field_scores": [],
-                "requirement_rating": None,
-            })
+        results.append({
+            "requirement_id": req_id,
+            "requirement_name": req_name,
+            "title": req_name,
+            "module": req.get("module"),
+            "status": status,
+            "risk": risk,
+            "confidence": confidence,
+            "missing_fields": missing_fields,
+            "failed_fields": failed_fields,
+            "notes": notes,
+            "logic_key": logic_key,
+            "fields_evaluated": fields_evaluated,
+            "requirement_score": requirement_score,
+            "field_scores": field_scores,
+            "requirement_rating": requirement_rating,
+            "project_evidence": project_evidence,
+            "methodology_basis": methodology_basis,
+            "gap": gap,
+            "recommendation": recommendation,
+        })
+
+    return results
             continue
 
         # 2) Busca a função de lógica
