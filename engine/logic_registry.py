@@ -46,6 +46,10 @@ from engine.requirement_logic import (
     stockpiling_disclosure,
     storage_system_boundary,
     uncertainty_inputs,
+    eval_lca_approach,
+    eval_lca_scope_coverage,
+    eval_lca_data_sources,
+    eval_lca_net_removal_logic,
 )
 
 LOGIC_REGISTRY = {
@@ -107,6 +111,11 @@ LOGIC_REGISTRY = {
     "direct_soil_application_evidence": direct_soil_application_evidence,
     "storage_system_boundary": storage_system_boundary,
 
+    "eval_lca_approach": eval_lca_approach,
+    "eval_lca_scope_coverage": eval_lca_scope_coverage,
+    "eval_lca_data_sources": eval_lca_data_sources,
+    "eval_lca_net_removal_logic": eval_lca_net_removal_logic,
+    
     # =========================
     # BACKWARD-COMPATIBLE LEGACY ALIASES
     # =========================
