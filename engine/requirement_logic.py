@@ -23,32 +23,32 @@ def eval_biochar_applicability(data):
             score_boolean_field(
                 "eligibility.net_negative_claim",
                 net_negative,
-                25,
+                30,
                 note_if_missing="Project does not demonstrate net-negative emissions.",
             ),
             score_boolean_field(
                 "eligibility.additionality_claim",
                 additionality,
-                20,
+                10,
                 note_if_missing="Additionality is not demonstrated.",
             ),
             {
                 "path": "eligibility.durability_years",
-                "weight": 25,
-                "score": 25 if (durability_years or 0) >= 200 else 0,
+                "weight": 30,
+                "score": 30 if (durability_years or 0) >= 200 else 0,
                 "status": "pass" if (durability_years or 0) >= 200 else "fail",
                 "notes": [] if (durability_years or 0) >= 200 else ["Durability must be at least 200 years."],
             },
             score_presence_field(
                 "production.pyrolysis_technology",
                 pyrolysis_tech,
-                15,
+                20,
                 note_if_missing="Pyrolysis technology is not defined.",
             ),
             score_boolean_field(
                 "storage.storage_environment_stable",
                 storage_stable,
-                15,
+                10,
                 note_if_missing="Storage environment stability is not demonstrated.",
             ),
         ]
@@ -56,7 +56,6 @@ def eval_biochar_applicability(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        # HARD eligibility gate
         hard_fail = (
             net_negative is not True
             or (durability_years or 0) < 200
@@ -99,7 +98,6 @@ def eval_biochar_applicability(data):
             field_scores=[],
             requirement_rating="weak",
         )
-
 
 def eval_reactor_requirements(data):
     """
@@ -176,19 +174,19 @@ def eval_storage_requirements(data):
             score_presence_field(
                 "storage.storage_module",
                 storage_module,
-                50,
+                60,
                 note_if_missing="Storage module is not defined.",
             ),
             score_presence_field(
                 "storage.storage_location",
                 storage_location,
-                25,
+                20,
                 note_if_missing="Storage location is not defined.",
             ),
             score_boolean_field(
                 "storage.storage_monitoring_plan",
                 storage_monitoring_plan,
-                25,
+                20,
                 note_if_missing="Storage monitoring plan is missing.",
             ),
         ]
@@ -196,14 +194,14 @@ def eval_storage_requirements(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if not storage_module:
-            status = "non_compliant"
-        else:
-            status = derive_requirement_status_from_score(
-                requirement_score,
-                non_compliant_threshold=50,
-                compliant_threshold=100,
-            )
+        hard_fail = not storage_module
+
+        status = derive_status_with_hard_gate(
+            requirement_score,
+            hard_fail=hard_fail,
+            non_compliant_threshold=60,
+            compliant_threshold=100,
+        )
 
         missing_fields = [
             item["path"]
@@ -218,7 +216,11 @@ def eval_storage_requirements(data):
         notes = collect_field_score_notes(field_scores)
 
         if status == "compliant":
-            notes.append("Storage module, location, and monitoring plan are present.")
+            notes.append("Storage module, location, and monitoring plan are sufficiently evidenced.")
+        elif status == "partial":
+            notes.append("Storage framework is partially evidenced but remains incomplete.")
+        elif status == "non_compliant" and not notes:
+            notes.append("Storage requirements are not sufficiently evidenced.")
 
         return build_logic_result(
             status=status,
@@ -238,7 +240,6 @@ def eval_storage_requirements(data):
             field_scores=[],
             requirement_rating="weak",
         )
-
 def eval_feedstock_requirements(data):
     try:
         feedstock = data.get("feedstock", {})
@@ -327,19 +328,19 @@ def eval_monitoring_requirements(data):
             score_boolean_field(
                 "monitoring_reporting.monitoring_plan",
                 monitoring_plan,
-                50,
+                60,
                 note_if_missing="Monitoring plan is missing.",
             ),
             score_presence_field(
                 "monitoring_reporting.uncertainty_method",
                 uncertainty_method,
-                20,
+                15,
                 note_if_missing="Uncertainty method is missing.",
             ),
             score_boolean_field(
                 "monitoring_reporting.verification_ready",
                 verification_ready,
-                30,
+                25,
                 note_if_missing="Verification readiness is not evidenced.",
             ),
         ]
@@ -347,14 +348,14 @@ def eval_monitoring_requirements(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if monitoring_plan is not True:
-            status = "non_compliant"
-        else:
-            status = derive_requirement_status_from_score(
-                requirement_score,
-                non_compliant_threshold=50,
-                compliant_threshold=100,
-            )
+        hard_fail = monitoring_plan is not True
+
+        status = derive_status_with_hard_gate(
+            requirement_score,
+            hard_fail=hard_fail,
+            non_compliant_threshold=60,
+            compliant_threshold=100,
+        )
 
         missing_fields = [
             item["path"]
@@ -369,7 +370,11 @@ def eval_monitoring_requirements(data):
         notes = collect_field_score_notes(field_scores)
 
         if status == "compliant":
-            notes.append("Monitoring plan, uncertainty method, and verification readiness are present.")
+            notes.append("Monitoring plan, uncertainty method, and verification readiness are sufficiently evidenced.")
+        elif status == "partial":
+            notes.append("Monitoring framework is partially evidenced but still incomplete.")
+        elif status == "non_compliant" and not notes:
+            notes.append("Monitoring requirements are not sufficiently evidenced.")
 
         return build_logic_result(
             status=status,
@@ -389,7 +394,6 @@ def eval_monitoring_requirements(data):
             field_scores=[],
             requirement_rating="weak",
         )
-
 # =========================
 # ENGINE RUNNER
 # =========================
@@ -711,6 +715,7 @@ def run_engine(project_data, requirements):
             requirement_rating = None
 
         # 4) Monta saída estruturada
+        # 4) Monta saída estruturada
         if status == "compliant":
             confidence = 0.95
             risk = "low"
@@ -765,8 +770,6 @@ def run_engine(project_data, requirements):
             "gap": gap,
             "recommendation": recommendation,
         })
-
-    return results
 
 def reactor_design_diagram(data):
     """
@@ -2911,19 +2914,19 @@ def eval_project_ownership(data):
             score_presence_field(
                 "project.country",
                 country,
-                25,
+                20,
                 note_if_missing="Project country is not documented.",
             ),
             score_presence_field(
                 "project.locations",
                 locations,
-                25,
+                20,
                 note_if_missing="Project locations are not documented.",
             ),
             score_presence_field(
                 "project.ownership_evidence",
                 ownership_evidence,
-                50,
+                60,
                 note_if_missing="Ownership evidence is not documented.",
             ),
         ]
@@ -2931,20 +2934,39 @@ def eval_project_ownership(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if not ownership_evidence:
-            status = "non_compliant"
-        else:
-            status = derive_requirement_status_from_score(
-                requirement_score,
-                non_compliant_threshold=50,
-                compliant_threshold=100,
-            )
+        hard_fail = not ownership_evidence
+
+        status = derive_status_with_hard_gate(
+            requirement_score,
+            hard_fail=hard_fail,
+            non_compliant_threshold=60,
+            compliant_threshold=100,
+        )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Project ownership and location context are sufficiently evidenced.")
+        elif status == "partial":
+            notes.append("Project ownership framework is partially evidenced but remains incomplete.")
+        elif status == "non_compliant" and not notes:
+            notes.append("Project ownership is not sufficiently evidenced.")
 
         return build_logic_result(
             status=status,
-            missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
-            failed_fields=[i["path"] for i in field_scores if i["status"] == "fail"],
-            notes=collect_field_score_notes(field_scores),
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
             requirement_score=requirement_score,
             field_scores=field_scores,
             requirement_rating=requirement_rating,
@@ -3432,20 +3454,39 @@ def eval_system_boundary(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if system_boundary is not True:
-            status = "non_compliant"
-        else:
-            status = derive_requirement_status_from_score(
-                requirement_score,
-                non_compliant_threshold=60,
-                compliant_threshold=100,
-            )
+        hard_fail = system_boundary is not True
+
+        status = derive_status_with_hard_gate(
+            requirement_score,
+            hard_fail=hard_fail,
+            non_compliant_threshold=60,
+            compliant_threshold=100,
+        )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("System boundary and crediting activity boundaries are sufficiently evidenced.")
+        elif status == "partial":
+            notes.append("System boundary framework is partially evidenced but remains incomplete.")
+        elif status == "non_compliant" and not notes:
+            notes.append("System boundary requirements are not sufficiently evidenced.")
 
         return build_logic_result(
             status=status,
-            missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
-            failed_fields=[i["path"] for i in field_scores if i["status"] == "fail"],
-            notes=collect_field_score_notes(field_scores),
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
             requirement_score=requirement_score,
             field_scores=field_scores,
             requirement_rating=requirement_rating,
@@ -3459,7 +3500,6 @@ def eval_system_boundary(data):
             field_scores=[],
             requirement_rating="weak",
         )
-
 
 def eval_leakage_sources(data):
     try:
