@@ -3,13 +3,18 @@ REQUIREMENT_LOGIC_MAP = {
     # CORE ELIGIBILITY
     # =========================
     "ELIG_001": "eval_biochar_applicability",
+    "ELIG_002": "eval_project_ownership",
+    "ELIG_003": "eval_project_crediting_context",
     "DURA_001": "durability_option_declared",
 
     # =========================
     # FEEDSTOCK
     # =========================
     "FEED_001": "eval_feedstock_requirements",
+    "FEED_002": "eval_feedstock_origin",
+    "FEED_003": "eval_feedstock_counterfactual",
     "FEED_004": "feedstock_moisture_management",
+    "FEED_005": "eval_feedstock_traceability",
 
     # =========================
     # TECHNOLOGY / PRODUCTION
@@ -39,6 +44,7 @@ REQUIREMENT_LOGIC_MAP = {
     # MRV / MONITORING
     # =========================
     "MRV_001": "eval_monitoring_requirements",
+    "MRV_002": "regulatory_measurement_methods",
     "MRV_004": "contaminant_monitoring_plan",
 
     # =========================
@@ -47,21 +53,30 @@ REQUIREMENT_LOGIC_MAP = {
     "TRACE_001": "chain_of_custody_diagram",
 
     # =========================
-    # UNCERTAINTY
+    # OWNERSHIP / ADDITIONALITY / BASELINE
     # =========================
-    "UNC_002": "uncertainty_inputs",
+    "OWN_001": "eval_project_ownership",
+    "ADD_001": "eval_additionality_core",
+    "ADD_002": "eval_additionality_barriers",
+    "BASE_001": "eval_baseline_core",
+    "BASE_002": "eval_baseline_evidence",
+    "BOUND_001": "eval_system_boundary",
 
     # =========================
-    # REVERSAL / SAFEGUARDS
+    # LEAKAGE / UNCERTAINTY / CARBON ACCOUNTING
+    # =========================
+    "LEAK_001": "eval_leakage_sources",
+    "LEAK_002": "eval_leakage_treatment",
+    "UNC_002": "uncertainty_inputs",
+    "CARB_001": "eval_carbon_accounting_structure",
+    "CARB_002": "eval_emissions_accounting_method",
+
+    # =========================
+    # REVERSAL / SAFEGUARDS / REGULATORY
     # =========================
     "REV_001": "fuel_use_reversal_risk",
     "SAFE_001": "adaptive_management_plan",
-
-    # =========================
-    # REGULATORY
-    # =========================
     "REG_001": "environmental_legal_requirements",
-    "MRV_002": "regulatory_measurement_methods",
 
     # =========================
     # OPTIONAL / ADVANCED TECH
