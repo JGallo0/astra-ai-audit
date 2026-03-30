@@ -86,4 +86,13 @@ REQUIREMENT_LOGIC_MAP = {
     "REV_001": "fuel_use_reversal_risk",
     "SAFE_001": "adaptive_management_plan",
     "REG_001": "environmental_legal_requirements",
+
+    # =========================
+    # LCA
+    # =========================
+
+    "LCA_001": "eval_lca_approach",
+    "LCA_002": "eval_lca_scope_coverage",
+    "LCA_003": "eval_lca_data_sources",
+    "LCA_004": "eval_lca_net_removal_logic",
 }
