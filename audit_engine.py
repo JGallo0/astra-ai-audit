@@ -549,6 +549,15 @@ class AuditEngine:
             filtered_requirements
         )
 
+        if isinstance(results, dict):
+            if isinstance(results.get("results"), list):
+                results = results.get("results")
+            else:
+                raise TypeError(f"run_engine returned dict but 'results' is {type(results.get('results')).__name__}")
+
+        if not isinstance(results, list):
+            raise TypeError(f"run_engine must return a list, got {type(results).__name__}")
+
         # =========================================================
         # AJUSTE INICIAL POR MODO DE AUDITORIA
         # =========================================================
@@ -606,6 +615,9 @@ class AuditEngine:
             "score": score_data["score"],
             "applicable_requirements": score_data["applicable_requirements"],
         }
+        
+        if not isinstance(results, list):
+            raise TypeError(f"Structured engine internal 'results' must be a list before return, got {type(results).__name__}")
 
         return {
             "project_data": project_data,
