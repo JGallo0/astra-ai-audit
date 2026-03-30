@@ -3765,6 +3765,340 @@ def eval_emissions_accounting_method(data):
             field_scores=[],
             requirement_rating="weak",
         )
+
+def eval_lca_approach(data):
+    """
+    LCA_001 | Life cycle assessment approach documented
+    """
+    try:
+        quant = data.get("quantification", {})
+        methodology = data.get("methodology", {})
+
+        lca_performed = quant.get("lca_performed")
+        standard = methodology.get("standard")
+
+        field_scores = [
+            score_boolean_field(
+                "quantification.lca_performed",
+                lca_performed,
+                70,
+                note_if_missing="Life cycle assessment approach is not documented.",
+            ),
+            score_presence_field(
+                "methodology.standard",
+                standard,
+                30,
+                note_if_missing="Methodology standard is not defined.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        hard_fail = lca_performed is not True
+
+        status = derive_status_with_hard_gate(
+            requirement_score,
+            hard_fail=hard_fail,
+            non_compliant_threshold=50,
+            compliant_threshold=100,
+        )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Life cycle assessment approach is documented.")
+        elif status == "partial":
+            notes.append("Life cycle assessment approach is partially evidenced but still incomplete.")
+        elif status == "non_compliant" and not notes:
+            notes.append("Life cycle assessment approach is not sufficiently evidenced.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"eval_lca_approach execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+
+def eval_lca_scope_coverage(data):
+    """
+    LCA_002 | Emission sources and sinks included
+    """
+    try:
+        quant = data.get("quantification", {})
+        ghg = data.get("ghg_accounting", {})
+
+        lca_performed = quant.get("lca_performed")
+        system_boundary_defined = ghg.get("system_boundary_defined")
+        storage_emissions_accounted = quant.get("storage_emissions_accounted")
+
+        field_scores = [
+            score_boolean_field(
+                "quantification.lca_performed",
+                lca_performed,
+                40,
+                note_if_missing="Life cycle assessment has not been evidenced.",
+            ),
+            score_boolean_field(
+                "ghg_accounting.system_boundary_defined",
+                system_boundary_defined,
+                35,
+                note_if_missing="System boundary is not defined.",
+            ),
+            score_boolean_field(
+                "quantification.storage_emissions_accounted",
+                storage_emissions_accounted,
+                25,
+                note_if_missing="Storage-related emissions are not accounted for.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        hard_fail = lca_performed is not True
+
+        status = derive_status_with_hard_gate(
+            requirement_score,
+            hard_fail=hard_fail,
+            non_compliant_threshold=50,
+            compliant_threshold=100,
+        )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("LCA scope covers key sources and sinks.")
+        elif status == "partial":
+            notes.append("LCA scope is partially evidenced but still incomplete.")
+        elif status == "non_compliant" and not notes:
+            notes.append("LCA scope does not sufficiently cover key sources and sinks.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"eval_lca_scope_coverage execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+
+def eval_lca_data_sources(data):
+    """
+    LCA_003 | Input data sources and emission factors documented
+    """
+    try:
+        quant = data.get("quantification", {})
+
+        lca_performed = quant.get("lca_performed")
+        input_variables = quant.get("input_variables")
+        input_uncertainties = quant.get("input_uncertainties")
+
+        field_scores = [
+            score_boolean_field(
+                "quantification.lca_performed",
+                lca_performed,
+                30,
+                note_if_missing="Life cycle assessment has not been evidenced.",
+            ),
+            score_boolean_field(
+                "quantification.input_variables",
+                input_variables,
+                35,
+                note_if_missing="Input data sources are not documented.",
+            ),
+            score_boolean_field(
+                "quantification.input_uncertainties",
+                input_uncertainties,
+                35,
+                note_if_missing="Emission factors and/or uncertainty treatment are not documented.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        hard_fail = lca_performed is not True
+
+        status = derive_status_with_hard_gate(
+            requirement_score,
+            hard_fail=hard_fail,
+            non_compliant_threshold=50,
+            compliant_threshold=100,
+        )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("LCA input data sources and uncertainty treatment are documented.")
+        elif status == "partial":
+            notes.append("LCA input data documentation is partially evidenced but still incomplete.")
+        elif status == "non_compliant" and not notes:
+            notes.append("LCA input data sources and uncertainty treatment are not sufficiently evidenced.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"eval_lca_data_sources execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
+
+
+def eval_lca_net_removal_logic(data):
+    """
+    LCA_004 | Net removal calculation logic documented
+    """
+    try:
+        quant = data.get("quantification", {})
+        ghg = data.get("ghg_accounting", {})
+
+        lca_performed = quant.get("lca_performed")
+        baseline_defined = ghg.get("baseline_defined")
+        system_boundary_defined = ghg.get("system_boundary_defined")
+        storage_emissions_accounted = quant.get("storage_emissions_accounted")
+
+        field_scores = [
+            score_boolean_field(
+                "quantification.lca_performed",
+                lca_performed,
+                30,
+                note_if_missing="Life cycle assessment has not been evidenced.",
+            ),
+            score_boolean_field(
+                "ghg_accounting.baseline_defined",
+                baseline_defined,
+                25,
+                note_if_missing="Baseline scenario is not defined.",
+            ),
+            score_boolean_field(
+                "ghg_accounting.system_boundary_defined",
+                system_boundary_defined,
+                25,
+                note_if_missing="System boundary is not defined.",
+            ),
+            score_boolean_field(
+                "quantification.storage_emissions_accounted",
+                storage_emissions_accounted,
+                20,
+                note_if_missing="Storage-related emissions are not accounted for in the net removal logic.",
+            ),
+        ]
+
+        requirement_score = summarize_field_scores(field_scores)
+        requirement_rating = derive_requirement_rating(requirement_score)
+
+        hard_fail = lca_performed is not True
+
+        status = derive_status_with_hard_gate(
+            requirement_score,
+            hard_fail=hard_fail,
+            non_compliant_threshold=50,
+            compliant_threshold=100,
+        )
+
+        missing_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "missing"
+        ]
+        failed_fields = [
+            item["path"]
+            for item in field_scores
+            if item["status"] == "fail"
+        ]
+        notes = collect_field_score_notes(field_scores)
+
+        if status == "compliant":
+            notes.append("Net removal calculation logic is documented.")
+        elif status == "partial":
+            notes.append("Net removal calculation logic is partially evidenced but still incomplete.")
+        elif status == "non_compliant" and not notes:
+            notes.append("Net removal calculation logic is not sufficiently evidenced.")
+
+        return build_logic_result(
+            status=status,
+            missing_fields=missing_fields,
+            failed_fields=failed_fields,
+            notes=notes,
+            requirement_score=requirement_score,
+            field_scores=field_scores,
+            requirement_rating=requirement_rating,
+        )
+
+    except Exception as e:
+        return build_logic_result(
+            status="error",
+            notes=[f"eval_lca_net_removal_logic execution error: {str(e)}"],
+            requirement_score=0,
+            field_scores=[],
+            requirement_rating="weak",
+        )
         
 # =========================
 # LOGIC REGISTRY
