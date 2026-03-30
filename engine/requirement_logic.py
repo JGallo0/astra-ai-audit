@@ -679,9 +679,19 @@ def run_engine(project_data, requirements):
             continue
 
         # 3) Executa a lógica
+        # 3) Executa a lógica
         try:
+            print("DEBUG LOGIC KEY:", logic_key)
+            print("DEBUG LOGIC FN:", logic_fn)
+
             logic_output = logic_fn(project_data)
+
+            print("DEBUG OUTPUT TYPE:", type(logic_output))
+            print("DEBUG OUTPUT VALUE:", logic_output)
         except Exception as e:
+            print("DEBUG EXECUTION ERROR IN:", logic_key)
+            print("DEBUG EXECUTION EXCEPTION:", str(e))
+
             results.append({
                 "requirement_id": req_id,
                 "requirement_name": req_name,
