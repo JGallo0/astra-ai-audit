@@ -1824,10 +1824,18 @@ if st.session_state.get("run_structured"):
 
         requirements = get_requirements_for_methodology(current_methodology)
 
-        # Enriquecer requirements com lógica
+        # Enriquecer requirements com lógica (robusto + debug)
         for req in requirements:
-            req_id = req.get("id")
-            req["logic"] = REQUIREMENT_LOGIC_MAP.get(req_id)
+            req_id = req.get("id") or req.get("requirement_id")
+
+            logic_fn = REQUIREMENT_LOGIC_MAP.get(req_id)
+
+            # DEBUG CONTROLADO
+            if not logic_fn:
+                st.write("DEBUG MISSING LOGIC → req_id:", req_id)
+                st.write("DEBUG RAW REQUIREMENT:", req)
+
+            req["logic"] = logic_fn
 
         if not requirements:
             st.error("Nenhum requisito estruturado foi carregado.")
