@@ -512,130 +512,138 @@ class AuditEngine:
             "ranked_project_sources": ranked_project,
             "ranked_methodology_sources": ranked_methodology,
         }
-    def run_structured_engine_audit(
-        self,
-        selected_modules: Optional[List[str]] = None,
-        audit_mode: str = "development",
-    ) -> Dict[str, Any]:
-        """
-        Nova rota de auditoria:
-        vector stores -> contextos -> mapper -> schema -> engine determinística
+def run_structured_engine_audit(
+    self,
+    selected_modules: Optional[List[str]] = None,
+    audit_mode: str = "development",
+) -> Dict[str, Any]:
 
-        audit_mode:
-        - development -> projeto em desenvolvimento / pré-operação
-        - operational -> projeto em operação / certificação
-        """
-        if not self.requirements:
-            raise ValueError("Nenhum requisito estruturado foi carregado para a metodologia selecionada.")
+    if not self.requirements:
+        raise ValueError("Nenhum requisito estruturado foi carregado para a metodologia selecionada.")
 
-        filtered_requirements = [
-            req for req in self.requirements
-            if not selected_modules or req.get("module") in selected_modules
-        ]
+    filtered_requirements = [
+        req for req in self.requirements
+        if not selected_modules or req.get("module") in selected_modules
+    ]
 
-        contexts = self._build_structured_contexts()
+    contexts = self._build_structured_contexts()
 
-        mapped = extract_project_data_from_contexts(
-            ai_client=self._call_llm_json_extraction,
-            project_context=contexts["project_context"],
-            methodology_context=contexts["methodology_context"],
-            project_hits=contexts["project_hits"],
-            methodology_hits=contexts["methodology_hits"],
+    mapped = extract_project_data_from_contexts(
+        ai_client=self._call_llm_json_extraction,
+        project_context=contexts["project_context"],
+        methodology_context=contexts["methodology_context"],
+        project_hits=contexts["project_hits"],
+        methodology_hits=contexts["methodology_hits"],
+    )
+
+    project_data = mapped["project_data"]
+
+    # =========================================================
+    # DEBUG 1 — OUTPUT DO RUN_ENGINE
+    # =========================================================
+    results = run_engine(
+        project_data,
+        filtered_requirements
+    )
+
+    print("\n===== DEBUG RUN_ENGINE OUTPUT =====")
+    print("TYPE:", type(results))
+    print("VALUE:", results if isinstance(results, (list, dict)) else str(results))
+    print("==================================\n")
+
+    if isinstance(results, dict):
+        print("DEBUG: results veio como dict")
+        print("DICT KEYS:", list(results.keys()))
+
+        if isinstance(results.get("results"), list):
+            print("DEBUG: extraindo results['results']")
+            results = results.get("results")
+        else:
+            raise TypeError(
+                f"run_engine returned dict but 'results' is {type(results.get('results')).__name__}"
+            )
+
+    if not isinstance(results, list):
+        raise TypeError(f"run_engine must return a list, got {type(results).__name__}")
+
+    # =========================================================
+    # AJUSTE POR MODO
+    # =========================================================
+    if audit_mode == "development":
+        adjusted_results = []
+
+        for r in results:
+            item = dict(r)
+
+            if item.get("status") == "non_compliant":
+                missing_fields = item.get("missing_fields", []) or []
+                failed_fields = item.get("failed_fields", []) or []
+
+                if missing_fields and not failed_fields:
+                    missing_fields_text = " ".join(missing_fields).lower()
+
+                    if any(k in missing_fields_text for k in [
+                        "lab", "monitoring", "measurement", "data", "testing", "emissions"
+                    ]):
+                        item["status"] = "future_evidence_required"
+
+                        original_notes = item.get("notes", []) or []
+                        item["notes"] = list(original_notes) + [
+                            "Projeto em desenvolvimento: evidência futura requerida."
+                        ]
+                    else:
+                        item["status"] = "partial"
+
+                        original_notes = item.get("notes", []) or []
+                        item["notes"] = list(original_notes) + [
+                            "Projeto em desenvolvimento: lacuna estrutural."
+                        ]
+
+            adjusted_results.append(item)
+
+        results = adjusted_results
+
+    # =========================================================
+    # DEBUG 2 — APÓS AJUSTE
+    # =========================================================
+    print("\n===== DEBUG AFTER ADJUSTMENT =====")
+    print("TYPE:", type(results))
+    print("LEN:", len(results) if isinstance(results, list) else "not_list")
+    print("=================================\n")
+
+    score_data = calculate_compliance_score(results)
+    score_label = classify_compliance_score(score_data["score"])
+
+    # =========================================================
+    # DEBUG 3 — FINAL OUTPUT
+    # =========================================================
+    print("\n===== DEBUG FINAL OUTPUT =====")
+    print("RESULTS TYPE:", type(results))
+    print("FIRST ITEM:", results[0] if isinstance(results, list) and results else "empty")
+    print("SCORE DATA:", score_data)
+    print("SCORE LABEL:", score_label)
+    print("================================\n")
+
+    if not isinstance(results, list):
+        raise TypeError(
+            f"Structured engine internal 'results' must be a list before return, got {type(results).__name__}"
         )
 
-        project_data = mapped["project_data"]
-        results = run_engine(
-            project_data,
-            filtered_requirements
-        )
-
-        if isinstance(results, dict):
-            if isinstance(results.get("results"), list):
-                results = results.get("results")
-            else:
-                raise TypeError(f"run_engine returned dict but 'results' is {type(results.get('results')).__name__}")
-
-        if not isinstance(results, list):
-            raise TypeError(f"run_engine must return a list, got {type(results).__name__}")
-
-        # =========================================================
-        # AJUSTE INICIAL POR MODO DE AUDITORIA
-        # =========================================================
-        if audit_mode == "development":
-            adjusted_results = []
-
-            for r in results:
-                item = dict(r)
-
-                if item.get("status") == "non_compliant":
-                    missing_fields = item.get("missing_fields", []) or []
-                    failed_fields = item.get("failed_fields", []) or []
-
-                    if missing_fields and not failed_fields:
-                        missing_fields_text = " ".join(missing_fields).lower()
-
-                        # Se for claramente evidência operacional ainda não esperada
-                        if any(k in missing_fields_text for k in [
-                            "lab",
-                            "monitoring",
-                            "measurement",
-                            "data",
-                            "testing",
-                            "emissions",
-                        ]):
-                            item["status"] = "future_evidence_required"
-
-                            original_notes = item.get("notes", []) or []
-                            item["notes"] = list(original_notes) + [
-                                "Projeto em desenvolvimento: evidência operacional e/ou documental futura ainda requerida."
-                            ]
-                        else:
-                            # Pode ser problema de desenho/estrutura do projeto,
-                            # então não reclassificamos como evidência futura.
-                            item["status"] = "partial"
-
-                            original_notes = item.get("notes", []) or []
-                            item["notes"] = list(original_notes) + [
-                                "Projeto em desenvolvimento: lacuna de desenho, definição ou estrutura documental ainda precisa ser fortalecida."
-                            ]
-
-                adjusted_results.append(item)
-
-            results = adjusted_results
-            
-        score_data = calculate_compliance_score(results)
-        score_label = classify_compliance_score(score_data["score"])
-
-        self.last_run_stats = {
-            "mode": "structured_engine_v2",
-            "audit_mode": audit_mode,
-            "queries": contexts["queries"],
-            "project_hits_count": len(contexts["project_hits"]),
-            "methodology_hits_count": len(contexts["methodology_hits"]),
-            "score": score_data["score"],
-            "applicable_requirements": score_data["applicable_requirements"],
-        }
-        
-        if not isinstance(results, list):
-            raise TypeError(f"Structured engine internal 'results' must be a list before return, got {type(results).__name__}")
-
-        return {
-            "project_data": project_data,
-            "results": results,
-            "score_data": score_data,
-            "score_label": score_label,
-            "audit_mode": audit_mode,
-            "selected_modules": selected_modules or [],
-            "queries": contexts["queries"],
-            "project_context": contexts["project_context"],
-            "methodology_context": contexts["methodology_context"],
-            "project_hits": contexts["project_hits"],
-            "methodology_hits": contexts["methodology_hits"],
-            "normalized_fields": mapped.get("normalized_fields", []),
-            "raw_extraction": mapped.get("raw_extraction", {}),
-        }
-    
-
+    return {
+        "project_data": project_data,
+        "results": results,
+        "score_data": score_data,
+        "score_label": score_label,
+        "audit_mode": audit_mode,
+        "selected_modules": selected_modules or [],
+        "queries": contexts["queries"],
+        "project_context": contexts["project_context"],
+        "methodology_context": contexts["methodology_context"],
+        "project_hits": contexts["project_hits"],
+        "methodology_hits": contexts["methodology_hits"],
+        "normalized_fields": mapped.get("normalized_fields", []),
+        "raw_extraction": mapped.get("raw_extraction", {}),
+    }
     # =========================================================
     # MODULE AUDIT
     # =========================================================
