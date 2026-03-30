@@ -642,29 +642,27 @@ def run_engine(project_data, requirements):
 
         # 1) Verifica aplicabilidade
         if not requirement_applies(project_data, applies_if):
-        results.append({
-            "requirement_id": req_id,
-            "requirement_name": req_name,
-            "title": req_name,
-            "module": req.get("module"),
-            "status": status,
-            "risk": risk,
-            "confidence": confidence,
-            "missing_fields": missing_fields,
-            "failed_fields": failed_fields,
-            "notes": notes,
-            "logic_key": logic_key,
-            "fields_evaluated": fields_evaluated,
-            "requirement_score": requirement_score,
-            "field_scores": field_scores,
-            "requirement_rating": requirement_rating,
-            "project_evidence": project_evidence,
-            "methodology_basis": methodology_basis,
-            "gap": gap,
-            "recommendation": recommendation,
-        })
-
-    return results
+            results.append({
+                "requirement_id": req_id,
+                "requirement_name": req_name,
+                "title": req_name,
+                "module": req.get("module"),
+                "status": "not_applicable",
+                "risk": "none",
+                "confidence": 1.0,
+                "missing_fields": [],
+                "failed_fields": [],
+                "notes": ["Requirement not applicable to this project configuration."],
+                "logic_key": logic_key,
+                "fields_evaluated": fields_evaluated,
+                "requirement_score": None,
+                "field_scores": [],
+                "requirement_rating": None,
+                "project_evidence": "",
+                "methodology_basis": "",
+                "gap": "",
+                "recommendation": "",
+            })
             continue
 
         # 2) Busca a função de lógica
@@ -674,7 +672,10 @@ def run_engine(project_data, requirements):
             results.append({
                 "requirement_id": req_id,
                 "requirement_name": req_name,
+                "title": req_name,
+                "module": req.get("module"),
                 "status": "error",
+                "risk": "unknown",
                 "confidence": 0.0,
                 "missing_fields": [],
                 "failed_fields": [],
@@ -684,10 +685,13 @@ def run_engine(project_data, requirements):
                 "requirement_score": 0,
                 "field_scores": [],
                 "requirement_rating": "weak",
+                "project_evidence": "",
+                "methodology_basis": "",
+                "gap": "Requirement not evaluated due to missing or disconnected logic.",
+                "recommendation": "Connect or implement deterministic logic for this requirement.",
             })
             continue
 
-        # 3) Executa a lógica
         # 3) Executa a lógica
         try:
             print("DEBUG LOGIC KEY:", logic_key)
@@ -704,7 +708,10 @@ def run_engine(project_data, requirements):
             results.append({
                 "requirement_id": req_id,
                 "requirement_name": req_name,
+                "title": req_name,
+                "module": req.get("module"),
                 "status": "error",
+                "risk": "unknown",
                 "confidence": 0.0,
                 "missing_fields": [],
                 "failed_fields": [],
@@ -714,8 +721,13 @@ def run_engine(project_data, requirements):
                 "requirement_score": 0,
                 "field_scores": [],
                 "requirement_rating": "weak",
+                "project_evidence": "",
+                "methodology_basis": "",
+                "gap": "Requirement not evaluated due to missing or disconnected logic.",
+                "recommendation": "Connect or implement deterministic logic for this requirement.",
             })
             continue
+
         if isinstance(logic_output, dict):
             status = logic_output.get("status", "error")
             missing_fields = logic_output.get("missing_fields", [])
@@ -733,7 +745,6 @@ def run_engine(project_data, requirements):
             field_scores = []
             requirement_rating = None
 
-        # 4) Monta saída estruturada
         # 4) Monta saída estruturada
         if status == "compliant":
             confidence = 0.95
@@ -790,6 +801,7 @@ def run_engine(project_data, requirements):
             "recommendation": recommendation,
         })
 
+    return results
 def reactor_design_diagram(data):
     """
     R-6AQG-1 | P&ID or engineering design diagram with sensors
