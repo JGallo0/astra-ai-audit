@@ -207,3 +207,103 @@ class QuantificationInference(BaseInferenceRule):
             "normalized_fields": updated_fields,
             "inference_events": inference_events,
         }
+
+        # -----------------------------------------------------
+        # INF-QUANT-003
+        # Infer LCA performed (robust multi-signal)
+        # -----------------------------------------------------
+        if not has_strong_evidence(updated_fields, "quantification.lca_performed"):
+
+            has_boundary = bool(get_best_value(updated_fields, "ghg_accounting.system_boundary_defined"))
+            has_baseline = bool(get_best_value(updated_fields, "ghg_accounting.baseline_defined"))
+            has_storage_accounting = bool(get_best_value(updated_fields, "quantification.storage_emissions_accounted"))
+
+            text = signals.get("project_text", "") or ""
+
+            lca_keywords = [
+                "lca",
+                "life cycle",
+                "lifecycle",
+                "ghg statement",
+                "carbon accounting",
+                "emissions accounting",
+                "bcu calculation",
+            ]
+
+            has_lca_keyword = project_contains_any(text, lca_keywords)
+
+            strong_structural_signal = (
+                has_boundary
+                and has_baseline
+                and has_storage_accounting
+            )
+
+            if strong_structural_signal or (has_lca_keyword and has_boundary):
+                updated_fields = append_inference_field(
+                    updated_fields,
+                    inference_events,
+                    path="quantification.lca_performed",
+                    value=True,
+                    evidence=(
+                        "Inferred from consistent carbon accounting structure including system boundary, baseline definition, "
+                        "and storage emissions accounting, optionally supported by LCA-related terminology."
+                    ),
+                    source="project",
+                    confidence=0.88,
+                    evidence_strength="moderate",
+                    extractor="quantification_inference",
+                    inference_rule_id="INF-QUANT-003",
+                    inputs_used=[
+                        "ghg_accounting.system_boundary_defined",
+                        "ghg_accounting.baseline_defined",
+                        "quantification.storage_emissions_accounted",
+                        "project_context: carbon accounting / LCA wording",
+                    ],
+                    resolution_action="fill",
+                )
+
+        # -----------------------------------------------------
+        # INF-QUANT-004
+        # Infer net-negative claim (conservative)
+        # -----------------------------------------------------
+        if not has_strong_evidence(updated_fields, "eligibility.net_negative_claim"):
+
+            has_boundary = bool(get_best_value(updated_fields, "ghg_accounting.system_boundary_defined"))
+            has_baseline = bool(get_best_value(updated_fields, "ghg_accounting.baseline_defined"))
+            has_storage_accounting = bool(get_best_value(updated_fields, "quantification.storage_emissions_accounted"))
+
+            text = signals.get("project_text", "") or ""
+
+            net_negative_keywords = [
+                "net carbon removal",
+                "net co2 removal",
+                "net cdr",
+                "carbon removal capacity",
+                "sequestered carbon",
+                "carbon sequestration",
+            ]
+
+            has_net_negative_text = project_contains_any(text, net_negative_keywords)
+
+            if (has_boundary and has_baseline and has_storage_accounting) and has_net_negative_text:
+                updated_fields = append_inference_field(
+                    updated_fields,
+                    inference_events,
+                    path="eligibility.net_negative_claim",
+                    value=True,
+                    evidence=(
+                        "Inferred from explicit carbon removal claims supported by structured accounting (boundary, baseline, storage emissions)."
+                    ),
+                    source="project",
+                    confidence=0.86,
+                    evidence_strength="moderate",
+                    extractor="quantification_inference",
+                    inference_rule_id="INF-QUANT-004",
+                    inputs_used=[
+                        "ghg_accounting.system_boundary_defined",
+                        "ghg_accounting.baseline_defined",
+                        "quantification.storage_emissions_accounted",
+                        "project_context: net carbon removal wording",
+                    ],
+                    resolution_action="fill",
+                )
