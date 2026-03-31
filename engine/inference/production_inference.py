@@ -189,7 +189,9 @@ class ProductionInference(BaseInferenceRule):
             "production.pyrolysis_technology",
         )
 
-        is_weak_value = normalize_text(current_value) in {
+        value_norm = normalize_text(current_value) or ""
+
+        weak_exact_values = {
             "",
             "biochar",
             "biochar production",
@@ -199,6 +201,21 @@ class ProductionInference(BaseInferenceRule):
             "carbon removal technology",
             "pyrolysis",
         }
+
+        weak_partial_terms = [
+            "diagram",
+            "design diagram",
+            "process diagram",
+            "flow diagram",
+            "schematic",
+            "reactor design",
+            "reactor design diagram",
+        ]
+
+        is_weak_value = (
+            value_norm in weak_exact_values
+            or any(term in value_norm for term in weak_partial_terms)
+        )
 
         if (
             not has_strong_evidence(updated_fields, "production.pyrolysis_technology")
