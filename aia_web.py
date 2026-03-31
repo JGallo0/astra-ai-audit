@@ -2467,7 +2467,7 @@ if structured_v2_output:
 
     if top_risks:
         for item in top_risks:
-        st.write(f"- {item}")
+            st.write(f"- {item}")
     else:
         st.write("Nenhum risco crítico identificado.")
 
