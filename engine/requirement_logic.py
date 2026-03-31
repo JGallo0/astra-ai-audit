@@ -634,8 +634,6 @@ def get_logic(logic_key):
 def run_engine(project_data, requirements):
     results = []
     cross_check_findings = run_core_cross_checks(project_data)
-    module_summary = aggregate_module_summary(results)
-    top_risks = build_top_risks(results, limit=5)
 
     for req in requirements:
         req_id = req.get("id")
@@ -837,6 +835,10 @@ def run_engine(project_data, requirements):
             "gap": gap,
             "recommendation": recommendation,
         })
+
+    score_data = calculate_compliance_score(results)
+    module_summary = aggregate_module_summary(results)
+    top_risks = build_top_risks(results, limit=5)
 
     return {
         "results": results,
