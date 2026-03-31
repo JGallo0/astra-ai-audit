@@ -630,6 +630,7 @@ def get_logic(logic_key):
         raise KeyError(f"Logic function '{logic_key}' not found.")
     return logic_fn
 
+
 def run_core_cross_checks(project_data):
     findings = []
 
@@ -640,7 +641,6 @@ def run_core_cross_checks(project_data):
     feedstock = project_data.get("feedstock", {})
     quantification = project_data.get("quantification", {})
 
-    # 1. Durability vs storage stability
     if (eligibility.get("durability_years") or 0) >= 200:
         if storage.get("storage_environment_stable") is not True:
             findings.append({
@@ -653,7 +653,6 @@ def run_core_cross_checks(project_data):
                 ],
             })
 
-    # 2. Baseline vs feedstock counterfactual
     if ghg.get("baseline_defined") is True and not feedstock.get("pre_project_biomass_use"):
         findings.append({
             "type": "cross_check",
@@ -665,7 +664,6 @@ def run_core_cross_checks(project_data):
             ],
         })
 
-    # 3. System boundary vs activity boundaries
     if ghg.get("system_boundary_defined") is True and quantification.get("crediting_activity_boundaries") is not True:
         findings.append({
             "type": "cross_check",
@@ -677,7 +675,6 @@ def run_core_cross_checks(project_data):
             ],
         })
 
-    # 4. Monitoring vs verification readiness
     if monitoring.get("monitoring_plan") is True and monitoring.get("verification_ready") is not True:
         findings.append({
             "type": "cross_check",
@@ -691,6 +688,243 @@ def run_core_cross_checks(project_data):
 
     return findings
 
+
+def classify_evidence_strength(field_scores):
+    if not field_scores:
+        return "none"
+
+    normalized = [
+        item for item in field_scores
+        if isinstance(item, dict) and item.get("status") != "not_applicable"
+    ]
+
+    if not normalized:
+        return "none"
+
+    total = len(normalized)
+    passes = len([f for f in normalized if f.get("status") == "pass"])
+    failed = len([f for f in normalized if f.get("status") == "fail"])
+
+    if passes == total:
+        return "strong"
+
+    if passes >= max(1, total // 2) and failed == 0:
+        return "moderate"
+
+    return "weak"
+
+
+def compute_confidence_from_field_scores(status, field_scores):
+    if status == "not_applicable":
+        return 1.0
+
+    if not field_scores:
+        return 0.0
+
+    normalized = [
+        item for item in field_scores
+        if isinstance(item, dict) and item.get("status") != "not_applicable"
+    ]
+
+    if not normalized:
+        return 0.0
+
+    total = len(normalized)
+    passes = len([f for f in normalized if f.get("status") == "pass"])
+    missing = len([f for f in normalized if f.get("status") == "missing"])
+    failed = len([f for f in normalized if f.get("status") == "fail"])
+
+    completeness_ratio = passes / total if total else 0.0
+    missing_penalty = missing / total if total else 0.0
+    fail_penalty = failed / total if total else 0.0
+
+    if status == "compliant":
+        base = 0.80 + 0.20 * completeness_ratio
+    elif status == "partial":
+        base = 0.55 + 0.20 * completeness_ratio - 0.10 * fail_penalty
+    elif status == "non_compliant":
+        base = 0.70 + 0.15 * fail_penalty
+    else:
+        base = 0.10 + 0.20 * completeness_ratio - 0.20 * missing_penalty
+
+    base = max(0.0, min(1.0, base))
+    return round(base, 2)
+
+
+def normalize_score_0_100(requirement_score):
+    if requirement_score is None:
+        return 0.0
+
+    try:
+        value = float(requirement_score)
+    except Exception:
+        return 0.0
+
+    return round(max(0.0, min(100.0, value)), 2)
+
+
+def compute_priority_score(status, requirement_score):
+    normalized_score = normalize_score_0_100(requirement_score)
+
+    if status == "non_compliant":
+        status_weight = 100
+    elif status == "partial":
+        status_weight = 70
+    elif status == "error":
+        status_weight = 55
+    elif status == "compliant":
+        status_weight = 10
+    elif status == "not_applicable":
+        status_weight = 0
+    else:
+        status_weight = 25
+
+    score_penalty = 100 - normalized_score
+    return round(status_weight * 0.65 + score_penalty * 0.35, 2)
+
+
+def build_project_evidence_text(missing_fields, failed_fields):
+    lines = []
+
+    if missing_fields:
+        lines.append("Missing fields:")
+        for f in missing_fields[:5]:
+            lines.append(f"- {f}")
+
+    if failed_fields:
+        lines.append("Failed checks:")
+        for f in failed_fields[:5]:
+            lines.append(f"- {f}")
+
+    if not lines:
+        lines.append("Structured evidence is available for the fields evaluated.")
+
+    return "\n".join(lines).strip()
+
+
+def build_methodology_basis_text(req):
+    if not isinstance(req, dict):
+        return ""
+
+    lines = []
+
+    req_id = req.get("id") or req.get("requirement_id")
+    req_name = req.get("title") or req.get("name")
+    module = req.get("module")
+    fields = req.get("fields", [])
+    applies_if = req.get("applies_if", {})
+
+    if req_id:
+        lines.append(f"Requirement ID: {req_id}")
+    if req_name:
+        lines.append(f"Requirement: {req_name}")
+    if module:
+        lines.append(f"Module: {module}")
+    if fields:
+        lines.append("Fields evaluated:")
+        for field in fields:
+            lines.append(f"- {field}")
+    if applies_if:
+        lines.append("Applicability conditions:")
+        for key, value in applies_if.items():
+            lines.append(f"- {key}: {value}")
+
+    return "\n".join(lines).strip()
+
+
+def build_gap_and_recommendation(status, missing_fields, failed_fields):
+    gap = ""
+    recommendation = ""
+
+    if status == "compliant":
+        gap = "No material compliance gap identified."
+        recommendation = "Maintain current evidence and validation readiness."
+    elif status == "partial":
+        gap = "Partial evidence available; material gaps remain."
+        if missing_fields:
+            recommendation = "Provide missing documentation and strengthen evidence for incomplete elements."
+        else:
+            recommendation = "Improve consistency and completeness of existing evidence."
+    elif status == "non_compliant":
+        gap = "Core requirement not met or insufficiently evidenced."
+        if failed_fields:
+            recommendation = "Correct failed conditions and provide full supporting evidence before validation."
+        else:
+            recommendation = "Establish missing core elements required for compliance."
+    elif status == "error":
+        gap = "Requirement not evaluated due to missing or disconnected logic."
+        recommendation = "Connect deterministic logic and verify the extraction pipeline for the required fields."
+    elif status == "not_applicable":
+        gap = ""
+        recommendation = ""
+
+    return gap, recommendation
+
+
+def aggregate_module_summary(results):
+    summary = {}
+
+    for item in results or []:
+        module = item.get("module") or "Unassigned"
+
+        if module not in summary:
+            summary[module] = {
+                "count": 0,
+                "compliant": 0,
+                "partial": 0,
+                "non_compliant": 0,
+                "error": 0,
+                "not_applicable": 0,
+                "priority_scores": [],
+                "priority_avg": 0.0,
+            }
+
+        summary[module]["count"] += 1
+
+        status = item.get("status")
+        if status in summary[module]:
+            summary[module][status] += 1
+
+        priority_score = item.get("priority_score")
+        if isinstance(priority_score, (int, float)):
+            summary[module]["priority_scores"].append(float(priority_score))
+
+    for _, data in summary.items():
+        scores = data.get("priority_scores", [])
+        data["priority_avg"] = round(sum(scores) / len(scores), 2) if scores else 0.0
+        data.pop("priority_scores", None)
+
+    return summary
+
+
+def build_top_risks(results, limit=5):
+    ranked = []
+
+    for item in results or []:
+        status = item.get("status")
+        if status not in {"non_compliant", "partial", "error"}:
+            continue
+
+        title = item.get("title") or item.get("requirement_name") or item.get("requirement_id") or "Unnamed requirement"
+        req_id = item.get("requirement_id", "")
+        notes = item.get("notes", []) or []
+
+        if isinstance(notes, list):
+            note_text = " ".join([str(n) for n in notes if str(n).strip()])
+        else:
+            note_text = str(notes).strip()
+
+        label = f"{req_id} — {title}" if req_id else title
+        if note_text:
+            label += f" | {note_text}"
+
+        ranked.append({
+            "text": label,
+            "priority_score": float(item.get("priority_score", 0.0) or 0.0),
+        })
+
+    ranked = sorted(ranked, key=lambda x: x.get("priority_score", 0.0), reverse=True)
+    return [item["text"] for item in ranked[:limit]]
 
 def run_engine(project_data, requirements):
     results = []
