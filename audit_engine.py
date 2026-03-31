@@ -619,6 +619,8 @@ class AuditEngine:
 
         score_data = calculate_compliance_score(results)
         score_label = classify_compliance_score(score_data["score"])
+        module_summary = aggregate_module_summary(results)
+        top_risks = build_top_risks(results, limit=5)
 
         # =========================================================
         # DEBUG 3 — FINAL OUTPUT
