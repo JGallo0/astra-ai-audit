@@ -1131,6 +1131,8 @@ def run_engine(project_data, requirements):
             "recommendation": recommendation,
         })
 
+    from scoring import calculate_compliance_score
+
     score_data = calculate_compliance_score(results)
     module_summary = aggregate_module_summary(results)
     top_risks = build_top_risks(results, limit=5)
