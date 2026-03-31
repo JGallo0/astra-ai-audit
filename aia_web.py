@@ -1306,14 +1306,26 @@ def init_project_session():
 
 def set_current_project(project: dict, user_email: str = "", methodology_key: str | None = None):
     methodology_key = (methodology_key or project.get("methodology") or "").strip().lower()
-    methodology_config = get_methodology_config(methodology_key)
+    methodology_config = get_methodology_config(methodology_key) or {}
+
+    project_vector_store_id = (
+        project.get("project_vector_store_id")
+        or project.get("vector_store_id")
+        or None
+    )
+
+    methodology_vector_store_id = (
+        methodology_config.get("vector_store_id")
+        or project.get("methodology_vector_store_id")
+        or None
+    )
 
     st.session_state["current_project_id"] = project.get("id")
     st.session_state["current_project_name"] = project.get("project_name")
-    st.session_state["current_project_vector_store_id"] = project.get("project_vector_store_id")
+    st.session_state["current_project_vector_store_id"] = project_vector_store_id
 
     st.session_state["current_methodology"] = methodology_key
-    st.session_state["current_methodology_vector_store_id"] = methodology_config.get("vector_store_id")
+    st.session_state["current_methodology_vector_store_id"] = methodology_vector_store_id
 
     if project.get("id") and user_email:
         try:
@@ -1329,7 +1341,7 @@ def set_current_project(project: dict, user_email: str = "", methodology_key: st
             st.session_state["messages"] = []
     else:
         st.session_state["messages"] = []
-
+        
 def ensure_default_example_project(user_email: str):
     project_vs_id = get_config_value("VECTOR_STORE_ID_NOVA_ESPERANCA")
     methodology_vs_id = get_config_value("VECTOR_STORE_ID_ISOMETRIC")
@@ -1730,6 +1742,10 @@ project_vs_id = st.session_state.get("current_project_vector_store_id")
 methodology_vs_id = st.session_state.get("current_methodology_vector_store_id")
 project_name = st.session_state.get("current_project_name")
 current_methodology = st.session_state.get("current_methodology")
+st.write("DEBUG project_vs_id:", project_vs_id)
+st.write("DEBUG methodology_vs_id:", methodology_vs_id)
+st.write("DEBUG project_name:", project_name)
+st.write("DEBUG current_methodology:", current_methodology)
 
 structured_requirements = get_requirements_for_methodology(current_methodology)
 
