@@ -147,37 +147,6 @@ class QuantificationInference(BaseInferenceRule):
         )
 
         # -----------------------------------------------------
-        # INF-QUANT-001
-        # Infer system boundary defined
-        # -----------------------------------------------------
-        if not has_strong_evidence(updated_fields, "ghg_accounting.system_boundary_defined"):
-            if self._should_infer_system_boundary(signals):
-                updated_fields = append_inference_field(
-                    updated_fields,
-                    inference_events,
-                    path="ghg_accounting.system_boundary_defined",
-                    value=True,
-                    evidence=(
-                        "Inferred from the presence of boundary definition language and/or a complete lifecycle structure (feedstock → production → storage → emissions/LCA)."
-                    ),
-                    source="project",
-                    confidence=0.83,
-                    evidence_strength="moderate",
-                    extractor="quantification_inference",
-                    inference_rule_id="INF-QUANT-001",
-                    inputs_used=[
-                        "project.project_boundary_defined",
-                        "feedstock.biomass_type",
-                        "production.pyrolysis_technology",
-                        "methodology.storage_pathway",
-                        "emissions.emissions_sources_identified",
-                        "quantification.lca_performed",
-                        "project_context: boundary wording",
-                    ],
-                    resolution_action="fill",
-                )
-
-        # -----------------------------------------------------
         # INF-QUANT-002
         # Infer storage emissions accounted
         # -----------------------------------------------------
@@ -202,11 +171,6 @@ class QuantificationInference(BaseInferenceRule):
                     ],
                     resolution_action="fill",
                 )
-
-        return {
-            "normalized_fields": updated_fields,
-            "inference_events": inference_events,
-        }
 
         # -----------------------------------------------------
         # INF-QUANT-003
@@ -307,3 +271,8 @@ class QuantificationInference(BaseInferenceRule):
                     ],
                     resolution_action="fill",
                 )
+
+        return {
+            "normalized_fields": updated_fields,
+            "inference_events": inference_events,
+        }
