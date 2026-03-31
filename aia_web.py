@@ -1926,13 +1926,18 @@ def build_structured_audit_summary_text(
     # -------------------------
     # Classificação de risco
     # -------------------------
-    if score >= 75:
+    
+    eligibility_override = score_data.get("eligibility_override")
+
+    if eligibility_override == "NOT_ELIGIBLE":
+        risk_level = "HIGH"
+    elif score >= 75:
         risk_level = "LOW"
     elif score >= 50:
         risk_level = "MODERATE"
     else:
         risk_level = "HIGH"
-
+            
     # -------------------------
     # Coleta de itens críticos
     # -------------------------
@@ -2086,12 +2091,19 @@ def build_eligibility_dossier_text(
     # -------------------------
     # Elegibilidade geral
     # -------------------------
-    if score >= 70:
-        eligibility_status = "ELIGIBLE"
-    elif score >= 40:
+    eligibility_override = score_data.get("eligibility_override")
+
+    if eligibility_override == "NOT_ELIGIBLE":
+        eligibility_status = "NOT ELIGIBLE"
+    elif eligibility_override == "CONDITIONALLY_ELIGIBLE":
         eligibility_status = "CONDITIONALLY ELIGIBLE"
     else:
-        eligibility_status = "NOT ELIGIBLE"
+        if score >= 70:
+            eligibility_status = "ELIGIBLE"
+        elif score >= 40:
+            eligibility_status = "CONDITIONALLY ELIGIBLE"
+        else:
+            eligibility_status = "NOT ELIGIBLE"
 
     # -------------------------
     # Extração de blocos chave
