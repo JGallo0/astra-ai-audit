@@ -2426,6 +2426,8 @@ if structured_v2_output:
     score_data = structured_v2_output.get("score_data", {})
     score_label = structured_v2_output.get("score_label", "")
     audit_mode = structured_v2_output.get("audit_mode", st.session_state.get("audit_mode", "development"))
+    module_summary = structured_v2_output.get("module_summary", {})
+    top_risks = structured_v2_output.get("top_risks", [])
 
     summary_text = build_structured_audit_summary_text(
         project_name=project_name,
