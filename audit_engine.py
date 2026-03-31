@@ -641,6 +641,7 @@ class AuditEngine:
 
         return {
             "project_data": project_data,
+            "final_project_data": project_data,
             "results": results,
             "score_data": score_data,
             "score_label": score_label,
@@ -653,8 +654,16 @@ class AuditEngine:
             "methodology_context": contexts["methodology_context"],
             "project_hits": contexts["project_hits"],
             "methodology_hits": contexts["methodology_hits"],
+
+            # debug / rastreabilidade
             "normalized_fields": mapped.get("normalized_fields", []),
             "raw_extraction": mapped.get("raw_extraction", {}),
+            "resolved_fields": mapped.get("resolved_fields", {}),
+            "field_resolution_log": mapped.get("field_resolution_log", []),
+            "inference_events": mapped.get("inference_events", []),
+            "invalidated_paths": mapped.get("invalidated_paths", []),
+            "consistency_flags": mapped.get("consistency_flags", []),
+            "consistency_notes": mapped.get("consistency_notes", []),
         }
 
     def _audit_single_module(
