@@ -619,8 +619,10 @@ class AuditEngine:
 
         score_data = calculate_compliance_score(results)
         score_label = classify_compliance_score(score_data["score"])
+        from engine.requirement_logic import aggregate_module_summary, build_top_risks
+
         module_summary = aggregate_module_summary(results)
-        top_risks = build_top_risks(results, limit=5)
+        top_risks = build_top_risks(results)
 
         # =========================================================
         # DEBUG 3 — FINAL OUTPUT
