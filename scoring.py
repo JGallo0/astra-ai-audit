@@ -501,20 +501,192 @@ def summarize_results(results: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 # scoring.py
 
+MODULE_WEIGHTS = {
+    "Eligibility": 2.0,
+    "Ownership": 1.8,
+    "MRV": 1.8,
+    "Storage/End Use": 1.6,
+    "Carbon Accounting": 1.5,
+    "System Boundary": 1.4,
+    "Durability": 1.4,
+    "Traceability": 1.3,
+    "Feedstock": 1.2,
+    "Technology": 1.1,
+    "Biochar Quality": 1.1,
+    "Biochar Carbon Quantification": 1.1,
+    "Baseline": 1.0,
+    "Additionality": 1.0,
+    "Leakage": 1.0,
+    "Uncertainty": 0.9,
+    "LCA": 0.9,
+    "Reversal Risk": 0.9,
+    "Safeguards": 0.8,
+    "Regulatory Compliance": 0.8,
+}
+
+
+def _status_factor(status: str) -> float:
+    status = str(status or "").strip().lower()
+
+    if status == "compliant":
+        return 1.0
+    if status == "partial":
+        return 0.5
+    if status == "future_evidence_required":
+        return 0.65
+    if status == "error":
+        return 0.2
+    if status == "non_compliant":
+        return 0.0
+    return 0.0
+
+
+def _safe_req_score(item: dict) -> float:
+    raw = item.get("requirement_score_normalized", item.get("requirement_score", 0))
+    try:
+        raw = float(raw)
+    except Exception:
+        raw = 0.0
+    return max(0.0, min(100.0, raw))
+
+
+def _combine_status_and_requirement_score(item: dict) -> float:
+    """
+    Score final do requisito em escala 0–1.
+    Dá peso maior ao status do que ao requirement_score,
+    para impedir score inflado quando há non-compliance real.
+    """
+    status_component = _status_factor(item.get("status")) * 100.0
+    req_component = _safe_req_score(item)
+
+    combined = (0.70 * status_component) + (0.30 * req_component)
+    return max(0.0, min(100.0, combined)) / 100.0
+
+
+def _compute_module_scores(results):
+    module_buckets = {}
+
+    for item in results or []:
+        status = str(item.get("status", "")).strip().lower()
+        if status == "not_applicable":
+            continue
+
+        module = item.get("module") or "Unassigned"
+
+        if module not in module_buckets:
+            module_buckets[module] = {
+                "weighted_sum": 0.0,
+                "weight_sum": 0.0,
+            }
+
+        module_weight = MODULE_WEIGHTS.get(module, 1.0)
+        item_score = _combine_status_and_requirement_score(item)
+
+        module_buckets[module]["weighted_sum"] += item_score * module_weight
+        module_buckets[module]["weight_sum"] += module_weight
+
+    module_scores = {}
+
+    for module, data in module_buckets.items():
+        if data["weight_sum"] > 0:
+            module_scores[module] = round((data["weighted_sum"] / data["weight_sum"]) * 100.0, 2)
+        else:
+            module_scores[module] = 0.0
+
+    return module_scores
+
+
+def _apply_module_penalties(base_score: float, module_scores: dict):
+    score = float(base_score)
+    penalties_applied = []
+
+    penalty_rules = [
+        ("Eligibility", 70.0, 0.75, "Eligibility module below threshold"),
+        ("MRV", 60.0, 0.85, "MRV module below threshold"),
+        ("Storage/End Use", 60.0, 0.90, "Storage/End Use module below threshold"),
+        ("Traceability", 50.0, 0.92, "Traceability module below threshold"),
+    ]
+
+    for module_name, threshold, multiplier, reason in penalty_rules:
+        module_score = module_scores.get(module_name)
+        if module_score is None:
+            continue
+        if module_score < threshold:
+            score *= multiplier
+            penalties_applied.append({
+                "module": module_name,
+                "module_score": module_score,
+                "threshold": threshold,
+                "multiplier": multiplier,
+                "reason": reason,
+            })
+
+    return round(max(0.0, min(100.0, score)), 2), penalties_applied
+
+
+def _apply_eligibility_hard_gate(score: float, results: list):
+    """
+    Hard gate de elegibilidade.
+    Requisitos críticos de elegibilidade não podem permitir score de readiness alto.
+    """
+    score = float(score)
+    eligibility_override = None
+    hard_gate_reasons = []
+
+    status_by_id = {
+        str(item.get("requirement_id", "")).strip(): str(item.get("status", "")).strip().lower()
+        for item in (results or [])
+    }
+
+    # Gate 1 — não elegível
+    not_eligible_ids = ["ELIG_001", "ELIG_002", "OWN_001"]
+    if any(status_by_id.get(req_id) == "non_compliant" for req_id in not_eligible_ids):
+        score = min(score, 39.0)
+        eligibility_override = "NOT_ELIGIBLE"
+        for req_id in not_eligible_ids:
+            if status_by_id.get(req_id) == "non_compliant":
+                hard_gate_reasons.append(f"{req_id} is non_compliant")
+
+    # Gate 2 — elegibilidade condicional no máximo
+    conditional_ids = ["STOR_001", "MRV_001"]
+    if eligibility_override != "NOT_ELIGIBLE":
+        if any(status_by_id.get(req_id) == "non_compliant" for req_id in conditional_ids):
+            score = min(score, 49.0)
+            eligibility_override = "CONDITIONALLY_ELIGIBLE"
+            for req_id in conditional_ids:
+                if status_by_id.get(req_id) == "non_compliant":
+                    hard_gate_reasons.append(f"{req_id} is non_compliant")
+
+    return round(max(0.0, min(100.0, score)), 2), eligibility_override, hard_gate_reasons
+
+
 def calculate_compliance_score(results):
-    """
-    Calcula score agregado da auditoria com base nos resultados da engine.
+    results = results or []
 
-    Prioridade:
-    1) requirement_score (V2 do requirement_logic.py)
-    2) score legado
-    3) fallback por status
+    status_counts = {
+        "compliant": 0,
+        "partial": 0,
+        "future_evidence_required": 0,
+        "non_compliant": 0,
+        "error": 0,
+        "not_applicable": 0,
+    }
 
-    Regras:
-    - not_applicable = excluído do denominador
-    - score final em escala 0-100
-    """
-    if not results:
+    applicable_results = []
+
+    for item in results:
+        status = str(item.get("status", "")).strip().lower()
+        if status in status_counts:
+            status_counts[status] += 1
+        else:
+            status_counts["error"] += 1
+
+        if status != "not_applicable":
+            applicable_results.append(item)
+
+    applicable_requirements = len(applicable_results)
+
+    if applicable_requirements == 0:
         return {
             "score": 0.0,
             "applicable_requirements": 0,
@@ -522,75 +694,52 @@ def calculate_compliance_score(results):
             "partial": 0,
             "future_evidence_required": 0,
             "non_compliant": 0,
-            "not_applicable": 0,
             "error": 0,
+            "not_applicable": status_counts["not_applicable"],
+            "module_scores": {},
+            "module_penalties": [],
+            "eligibility_override": None,
+            "hard_gate_reasons": [],
         }
 
-    compliant = 0
-    partial = 0
-    future_evidence_required = 0
-    non_compliant = 0
-    not_applicable = 0
-    error = 0
+    weighted_sum = 0.0
+    total_weight = 0.0
 
-    weighted_points = 0.0
-    applicable_requirements = 0
+    for item in applicable_results:
+        module = item.get("module") or "Unassigned"
+        module_weight = MODULE_WEIGHTS.get(module, 1.0)
+        item_score = _combine_status_and_requirement_score(item)
 
-    for r in results:
-        status = safe_str(r.get("status", "")).strip().lower()
+        weighted_sum += item_score * module_weight
+        total_weight += module_weight
 
-        if status in ["not_applicable", "não aplicável", "nao aplicavel"]:
-            not_applicable += 1
-            continue
+    base_score = (weighted_sum / total_weight) * 100.0 if total_weight > 0 else 0.0
+    base_score = round(max(0.0, min(100.0, base_score)), 2)
 
-        applicable_requirements += 1
-
-        requirement_score = r.get("requirement_score")
-
-        if status in ["compliant", "conforme"]:
-            compliant += 1
-        elif status in ["partial", "parcialmente conforme"]:
-            partial += 1
-        elif status in ["future_evidence_required"]:
-            future_evidence_required += 1
-        elif status in ["non_compliant", "não conforme", "nao conforme"]:
-            non_compliant += 1
-        elif status in ["error", "erro de análise", "erro de analise"]:
-            error += 1
-        else:
-            error += 1
-
-        if requirement_score is not None:
-            weighted_points += get_engine_requirement_score_fraction(r)
-        else:
-            if status in ["compliant", "conforme"]:
-                weighted_points += 1.0
-            elif status in ["partial", "parcialmente conforme"]:
-                weighted_points += 0.5
-            elif status in ["future_evidence_required"]:
-                weighted_points += 0.35
-            elif status in ["non_compliant", "não conforme", "nao conforme"]:
-                weighted_points += 0.0
-            elif status in ["error", "erro de análise", "erro de analise"]:
-                weighted_points += 0.0
-            else:
-                weighted_points += 0.0
-
-    if applicable_requirements == 0:
-        score = 0.0
-    else:
-        score = round((weighted_points / applicable_requirements) * 100, 2)
+    module_scores = _compute_module_scores(applicable_results)
+    penalized_score, module_penalties = _apply_module_penalties(base_score, module_scores)
+    final_score, eligibility_override, hard_gate_reasons = _apply_eligibility_hard_gate(
+        penalized_score,
+        applicable_results,
+    )
 
     return {
-        "score": score,
+        "score": final_score,
+        "base_score": base_score,
+        "score_after_module_penalties": penalized_score,
         "applicable_requirements": applicable_requirements,
-        "compliant": compliant,
-        "partial": partial,
-        "future_evidence_required": future_evidence_required,
-        "non_compliant": non_compliant,
-        "not_applicable": not_applicable,
-        "error": error,
+        "compliant": status_counts["compliant"],
+        "partial": status_counts["partial"],
+        "future_evidence_required": status_counts["future_evidence_required"],
+        "non_compliant": status_counts["non_compliant"],
+        "error": status_counts["error"],
+        "not_applicable": status_counts["not_applicable"],
+        "module_scores": module_scores,
+        "module_penalties": module_penalties,
+        "eligibility_override": eligibility_override,
+        "hard_gate_reasons": hard_gate_reasons,
     }
+    
 def classify_compliance_score(score):
     """
     Classificação executiva alinhada com lógica interna do motor.
