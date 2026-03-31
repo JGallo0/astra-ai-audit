@@ -2452,7 +2452,8 @@ if structured_v2_output:
     project_data = structured_v2_output.get(
         "final_project_data",
         structured_v2_output.get("project_data", {})
-    )    normalized_fields = structured_v2_output.get("normalized_fields", [])
+    )
+    normalized_fields = structured_v2_output.get("normalized_fields", [])
     score_data = structured_v2_output.get("score_data", {})
     score_label = structured_v2_output.get("score_label", "")
     audit_mode = structured_v2_output.get("audit_mode", st.session_state.get("audit_mode", "development"))
