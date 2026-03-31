@@ -23,32 +23,32 @@ def eval_biochar_applicability(data):
             score_boolean_field(
                 "eligibility.net_negative_claim",
                 net_negative,
-                30,
+                25,
                 note_if_missing="Project does not demonstrate net-negative emissions.",
             ),
             score_boolean_field(
                 "eligibility.additionality_claim",
                 additionality,
-                10,
+                20,
                 note_if_missing="Additionality is not demonstrated.",
             ),
             {
                 "path": "eligibility.durability_years",
-                "weight": 30,
-                "score": 30 if (durability_years or 0) >= 200 else 0,
+                "weight": 25,
+                "score": 25 if (durability_years or 0) >= 200 else 0,
                 "status": "pass" if (durability_years or 0) >= 200 else "fail",
                 "notes": [] if (durability_years or 0) >= 200 else ["Durability must be at least 200 years."],
             },
             score_presence_field(
                 "production.pyrolysis_technology",
                 pyrolysis_tech,
-                20,
+                15,
                 note_if_missing="Pyrolysis technology is not defined.",
             ),
             score_boolean_field(
                 "storage.storage_environment_stable",
                 storage_stable,
-                10,
+                15,
                 note_if_missing="Storage environment stability is not demonstrated.",
             ),
         ]
@@ -174,19 +174,19 @@ def eval_storage_requirements(data):
             score_presence_field(
                 "storage.storage_module",
                 storage_module,
-                60,
+                50,
                 note_if_missing="Storage module is not defined.",
             ),
             score_presence_field(
                 "storage.storage_location",
                 storage_location,
-                20,
+                25,
                 note_if_missing="Storage location is not defined.",
             ),
             score_boolean_field(
                 "storage.storage_monitoring_plan",
                 storage_monitoring_plan,
-                20,
+                25,
                 note_if_missing="Storage monitoring plan is missing.",
             ),
         ]
@@ -240,6 +240,7 @@ def eval_storage_requirements(data):
             field_scores=[],
             requirement_rating="weak",
         )
+        
 def eval_feedstock_requirements(data):
     try:
         feedstock = data.get("feedstock", {})
@@ -314,7 +315,6 @@ def eval_feedstock_requirements(data):
             field_scores=[],
             requirement_rating="weak",
         )
-
 
 def eval_monitoring_requirements(data):
     try:
@@ -394,6 +394,7 @@ def eval_monitoring_requirements(data):
             field_scores=[],
             requirement_rating="weak",
         )
+
 # =========================
 # ENGINE RUNNER
 # =========================
@@ -632,6 +633,9 @@ def get_logic(logic_key):
 
 def run_engine(project_data, requirements):
     results = []
+    cross_check_findings = run_core_cross_checks(project_data)
+    module_summary = aggregate_module_summary(results)
+    top_risks = build_top_risks(results, limit=5)
 
     for req in requirements:
         req_id = req.get("id")
@@ -656,10 +660,14 @@ def run_engine(project_data, requirements):
                 "logic_key": logic_key,
                 "fields_evaluated": fields_evaluated,
                 "requirement_score": None,
+                "requirement_score_normalized": 0.0,
+                "priority_score": 0.0,
                 "field_scores": [],
                 "requirement_rating": None,
+                "evidence_strength": "none",
+                "cross_checks": [],
                 "project_evidence": "",
-                "methodology_basis": "",
+                "methodology_basis": build_methodology_basis_text(req),
                 "gap": "",
                 "recommendation": "",
             })
@@ -683,10 +691,14 @@ def run_engine(project_data, requirements):
                 "logic_key": logic_key,
                 "fields_evaluated": fields_evaluated,
                 "requirement_score": 0,
+                "requirement_score_normalized": 0.0,
+                "priority_score": compute_priority_score("error", 0),
                 "field_scores": [],
                 "requirement_rating": "weak",
+                "evidence_strength": "none",
+                "cross_checks": [],
                 "project_evidence": "",
-                "methodology_basis": "",
+                "methodology_basis": build_methodology_basis_text(req),
                 "gap": "Requirement not evaluated due to missing or disconnected logic.",
                 "recommendation": "Connect or implement deterministic logic for this requirement.",
             })
@@ -694,17 +706,8 @@ def run_engine(project_data, requirements):
 
         # 3) Executa a lógica
         try:
-            print("DEBUG LOGIC KEY:", logic_key)
-            print("DEBUG LOGIC FN:", logic_fn)
-
             logic_output = logic_fn(project_data)
-
-            print("DEBUG OUTPUT TYPE:", type(logic_output))
-            print("DEBUG OUTPUT VALUE:", logic_output)
         except Exception as e:
-            print("DEBUG EXECUTION ERROR IN:", logic_key)
-            print("DEBUG EXECUTION EXCEPTION:", str(e))
-
             results.append({
                 "requirement_id": req_id,
                 "requirement_name": req_name,
@@ -719,15 +722,20 @@ def run_engine(project_data, requirements):
                 "logic_key": logic_key,
                 "fields_evaluated": fields_evaluated,
                 "requirement_score": 0,
+                "requirement_score_normalized": 0.0,
+                "priority_score": compute_priority_score("error", 0),
                 "field_scores": [],
                 "requirement_rating": "weak",
+                "evidence_strength": "none",
+                "cross_checks": [],
                 "project_evidence": "",
-                "methodology_basis": "",
+                "methodology_basis": build_methodology_basis_text(req),
                 "gap": "Requirement not evaluated due to missing or disconnected logic.",
-                "recommendation": "Connect or implement deterministic logic for this requirement.",
+                "recommendation": "Connect or implement deterministic logic and verify the extraction pipeline for the required fields.",
             })
             continue
 
+        # 4) Normaliza a saída da lógica
         if isinstance(logic_output, dict):
             status = logic_output.get("status", "error")
             missing_fields = logic_output.get("missing_fields", [])
@@ -745,40 +753,65 @@ def run_engine(project_data, requirements):
             field_scores = []
             requirement_rating = None
 
-        # 4) Monta saída estruturada
+        if notes is None:
+            notes = []
+        elif not isinstance(notes, list):
+            notes = [str(notes)]
+
+        # 5) Cross-checks relacionados
+        related_cross_checks = [
+            finding
+            for finding in cross_check_findings
+            if any(
+                path in (missing_fields + failed_fields + fields_evaluated)
+                for path in finding.get("paths", [])
+            )
+        ]
+
+        if related_cross_checks:
+            for finding in related_cross_checks:
+                notes.append(f"[Cross-check] {finding.get('message')}")
+
+        # 6) Confidence e evidência
+        confidence = compute_confidence_from_field_scores(
+            status,
+            field_scores,
+        )
+
+        evidence_strength = classify_evidence_strength(field_scores)
+
         if status == "compliant":
-            confidence = 0.95
             risk = "low"
         elif status == "partial":
-            confidence = 0.75
             risk = "medium"
         elif status == "non_compliant":
-            confidence = 0.90
             risk = "high"
         elif status == "not_applicable":
-            confidence = 1.0
             risk = "none"
         else:
-            confidence = 0.0
             risk = "unknown"
 
-        project_evidence = ""
-        methodology_basis = ""
-        gap = ""
-        recommendation = ""
+        normalized_score = normalize_score_0_100(requirement_score)
 
-        if status == "compliant":
-            recommendation = "Maintain current evidence package and validation readiness."
-        elif status == "partial":
-            gap = "Partial evidence available, but material gaps remain."
-            recommendation = "Strengthen documentary evidence for the missing elements."
-        elif status == "non_compliant":
-            gap = "Core requirement not sufficiently evidenced."
-            recommendation = "Resolve this requirement before validation."
-        elif status == "error":
-            gap = "Requirement not evaluated due to missing or disconnected logic."
-            recommendation = "Connect or implement deterministic logic for this requirement."
+        priority_score = compute_priority_score(
+            status,
+            normalized_score,
+        )
 
+        project_evidence = build_project_evidence_text(
+            missing_fields,
+            failed_fields,
+        )
+
+        methodology_basis = build_methodology_basis_text(req)
+
+        gap, recommendation = build_gap_and_recommendation(
+            status,
+            missing_fields,
+            failed_fields,
+        )
+
+        # 7) Monta saída estruturada
         results.append({
             "requirement_id": req_id,
             "requirement_name": req_name,
@@ -793,15 +826,25 @@ def run_engine(project_data, requirements):
             "logic_key": logic_key,
             "fields_evaluated": fields_evaluated,
             "requirement_score": requirement_score,
+            "requirement_score_normalized": normalized_score,
+            "priority_score": priority_score,
             "field_scores": field_scores,
             "requirement_rating": requirement_rating,
+            "evidence_strength": evidence_strength,
+            "cross_checks": related_cross_checks,
             "project_evidence": project_evidence,
             "methodology_basis": methodology_basis,
             "gap": gap,
             "recommendation": recommendation,
         })
 
-    return results
+    return {
+        "results": results,
+        "score_data": score_data,
+        "module_summary": module_summary,
+        "top_risks": top_risks,
+    }
+    
 def reactor_design_diagram(data):
     """
     R-6AQG-1 | P&ID or engineering design diagram with sensors
@@ -2933,6 +2976,152 @@ def derive_status_with_hard_gate(
         compliant_threshold=compliant_threshold,
     )
 
+def build_project_evidence_text(missing_fields, failed_fields):
+    lines = []
+
+    if missing_fields:
+        lines.append("Missing fields:")
+        for f in missing_fields[:5]:
+            lines.append(f"- {f}")
+
+    if failed_fields:
+        lines.append("Failed checks:")
+        for f in failed_fields[:5]:
+            lines.append(f"- {f}")
+
+    return "\n".join(lines).strip()
+
+
+def build_methodology_basis_text(req):
+    module = req.get("module")
+    requirement_id = req.get("id") or req.get("requirement_id")
+
+    parts = []
+    if module:
+        parts.append(f"Module: {module}")
+    if requirement_id:
+        parts.append(f"Requirement ID: {requirement_id}")
+
+    return " | ".join(parts)
+
+
+def build_gap_and_recommendation(status, missing_fields, failed_fields):
+    gap = ""
+    recommendation = ""
+
+    if status == "compliant":
+        recommendation = "Maintain current evidence and proceed to validation readiness."
+
+    elif status == "partial":
+        gap = "Partial evidence available; some required elements are incomplete."
+        if missing_fields:
+            recommendation = "Provide missing documentation and strengthen evidence for identified gaps."
+        else:
+            recommendation = "Strengthen consistency and completeness of existing evidence."
+
+    elif status == "non_compliant":
+        gap = "Core requirement not met or insufficiently evidenced."
+        if failed_fields:
+            recommendation = "Correct failed conditions and provide full supporting evidence before validation."
+        else:
+            recommendation = "Establish missing core elements required for compliance."
+
+    elif status == "error":
+        gap = "Requirement not evaluated due to missing or disconnected logic."
+        recommendation = "Connect logic or ensure required fields are properly extracted and mapped."
+
+    return gap, recommendation
+
+def normalize_score_0_100(value):
+    try:
+        if value is None:
+            return 0.0
+        v = float(value)
+        if v <= 1.0:
+            return round(v * 100.0, 2)
+        return round(v, 2)
+    except Exception:
+        return 0.0
+
+
+def compute_priority_score(status, requirement_score):
+    # status_weight: erro/NC > partial > compliant
+    if status == "error":
+        status_weight = 100
+    elif status == "non_compliant":
+        status_weight = 90
+    elif status == "partial":
+        status_weight = 60
+    elif status == "compliant":
+        status_weight = 10
+    else:
+        status_weight = 0
+
+    score = normalize_score_0_100(requirement_score)
+    # quanto menor o score, maior a prioridade
+    score_penalty = 100 - score
+
+    return round(status_weight * 0.6 + score_penalty * 0.4, 2)
+
+
+def aggregate_module_summary(results):
+    module_summary = {}
+
+    for r in results or []:
+        module = r.get("module") or "unknown"
+        ms = module_summary.setdefault(module, {
+            "count": 0,
+            "compliant": 0,
+            "partial": 0,
+            "non_compliant": 0,
+            "error": 0,
+            "priority_sum": 0.0,
+        })
+
+        ms["count"] += 1
+        status = r.get("status")
+
+        if status in ms:
+            ms[status] += 1
+        else:
+            ms[status] = ms.get(status, 0) + 1
+
+        ms["priority_sum"] += float(r.get("priority_score", 0) or 0)
+
+    # calcular média de prioridade por módulo
+    for m, ms in module_summary.items():
+        if ms["count"] > 0:
+            ms["priority_avg"] = round(ms["priority_sum"] / ms["count"], 2)
+        else:
+            ms["priority_avg"] = 0.0
+
+    return module_summary
+
+
+def build_top_risks(results, limit=5):
+    sorted_items = sorted(
+        results or [],
+        key=lambda r: float(r.get("priority_score", 0) or 0),
+        reverse=True,
+    )
+
+    top = []
+    for r in sorted_items[:limit]:
+        rid = r.get("requirement_id")
+        title = r.get("title") or r.get("requirement_name")
+        gap = r.get("gap", "")
+        rec = r.get("recommendation", "")
+
+        line = f"{rid} — {title}"
+        if gap:
+            line += f" | Gap: {gap}"
+        if rec:
+            line += f" | Action: {rec}"
+
+        top.append(line)
+
+    return top
+    
 def eval_project_ownership(data):
     try:
         project = data.get("project", {})
