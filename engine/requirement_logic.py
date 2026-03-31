@@ -630,6 +630,67 @@ def get_logic(logic_key):
         raise KeyError(f"Logic function '{logic_key}' not found.")
     return logic_fn
 
+def run_core_cross_checks(project_data):
+    findings = []
+
+    eligibility = project_data.get("eligibility", {})
+    storage = project_data.get("storage", {})
+    ghg = project_data.get("ghg_accounting", {})
+    monitoring = project_data.get("monitoring_reporting", {})
+    feedstock = project_data.get("feedstock", {})
+    quantification = project_data.get("quantification", {})
+
+    # 1. Durability vs storage stability
+    if (eligibility.get("durability_years") or 0) >= 200:
+        if storage.get("storage_environment_stable") is not True:
+            findings.append({
+                "type": "cross_check",
+                "severity": "medium",
+                "message": "Durability is claimed, but storage environment stability is not evidenced.",
+                "paths": [
+                    "eligibility.durability_years",
+                    "storage.storage_environment_stable",
+                ],
+            })
+
+    # 2. Baseline vs feedstock counterfactual
+    if ghg.get("baseline_defined") is True and not feedstock.get("pre_project_biomass_use"):
+        findings.append({
+            "type": "cross_check",
+            "severity": "high",
+            "message": "Baseline is marked as defined, but pre-project feedstock use is not documented.",
+            "paths": [
+                "ghg_accounting.baseline_defined",
+                "feedstock.pre_project_biomass_use",
+            ],
+        })
+
+    # 3. System boundary vs activity boundaries
+    if ghg.get("system_boundary_defined") is True and quantification.get("crediting_activity_boundaries") is not True:
+        findings.append({
+            "type": "cross_check",
+            "severity": "medium",
+            "message": "System boundary is defined, but crediting activity boundaries are incomplete.",
+            "paths": [
+                "ghg_accounting.system_boundary_defined",
+                "quantification.crediting_activity_boundaries",
+            ],
+        })
+
+    # 4. Monitoring vs verification readiness
+    if monitoring.get("monitoring_plan") is True and monitoring.get("verification_ready") is not True:
+        findings.append({
+            "type": "cross_check",
+            "severity": "medium",
+            "message": "Monitoring plan exists, but verification readiness is not evidenced.",
+            "paths": [
+                "monitoring_reporting.monitoring_plan",
+                "monitoring_reporting.verification_ready",
+            ],
+        })
+
+    return findings
+
 
 def run_engine(project_data, requirements):
     results = []
