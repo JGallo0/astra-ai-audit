@@ -2463,6 +2463,36 @@ if structured_v2_output:
     with col2:
         st.metric("Rating", score_label)
 
+        st.markdown("### Top Risks")
+
+    if top_risks:
+        for item in top_risks:
+        st.write(f"- {item}")
+    else:
+        st.write("Nenhum risco crítico identificado.")
+
+    st.markdown("### Module Overview")
+
+    if module_summary:
+        module_rows = []
+
+        for module_name, data in module_summary.items():
+            module_rows.append({
+                "Module": module_name,
+                "Requirements": data.get("count", 0),
+                "Compliant": data.get("compliant", 0),
+                "Partial": data.get("partial", 0),
+                "Non-compliant": data.get("non_compliant", 0),
+                "Error": data.get("error", 0),
+                "Priority": data.get("priority_avg", 0.0),
+            })
+
+        df_modules = pd.DataFrame(module_rows)
+        st.dataframe(df_modules, hide_index=True, width="stretch")
+    else:
+        st.write("Nenhum resumo por módulo disponível.")
+    
+
     if results:
 
         normalized_results = []
