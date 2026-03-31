@@ -541,10 +541,11 @@ class AuditEngine:
         # =========================================================
         # DEBUG 1 — OUTPUT DO RUN_ENGINE
         # =========================================================
-        results = run_engine(
-            project_data,
-            filtered_requirements
-        )
+        engine_output = run_engine(project_data, requirements)
+        results = engine_output.get("results", [])
+        score_data = engine_output.get("score_data", {})
+        module_summary = engine_output.get("module_summary", {})
+        top_risks = engine_output.get("top_risks", [])
 
         print("\n===== DEBUG RUN_ENGINE OUTPUT =====")
         print("TYPE:", type(results))
@@ -857,6 +858,7 @@ class AuditEngine:
             normalized_results.append(normalized)
 
         return normalized_results
+        
     def _has_real_evidence(self, text: str) -> bool:
         text = safe_str(text).lower()
         if not text:
