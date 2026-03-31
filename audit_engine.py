@@ -8,7 +8,6 @@ from compliance_rules import (
     calculate_score,
     calculate_confidence,
     classify_status,
-    classify_risk,
 )
 
 from smart_search import normalize_sources, rank_sources, build_smart_context
@@ -541,7 +540,13 @@ class AuditEngine:
         # =========================================================
         # DEBUG 1 — OUTPUT DO RUN_ENGINE
         # =========================================================
-        engine_output = run_engine(project_data, requirements)
+        engine_output = run_engine(project_data, filtered_requirements)
+
+        if not isinstance(engine_output, dict):
+            raise TypeError(
+                f"run_engine must return a dict in structured audit mode, got {type(engine_output).__name__}"
+            )
+
         results = engine_output.get("results", [])
         score_data = engine_output.get("score_data", {})
         module_summary = engine_output.get("module_summary", {})
@@ -637,6 +642,8 @@ class AuditEngine:
             "score_label": score_label,
             "audit_mode": audit_mode,
             "selected_modules": selected_modules or [],
+            "module_summary": module_summary,
+            "top_risks": top_risks,
             "queries": contexts["queries"],
             "project_context": contexts["project_context"],
             "methodology_context": contexts["methodology_context"],
@@ -896,64 +903,6 @@ class AuditEngine:
             "insufficient evidence",
         ]
         return not any(marker in text for marker in negative_markers)
-
-        # =========================================================
-        # 1. EVIDÊNCIA DO PROJETO (0–40)
-        # =========================================================
-        if self._has_real_evidence(pe):
-            score += 25
-
-            if len(pe) >= 120:
-                score += 5
-            if len(pe) >= 220:
-                score += 5
-            if len(pe) >= 400:
-                score += 5
-
-        # =========================================================
-        # 2. BASE METODOLÓGICA (0–30)
-        # =========================================================
-        if self._has_real_methodology_basis(mb):
-            score += 20
-
-            if len(mb) >= 100:
-                score += 4
-            if len(mb) >= 180:
-                score += 3
-            if len(mb) >= 300:
-                score += 3
-
-        # =========================================================
-        # 3. GAP (-30 até +10)
-        # =========================================================
-        if gp:
-            if "no material gap" in gp_lower or "não foi identificada lacuna" in gp_lower:
-                score += 8
-            else:
-                score -= 10
-
-                if any(x in gp_lower for x in ["missing", "ausência", "incomplete", "não especifica"]):
-                    score -= 5
-
-                if any(x in gp_lower for x in ["not compliant", "não atende", "insufficient"]):
-                    score -= 10
-
-        # =========================================================
-        # 4. RECOMENDAÇÃO (+0–5)
-        # =========================================================
-        if rc:
-            score += 2
-
-        # =========================================================
-        # 5. NOTAS (+0–5)
-        # =========================================================
-        if nt:
-            score += 2
-
-        # =========================================================
-        # 6. NORMALIZAÇÃO FINAL
-        # =========================================================
-        return clip_int(score, default=0, min_value=0, max_value=100)        
 
     
     # =========================================================
