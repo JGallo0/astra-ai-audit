@@ -43,6 +43,21 @@ EXTRACTION_FIELDS = [
         "type": "boolean",
         "description": "Whether the project boundary is explicitly defined.",
     },
+    {
+        "path": "project.country",
+        "type": "string",
+        "description": "Country where the project is located.",
+    },
+    {
+        "path": "project.locations",
+        "type": "list",
+        "description": "Project locations such as city, county, state, or region.",
+    },
+    {
+        "path": "project.ownership_evidence",
+        "type": "list",
+        "description": "Evidence that the project entity owns or has the right to claim removals.",
+    },
 
     # =========================================================
     # ELIGIBILITY
