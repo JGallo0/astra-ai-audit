@@ -127,7 +127,6 @@ def apply_local_heuristics(
     # ------------------------------------------------------------
     # storage.storage_module
     # ------------------------------------------------------------
-    
     current_module = field_map.get("storage.storage_module", {}).get("value")
     storage_pathway = field_map.get("methodology.storage_pathway", {}).get("value")
     deployment_methods = field_map.get("storage.soil.deployment_methods", {}).get("value")
@@ -160,7 +159,6 @@ def apply_local_heuristics(
     # ------------------------------------------------------------
     # storage.storage_location
     # ------------------------------------------------------------
-    
     current_location = field_map.get("storage.storage_location", {}).get("value")
 
     if current_location in (None, "", [], False):
@@ -197,8 +195,32 @@ def apply_local_heuristics(
                 evidence_mode="direct",
             )
 
-    return merge_normalized_fields(list(field_map.values()))
+    # ------------------------------------------------------------
+    # storage.storage_monitoring_plan
+    # ------------------------------------------------------------
+    current_monitoring = field_map.get("storage.storage_monitoring_plan", {}).get("value")
 
+    if current_monitoring in (None, "", [], False):
+        if (
+            "monitoring plan" in text
+            or "storage site monitoring" in text
+            or "monitor biochar storage" in text
+            or "monitoring of storage" in text
+            or "periodic monitoring" in text
+        ):
+            upsert_field(
+                field_map,
+                path="storage.storage_monitoring_plan",
+                value=True,
+                evidence="Heuristic match: monitoring plan or storage site monitoring language is explicitly described.",
+                extractor="storage_mapper",
+                fill_method="heuristic",
+                confidence=0.82,
+                evidence_strength="moderate",
+                evidence_mode="direct",
+            )
+
+    return merge_normalized_fields(list(field_map.values()))
 
 # ------------------------------------------------------------
 # MAIN
