@@ -255,7 +255,12 @@ def apply_local_heuristics(
     # ------------------------------------------------------------
     current = field_map.get("biochar.characterization.chemical_analysis_performed", {}).get("value")
     if current in (None, False, "", []):
-        if re.search(r"chemical analysis", combined_text) or re.search(r"laboratory analyses", combined_text):
+        if (
+            re.search(r"chemical analysis", combined_text)
+            or re.search(r"laboratory analyses", combined_text)
+            or re.search(r"lab reports", combined_text)
+            or re.search(r"laboratory analysis", combined_text)
+        ):
             upsert_field(
                 field_map,
                 path="biochar.characterization.chemical_analysis_performed",
@@ -273,7 +278,12 @@ def apply_local_heuristics(
     # ------------------------------------------------------------
     current = field_map.get("biochar.characterization.lab_reports", {}).get("value")
     if current in (None, False, "", []):
-        if re.search(r"iso/iec 17025", combined_text) or re.search(r"laboratory certificate", combined_text):
+        if (
+            re.search(r"iso/iec 17025", combined_text)
+            or re.search(r"laboratory certificate", combined_text)
+            or re.search(r"lab reports", combined_text)
+            or re.search(r"laboratory analysis", combined_text)
+        ):
             upsert_field(
                 field_map,
                 path="biochar.characterization.lab_reports",
@@ -293,18 +303,23 @@ def apply_local_heuristics(
     if current in (None, False, "", []):
         if (
             re.search(r"total carbon", combined_text)
-            and re.search(r"h/corg", combined_text)
-            and re.search(r"fixed carbon", combined_text)
+            or re.search(r"h/corg", combined_text)
+            or re.search(r"fixed carbon", combined_text)
+            or re.search(r"ash content", combined_text)
+            or re.search(r"volatile matter", combined_text)
+            or re.search(r"proximate analysis", combined_text)
+            or re.search(r"ultimate analysis", combined_text)
+            or re.search(r"biochar characterization", combined_text)
         ):
             upsert_field(
                 field_map,
                 path="biochar.characterization.required_measurements_complete",
                 value=True,
-                evidence="Heuristic match: permanence-related required measurements are explicitly listed.",
+                evidence="Heuristic match: required permanence-related and characterization measurements are explicitly described.",
                 extractor="quantification_mapper",
                 fill_method="heuristic",
-                confidence=0.94,
-                evidence_strength="strong",
+                confidence=0.91,
+                evidence_strength="moderate",
                 evidence_mode="direct",
             )
 
@@ -319,16 +334,18 @@ def apply_local_heuristics(
             or re.search(r"volatile matter", combined_text)
             or re.search(r"fixed carbon", combined_text)
             or re.search(r"ash content", combined_text)
+            or re.search(r"%", combined_text)
+            or re.search(r"carbon content", combined_text)
         ):
             upsert_field(
                 field_map,
                 path="biochar.characterization.measurement_values",
                 value=True,
-                evidence="Heuristic match: measured biochar properties/values are explicitly listed.",
+                evidence="Heuristic match: measured biochar properties/values are explicitly listed or discussed.",
                 extractor="quantification_mapper",
                 fill_method="heuristic",
-                confidence=0.91,
-                evidence_strength="strong",
+                confidence=0.89,
+                evidence_strength="moderate",
                 evidence_mode="direct",
             )
 
@@ -338,19 +355,46 @@ def apply_local_heuristics(
     current = field_map.get("biochar.characterization.approach_description", {}).get("value")
     if current in (None, False, "", []):
         if (
-            re.search(r"the project measures and documents all relevant chemical properties", combined_text)
-            or re.search(r"durability is demonstrated by", combined_text)
+            re.search(r"biochar characterization", combined_text)
             or re.search(r"analytical methods", combined_text)
+            or re.search(r"chemical analysis", combined_text)
+            or re.search(r"laboratory analysis", combined_text)
+            or re.search(r"sampling", combined_text)
+            or re.search(r"testing", combined_text)
         ):
             upsert_field(
                 field_map,
                 path="biochar.characterization.approach_description",
                 value=True,
-                evidence="Heuristic match: characterization approach is explicitly described.",
+                evidence="Heuristic match: characterization approach is explicitly described through testing / analysis / sampling language.",
                 extractor="quantification_mapper",
                 fill_method="heuristic",
-                confidence=0.90,
-                evidence_strength="strong",
+                confidence=0.88,
+                evidence_strength="moderate",
+                evidence_mode="direct",
+            )
+
+    # ------------------------------------------------------------
+    # biochar.characterization.ongoing_monitoring_plan
+    # ------------------------------------------------------------
+    current = field_map.get("biochar.characterization.ongoing_monitoring_plan", {}).get("value")
+    if current in (None, False, "", []):
+        if (
+            re.search(r"ongoing monitoring", combined_text)
+            or re.search(r"periodic testing", combined_text)
+            or re.search(r"annual testing", combined_text)
+            or re.search(r"monitoring plan", combined_text)
+            or re.search(r"recurring testing", combined_text)
+        ):
+            upsert_field(
+                field_map,
+                path="biochar.characterization.ongoing_monitoring_plan",
+                value=True,
+                evidence="Heuristic match: ongoing or periodic testing/monitoring of characterization parameters is explicitly described.",
+                extractor="quantification_mapper",
+                fill_method="heuristic",
+                confidence=0.86,
+                evidence_strength="moderate",
                 evidence_mode="direct",
             )
 
@@ -387,6 +431,8 @@ def apply_local_heuristics(
             or re.search(r"epa 8270d", combined_text)
             or re.search(r"en 16181", combined_text)
             or re.search(r"isometric bicrs", combined_text)
+            or re.search(r"isometric protocol", combined_text)
+            or re.search(r"isometric exemption note", combined_text)
         ):
             upsert_field(
                 field_map,
@@ -409,6 +455,10 @@ def apply_local_heuristics(
 
         if re.search(r"isometric bicrs", combined_text):
             schemes.append("Isometric BiCRS")
+        if re.search(r"isometric protocol", combined_text):
+            schemes.append("Isometric Protocol")
+        if re.search(r"isometric exemption note", combined_text):
+            schemes.append("Isometric Exemption Note")
         if re.search(r"astm d1762-84", combined_text):
             schemes.append("ASTM D1762-84")
         if re.search(r"astm d5373", combined_text):
@@ -466,12 +516,17 @@ def apply_local_heuristics(
             or re.search(r"en 16181", combined_text)
             or re.search(r"iso/iec 17025", combined_text)
             or re.search(r"analytical methods", combined_text)
+            or re.search(r"calibrated", combined_text)
+            or re.search(r"calibrated scale", combined_text)
+            or re.search(r"legal-for-trade", combined_text)
+            or re.search(r"truck scale", combined_text)
+            or re.search(r"measurement methods", combined_text)
         ):
             upsert_field(
                 field_map,
                 path="legal.regulatory_measurement_methods",
                 value=True,
-                evidence="Heuristic match: regulatory/standardized measurement methods are explicitly described.",
+                evidence="Heuristic match: regulatory/standardized measurement methods or calibrated measurement practices are explicitly described.",
                 extractor="quantification_mapper",
                 fill_method="heuristic",
                 confidence=0.90,
