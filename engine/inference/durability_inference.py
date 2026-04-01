@@ -34,6 +34,9 @@ class DurabilityInference(BaseInferenceRule):
         "stable form of carbon",
         "h/corg",
         "h/c",
+        "low risk of reversal",
+        "very low risk level of reversal",
+        "buffer pool",
     ]
 
     SOIL_STORAGE_TERMS = {
@@ -43,6 +46,7 @@ class DurabilityInference(BaseInferenceRule):
         "agricultural soil",
         "soil amendment",
         "soil use",
+        "biochar storage in soil environments",
     }
 
     def _get_signal_bundle(
@@ -52,8 +56,11 @@ class DurabilityInference(BaseInferenceRule):
     ) -> Dict[str, Any]:
         storage_pathway = get_best_value(normalized_fields, "methodology.storage_pathway")
         stable_storage = get_best_value(normalized_fields, "storage.storage_environment_stable")
+        storage_module = get_best_value(normalized_fields, "storage.storage_module")
         product_use = get_best_value(normalized_fields, "product.end_use")
         permanence_claim = get_best_value(normalized_fields, "eligibility.permanence_claim")
+        durability_years = get_best_value(normalized_fields, "eligibility.durability_years")
+        deployment_methods = get_best_value(normalized_fields, "storage.soil.deployment_methods")
 
         project_text = normalize_text(project_context)
 
@@ -63,13 +70,19 @@ class DurabilityInference(BaseInferenceRule):
         )
 
         storage_pathway_norm = normalize_text(storage_pathway)
+        storage_module_norm = normalize_text(storage_module)
         product_use_norm = normalize_text(product_use)
         stable_storage_bool = safe_bool(stable_storage)
         permanence_claim_bool = safe_bool(permanence_claim)
 
         strong_storage_signal = (
             storage_pathway_norm in self.SOIL_STORAGE_TERMS
+            or storage_module_norm in self.SOIL_STORAGE_TERMS
             or product_use_norm in self.SOIL_STORAGE_TERMS
+            or (
+                isinstance(deployment_methods, list)
+                and any(normalize_text(item) in self.SOIL_STORAGE_TERMS for item in deployment_methods)
+            )
         )
 
         stable_storage_signal = stable_storage_bool is True
@@ -78,6 +91,9 @@ class DurabilityInference(BaseInferenceRule):
             permanence_claim_bool is True
             or "permanence" in project_text
             or "permanent carbon storage" in project_text
+            or "very low risk level of reversal" in project_text
+            or "low risk of biochar carbon reversal" in project_text
+            or "buffer pool" in project_text
         )
 
         is_biochar_project = "biochar" in project_text
@@ -85,8 +101,11 @@ class DurabilityInference(BaseInferenceRule):
         return {
             "storage_pathway": storage_pathway,
             "stable_storage": stable_storage,
+            "storage_module": storage_module,
             "product_use": product_use,
             "permanence_claim": permanence_claim,
+            "durability_years": durability_years,
+            "deployment_methods": deployment_methods,
             "project_text": project_text,
             "keyword_hits": keyword_hits,
             "strong_storage_signal": strong_storage_signal,
@@ -96,15 +115,12 @@ class DurabilityInference(BaseInferenceRule):
         }
 
     def _should_infer_200_year_durability(self, signals: Dict[str, Any]) -> bool:
-        # Caso 1 — evidência explícita (mesmo que fraca)
         if signals["keyword_hits"] >= 1:
             return True
 
-        # Caso 2 — inferência estrutural (biochar + soil)
         if signals["strong_storage_signal"]:
             return True
 
-        # Caso 3 — permanência declarada
         if signals["permanence_signal"]:
             return True
 
@@ -149,6 +165,7 @@ class DurabilityInference(BaseInferenceRule):
                     inputs_used=[
                         "methodology.storage_pathway",
                         "storage.storage_environment_stable",
+                        "storage.storage_module",
                         "product.end_use",
                         "eligibility.permanence_claim",
                         "project_context: durability/permanence wording",
@@ -180,8 +197,53 @@ class DurabilityInference(BaseInferenceRule):
                     inputs_used=[
                         "methodology.durability_option",
                         "storage.storage_environment_stable",
+                        "storage.storage_module",
                         "eligibility.permanence_claim",
                         "project_context: permanence wording",
+                    ],
+                    resolution_action="fill",
+                )
+
+        # -----------------------------------------------------
+        # INF-DUR-003
+        # Infer storage.storage_environment_stable = True
+        # -----------------------------------------------------
+        if not has_strong_evidence(updated_fields, "storage.storage_environment_stable"):
+            stable_soil_signal = (
+                signals["strong_storage_signal"]
+                and (
+                    signals["durability_years"] == 200
+                    or normalize_text(get_best_value(updated_fields, "methodology.durability_option")) == "200"
+                )
+            )
+
+            reversal_text_signal = (
+                "very low risk level of reversal" in signals["project_text"]
+                or "low risk of biochar carbon reversal" in signals["project_text"]
+                or "buffer pool" in signals["project_text"]
+                or "acceptably low risk" in signals["project_text"]
+            )
+
+            if stable_soil_signal and (reversal_text_signal or signals["keyword_hits"] >= 1):
+                updated_fields = append_inference_field(
+                    updated_fields,
+                    inference_events,
+                    path="storage.storage_environment_stable",
+                    value=True,
+                    evidence=(
+                        "Inferred from soil storage pathway combined with 200-year durability framing and explicit low-reversal/permanence wording."
+                    ),
+                    source="project",
+                    confidence=0.93,
+                    evidence_strength="strong",
+                    extractor="durability_inference",
+                    inference_rule_id="INF-DUR-003",
+                    inputs_used=[
+                        "methodology.storage_pathway",
+                        "storage.storage_module",
+                        "storage.soil.deployment_methods",
+                        "eligibility.durability_years",
+                        "project_context: low-reversal/permanence wording",
                     ],
                     resolution_action="fill",
                 )
