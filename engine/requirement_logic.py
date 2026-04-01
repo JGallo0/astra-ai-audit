@@ -319,10 +319,20 @@ def eval_feedstock_requirements(data):
 def eval_monitoring_requirements(data):
     try:
         monitoring = data.get("monitoring_reporting", {})
+        sampling = data.get("sampling", {})
+        emissions = data.get("emissions", {})
+        biochar = data.get("biochar", {}).get("characterization", {})
 
         monitoring_plan = monitoring.get("monitoring_plan")
         uncertainty_method = monitoring.get("uncertainty_method")
         verification_ready = monitoring.get("verification_ready")
+
+        auxiliary_mrv_signal = (
+            sampling.get("sampling_plan_defined") is True
+            or bool(emissions.get("stack_monitoring_method"))
+            or bool(emissions.get("testing_frequency"))
+            or biochar.get("lab_reports") is True
+        )
 
         field_scores = [
             score_boolean_field(
@@ -348,11 +358,20 @@ def eval_monitoring_requirements(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        hard_fail = monitoring_plan is not True
+        hard_fail = (
+            monitoring_plan is not True
+            and not auxiliary_mrv_signal
+        )
+
+        hard_partial = (
+            monitoring_plan is not True
+            and auxiliary_mrv_signal
+        )
 
         status = derive_status_with_hard_gate(
             requirement_score,
             hard_fail=hard_fail,
+            hard_partial=hard_partial,
             non_compliant_threshold=60,
             compliant_threshold=100,
         )
@@ -368,6 +387,11 @@ def eval_monitoring_requirements(data):
             if item["status"] == "fail"
         ]
         notes = collect_field_score_notes(field_scores)
+
+        if hard_partial:
+            notes.append(
+                "Partial MRV evidence exists through sampling/testing signals, but a consolidated monitoring plan is not explicitly documented."
+            )
 
         if status == "compliant":
             notes.append("Monitoring plan, uncertainty method, and verification readiness are sufficiently evidenced.")
@@ -1855,20 +1879,21 @@ def contaminant_monitoring_plan(data):
     try:
         characterization = data.get("biochar", {}).get("characterization", {})
         safeguards = data.get("safeguards", {})
+        emissions = data.get("emissions", {})
 
         contaminants = characterization.get("contaminant_testing")
         frequency = characterization.get("contaminant_testing_frequency")
 
-        # backward-compatible support in case future mapper/schema moves this to safeguards
         safeguards_plan = safeguards.get("contaminant_monitoring_plan")
         safeguards_frequency = safeguards.get("testing_frequency")
 
         contaminants_present = (contaminants is True) or (safeguards_plan is True)
         frequency_present = bool(frequency) or bool(safeguards_frequency)
 
+        auxiliary_frequency_signal = bool(emissions.get("testing_frequency"))
+
         field_scores = []
 
-        # Campo 1: testing / monitoring plan
         if contaminants_present:
             field_scores.append({
                 "path": "biochar.characterization.contaminant_testing",
@@ -1886,7 +1911,6 @@ def contaminant_monitoring_plan(data):
                 "notes": ["Contaminant testing or contaminant monitoring plan is not documented."],
             })
 
-        # Campo 2: frequency
         if frequency_present:
             field_scores.append({
                 "path": "biochar.characterization.contaminant_testing_frequency",
@@ -1894,6 +1918,14 @@ def contaminant_monitoring_plan(data):
                 "score": 30,
                 "status": "pass",
                 "notes": [],
+            })
+        elif contaminants_present and auxiliary_frequency_signal:
+            field_scores.append({
+                "path": "biochar.characterization.contaminant_testing_frequency",
+                "weight": 30,
+                "score": 15,
+                "status": "fail",
+                "notes": ["Contaminant testing frequency is not explicit, but recurring testing cadence is partially evidenced."],
             })
         else:
             field_scores.append({
@@ -1907,14 +1939,21 @@ def contaminant_monitoring_plan(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if not contaminants_present:
-            status = "non_compliant"
-        else:
+        if contaminants_present and frequency_present:
             status = derive_requirement_status_from_score(
                 requirement_score,
                 non_compliant_threshold=70,
                 compliant_threshold=100,
             )
+        elif contaminants_present and auxiliary_frequency_signal:
+            status = "partial"
+            if requirement_score < 60:
+                requirement_score = 60.0
+                requirement_rating = derive_requirement_rating(requirement_score)
+        elif contaminants_present:
+            status = "partial"
+        else:
+            status = "non_compliant"
 
         missing_fields = [
             item["path"]
@@ -1930,6 +1969,8 @@ def contaminant_monitoring_plan(data):
 
         if status == "compliant":
             notes.append("Contaminant testing and monitoring frequency are documented.")
+        elif status == "partial":
+            notes.append("Contaminant monitoring is partially evidenced but frequency/control details remain incomplete.")
 
         return build_logic_result(
             status=status,
@@ -1949,7 +1990,7 @@ def contaminant_monitoring_plan(data):
             field_scores=[],
             requirement_rating="weak",
         )
-
+        
 def product_standard_compliance(data):
     """
     R-9KKF-0 | Compliance with relevant product standards evidenced
@@ -2097,9 +2138,12 @@ def sampling_plan_consistency(data):
     """
     try:
         sampling = data.get("sampling", {})
+        biochar = data.get("biochar", {}).get("characterization", {})
 
         method = sampling.get("method")
         plan_defined = sampling.get("sampling_plan_defined")
+        lab_reports = biochar.get("lab_reports")
+        chemical_analysis = biochar.get("chemical_analysis_performed")
 
         field_scores = []
 
@@ -2119,6 +2163,14 @@ def sampling_plan_consistency(data):
                 "score": 0,
                 "status": "missing",
                 "notes": ["Sampling method is not documented."],
+            })
+        elif method == "project_defined_sampling_regime":
+            field_scores.append({
+                "path": "sampling.method",
+                "weight": 60,
+                "score": 30,
+                "status": "fail",
+                "notes": ["Sampling regime is evidenced, but not mapped explicitly to Isometric Method A or B."],
             })
         else:
             field_scores.append({
@@ -2142,14 +2194,21 @@ def sampling_plan_consistency(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if method not in ["A", "B"]:
-            status = "non_compliant"
-        else:
+        auxiliary_sampling_signal = (
+            plan_defined is True
+            and (lab_reports is True or chemical_analysis is True)
+        )
+
+        if method in ["A", "B"]:
             status = derive_requirement_status_from_score(
                 requirement_score,
                 non_compliant_threshold=60,
                 compliant_threshold=100,
             )
+        elif auxiliary_sampling_signal:
+            status = "partial"
+        else:
+            status = "non_compliant"
 
         missing_fields = [
             item["path"]
@@ -2162,6 +2221,11 @@ def sampling_plan_consistency(data):
             if item["status"] == "fail"
         ]
         notes = collect_field_score_notes(field_scores)
+
+        if auxiliary_sampling_signal and method not in ["A", "B"]:
+            notes.append(
+                "Sampling evidence exists, but the documentation does not explicitly map the regime to Method A/B."
+            )
 
         if status == "compliant":
             notes.append("Sampling method and sampling plan are properly defined.")
@@ -2775,8 +2839,11 @@ def regulatory_measurement_methods(data):
     """
     try:
         legal = data.get("legal", {})
+        emissions = data.get("emissions", {})
 
         methods = legal.get("regulatory_measurement_methods")
+        stack_method = emissions.get("stack_monitoring_method")
+        testing_frequency = emissions.get("testing_frequency")
 
         field_scores = [
             score_boolean_field(
@@ -2790,10 +2857,17 @@ def regulatory_measurement_methods(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if methods is not True:
-            status = "non_compliant"
-        else:
+        auxiliary_reg_signal = bool(stack_method) or bool(testing_frequency)
+
+        if methods is True:
             status = "compliant"
+        elif auxiliary_reg_signal:
+            status = "partial"
+            if requirement_score < 50:
+                requirement_score = 50.0
+                requirement_rating = derive_requirement_rating(requirement_score)
+        else:
+            status = "non_compliant"
 
         missing_fields = [
             item["path"]
@@ -2806,6 +2880,11 @@ def regulatory_measurement_methods(data):
             if item["status"] == "fail"
         ]
         notes = collect_field_score_notes(field_scores)
+
+        if auxiliary_reg_signal and methods is not True:
+            notes.append(
+                "Measurement/testing practice is partially evidenced via stack monitoring and testing frequency, but the regulatory measurement method is not explicitly documented as a dedicated method statement."
+            )
 
         if status == "compliant":
             notes.append("Regulatory measurement methods are documented.")
@@ -2828,6 +2907,7 @@ def regulatory_measurement_methods(data):
             field_scores=[],
             requirement_rating="weak",
         )
+        
 def biochar_characterization_approach(data):
     """
     R-NYQT-0 | Biochar characterization and ongoing monitoring approach described
@@ -2837,6 +2917,9 @@ def biochar_characterization_approach(data):
 
         approach_description = characterization.get("approach_description")
         ongoing_monitoring_plan = characterization.get("ongoing_monitoring_plan")
+        chemical_analysis_performed = characterization.get("chemical_analysis_performed")
+        lab_reports = characterization.get("lab_reports")
+        required_complete = characterization.get("required_measurements_complete")
 
         field_scores = [
             score_presence_field(
@@ -2856,14 +2939,25 @@ def biochar_characterization_approach(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if not approach_description:
-            status = "non_compliant"
-        else:
+        auxiliary_characterization_signal = (
+            chemical_analysis_performed is True
+            and lab_reports is True
+            and required_complete is True
+        )
+
+        if approach_description:
             status = derive_requirement_status_from_score(
                 requirement_score,
                 non_compliant_threshold=65,
                 compliant_threshold=100,
             )
+        elif auxiliary_characterization_signal:
+            status = "partial"
+            if requirement_score < 55:
+                requirement_score = 55.0
+                requirement_rating = derive_requirement_rating(requirement_score)
+        else:
+            status = "non_compliant"
 
         missing_fields = [
             item["path"]
@@ -2877,8 +2971,15 @@ def biochar_characterization_approach(data):
         ]
         notes = collect_field_score_notes(field_scores)
 
+        if auxiliary_characterization_signal and not approach_description:
+            notes.append(
+                "Characterization evidence exists through lab analysis and required measurements, but the approach is not described in a dedicated explicit statement."
+            )
+
         if status == "compliant":
             notes.append("Biochar characterization approach and monitoring plan are documented.")
+        elif status == "partial":
+            notes.append("Biochar characterization is partially evidenced but monitoring/process detail remains incomplete.")
 
         return build_logic_result(
             status=status,
@@ -2898,7 +2999,7 @@ def biochar_characterization_approach(data):
             field_scores=[],
             requirement_rating="weak",
         )
-
+        
 def engineering_design_diagram(data):
     """
     R-29W5-0 | Engineering design diagram provided
