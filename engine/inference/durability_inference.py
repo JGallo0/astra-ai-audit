@@ -208,6 +208,7 @@ class DurabilityInference(BaseInferenceRule):
         # INF-DUR-003
         # Infer storage.storage_environment_stable = True
         # -----------------------------------------------------
+        
         if not has_strong_evidence(updated_fields, "storage.storage_environment_stable"):
             storage_pathway = normalize_text(get_best_value(updated_fields, "methodology.storage_pathway"))
             storage_module = normalize_text(get_best_value(updated_fields, "storage.storage_module"))
