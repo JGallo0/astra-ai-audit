@@ -509,3 +509,72 @@ class QuantificationInference(BaseInferenceRule):
             "normalized_fields": updated_fields,
             "inference_events": inference_events,
         }
+
+        # -----------------------------------------------------
+        # INF-QUANT-011
+        # Infer biochar.characterization.ongoing_monitoring_plan
+        # -----------------------------------------------------
+        if not has_strong_evidence(updated_fields, "biochar.characterization.ongoing_monitoring_plan"):
+            monitoring_signal = (
+                "updated sampling regime" in project_text
+                or "increased sampling frequency" in project_text
+                or "separate proximate analysis" in project_text
+                or "composite samples" in project_text
+                or "monitor quality and carbon content" in project_text
+                or "per reporting period" in project_text
+            )
+
+            if monitoring_signal:
+                updated_fields = append_inference_field(
+                    updated_fields,
+                    inference_events,
+                    path="biochar.characterization.ongoing_monitoring_plan",
+                    value=True,
+                    evidence=(
+                        "Inferred from updated sampling regime, increased sampling frequency, composite sampling, and recurring proximate analysis language."
+                    ),
+                    source="project",
+                    confidence=0.84,
+                    evidence_strength="moderate",
+                    extractor="quantification_inference",
+                    inference_rule_id="INF-QUANT-011",
+                    inputs_used=[
+                        "project_context: updated sampling regime / frequency / proximate analysis wording",
+                    ],
+                    resolution_action="fill",
+                )
+
+        # -----------------------------------------------------
+        # INF-QUANT-012
+        # Infer monitoring_reporting.data_sharing_plan (weak/partial signal only)
+        # -----------------------------------------------------
+        if not has_strong_evidence(updated_fields, "monitoring_reporting.data_sharing_plan"):
+            record_signal = (
+                "chain-of-custody" in project_text
+                or "coc tracing" in project_text
+                or "signed affidavit" in project_text
+                or "appendix" in project_text
+                or "byproduct log" in project_text
+                or "supporting documents" in project_text
+                or "project locations section" in project_text
+            )
+
+            if record_signal:
+                updated_fields = append_inference_field(
+                    updated_fields,
+                    inference_events,
+                    path="monitoring_reporting.data_sharing_plan",
+                    value=True,
+                    evidence=(
+                        "Inferred from documentary traceability and supporting-record language, treated as partial governance evidence rather than a formal data-sharing plan."
+                    ),
+                    source="project",
+                    confidence=0.68,
+                    evidence_strength="weak",
+                    extractor="quantification_inference",
+                    inference_rule_id="INF-QUANT-012",
+                    inputs_used=[
+                        "project_context: CoC / appendix / supporting-record wording",
+                    ],
+                    resolution_action="fill",
+                )
