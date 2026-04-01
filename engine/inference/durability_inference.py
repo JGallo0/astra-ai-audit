@@ -131,6 +131,7 @@ class DurabilityInference(BaseInferenceRule):
         # INF-DUR-001
         # Infer methodology.durability_option = "200"
         # -----------------------------------------------------
+        
         if not has_strong_evidence(updated_fields, "methodology.durability_option"):
             if should_infer_200:
                 updated_fields = append_inference_field(
@@ -160,6 +161,7 @@ class DurabilityInference(BaseInferenceRule):
         # INF-DUR-002
         # Infer eligibility.durability_years = 200
         # -----------------------------------------------------
+        
         if not has_strong_evidence(updated_fields, "eligibility.durability_years"):
             inferred_option = get_best_value(updated_fields, "methodology.durability_option")
 
@@ -190,3 +192,63 @@ class DurabilityInference(BaseInferenceRule):
             "normalized_fields": updated_fields,
             "inference_events": inference_events,
         }
+        
+        # -----------------------------------------------------
+        # INF-DUR-003
+        # Infer storage.storage_environment_stable = True
+        # -----------------------------------------------------
+        if not has_strong_evidence(updated_fields, "storage.storage_environment_stable"):
+            storage_pathway = get_best_value(updated_fields, "methodology.storage_pathway")
+            deployment_methods = get_best_value(updated_fields, "storage.soil.deployment_methods")
+            storage_module = get_best_value(updated_fields, "storage.storage_module")
+            project_text = normalize_text(project_context)
+
+            stable_soil_signal = (
+                normalize_text(storage_pathway) == "soil"
+                or normalize_text(storage_module) == "biochar storage in soil environments"
+                or (
+                    isinstance(deployment_methods, list)
+                    and any(
+                        normalize_text(item) in {
+                            "soil application",
+                            "land application",
+                            "field incorporation",
+                            "biochar application",
+                            "direct application",
+                        }
+                        for item in deployment_methods
+                    )
+                )
+            )
+
+            permanence_text_signal = (
+                "permanence" in project_text
+                or "stable carbon" in project_text
+                or "durable carbon storage" in project_text
+                or "long-term storage" in project_text
+                or "long term storage" in project_text
+                or "200 years" in project_text
+            )
+
+            if stable_soil_signal and (permanence_text_signal or signals["keyword_hits"] >= 1):
+                updated_fields = append_inference_field(
+                    updated_fields,
+                    inference_events,
+                    path="storage.storage_environment_stable",
+                    value=True,
+                    evidence=(
+                        "Inferred from soil storage pathway signals combined with permanence/durability wording consistent with stable biochar storage in soil environments."
+                    ),
+                    source="project",
+                    confidence=0.84,
+                    evidence_strength="moderate",
+                    extractor="durability_inference",
+                    inference_rule_id="INF-DUR-003",
+                    inputs_used=[
+                        "methodology.storage_pathway",
+                        "storage.storage_module",
+                        "storage.soil.deployment_methods",
+                        "project_context: permanence/durability wording",
+                    ],
+                    resolution_action="fill",
+                )
