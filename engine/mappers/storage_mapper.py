@@ -55,6 +55,7 @@ Prefer null over incorrect values.
 # ------------------------------------------------------------
 # SANITIZATION
 # ------------------------------------------------------------
+
 def sanitize_storage_fields(
     normalized_fields: List[Dict[str, Any]],
 ) -> List[Dict[str, Any]]:
@@ -91,6 +92,7 @@ def sanitize_storage_fields(
 # ------------------------------------------------------------
 # HEURISTICS
 # ------------------------------------------------------------
+
 def apply_local_heuristics(
     project_context: str,
     normalized_fields: List[Dict[str, Any]],
@@ -107,6 +109,8 @@ def apply_local_heuristics(
             "land application",
             "field application",
             "agricultural use",
+            "biochar application",
+            "direct application",
         ]):
             upsert_field(
                 field_map,
@@ -120,12 +124,86 @@ def apply_local_heuristics(
                 evidence_mode="direct",
             )
 
+    # ------------------------------------------------------------
+    # storage.storage_module
+    # ------------------------------------------------------------
+    
+    current_module = field_map.get("storage.storage_module", {}).get("value")
+    storage_pathway = field_map.get("methodology.storage_pathway", {}).get("value")
+    deployment_methods = field_map.get("storage.soil.deployment_methods", {}).get("value")
+
+    if current_module in (None, "", [], False):
+        if (
+            str(storage_pathway).strip().lower() == "soil"
+            or (isinstance(deployment_methods, list) and len(deployment_methods) > 0)
+            or any(term in text for term in [
+                "soil application",
+                "land application",
+                "field application",
+                "biochar application",
+                "direct application",
+                "soil environments",
+            ])
+        ):
+            upsert_field(
+                field_map,
+                path="storage.storage_module",
+                value="Biochar Storage in Soil Environments",
+                evidence="Heuristic match: soil storage pathway and/or soil deployment language indicates the Isometric soil storage module.",
+                extractor="storage_mapper",
+                fill_method="heuristic",
+                confidence=0.92,
+                evidence_strength="strong",
+                evidence_mode="direct",
+            )
+
+    # ------------------------------------------------------------
+    # storage.storage_location
+    # ------------------------------------------------------------
+    
+    current_location = field_map.get("storage.storage_location", {}).get("value")
+
+    if current_location in (None, "", [], False):
+        location_candidates = []
+
+        location_patterns = [
+            r"\bScotia,\s*CA\b",
+            r"\bHumboldt County\b",
+            r"\bCalifornia\b",
+            r"\bMendocino County\b",
+            r"\bSonoma County\b",
+            r"\bSanta Cruz County\b",
+            r"\bMonterey County\b",
+            r"\bDel Norte County\b",
+        ]
+
+        for pattern in location_patterns:
+            matches = re.findall(pattern, project_context or "", re.IGNORECASE)
+            for match in matches:
+                cleaned = str(match).strip()
+                if cleaned and cleaned not in location_candidates:
+                    location_candidates.append(cleaned)
+
+        if location_candidates:
+            upsert_field(
+                field_map,
+                path="storage.storage_location",
+                value=location_candidates[0],
+                evidence="Heuristic match: storage/application location identified from explicit project geography references.",
+                extractor="storage_mapper",
+                fill_method="heuristic",
+                confidence=0.85,
+                evidence_strength="moderate",
+                evidence_mode="direct",
+            )
+
     return merge_normalized_fields(list(field_map.values()))
 
 
 # ------------------------------------------------------------
 # MAIN
 # ------------------------------------------------------------
+
 def run_storage_mapper(
     ai_client,
     project_context: str,
