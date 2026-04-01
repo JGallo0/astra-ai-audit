@@ -209,29 +209,46 @@ class DurabilityInference(BaseInferenceRule):
         # Infer storage.storage_environment_stable = True
         # -----------------------------------------------------
         if not has_strong_evidence(updated_fields, "storage.storage_environment_stable"):
+            storage_pathway = normalize_text(get_best_value(updated_fields, "methodology.storage_pathway"))
+            storage_module = normalize_text(get_best_value(updated_fields, "storage.storage_module"))
+            durability_years = get_best_value(updated_fields, "eligibility.durability_years")
+            deployment_methods = get_best_value(updated_fields, "storage.soil.deployment_methods")
+            project_text = normalize_text(project_context)
+
             stable_soil_signal = (
-                signals["strong_storage_signal"]
-                and (
-                    signals["durability_years"] == 200
-                    or normalize_text(get_best_value(updated_fields, "methodology.durability_option")) == "200"
+                storage_pathway in {"soil", "soil application", "soil storage", "agricultural soil"}
+                or storage_module == "biochar storage in soil environments"
+                or (
+                    isinstance(deployment_methods, list)
+                    and any(
+                        normalize_text(item) in {
+                            "soil application",
+                            "biochar application",
+                            "land application",
+                            "field incorporation",
+                            "direct application",
+                        }
+                        for item in deployment_methods
+                    )
                 )
             )
 
-            reversal_text_signal = (
-                "very low risk level of reversal" in signals["project_text"]
-                or "low risk of biochar carbon reversal" in signals["project_text"]
-                or "buffer pool" in signals["project_text"]
-                or "acceptably low risk" in signals["project_text"]
+            reversal_signal = (
+                "very low risk level of reversal" in project_text
+                or "low risk of biochar carbon reversal" in project_text
+                or "acceptably low risk" in project_text
+                or "buffer pool" in project_text
+                or "permanence" in project_text
             )
 
-            if stable_soil_signal and (reversal_text_signal or signals["keyword_hits"] >= 1):
+            if stable_soil_signal and ((durability_years or 0) >= 200) and reversal_signal:
                 updated_fields = append_inference_field(
                     updated_fields,
                     inference_events,
                     path="storage.storage_environment_stable",
                     value=True,
                     evidence=(
-                        "Inferred from soil storage pathway combined with 200-year durability framing and explicit low-reversal/permanence wording."
+                        "Inferred from soil storage pathway, 200-year durability framing, and explicit low-reversal/permanence wording."
                     ),
                     source="project",
                     confidence=0.93,
@@ -243,7 +260,7 @@ class DurabilityInference(BaseInferenceRule):
                         "storage.storage_module",
                         "storage.soil.deployment_methods",
                         "eligibility.durability_years",
-                        "project_context: low-reversal/permanence wording",
+                        "project_context: reversal/permanence wording",
                     ],
                     resolution_action="fill",
                 )
