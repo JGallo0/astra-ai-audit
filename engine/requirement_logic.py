@@ -1321,6 +1321,37 @@ def run_engine(project_data, requirements):
     module_summary = aggregate_module_summary(results)
     top_risks = build_top_risks(results, limit=5)
 
+    # -----------------------------------------------------
+    # SCORE AGGREGATION (mínimo funcional)
+    # -----------------------------------------------------
+    total = len(results) or 1
+
+    compliant = len([r for r in results if r.get("status") == "compliant"])
+    partial = len([r for r in results if r.get("status") == "partial"])
+    non_compliant = len([r for r in results if r.get("status") == "non_compliant"])
+    errors = len([r for r in results if r.get("status") == "error"])
+
+    score = round(
+        (
+            compliant * 1.0 +
+            partial * 0.5 +
+            non_compliant * 0.0
+        ) / total * 100,
+        2
+    )
+
+    score_data = {
+        "score": score,
+        "total_requirements": total,
+        "compliant": compliant,
+        "partial": partial,
+        "non_compliant": non_compliant,
+        "error": errors,
+    }
+
+    module_summary = aggregate_module_summary(results)
+    top_risks = build_top_risks(results, limit=5)
+
     return {
         "results": results,
         "score_data": score_data,
