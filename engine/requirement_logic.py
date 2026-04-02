@@ -727,51 +727,41 @@ def run_core_cross_checks(project_data):
 
     return findings
 
-def compute_confidence_from_field_scores(field_scores):
-    """
-    Calcula uma confiança agregada simples a partir dos field_scores.
-    Retorna valor entre 0.0 e 1.0.
-    """
+def compute_confidence_from_field_scores(status, field_scores):
+    if status == "not_applicable":
+        return 1.0
+
     if not field_scores:
         return 0.0
 
-    total_weight = 0.0
-    weighted_confidence = 0.0
+    normalized = [
+        item for item in field_scores
+        if isinstance(item, dict) and item.get("status") != "not_applicable"
+    ]
 
-    for item in field_scores:
-        weight = item.get("weight", 0) or 0
-        status = (item.get("status") or "").lower()
-        score = item.get("score", 0) or 0
-
-        if weight <= 0:
-            continue
-
-        # Base por status
-        if status == "pass":
-            base_conf = 0.95
-        elif status == "fail":
-            base_conf = 0.70
-        elif status == "missing":
-            base_conf = 0.35
-        else:
-            base_conf = 0.50
-
-        # Ajuste leve pela proporção do score no peso
-        ratio = 0.0
-        try:
-            ratio = max(0.0, min(1.0, float(score) / float(weight)))
-        except Exception:
-            ratio = 0.0
-
-        item_confidence = (base_conf * 0.7) + (ratio * 0.3)
-
-        weighted_confidence += item_confidence * weight
-        total_weight += weight
-
-    if total_weight <= 0:
+    if not normalized:
         return 0.0
 
-    return round(weighted_confidence / total_weight, 4)
+    total = len(normalized)
+    passes = len([f for f in normalized if f.get("status") == "pass"])
+    missing = len([f for f in normalized if f.get("status") == "missing"])
+    failed = len([f for f in normalized if f.get("status") == "fail"])
+
+    completeness_ratio = passes / total if total else 0.0
+    missing_penalty = missing / total if total else 0.0
+    fail_penalty = failed / total if total else 0.0
+
+    if status == "compliant":
+        base = 0.80 + 0.20 * completeness_ratio
+    elif status == "partial":
+        base = 0.55 + 0.20 * completeness_ratio - 0.10 * fail_penalty
+    elif status == "non_compliant":
+        base = 0.70 + 0.15 * fail_penalty
+    else:
+        base = 0.10 + 0.20 * completeness_ratio - 0.20 * missing_penalty
+
+    base = max(0.0, min(1.0, base))
+    return round(base, 2)
 
 def run_engine(project_data, requirements):
     results = []
