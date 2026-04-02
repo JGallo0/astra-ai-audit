@@ -6,6 +6,35 @@ from engine.mappers.consistency import run_consistency_checks
 from engine.extraction_schema import EXTRACTION_FIELDS
 from engine.normalization import normalize_field_value
 
+# --- CANONICAL PATH MAPPING ---
+
+CANONICAL_PATH_MAP = {
+    "biochar_characterization": "biochar.characterization",
+    "biochar_characterization.carbon_content": "biochar.characterization.carbon_content",
+    "biochar_characterization.h_c_ratio": "biochar.characterization.h_c_ratio",
+    "biochar_characterization.o_c_ratio": "biochar.characterization.o_c_ratio",
+    "biochar_characterization.sampling_method": "biochar.characterization.sampling_method",
+    "biochar_characterization.sampling_frequency": "biochar.characterization.sampling_frequency",
+    "biochar_characterization.approach_description": "biochar.characterization.approach_description",
+    "biochar_characterization.ongoing_monitoring_plan": "biochar.characterization.ongoing_monitoring_plan",
+}
+
+
+def canonicalize_path(path: str) -> str:
+    """
+    Normaliza paths legados para o formato canônico do schema.
+    """
+
+    # Match direto (mais específico primeiro)
+    if path in CANONICAL_PATH_MAP:
+        return CANONICAL_PATH_MAP[path]
+
+    # Match por prefixo (ex: biochar_characterization.*)
+    for old_prefix, new_prefix in CANONICAL_PATH_MAP.items():
+        if path.startswith(old_prefix + "."):
+            return path.replace(old_prefix, new_prefix, 1)
+
+    return path
 
 def set_nested_value(data: Dict[str, Any], path: str, value: Any) -> None:
     keys = path.split(".")
@@ -301,7 +330,8 @@ def build_project_data_from_extraction(
         if normalized_value is None:
             continue
 
-        set_nested_value(data, path, normalized_value)
+canonical_path = canonicalize_path(path)
+set_nested_value(data, canonical_path, normalized_value)
 
     if return_resolution_artifacts:
         return {
