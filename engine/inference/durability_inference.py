@@ -271,3 +271,8 @@ class DurabilityInference(BaseInferenceRule):
                     ],
                     resolution_action="override",
                 )
+
+        return {
+            "normalized_fields": updated_fields,
+            "inference_events": inference_events,
+        }
