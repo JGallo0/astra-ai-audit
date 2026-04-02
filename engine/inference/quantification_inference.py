@@ -477,40 +477,6 @@ class QuantificationInference(BaseInferenceRule):
                 )
 
         # -----------------------------------------------------
-        # INF-QUANT-010
-        # Infer sampling.method as partial protocol evidence
-        # -----------------------------------------------------
-        if not has_strong_evidence(updated_fields, "sampling.method"):
-            if (
-                "composite samples" in project_text
-                or "updated sampling regime" in project_text
-                or "separate proximate analysis" in project_text
-            ):
-                updated_fields = append_inference_field(
-                    updated_fields,
-                    inference_events,
-                    path="sampling.method",
-                    value="project_defined_sampling_regime",
-                    evidence=(
-                        "Inferred from explicit sampling regime / composite sampling / proximate analysis language, though not mapped to Isometric Method A/B verbatim."
-                    ),
-                    source="project",
-                    confidence=0.72,
-                    evidence_strength="moderate",
-                    extractor="quantification_inference",
-                    inference_rule_id="INF-QUANT-010",
-                    inputs_used=[
-                        "project_context: composite samples / updated sampling regime / proximate analysis wording",
-                    ],
-                    resolution_action="fill",
-                )
-
-        return {
-            "normalized_fields": updated_fields,
-            "inference_events": inference_events,
-        }
-
-        # -----------------------------------------------------
         # INF-QUANT-011
         # Infer biochar.characterization.ongoing_monitoring_plan
         # -----------------------------------------------------
@@ -578,3 +544,8 @@ class QuantificationInference(BaseInferenceRule):
                     ],
                     resolution_action="fill",
                 )
+
+        return {
+            "normalized_fields": updated_fields,
+            "inference_events": inference_events,
+        }
