@@ -630,6 +630,103 @@ def get_logic(logic_key):
         raise KeyError(f"Logic function '{logic_key}' not found.")
     return logic_fn
 
+def run_core_cross_checks(project_data):
+    """
+    Cross-checks leves e determinísticos entre campos já consolidados.
+    Retorna uma lista de findings, cada um com:
+    - code
+    - severity
+    - message
+    - fields
+    """
+    findings = []
+
+    methodology = project_data.get("methodology", {}) or {}
+    storage = project_data.get("storage", {}) or {}
+    eligibility = project_data.get("eligibility", {}) or {}
+    monitoring = project_data.get("monitoring_reporting", {}) or {}
+    feedstock = project_data.get("feedstock", {}) or {}
+    biochar = (project_data.get("biochar", {}) or {}).get("characterization", {}) or {}
+
+    storage_pathway = methodology.get("storage_pathway")
+    storage_module = storage.get("storage_module")
+    storage_stable = storage.get("storage_environment_stable")
+    durability_years = eligibility.get("durability_years")
+    monitoring_plan = monitoring.get("monitoring_plan")
+    source_locations = feedstock.get("source_locations") or []
+    required_measurements_complete = biochar.get("required_measurements_complete")
+    measurement_values = biochar.get("measurement_values")
+
+    # -----------------------------------------------------
+    # Storage consistency
+    # -----------------------------------------------------
+    if storage_pathway == "soil" and not storage_module:
+        findings.append({
+            "code": "CC-STOR-001",
+            "severity": "moderate",
+            "message": "Storage pathway is 'soil' but storage module is not documented.",
+            "fields": [
+                "methodology.storage_pathway",
+                "storage.storage_module",
+            ],
+        })
+
+    if storage_pathway == "soil" and durability_years and durability_years >= 200 and storage_stable is not True:
+        findings.append({
+            "code": "CC-STOR-002",
+            "severity": "moderate",
+            "message": "Soil storage with 200-year durability is present, but storage stability is not evidenced.",
+            "fields": [
+                "methodology.storage_pathway",
+                "eligibility.durability_years",
+                "storage.storage_environment_stable",
+            ],
+        })
+
+    # -----------------------------------------------------
+    # Monitoring consistency
+    # -----------------------------------------------------
+    if monitoring_plan is True and storage_stable is None and storage_pathway == "soil":
+        findings.append({
+            "code": "CC-MRV-001",
+            "severity": "low",
+            "message": "Monitoring plan exists, but storage stability remains unresolved for soil storage.",
+            "fields": [
+                "monitoring_reporting.monitoring_plan",
+                "storage.storage_environment_stable",
+            ],
+        })
+
+    # -----------------------------------------------------
+    # Feedstock traceability consistency
+    # -----------------------------------------------------
+    if feedstock.get("biomass_type") and not source_locations:
+        findings.append({
+            "code": "CC-FEED-001",
+            "severity": "moderate",
+            "message": "Feedstock type is defined but source locations are missing.",
+            "fields": [
+                "feedstock.biomass_type",
+                "feedstock.source_locations",
+            ],
+        })
+
+    # -----------------------------------------------------
+    # Biochar characterization consistency
+    # -----------------------------------------------------
+    if required_measurements_complete is True and measurement_values is not True:
+        findings.append({
+            "code": "CC-BCQ-001",
+            "severity": "moderate",
+            "message": "Required biochar measurements are marked complete, but measurement values are not evidenced.",
+            "fields": [
+                "biochar.characterization.required_measurements_complete",
+                "biochar.characterization.measurement_values",
+            ],
+        })
+
+    return findings
+
 
 def run_engine(project_data, requirements):
     results = []
