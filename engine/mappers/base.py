@@ -234,10 +234,19 @@ def normalize_domain_fields(
         evidence_mode = item.get("evidence_mode") or infer_evidence_mode(evidence)
         evidence_strength = item.get("evidence_strength") or infer_evidence_strength(evidence, value)
 
+        # --- RASTREABILIDADE: captura citação de origem do documento ---
+        raw_citation = item.get("citation") or {}
+        citation = {
+            "document": clean_evidence(raw_citation.get("document", ""), max_len=200),
+            "page": str(raw_citation.get("page", "")).strip(),
+            "excerpt": clean_evidence(raw_citation.get("excerpt", ""), max_len=300),
+        }
+
         normalized.append({
             "path": path,
             "value": value,
             "evidence": evidence,
+            "citation": citation,
             "source": source,
             "confidence": confidence,
             "evidence_strength": evidence_strength,
@@ -260,6 +269,7 @@ def upsert_field(
     confidence: Optional[float] = None,
     evidence_strength: str = "moderate",
     evidence_mode: str = "inferred",
+    citation: Optional[Dict[str, str]] = None,
 ) -> None:
     existing = field_map.get(path, {})
 
@@ -267,6 +277,7 @@ def upsert_field(
         "path": path,
         "value": value,
         "evidence": clean_evidence(evidence) or existing.get("evidence", ""),
+        "citation": citation or existing.get("citation", {}),
         "source": source,
         "confidence": confidence if confidence is not None else existing.get("confidence"),
         "evidence_strength": evidence_strength,
@@ -397,6 +408,10 @@ RULES:
    If not found or unclear, return null.
 8. Include short evidence text and confidence between 0 and 1.
 9. Use source="project" unless the field is clearly methodological in nature.
+10. CITATION (MANDATORY): For every field where you find evidence, populate the citation object
+    with the document name, page/section number, and a short literal excerpt (max 200 chars)
+    copied verbatim from the source text. This is required for audit traceability.
+    If no evidence is found, set citation to {{}}.
 
 DOMAIN INSTRUCTIONS:
 {domain_instructions}
@@ -407,7 +422,12 @@ OUTPUT FORMAT:
     {{
       "path": "example.path",
       "value": true,
-      "evidence": "short evidence",
+      "evidence": "short evidence summary",
+      "citation": {{
+        "document": "filename or document title",
+        "page": "page or section number",
+        "excerpt": "verbatim excerpt from source text (max 200 chars)"
+      }},
       "source": "project",
       "confidence": 0.91
     }}
