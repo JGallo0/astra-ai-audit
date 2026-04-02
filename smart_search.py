@@ -53,14 +53,19 @@ def rank_sources(query: str, sources: List[Dict]) -> List[Dict]:
 
 
 def build_smart_context(query: str, ranked_sources: List[Dict], max_items: int = 8) -> str:
+    """
+    Monta o contexto textual para o prompt do LLM.
+    Cada evidencia e numerada com ID rastreaevel [EVIDENCIA N] que o LLM
+    deve referenciar no campo citation.document ao extrair cada campo.
+    """
     selected = ranked_sources[:max_items]
 
     if not selected:
         return (
-            "Pergunta do usuário:\n"
+            "Pergunta do usuario:\n"
             + str(query)
             + "\n\n"
-            + "Nenhuma evidência relevante encontrada nas bases consultadas."
+            + "Nenhuma evidencia relevante encontrada nas bases consultadas."
         )
 
     blocks = []
@@ -68,22 +73,44 @@ def build_smart_context(query: str, ranked_sources: List[Dict], max_items: int =
     for i, s in enumerate(selected, 1):
         source_type = (s.get("source_type") or "unknown").upper()
         filename = s.get("filename") or "Documento sem nome"
-        page = s.get("page") or "não identificada"
+        page = s.get("page") or "nao identificada"
         text = s.get("text") or ""
 
         blocks.append(
-            f"[EVIDÊNCIA {i}] ({source_type})\n"
+            f"[EVIDENCIA {i}] ({source_type})\n"
             f"Documento: {filename}\n"
-            f"Página/Seção: {page}\n"
+            f"Pagina/Secao: {page}\n"
             f"Trecho:\n{text}\n"
         )
 
     return (
-        "Pergunta do usuário:\n"
+        "Pergunta do usuario:\n"
         + str(query)
         + "\n\n"
-        + "Responda usando EXCLUSIVAMENTE as evidências abaixo.\n"
-        + "Compare Projeto × Metodologia quando aplicável.\n"
-        + "Se houver evidência insuficiente, diga isso explicitamente.\n\n"
+        + "Responda usando EXCLUSIVAMENTE as evidencias abaixo.\n"
+        + "Compare Projeto x Metodologia quando aplicavel.\n"
+        + "Se houver evidencia insuficiente, diga isso explicitamente.\n"
+        + "IMPORTANTE: No campo citation, use o nome exato do documento e a pagina/secao\n"
+        + "indicada no cabecalho de cada evidencia acima.\n\n"
         + "\n".join(blocks)
     )
+
+
+def get_hits_index(ranked_sources: List[Dict], max_items: int = 8) -> Dict[str, Dict]:
+    """
+    Retorna um indice {filename -> hit} com os metadados estruturados
+    dos chunks selecionados. Usado pelos mappers para validar e enriquecer
+    citacoes retornadas pelo LLM.
+    """
+    selected = ranked_sources[:max_items]
+    index = {}
+    for s in selected:
+        filename = s.get("filename") or ""
+        if filename:
+            index[filename] = {
+                "filename": filename,
+                "page": s.get("page") or "",
+                "source_type": s.get("source_type") or "",
+                "text": s.get("text") or "",
+            }
+    return index
