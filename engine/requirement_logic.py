@@ -4,6 +4,78 @@
 # LOGIC FUNCTIONS
 # =========================
 
+# =========================
+# CORE HELPERS — defined early so they are always available
+# regardless of where run_engine appears in this file
+# =========================
+
+def compute_confidence_from_field_scores(status, field_scores):
+    if status == 'not_applicable':
+        return 1.0
+    if not field_scores:
+        return 0.0
+    normalized = [
+        item for item in field_scores
+        if isinstance(item, dict) and item.get('status') != 'not_applicable'
+    ]
+    if not normalized:
+        return 0.0
+    total = len(normalized)
+    passes = len([f for f in normalized if f.get('status') == 'pass'])
+    missing = len([f for f in normalized if f.get('status') == 'missing'])
+    failed = len([f for f in normalized if f.get('status') == 'fail'])
+    completeness_ratio = passes / total if total else 0.0
+    missing_penalty = missing / total if total else 0.0
+    fail_penalty = failed / total if total else 0.0
+    if status == 'compliant':
+        base = 0.80 + 0.20 * completeness_ratio
+    elif status == 'partial':
+        base = 0.55 + 0.20 * completeness_ratio - 0.10 * fail_penalty
+    elif status == 'non_compliant':
+        base = 0.70 + 0.15 * fail_penalty
+    else:
+        base = 0.10 + 0.20 * completeness_ratio - 0.20 * missing_penalty
+    return round(max(0.0, min(1.0, base)), 2)
+
+
+def classify_evidence_strength(field_scores):
+    if not field_scores:
+        return 'none'
+    normalized = [f for f in field_scores if isinstance(f, dict)]
+    if not normalized:
+        return 'none'
+    passes = len([f for f in normalized if f.get('status') == 'pass'])
+    total = len(normalized)
+    ratio = passes / total if total else 0.0
+    if ratio >= 0.85:
+        return 'strong'
+    if ratio >= 0.50:
+        return 'moderate'
+    return 'weak'
+
+
+def compute_priority_score(status, requirement_score):
+    try:
+        normalized_score = round(max(0.0, min(100.0, float(requirement_score or 0))), 2)
+    except Exception:
+        normalized_score = 0.0
+    if status == 'non_compliant':
+        status_weight = 100
+    elif status == 'partial':
+        status_weight = 60
+    elif status == 'error':
+        status_weight = 50
+    elif status == 'compliant':
+        status_weight = 10
+    elif status == 'not_applicable':
+        status_weight = 0
+    else:
+        status_weight = 25
+    score_penalty = 100 - normalized_score
+    return round(status_weight * 0.65 + score_penalty * 0.35, 2)
+
+
+
 def eval_biochar_applicability(data):
     """
     Determines whether the project qualifies as a biochar CDR activity
@@ -319,10 +391,20 @@ def eval_feedstock_requirements(data):
 def eval_monitoring_requirements(data):
     try:
         monitoring = data.get("monitoring_reporting", {})
+        sampling = data.get("sampling", {})
+        emissions = data.get("emissions", {})
+        biochar = data.get("biochar", {}).get("characterization", {})
 
         monitoring_plan = monitoring.get("monitoring_plan")
         uncertainty_method = monitoring.get("uncertainty_method")
         verification_ready = monitoring.get("verification_ready")
+
+        auxiliary_mrv_signal = (
+            sampling.get("sampling_plan_defined") is True
+            or bool(emissions.get("stack_monitoring_method"))
+            or bool(emissions.get("testing_frequency"))
+            or biochar.get("lab_reports") is True
+        )
 
         field_scores = [
             score_boolean_field(
@@ -348,11 +430,20 @@ def eval_monitoring_requirements(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        hard_fail = monitoring_plan is not True
+        hard_fail = (
+            monitoring_plan is not True
+            and not auxiliary_mrv_signal
+        )
+
+        hard_partial = (
+            monitoring_plan is not True
+            and auxiliary_mrv_signal
+        )
 
         status = derive_status_with_hard_gate(
             requirement_score,
             hard_fail=hard_fail,
+            hard_partial=hard_partial,
             non_compliant_threshold=60,
             compliant_threshold=100,
         )
@@ -368,6 +459,11 @@ def eval_monitoring_requirements(data):
             if item["status"] == "fail"
         ]
         notes = collect_field_score_notes(field_scores)
+
+        if hard_partial:
+            notes.append(
+                "Partial MRV evidence exists through sampling/testing signals, but a consolidated monitoring plan is not explicitly documented."
+            )
 
         if status == "compliant":
             notes.append("Monitoring plan, uncertainty method, and verification readiness are sufficiently evidenced.")
@@ -630,144 +726,66 @@ def get_logic(logic_key):
         raise KeyError(f"Logic function '{logic_key}' not found.")
     return logic_fn
 
+
 def run_core_cross_checks(project_data):
-    """
-    Cross-checks leves e determinísticos entre campos já consolidados.
-    Retorna uma lista de findings, cada um com:
-    - code
-    - severity
-    - message
-    - fields
-    """
     findings = []
 
-    methodology = project_data.get("methodology", {}) or {}
-    storage = project_data.get("storage", {}) or {}
-    eligibility = project_data.get("eligibility", {}) or {}
-    monitoring = project_data.get("monitoring_reporting", {}) or {}
-    feedstock = project_data.get("feedstock", {}) or {}
-    biochar = (project_data.get("biochar", {}) or {}).get("characterization", {}) or {}
+    eligibility = project_data.get("eligibility", {})
+    storage = project_data.get("storage", {})
+    ghg = project_data.get("ghg_accounting", {})
+    monitoring = project_data.get("monitoring_reporting", {})
+    feedstock = project_data.get("feedstock", {})
+    quantification = project_data.get("quantification", {})
 
-    storage_pathway = methodology.get("storage_pathway")
-    storage_module = storage.get("storage_module")
-    storage_stable = storage.get("storage_environment_stable")
-    durability_years = eligibility.get("durability_years")
-    monitoring_plan = monitoring.get("monitoring_plan")
-    source_locations = feedstock.get("source_locations") or []
-    required_measurements_complete = biochar.get("required_measurements_complete")
-    measurement_values = biochar.get("measurement_values")
+    if (eligibility.get("durability_years") or 0) >= 200:
+        if storage.get("storage_environment_stable") is not True:
+            findings.append({
+                "type": "cross_check",
+                "severity": "medium",
+                "message": "Durability is claimed, but storage environment stability is not evidenced.",
+                "paths": [
+                    "eligibility.durability_years",
+                    "storage.storage_environment_stable",
+                ],
+            })
 
-    # -----------------------------------------------------
-    # Storage consistency
-    # -----------------------------------------------------
-    if storage_pathway == "soil" and not storage_module:
+    if ghg.get("baseline_defined") is True and not feedstock.get("pre_project_biomass_use"):
         findings.append({
-            "code": "CC-STOR-001",
-            "severity": "moderate",
-            "message": "Storage pathway is 'soil' but storage module is not documented.",
-            "fields": [
-                "methodology.storage_pathway",
-                "storage.storage_module",
+            "type": "cross_check",
+            "severity": "high",
+            "message": "Baseline is marked as defined, but pre-project feedstock use is not documented.",
+            "paths": [
+                "ghg_accounting.baseline_defined",
+                "feedstock.pre_project_biomass_use",
             ],
         })
 
-    if storage_pathway == "soil" and durability_years and durability_years >= 200 and storage_stable is not True:
+    if ghg.get("system_boundary_defined") is True and quantification.get("crediting_activity_boundaries") is not True:
         findings.append({
-            "code": "CC-STOR-002",
-            "severity": "moderate",
-            "message": "Soil storage with 200-year durability is present, but storage stability is not evidenced.",
-            "fields": [
-                "methodology.storage_pathway",
-                "eligibility.durability_years",
-                "storage.storage_environment_stable",
+            "type": "cross_check",
+            "severity": "medium",
+            "message": "System boundary is defined, but crediting activity boundaries are incomplete.",
+            "paths": [
+                "ghg_accounting.system_boundary_defined",
+                "quantification.crediting_activity_boundaries",
             ],
         })
 
-    # -----------------------------------------------------
-    # Monitoring consistency
-    # -----------------------------------------------------
-    if monitoring_plan is True and storage_stable is None and storage_pathway == "soil":
+    if monitoring.get("monitoring_plan") is True and monitoring.get("verification_ready") is not True:
         findings.append({
-            "code": "CC-MRV-001",
-            "severity": "low",
-            "message": "Monitoring plan exists, but storage stability remains unresolved for soil storage.",
-            "fields": [
+            "type": "cross_check",
+            "severity": "medium",
+            "message": "Monitoring plan exists, but verification readiness is not evidenced.",
+            "paths": [
                 "monitoring_reporting.monitoring_plan",
-                "storage.storage_environment_stable",
-            ],
-        })
-
-    # -----------------------------------------------------
-    # Feedstock traceability consistency
-    # -----------------------------------------------------
-    if feedstock.get("biomass_type") and not source_locations:
-        findings.append({
-            "code": "CC-FEED-001",
-            "severity": "moderate",
-            "message": "Feedstock type is defined but source locations are missing.",
-            "fields": [
-                "feedstock.biomass_type",
-                "feedstock.source_locations",
-            ],
-        })
-
-    # -----------------------------------------------------
-    # Biochar characterization consistency
-    # -----------------------------------------------------
-    if required_measurements_complete is True and measurement_values is not True:
-        findings.append({
-            "code": "CC-BCQ-001",
-            "severity": "moderate",
-            "message": "Required biochar measurements are marked complete, but measurement values are not evidenced.",
-            "fields": [
-                "biochar.characterization.required_measurements_complete",
-                "biochar.characterization.measurement_values",
+                "monitoring_reporting.verification_ready",
             ],
         })
 
     return findings
 
-def compute_confidence_from_field_scores(status, field_scores):
-    if status == "not_applicable":
-        return 1.0
-
-    if not field_scores:
-        return 0.0
-
-    normalized = [
-        item for item in field_scores
-        if isinstance(item, dict) and item.get("status") != "not_applicable"
-    ]
-
-    if not normalized:
-        return 0.0
-
-    total = len(normalized)
-    passes = len([f for f in normalized if f.get("status") == "pass"])
-    missing = len([f for f in normalized if f.get("status") == "missing"])
-    failed = len([f for f in normalized if f.get("status") == "fail"])
-
-    completeness_ratio = passes / total if total else 0.0
-    missing_penalty = missing / total if total else 0.0
-    fail_penalty = failed / total if total else 0.0
-
-    if status == "compliant":
-        base = 0.80 + 0.20 * completeness_ratio
-    elif status == "partial":
-        base = 0.55 + 0.20 * completeness_ratio - 0.10 * fail_penalty
-    elif status == "non_compliant":
-        base = 0.70 + 0.15 * fail_penalty
-    else:
-        base = 0.10 + 0.20 * completeness_ratio - 0.20 * missing_penalty
-
-    base = max(0.0, min(1.0, base))
-    return round(base, 2)
 
 def classify_evidence_strength(field_scores):
-    """
-    Classifica a força da evidência agregada com base nos field_scores.
-    Retorna: 'strong', 'moderate', 'weak' ou 'none'
-    """
     if not field_scores:
         return "none"
 
@@ -781,105 +799,15 @@ def classify_evidence_strength(field_scores):
 
     total = len(normalized)
     passes = len([f for f in normalized if f.get("status") == "pass"])
-    fails = len([f for f in normalized if f.get("status") == "fail"])
-    missing = len([f for f in normalized if f.get("status") == "missing"])
+    failed = len([f for f in normalized if f.get("status") == "fail"])
 
-    pass_ratio = passes / total if total else 0.0
-    fail_ratio = fails / total if total else 0.0
-    missing_ratio = missing / total if total else 0.0
-
-    if pass_ratio >= 0.80 and missing_ratio <= 0.10:
+    if passes == total:
         return "strong"
 
-    if pass_ratio >= 0.40 and fail_ratio <= 0.40:
+    if passes >= max(1, total // 2) and failed == 0:
         return "moderate"
 
     return "weak"
-
-def run_core_cross_checks(project_data):
-    """
-    Cross-checks leves e determinísticos entre campos já consolidados.
-    Retorna uma lista de findings, cada um com:
-    - code
-    - severity
-    - message
-    - fields
-    """
-    findings = []
-
-    methodology = project_data.get("methodology", {}) or {}
-    storage = project_data.get("storage", {}) or {}
-    eligibility = project_data.get("eligibility", {}) or {}
-    monitoring = project_data.get("monitoring_reporting", {}) or {}
-    feedstock = project_data.get("feedstock", {}) or {}
-    biochar = (project_data.get("biochar", {}) or {}).get("characterization", {}) or {}
-
-    storage_pathway = methodology.get("storage_pathway")
-    storage_module = storage.get("storage_module")
-    storage_stable = storage.get("storage_environment_stable")
-    durability_years = eligibility.get("durability_years")
-    monitoring_plan = monitoring.get("monitoring_plan")
-    source_locations = feedstock.get("source_locations") or []
-    required_measurements_complete = biochar.get("required_measurements_complete")
-    measurement_values = biochar.get("measurement_values")
-
-    if storage_pathway == "soil" and not storage_module:
-        findings.append({
-            "code": "CC-STOR-001",
-            "severity": "moderate",
-            "message": "Storage pathway is 'soil' but storage module is not documented.",
-            "fields": [
-                "methodology.storage_pathway",
-                "storage.storage_module",
-            ],
-        })
-
-    if storage_pathway == "soil" and durability_years and durability_years >= 200 and storage_stable is not True:
-        findings.append({
-            "code": "CC-STOR-002",
-            "severity": "moderate",
-            "message": "Soil storage with 200-year durability is present, but storage stability is not evidenced.",
-            "fields": [
-                "methodology.storage_pathway",
-                "eligibility.durability_years",
-                "storage.storage_environment_stable",
-            ],
-        })
-
-    if monitoring_plan is True and storage_stable is None and storage_pathway == "soil":
-        findings.append({
-            "code": "CC-MRV-001",
-            "severity": "low",
-            "message": "Monitoring plan exists, but storage stability remains unresolved for soil storage.",
-            "fields": [
-                "monitoring_reporting.monitoring_plan",
-                "storage.storage_environment_stable",
-            ],
-        })
-
-    if feedstock.get("biomass_type") and not source_locations:
-        findings.append({
-            "code": "CC-FEED-001",
-            "severity": "moderate",
-            "message": "Feedstock type is defined but source locations are missing.",
-            "fields": [
-                "feedstock.biomass_type",
-                "feedstock.source_locations",
-            ],
-        })
-
-    if required_measurements_complete is True and measurement_values is not True:
-        findings.append({
-            "code": "CC-BCQ-001",
-            "severity": "moderate",
-            "message": "Required biochar measurements are marked complete, but measurement values are not evidenced.",
-            "fields": [
-                "biochar.characterization.required_measurements_complete",
-                "biochar.characterization.measurement_values",
-            ],
-        })
-
-    return findings
 
 
 def compute_confidence_from_field_scores(status, field_scores):
@@ -917,201 +845,182 @@ def compute_confidence_from_field_scores(status, field_scores):
 
     base = max(0.0, min(1.0, base))
     return round(base, 2)
-
-
-def classify_evidence_strength(field_scores):
-    """
-    Classifica a força da evidência agregada com base nos field_scores.
-    Retorna: 'strong', 'moderate', 'weak' ou 'none'
-    """
-    if not field_scores:
-        return "none"
-
-    normalized = [
-        item for item in field_scores
-        if isinstance(item, dict) and item.get("status") != "not_applicable"
-    ]
-
-    if not normalized:
-        return "none"
-
-    total = len(normalized)
-    passes = len([f for f in normalized if f.get("status") == "pass"])
-    fails = len([f for f in normalized if f.get("status") == "fail"])
-    missing = len([f for f in normalized if f.get("status") == "missing"])
-
-    pass_ratio = passes / total if total else 0.0
-    fail_ratio = fails / total if total else 0.0
-    missing_ratio = missing / total if total else 0.0
-
-    if pass_ratio >= 0.80 and missing_ratio <= 0.10:
-        return "strong"
-
-    if pass_ratio >= 0.40 and fail_ratio <= 0.40:
-        return "moderate"
-
-    return "weak"
 
 
 def normalize_score_0_100(requirement_score):
     if requirement_score is None:
         return 0.0
+
     try:
         value = float(requirement_score)
     except Exception:
         return 0.0
+
     return round(max(0.0, min(100.0, value)), 2)
 
 
-def compute_priority_score(status, normalized_score):
-    score = normalize_score_0_100(normalized_score)
+def compute_priority_score(status, requirement_score):
+    normalized_score = normalize_score_0_100(requirement_score)
 
     if status == "non_compliant":
-        base = 100.0 - score + 25.0
+        status_weight = 100
     elif status == "partial":
-        base = 100.0 - score + 10.0
+        status_weight = 70
     elif status == "error":
-        base = 100.0
+        status_weight = 55
     elif status == "compliant":
-        base = max(0.0, 20.0 - (score * 0.2))
+        status_weight = 10
+    elif status == "not_applicable":
+        status_weight = 0
     else:
-        base = 0.0
+        status_weight = 25
 
-    return round(max(0.0, min(100.0, base)), 2)
+    score_penalty = 100 - normalized_score
+    return round(status_weight * 0.65 + score_penalty * 0.35, 2)
 
 
 def build_project_evidence_text(missing_fields, failed_fields):
-    missing_fields = missing_fields or []
-    failed_fields = failed_fields or []
-
-    if not missing_fields and not failed_fields:
-        return "Project evidence sufficiently covers the required fields for this requirement."
-
-    parts = []
+    lines = []
 
     if missing_fields:
-        parts.append("Missing fields: " + ", ".join(missing_fields))
+        lines.append("Missing fields:")
+        for f in missing_fields[:5]:
+            lines.append(f"- {f}")
 
     if failed_fields:
-        parts.append("Failed fields: " + ", ".join(failed_fields))
+        lines.append("Failed checks:")
+        for f in failed_fields[:5]:
+            lines.append(f"- {f}")
 
-    return " | ".join(parts)
+    if not lines:
+        lines.append("Structured evidence is available for the fields evaluated.")
+
+    return "\n".join(lines).strip()
 
 
 def build_methodology_basis_text(req):
-    applies_if = req.get("applies_if", {}) or {}
-    fields = req.get("fields", []) or []
+    if not isinstance(req, dict):
+        return ""
 
-    parts = []
+    lines = []
 
-    if req.get("id"):
-        parts.append(f"Requirement ID: {req.get('id')}")
+    req_id = req.get("id") or req.get("requirement_id")
+    req_name = req.get("title") or req.get("name")
+    module = req.get("module")
+    fields = req.get("fields", [])
+    applies_if = req.get("applies_if", {})
 
-    if req.get("module"):
-        parts.append(f"Module: {req.get('module')}")
-
-    if applies_if:
-        parts.append(f"Applies if: {applies_if}")
-
+    if req_id:
+        lines.append(f"Requirement ID: {req_id}")
+    if req_name:
+        lines.append(f"Requirement: {req_name}")
+    if module:
+        lines.append(f"Module: {module}")
     if fields:
-        parts.append("Relevant fields: " + ", ".join(fields))
+        lines.append("Fields evaluated:")
+        for field in fields:
+            lines.append(f"- {field}")
+    if applies_if:
+        lines.append("Applicability conditions:")
+        for key, value in applies_if.items():
+            lines.append(f"- {key}: {value}")
 
-    return " | ".join(parts)
+    return "\n".join(lines).strip()
 
 
 def build_gap_and_recommendation(status, missing_fields, failed_fields):
-    missing_fields = missing_fields or []
-    failed_fields = failed_fields or []
+    gap = ""
+    recommendation = ""
 
     if status == "compliant":
-        return "", "Maintain current evidence and proceed to validation readiness."
-
-    if status == "partial":
-        gap = "Partial evidence available; some required elements are incomplete."
-        recommendation = "Provide missing documentation and strengthen evidence for identified gaps."
-        return gap, recommendation
-
-    if status == "non_compliant":
+        gap = "No material compliance gap identified."
+        recommendation = "Maintain current evidence and validation readiness."
+    elif status == "partial":
+        gap = "Partial evidence available; material gaps remain."
+        if missing_fields:
+            recommendation = "Provide missing documentation and strengthen evidence for incomplete elements."
+        else:
+            recommendation = "Improve consistency and completeness of existing evidence."
+    elif status == "non_compliant":
         gap = "Core requirement not met or insufficiently evidenced."
-        recommendation = "Establish missing core elements required for compliance."
-        return gap, recommendation
+        if failed_fields:
+            recommendation = "Correct failed conditions and provide full supporting evidence before validation."
+        else:
+            recommendation = "Establish missing core elements required for compliance."
+    elif status == "error":
+        gap = "Requirement not evaluated due to missing or disconnected logic."
+        recommendation = "Connect deterministic logic and verify the extraction pipeline for the required fields."
+    elif status == "not_applicable":
+        gap = ""
+        recommendation = ""
 
-    if status == "error":
-        gap = "Requirement could not be evaluated due to a logic or processing error."
-        recommendation = "Review logic connectivity and required field availability."
-        return gap, recommendation
-
-    if status == "not_applicable":
-        return "", "No action required."
-
-    gap = "Requirement status is unresolved."
-    recommendation = "Review evidence and logic mapping."
     return gap, recommendation
 
 
 def aggregate_module_summary(results):
     summary = {}
 
-    for item in results:
-        module = item.get("module") or "Unmapped"
+    for item in results or []:
+        module = item.get("module") or "Unassigned"
 
         if module not in summary:
             summary[module] = {
-                "module": module,
-                "requirements": 0,
+                "count": 0,
                 "compliant": 0,
                 "partial": 0,
                 "non_compliant": 0,
                 "error": 0,
-                "priority_score": 0.0,
+                "not_applicable": 0,
+                "priority_scores": [],
+                "priority_avg": 0.0,
             }
 
-        summary[module]["requirements"] += 1
+        summary[module]["count"] += 1
 
         status = item.get("status")
-        if status == "compliant":
-            summary[module]["compliant"] += 1
-        elif status == "partial":
-            summary[module]["partial"] += 1
-        elif status == "non_compliant":
-            summary[module]["non_compliant"] += 1
-        elif status == "error":
-            summary[module]["error"] += 1
+        if status in summary[module]:
+            summary[module][status] += 1
 
-        summary[module]["priority_score"] += float(item.get("priority_score", 0.0) or 0.0)
+        priority_score = item.get("priority_score")
+        if isinstance(priority_score, (int, float)):
+            summary[module]["priority_scores"].append(float(priority_score))
 
-    output = []
-    for _, row in summary.items():
-        requirements = row["requirements"] or 1
-        row["priority_score"] = round(row["priority_score"] / requirements, 2)
-        output.append(row)
+    for _, data in summary.items():
+        scores = data.get("priority_scores", [])
+        data["priority_avg"] = round(sum(scores) / len(scores), 2) if scores else 0.0
+        data.pop("priority_scores", None)
 
-    output.sort(key=lambda x: x["priority_score"], reverse=True)
-    return output
+    return summary
 
 
 def build_top_risks(results, limit=5):
     ranked = []
 
-    for item in results:
+    for item in results or []:
         status = item.get("status")
         if status not in {"non_compliant", "partial", "error"}:
             continue
 
+        title = item.get("title") or item.get("requirement_name") or item.get("requirement_id") or "Unnamed requirement"
+        req_id = item.get("requirement_id", "")
+        notes = item.get("notes", []) or []
+
+        if isinstance(notes, list):
+            note_text = " ".join([str(n) for n in notes if str(n).strip()])
+        else:
+            note_text = str(notes).strip()
+
+        label = f"{req_id} — {title}" if req_id else title
+        if note_text:
+            label += f" | {note_text}"
+
         ranked.append({
-            "requirement_id": item.get("requirement_id"),
-            "title": item.get("title"),
-            "module": item.get("module"),
-            "status": status,
-            "risk": item.get("risk"),
-            "gap": item.get("gap", ""),
-            "recommendation": item.get("recommendation", ""),
+            "text": label,
             "priority_score": float(item.get("priority_score", 0.0) or 0.0),
         })
 
-    ranked.sort(key=lambda x: x["priority_score"], reverse=True)
-    return ranked[:limit]
-
+    ranked = sorted(ranked, key=lambda x: x.get("priority_score", 0.0), reverse=True)
+    return [item["text"] for item in ranked[:limit]]
 
 def run_engine(project_data, requirements):
     results = []
@@ -1318,37 +1227,9 @@ def run_engine(project_data, requirements):
             "recommendation": recommendation,
         })
 
-    module_summary = aggregate_module_summary(results)
-    top_risks = build_top_risks(results, limit=5)
+    from scoring import calculate_compliance_score
 
-    # -----------------------------------------------------
-    # SCORE AGGREGATION (mínimo funcional)
-    # -----------------------------------------------------
-    total = len(results) or 1
-
-    compliant = len([r for r in results if r.get("status") == "compliant"])
-    partial = len([r for r in results if r.get("status") == "partial"])
-    non_compliant = len([r for r in results if r.get("status") == "non_compliant"])
-    errors = len([r for r in results if r.get("status") == "error"])
-
-    score = round(
-        (
-            compliant * 1.0 +
-            partial * 0.5 +
-            non_compliant * 0.0
-        ) / total * 100,
-        2
-    )
-
-    score_data = {
-        "score": score,
-        "total_requirements": total,
-        "compliant": compliant,
-        "partial": partial,
-        "non_compliant": non_compliant,
-        "error": errors,
-    }
-
+    score_data = calculate_compliance_score(results)
     module_summary = aggregate_module_summary(results)
     top_risks = build_top_risks(results, limit=5)
 
@@ -2070,20 +1951,21 @@ def contaminant_monitoring_plan(data):
     try:
         characterization = data.get("biochar", {}).get("characterization", {})
         safeguards = data.get("safeguards", {})
+        emissions = data.get("emissions", {})
 
         contaminants = characterization.get("contaminant_testing")
         frequency = characterization.get("contaminant_testing_frequency")
 
-        # backward-compatible support in case future mapper/schema moves this to safeguards
         safeguards_plan = safeguards.get("contaminant_monitoring_plan")
         safeguards_frequency = safeguards.get("testing_frequency")
 
         contaminants_present = (contaminants is True) or (safeguards_plan is True)
         frequency_present = bool(frequency) or bool(safeguards_frequency)
 
+        auxiliary_frequency_signal = bool(emissions.get("testing_frequency"))
+
         field_scores = []
 
-        # Campo 1: testing / monitoring plan
         if contaminants_present:
             field_scores.append({
                 "path": "biochar.characterization.contaminant_testing",
@@ -2101,7 +1983,6 @@ def contaminant_monitoring_plan(data):
                 "notes": ["Contaminant testing or contaminant monitoring plan is not documented."],
             })
 
-        # Campo 2: frequency
         if frequency_present:
             field_scores.append({
                 "path": "biochar.characterization.contaminant_testing_frequency",
@@ -2109,6 +1990,14 @@ def contaminant_monitoring_plan(data):
                 "score": 30,
                 "status": "pass",
                 "notes": [],
+            })
+        elif contaminants_present and auxiliary_frequency_signal:
+            field_scores.append({
+                "path": "biochar.characterization.contaminant_testing_frequency",
+                "weight": 30,
+                "score": 15,
+                "status": "fail",
+                "notes": ["Contaminant testing frequency is not explicit, but recurring testing cadence is partially evidenced."],
             })
         else:
             field_scores.append({
@@ -2122,14 +2011,21 @@ def contaminant_monitoring_plan(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if not contaminants_present:
-            status = "non_compliant"
-        else:
+        if contaminants_present and frequency_present:
             status = derive_requirement_status_from_score(
                 requirement_score,
                 non_compliant_threshold=70,
                 compliant_threshold=100,
             )
+        elif contaminants_present and auxiliary_frequency_signal:
+            status = "partial"
+            if requirement_score < 60:
+                requirement_score = 60.0
+                requirement_rating = derive_requirement_rating(requirement_score)
+        elif contaminants_present:
+            status = "partial"
+        else:
+            status = "non_compliant"
 
         missing_fields = [
             item["path"]
@@ -2145,6 +2041,8 @@ def contaminant_monitoring_plan(data):
 
         if status == "compliant":
             notes.append("Contaminant testing and monitoring frequency are documented.")
+        elif status == "partial":
+            notes.append("Contaminant monitoring is partially evidenced but frequency/control details remain incomplete.")
 
         return build_logic_result(
             status=status,
@@ -2164,7 +2062,7 @@ def contaminant_monitoring_plan(data):
             field_scores=[],
             requirement_rating="weak",
         )
-
+        
 def product_standard_compliance(data):
     """
     R-9KKF-0 | Compliance with relevant product standards evidenced
@@ -2312,9 +2210,12 @@ def sampling_plan_consistency(data):
     """
     try:
         sampling = data.get("sampling", {})
+        biochar = data.get("biochar", {}).get("characterization", {})
 
         method = sampling.get("method")
         plan_defined = sampling.get("sampling_plan_defined")
+        lab_reports = biochar.get("lab_reports")
+        chemical_analysis = biochar.get("chemical_analysis_performed")
 
         field_scores = []
 
@@ -2334,6 +2235,14 @@ def sampling_plan_consistency(data):
                 "score": 0,
                 "status": "missing",
                 "notes": ["Sampling method is not documented."],
+            })
+        elif method == "project_defined_sampling_regime":
+            field_scores.append({
+                "path": "sampling.method",
+                "weight": 60,
+                "score": 30,
+                "status": "fail",
+                "notes": ["Sampling regime is evidenced, but not mapped explicitly to Isometric Method A or B."],
             })
         else:
             field_scores.append({
@@ -2357,14 +2266,21 @@ def sampling_plan_consistency(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if method not in ["A", "B"]:
-            status = "non_compliant"
-        else:
+        auxiliary_sampling_signal = (
+            plan_defined is True
+            and (lab_reports is True or chemical_analysis is True)
+        )
+
+        if method in ["A", "B"]:
             status = derive_requirement_status_from_score(
                 requirement_score,
                 non_compliant_threshold=60,
                 compliant_threshold=100,
             )
+        elif auxiliary_sampling_signal:
+            status = "partial"
+        else:
+            status = "non_compliant"
 
         missing_fields = [
             item["path"]
@@ -2377,6 +2293,11 @@ def sampling_plan_consistency(data):
             if item["status"] == "fail"
         ]
         notes = collect_field_score_notes(field_scores)
+
+        if auxiliary_sampling_signal and method not in ["A", "B"]:
+            notes.append(
+                "Sampling evidence exists, but the documentation does not explicitly map the regime to Method A/B."
+            )
 
         if status == "compliant":
             notes.append("Sampling method and sampling plan are properly defined.")
@@ -2990,8 +2911,11 @@ def regulatory_measurement_methods(data):
     """
     try:
         legal = data.get("legal", {})
+        emissions = data.get("emissions", {})
 
         methods = legal.get("regulatory_measurement_methods")
+        stack_method = emissions.get("stack_monitoring_method")
+        testing_frequency = emissions.get("testing_frequency")
 
         field_scores = [
             score_boolean_field(
@@ -3005,10 +2929,17 @@ def regulatory_measurement_methods(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if methods is not True:
-            status = "non_compliant"
-        else:
+        auxiliary_reg_signal = bool(stack_method) or bool(testing_frequency)
+
+        if methods is True:
             status = "compliant"
+        elif auxiliary_reg_signal:
+            status = "partial"
+            if requirement_score < 50:
+                requirement_score = 50.0
+                requirement_rating = derive_requirement_rating(requirement_score)
+        else:
+            status = "non_compliant"
 
         missing_fields = [
             item["path"]
@@ -3021,6 +2952,11 @@ def regulatory_measurement_methods(data):
             if item["status"] == "fail"
         ]
         notes = collect_field_score_notes(field_scores)
+
+        if auxiliary_reg_signal and methods is not True:
+            notes.append(
+                "Measurement/testing practice is partially evidenced via stack monitoring and testing frequency, but the regulatory measurement method is not explicitly documented as a dedicated method statement."
+            )
 
         if status == "compliant":
             notes.append("Regulatory measurement methods are documented.")
@@ -3043,6 +2979,7 @@ def regulatory_measurement_methods(data):
             field_scores=[],
             requirement_rating="weak",
         )
+        
 def biochar_characterization_approach(data):
     """
     R-NYQT-0 | Biochar characterization and ongoing monitoring approach described
@@ -3052,6 +2989,9 @@ def biochar_characterization_approach(data):
 
         approach_description = characterization.get("approach_description")
         ongoing_monitoring_plan = characterization.get("ongoing_monitoring_plan")
+        chemical_analysis_performed = characterization.get("chemical_analysis_performed")
+        lab_reports = characterization.get("lab_reports")
+        required_complete = characterization.get("required_measurements_complete")
 
         field_scores = [
             score_presence_field(
@@ -3071,14 +3011,25 @@ def biochar_characterization_approach(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if not approach_description:
-            status = "non_compliant"
-        else:
+        auxiliary_characterization_signal = (
+            chemical_analysis_performed is True
+            and lab_reports is True
+            and required_complete is True
+        )
+
+        if approach_description:
             status = derive_requirement_status_from_score(
                 requirement_score,
                 non_compliant_threshold=65,
                 compliant_threshold=100,
             )
+        elif auxiliary_characterization_signal:
+            status = "partial"
+            if requirement_score < 55:
+                requirement_score = 55.0
+                requirement_rating = derive_requirement_rating(requirement_score)
+        else:
+            status = "non_compliant"
 
         missing_fields = [
             item["path"]
@@ -3092,8 +3043,15 @@ def biochar_characterization_approach(data):
         ]
         notes = collect_field_score_notes(field_scores)
 
+        if auxiliary_characterization_signal and not approach_description:
+            notes.append(
+                "Characterization evidence exists through lab analysis and required measurements, but the approach is not described in a dedicated explicit statement."
+            )
+
         if status == "compliant":
             notes.append("Biochar characterization approach and monitoring plan are documented.")
+        elif status == "partial":
+            notes.append("Biochar characterization is partially evidenced but monitoring/process detail remains incomplete.")
 
         return build_logic_result(
             status=status,
@@ -3113,7 +3071,7 @@ def biochar_characterization_approach(data):
             field_scores=[],
             requirement_rating="weak",
         )
-
+        
 def engineering_design_diagram(data):
     """
     R-29W5-0 | Engineering design diagram provided
