@@ -763,6 +763,40 @@ def compute_confidence_from_field_scores(status, field_scores):
     base = max(0.0, min(1.0, base))
     return round(base, 2)
 
+def classify_evidence_strength(field_scores):
+    """
+    Classifica a força da evidência agregada com base nos field_scores.
+    Retorna: 'strong', 'moderate', 'weak' ou 'none'
+    """
+    if not field_scores:
+        return "none"
+
+    normalized = [
+        item for item in field_scores
+        if isinstance(item, dict) and item.get("status") != "not_applicable"
+    ]
+
+    if not normalized:
+        return "none"
+
+    total = len(normalized)
+    passes = len([f for f in normalized if f.get("status") == "pass"])
+    fails = len([f for f in normalized if f.get("status") == "fail"])
+    missing = len([f for f in normalized if f.get("status") == "missing"])
+
+    pass_ratio = passes / total if total else 0.0
+    fail_ratio = fails / total if total else 0.0
+    missing_ratio = missing / total if total else 0.0
+
+    if pass_ratio >= 0.80 and missing_ratio <= 0.10:
+        return "strong"
+
+    if pass_ratio >= 0.40 and fail_ratio <= 0.40:
+        return "moderate"
+
+    return "weak"
+
+
 def run_engine(project_data, requirements):
     results = []
     cross_check_findings = run_core_cross_checks(project_data)
