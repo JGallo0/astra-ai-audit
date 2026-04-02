@@ -796,12 +796,326 @@ def classify_evidence_strength(field_scores):
 
     return "weak"
 
+def run_core_cross_checks(project_data):
+    """
+    Cross-checks leves e determinísticos entre campos já consolidados.
+    Retorna uma lista de findings, cada um com:
+    - code
+    - severity
+    - message
+    - fields
+    """
+    findings = []
+
+    methodology = project_data.get("methodology", {}) or {}
+    storage = project_data.get("storage", {}) or {}
+    eligibility = project_data.get("eligibility", {}) or {}
+    monitoring = project_data.get("monitoring_reporting", {}) or {}
+    feedstock = project_data.get("feedstock", {}) or {}
+    biochar = (project_data.get("biochar", {}) or {}).get("characterization", {}) or {}
+
+    storage_pathway = methodology.get("storage_pathway")
+    storage_module = storage.get("storage_module")
+    storage_stable = storage.get("storage_environment_stable")
+    durability_years = eligibility.get("durability_years")
+    monitoring_plan = monitoring.get("monitoring_plan")
+    source_locations = feedstock.get("source_locations") or []
+    required_measurements_complete = biochar.get("required_measurements_complete")
+    measurement_values = biochar.get("measurement_values")
+
+    if storage_pathway == "soil" and not storage_module:
+        findings.append({
+            "code": "CC-STOR-001",
+            "severity": "moderate",
+            "message": "Storage pathway is 'soil' but storage module is not documented.",
+            "fields": [
+                "methodology.storage_pathway",
+                "storage.storage_module",
+            ],
+        })
+
+    if storage_pathway == "soil" and durability_years and durability_years >= 200 and storage_stable is not True:
+        findings.append({
+            "code": "CC-STOR-002",
+            "severity": "moderate",
+            "message": "Soil storage with 200-year durability is present, but storage stability is not evidenced.",
+            "fields": [
+                "methodology.storage_pathway",
+                "eligibility.durability_years",
+                "storage.storage_environment_stable",
+            ],
+        })
+
+    if monitoring_plan is True and storage_stable is None and storage_pathway == "soil":
+        findings.append({
+            "code": "CC-MRV-001",
+            "severity": "low",
+            "message": "Monitoring plan exists, but storage stability remains unresolved for soil storage.",
+            "fields": [
+                "monitoring_reporting.monitoring_plan",
+                "storage.storage_environment_stable",
+            ],
+        })
+
+    if feedstock.get("biomass_type") and not source_locations:
+        findings.append({
+            "code": "CC-FEED-001",
+            "severity": "moderate",
+            "message": "Feedstock type is defined but source locations are missing.",
+            "fields": [
+                "feedstock.biomass_type",
+                "feedstock.source_locations",
+            ],
+        })
+
+    if required_measurements_complete is True and measurement_values is not True:
+        findings.append({
+            "code": "CC-BCQ-001",
+            "severity": "moderate",
+            "message": "Required biochar measurements are marked complete, but measurement values are not evidenced.",
+            "fields": [
+                "biochar.characterization.required_measurements_complete",
+                "biochar.characterization.measurement_values",
+            ],
+        })
+
+    return findings
+
+
+def compute_confidence_from_field_scores(status, field_scores):
+    if status == "not_applicable":
+        return 1.0
+
+    if not field_scores:
+        return 0.0
+
+    normalized = [
+        item for item in field_scores
+        if isinstance(item, dict) and item.get("status") != "not_applicable"
+    ]
+
+    if not normalized:
+        return 0.0
+
+    total = len(normalized)
+    passes = len([f for f in normalized if f.get("status") == "pass"])
+    missing = len([f for f in normalized if f.get("status") == "missing"])
+    failed = len([f for f in normalized if f.get("status") == "fail"])
+
+    completeness_ratio = passes / total if total else 0.0
+    missing_penalty = missing / total if total else 0.0
+    fail_penalty = failed / total if total else 0.0
+
+    if status == "compliant":
+        base = 0.80 + 0.20 * completeness_ratio
+    elif status == "partial":
+        base = 0.55 + 0.20 * completeness_ratio - 0.10 * fail_penalty
+    elif status == "non_compliant":
+        base = 0.70 + 0.15 * fail_penalty
+    else:
+        base = 0.10 + 0.20 * completeness_ratio - 0.20 * missing_penalty
+
+    base = max(0.0, min(1.0, base))
+    return round(base, 2)
+
+
+def classify_evidence_strength(field_scores):
+    """
+    Classifica a força da evidência agregada com base nos field_scores.
+    Retorna: 'strong', 'moderate', 'weak' ou 'none'
+    """
+    if not field_scores:
+        return "none"
+
+    normalized = [
+        item for item in field_scores
+        if isinstance(item, dict) and item.get("status") != "not_applicable"
+    ]
+
+    if not normalized:
+        return "none"
+
+    total = len(normalized)
+    passes = len([f for f in normalized if f.get("status") == "pass"])
+    fails = len([f for f in normalized if f.get("status") == "fail"])
+    missing = len([f for f in normalized if f.get("status") == "missing"])
+
+    pass_ratio = passes / total if total else 0.0
+    fail_ratio = fails / total if total else 0.0
+    missing_ratio = missing / total if total else 0.0
+
+    if pass_ratio >= 0.80 and missing_ratio <= 0.10:
+        return "strong"
+
+    if pass_ratio >= 0.40 and fail_ratio <= 0.40:
+        return "moderate"
+
+    return "weak"
+
+
+def normalize_score_0_100(requirement_score):
+    if requirement_score is None:
+        return 0.0
+    try:
+        value = float(requirement_score)
+    except Exception:
+        return 0.0
+    return round(max(0.0, min(100.0, value)), 2)
+
+
+def compute_priority_score(status, normalized_score):
+    score = normalize_score_0_100(normalized_score)
+
+    if status == "non_compliant":
+        base = 100.0 - score + 25.0
+    elif status == "partial":
+        base = 100.0 - score + 10.0
+    elif status == "error":
+        base = 100.0
+    elif status == "compliant":
+        base = max(0.0, 20.0 - (score * 0.2))
+    else:
+        base = 0.0
+
+    return round(max(0.0, min(100.0, base)), 2)
+
+
+def build_project_evidence_text(missing_fields, failed_fields):
+    missing_fields = missing_fields or []
+    failed_fields = failed_fields or []
+
+    if not missing_fields and not failed_fields:
+        return "Project evidence sufficiently covers the required fields for this requirement."
+
+    parts = []
+
+    if missing_fields:
+        parts.append("Missing fields: " + ", ".join(missing_fields))
+
+    if failed_fields:
+        parts.append("Failed fields: " + ", ".join(failed_fields))
+
+    return " | ".join(parts)
+
+
+def build_methodology_basis_text(req):
+    applies_if = req.get("applies_if", {}) or {}
+    fields = req.get("fields", []) or []
+
+    parts = []
+
+    if req.get("id"):
+        parts.append(f"Requirement ID: {req.get('id')}")
+
+    if req.get("module"):
+        parts.append(f"Module: {req.get('module')}")
+
+    if applies_if:
+        parts.append(f"Applies if: {applies_if}")
+
+    if fields:
+        parts.append("Relevant fields: " + ", ".join(fields))
+
+    return " | ".join(parts)
+
+
+def build_gap_and_recommendation(status, missing_fields, failed_fields):
+    missing_fields = missing_fields or []
+    failed_fields = failed_fields or []
+
+    if status == "compliant":
+        return "", "Maintain current evidence and proceed to validation readiness."
+
+    if status == "partial":
+        gap = "Partial evidence available; some required elements are incomplete."
+        recommendation = "Provide missing documentation and strengthen evidence for identified gaps."
+        return gap, recommendation
+
+    if status == "non_compliant":
+        gap = "Core requirement not met or insufficiently evidenced."
+        recommendation = "Establish missing core elements required for compliance."
+        return gap, recommendation
+
+    if status == "error":
+        gap = "Requirement could not be evaluated due to a logic or processing error."
+        recommendation = "Review logic connectivity and required field availability."
+        return gap, recommendation
+
+    if status == "not_applicable":
+        return "", "No action required."
+
+    gap = "Requirement status is unresolved."
+    recommendation = "Review evidence and logic mapping."
+    return gap, recommendation
+
+
+def aggregate_module_summary(results):
+    summary = {}
+
+    for item in results:
+        module = item.get("module") or "Unmapped"
+
+        if module not in summary:
+            summary[module] = {
+                "module": module,
+                "requirements": 0,
+                "compliant": 0,
+                "partial": 0,
+                "non_compliant": 0,
+                "error": 0,
+                "priority_score": 0.0,
+            }
+
+        summary[module]["requirements"] += 1
+
+        status = item.get("status")
+        if status == "compliant":
+            summary[module]["compliant"] += 1
+        elif status == "partial":
+            summary[module]["partial"] += 1
+        elif status == "non_compliant":
+            summary[module]["non_compliant"] += 1
+        elif status == "error":
+            summary[module]["error"] += 1
+
+        summary[module]["priority_score"] += float(item.get("priority_score", 0.0) or 0.0)
+
+    output = []
+    for _, row in summary.items():
+        requirements = row["requirements"] or 1
+        row["priority_score"] = round(row["priority_score"] / requirements, 2)
+        output.append(row)
+
+    output.sort(key=lambda x: x["priority_score"], reverse=True)
+    return output
+
+
+def build_top_risks(results, limit=5):
+    ranked = []
+
+    for item in results:
+        status = item.get("status")
+        if status not in {"non_compliant", "partial", "error"}:
+            continue
+
+        ranked.append({
+            "requirement_id": item.get("requirement_id"),
+            "title": item.get("title"),
+            "module": item.get("module"),
+            "status": status,
+            "risk": item.get("risk"),
+            "gap": item.get("gap", ""),
+            "recommendation": item.get("recommendation", ""),
+            "priority_score": float(item.get("priority_score", 0.0) or 0.0),
+        })
+
+    ranked.sort(key=lambda x: x["priority_score"], reverse=True)
+    return ranked[:limit]
+
 
 def run_engine(project_data, requirements):
     results = []
     cross_check_findings = run_core_cross_checks(project_data)
-    module_summary = aggregate_module_summary(results)
-    top_risks = build_top_risks(results, limit=5)
 
     for req in requirements:
         req_id = req.get("id")
@@ -1003,6 +1317,9 @@ def run_engine(project_data, requirements):
             "gap": gap,
             "recommendation": recommendation,
         })
+
+    module_summary = aggregate_module_summary(results)
+    top_risks = build_top_risks(results, limit=5)
 
     return {
         "results": results,
