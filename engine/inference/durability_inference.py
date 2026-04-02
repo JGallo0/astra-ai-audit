@@ -224,6 +224,7 @@ class DurabilityInference(BaseInferenceRule):
                         normalize_text(item) in {
                             "soil application",
                             "biochar application",
+                            "application of biochar",
                             "land application",
                             "field incorporation",
                             "direct application",
@@ -241,17 +242,23 @@ class DurabilityInference(BaseInferenceRule):
                 or "permanence" in project_text
             )
 
-            if stable_soil_signal and ((durability_years or 0) >= 200) and reversal_signal:
+            strong_structural_signal = (
+                stable_soil_signal
+                and ((durability_years or 0) >= 200)
+                and storage_module == "biochar storage in soil environments"
+            )
+
+            if strong_structural_signal or (stable_soil_signal and ((durability_years or 0) >= 200) and reversal_signal):
                 updated_fields = append_inference_field(
                     updated_fields,
                     inference_events,
                     path="storage.storage_environment_stable",
                     value=True,
                     evidence=(
-                        "Inferred from soil storage pathway, 200-year durability framing, and explicit low-reversal/permanence wording."
+                        "Inferred from soil storage pathway, soil storage module, and 200-year durability framing, with additional support from permanence/reversal wording when available."
                     ),
                     source="project",
-                    confidence=0.93,
+                    confidence=0.95,
                     evidence_strength="strong",
                     extractor="durability_inference",
                     inference_rule_id="INF-DUR-003",
@@ -264,8 +271,3 @@ class DurabilityInference(BaseInferenceRule):
                     ],
                     resolution_action="override",
                 )
-
-        return {
-            "normalized_fields": updated_fields,
-            "inference_events": inference_events,
-        }
