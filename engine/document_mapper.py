@@ -208,6 +208,7 @@ def _resolve_field_candidates(
                             "fill_method": winner.get("fill_method"),
                             "resolution_action": winner.get("resolution_action", "set"),
                             "inference_rule_id": winner.get("inference_rule_id"),
+                            "citation": winner.get("citation", {}),
                         },
                         "invalidated_by": invalidated_paths[path],
                         "candidate_count": len(candidates),
@@ -247,6 +248,7 @@ def _resolve_field_candidates(
                     "fill_method": winner.get("fill_method"),
                     "resolution_action": winner.get("resolution_action", "set"),
                     "inference_rule_id": winner.get("inference_rule_id"),
+                    "citation": winner.get("citation", {}),
                 },
                 "losers": [
                     {
@@ -279,6 +281,15 @@ def build_project_data_from_extraction(
 
     field_schema_index = _build_field_schema_index()
 
+    # Monta indice de citacoes: {path -> citation} a partir do resolution_log
+    field_citations: Dict[str, Any] = {}
+    for entry in resolution_log:
+        path = entry.get("path")
+        winner = entry.get("winner", {})
+        citation = winner.get("citation")
+        if path and citation:
+            field_citations[path] = citation
+
     for path, value in resolved_fields.items():
         field_def = field_schema_index.get(path)
 
@@ -297,6 +308,7 @@ def build_project_data_from_extraction(
             "project_data": data,
             "resolved_fields": resolved_fields,
             "field_resolution_log": resolution_log,
+            "field_citations": field_citations,
             "invalidated_paths": invalidated_paths,
         }
 
@@ -361,6 +373,7 @@ def extract_project_data_from_contexts(
             "inference_events": inference_events,
             "resolved_fields": build_output.get("resolved_fields", {}),
             "field_resolution_log": build_output.get("field_resolution_log", []),
+            "field_citations": build_output.get("field_citations", {}),
             "invalidated_paths": build_output.get("invalidated_paths", {}),
             "consistency_flags": consistency_output.get("consistency_flags", []),
             "consistency_notes": consistency_output.get("consistency_notes", []),
