@@ -22,6 +22,19 @@ Only fill fields when evidence is reasonably clear.
 Be conservative.
 Do not guess.
 Prefer null when uncertain.
+
+PROJECT-SPECIFIC GUIDANCE (critical):
+- project.country:
+  Fill only when a country is explicitly named as the project location.
+  Do not infer from organization nationality, language, or methodology origin.
+- project.locations:
+  Fill with explicit site/location names (city, state, municipality, region, facility names).
+  Return a list_string with only locations evidenced in the text.
+  Do not include generic terms like "project area" without a named place.
+- project.ownership_evidence:
+  Fill with explicit ownership/control evidence references (e.g., land title, concession,
+  lease agreement, supply contract, operator authorization, right-to-operate statement).
+  Return a list_string of evidence labels found in source text; do not invent document names.
 """
 
 

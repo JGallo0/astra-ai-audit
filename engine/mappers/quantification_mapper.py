@@ -63,6 +63,10 @@ Important interpretation rules:
 - Count product.standard_compliance when compliance with ASTM/EPA/EN/Isometric-type
   product or testing standards is evidenced.
 - Count product.certification_scheme when named schemes or standard references are listed.
+- Count biochar.characterization.ongoing_monitoring_plan when the project explicitly describes
+  recurring post-baseline monitoring/testing for biochar characterization (e.g., periodic or annual
+  lab analysis plan, defined recurring monitoring cadence, or ongoing characterization protocol).
+  Do not mark true for one-time baseline testing only.
 
 Prefer null over false if the evidence is unclear.
 """

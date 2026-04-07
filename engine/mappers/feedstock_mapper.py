@@ -22,8 +22,15 @@ def _instructions() -> str:
     return """
 Focus on feedstock evidence:
 - biomass type
+- source locations
 - pre-project use
 - accounting module or classification
+
+For feedstock.source_locations:
+- extract only explicit biomass sourcing places (city/municipality/state/region/site)
+- return list_string values exactly grounded in the text
+- do not infer locations from company headquarters or generic country mentions
+
 Be conservative.
 """
 

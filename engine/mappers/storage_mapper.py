@@ -49,6 +49,12 @@ Valid examples:
 - agronomic application
 
 Prefer null over incorrect values.
+
+For storage.storage_environment_stable:
+- mark true only with explicit stability/permanence wording (e.g., stable storage environment,
+  low reversal risk, permanence controls, buffer/risk management tied to storage stability)
+- mark false only with explicit contradiction
+- otherwise return null
 """
 
 
