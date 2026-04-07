@@ -143,11 +143,9 @@ def apply_local_heuristics(
     current = field_map.get("management.pause_or_stop_conditions", {}).get("value")
     if current in (None, False, "", []):
         if (
-            re.search(r"pause", combined_text)
-            or re.search(r"stop operations", combined_text)
-            or re.search(r"suspend operations", combined_text)
-            or re.search(r"conditions for resumption", combined_text)
-            or re.search(r"operations may be paused", combined_text)
+            re.search(r"(pause|stop|suspend).{0,40}(operations?|production|process)", combined_text)
+            or re.search(r"(operations?|production).{0,40}(may be|must be).{0,20}(paused|stopped|suspended)", combined_text)
+            or re.search(r"(criteria|conditions).{0,40}(resume|resumption)", combined_text)
         ):
             upsert_field(
                 field_map,
@@ -167,12 +165,11 @@ def apply_local_heuristics(
     current = field_map.get("management.monitoring_triggers", {}).get("value")
     if current in (None, False, "", []):
         if (
-            re.search(r"trigger", combined_text)
-            or re.search(r"threshold", combined_text)
-            or re.search(r"exceedance", combined_text)
-            or re.search(r"review points", combined_text)
-            or re.search(r"if .* detected", combined_text)
-            or re.search(r"conditions for resumption", combined_text)
+            re.search(r"(trigger|threshold|exceedance|review point)", combined_text)
+            and (
+                re.search(r"(corrective|mitigation|response|action)", combined_text)
+                or re.search(r"(pause|stop|suspend).{0,30}(operations?|production)", combined_text)
+            )
         ):
             upsert_field(
                 field_map,
