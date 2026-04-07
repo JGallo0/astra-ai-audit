@@ -124,9 +124,28 @@ def apply_local_heuristics(
                 evidence_strength="strong",
                 evidence_mode="direct",
             )
+            
+    current_stable = field_map.get("storage.storage_environment_stable", {}).get("value")
+    if current_stable in (None, "", [], False):
+        if (
+            "stable storage environment" in text
+            or "low risk of reversal" in text
+            or "very low risk level of reversal" in text
+            or "acceptably low risk of reversal" in text
+        ):
+            upsert_field(
+                field_map,
+                path="storage.storage_environment_stable",
+                value=True,
+                evidence="Heuristic match: explicit stable-storage / low-reversal language.",
+                extractor="storage_mapper",
+                fill_method="heuristic",
+                confidence=0.89,
+                evidence_strength="strong",
+                evidence_mode="direct",
+            )
 
     return merge_normalized_fields(list(field_map.values()))
-
 
 # ------------------------------------------------------------
 # MAIN
