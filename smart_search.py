@@ -96,21 +96,21 @@ def build_smart_context(query: str, ranked_sources: List[Dict], max_items: int =
     )
 
 
-def get_hits_index(ranked_sources: List[Dict], max_items: int = 8) -> Dict[str, Dict]:
+def get_hits_index(ranked_sources: List[Dict], max_items: int = 8) -> Dict[str, List[Dict]]:
     """
-    Retorna um indice {filename -> hit} com os metadados estruturados
+    Retorna um indice {filename -> [hits]} com os metadados estruturados
     dos chunks selecionados. Usado pelos mappers para validar e enriquecer
     citacoes retornadas pelo LLM.
     """
     selected = ranked_sources[:max_items]
-    index = {}
+    index: Dict[str, List[Dict]] = {}
     for s in selected:
         filename = s.get("filename") or ""
         if filename:
-            index[filename] = {
+            index.setdefault(filename, []).append({
                 "filename": filename,
                 "page": s.get("page") or "",
                 "source_type": s.get("source_type") or "",
                 "text": s.get("text") or "",
-            }
+            })
     return index
