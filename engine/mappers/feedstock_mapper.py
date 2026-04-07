@@ -24,7 +24,6 @@ Focus on feedstock evidence:
 - biomass type
 - pre-project use
 - accounting module or classification
-Be conservative.
 For feedstock.source_locations:
 - extract only explicit biomass sourcing places (city/municipality/state/region/site)
 - return list_string values exactly grounded in the text
@@ -33,6 +32,14 @@ For feedstock.source_locations:
   "feedstock is procured/collected/sourced from [location]"
 - combine distributed evidence across sections if each location mention is explicit
 - if only transport route or destination is given (without source), return null
+
+For feedstock.pre_project_biomass_use:
+- extract the documented use/disposal state BEFORE project start (e.g., left on field,
+  burned, composted, landfilled, unmanaged decomposition)
+- do not use current project handling as pre-project baseline
+- if baseline behavior is ambiguous or mixed without clear predominance, return null
+
+Be conservative.
 """
 
 
