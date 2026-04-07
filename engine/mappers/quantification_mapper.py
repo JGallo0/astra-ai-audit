@@ -371,6 +371,9 @@ def apply_local_heuristics(
             re.search(r"the project measures and documents all relevant chemical properties", combined_text)
             or re.search(r"durability is demonstrated by", combined_text)
             or re.search(r"analytical methods", combined_text)
+            or re.search(r"characterization (approach|protocol|methodology)", combined_text)
+            or re.search(r"batch-level (sampling|analysis)", combined_text)
+            or re.search(r"accredited laborator(y|ies)", combined_text)
         ):
             upsert_field(
                 field_map,
@@ -439,16 +442,12 @@ def apply_local_heuristics(
 
         if re.search(r"isometric bicrs", combined_text):
             schemes.append("Isometric BiCRS")
-        if re.search(r"astm d1762-84", combined_text):
-            schemes.append("ASTM D1762-84")
-        if re.search(r"astm d5373", combined_text):
-            schemes.append("ASTM D5373")
-        if re.search(r"epa 8270d", combined_text):
-            schemes.append("EPA 8270D")
-        if re.search(r"en 16181", combined_text):
-            schemes.append("EN 16181")
-        if re.search(r"iso/iec 17025", combined_text):
-            schemes.append("ISO/IEC 17025")
+        if re.search(r"\beuropean biochar certificate\b|\bebc\b", combined_text):
+            schemes.append("European Biochar Certificate (EBC)")
+        if re.search(r"\binternational biochar initiative\b|\bibi\b", combined_text):
+            schemes.append("International Biochar Initiative (IBI)")
+        if re.search(r"\bpuro\.?earth\b", combined_text):
+            schemes.append("Puro.Earth")
 
         if schemes:
             upsert_field(
