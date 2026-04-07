@@ -67,10 +67,35 @@ Important interpretation rules:
   recurring post-baseline monitoring/testing for biochar characterization (e.g., periodic or annual
   lab analysis plan, defined recurring monitoring cadence, or ongoing characterization protocol).
   Do not mark true for one-time baseline testing only.
-
+  You may aggregate distributed evidence (e.g., one section states annual testing and another
+  states lab-based characterization) when together they clearly indicate an ongoing plan.
 Prefer null over false if the evidence is unclear.
 
 """
+
+    # ------------------------------------------------------------
+    # biochar.characterization.ongoing_monitoring_plan
+    # ------------------------------------------------------------
+    current = field_map.get("biochar.characterization.ongoing_monitoring_plan", {}).get("value")
+    if current in (None, False, "", []):
+        if (
+            re.search(r"ongoing monitoring", combined_text)
+            or re.search(r"periodic (lab|laboratory) (analysis|testing)", combined_text)
+            or re.search(r"annual (lab|laboratory) (analysis|testing)", combined_text)
+            or re.search(r"regularly analyzed", combined_text)
+            or re.search(r"recurring (testing|analysis|monitoring)", combined_text)
+        ):
+            upsert_field(
+                field_map,
+                path="biochar.characterization.ongoing_monitoring_plan",
+                value=True,
+                evidence="Heuristic match: explicit recurring monitoring/testing language for biochar characterization.",
+                extractor="quantification_mapper",
+                fill_method="heuristic",
+                confidence=0.88,
+                evidence_strength="strong",
+                evidence_mode="direct",
+            )
 
 
 def apply_local_heuristics(
