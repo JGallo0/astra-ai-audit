@@ -17,7 +17,56 @@ def set_nested_value(data: Dict[str, Any], path: str, value: Any) -> None:
         cursor = cursor[key]
 
     cursor[keys[-1]] = value
-    
+
+def _canonicalize_path(path: str) -> str:
+    if not path:
+        return path
+
+    if path == "biochar_characterization":
+        return "biochar.characterization"
+
+    if path.startswith("biochar_characterization."):
+        return path.replace("biochar_characterization.", "biochar.characterization.", 1)
+
+    return path
+
+
+def _canonicalize_paths_list(paths: List[str]) -> List[str]:
+    canonical_paths: List[str] = []
+
+    for path in paths:
+        canonical_path = _canonicalize_path(path)
+        if canonical_path:
+            canonical_paths.append(canonical_path)
+
+    return canonical_paths
+
+
+def _canonicalize_field_item(item: Dict[str, Any]) -> Dict[str, Any]:
+    canonical_item = dict(item)
+
+    canonical_item["path"] = _canonicalize_path(canonical_item.get("path"))
+
+    if canonical_item.get("reclassify_from"):
+        canonical_item["reclassify_from"] = _canonicalize_path(
+            canonical_item.get("reclassify_from")
+        )
+
+    canonical_item["invalidates_paths"] = _canonicalize_paths_list(
+        _normalize_list(canonical_item.get("invalidates_paths"))
+    )
+
+    canonical_item["supersedes_paths"] = _canonicalize_paths_list(
+        _normalize_list(canonical_item.get("supersedes_paths"))
+    )
+
+    return canonical_item
+
+
+def _canonicalize_normalized_fields(
+    normalized_fields: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    return [_canonicalize_field_item(item) for item in normalized_fields]
 
 def _build_field_schema_index() -> Dict[str, Dict[str, Any]]:
     return {
@@ -266,12 +315,13 @@ def _resolve_field_candidates(
         )
     return resolved_fields, resolution_log, invalidated_paths
 
-
 def build_project_data_from_extraction(
     normalized_fields: List[Dict[str, Any]],
     return_resolution_artifacts: bool = False,
 ) -> Any:
     data = get_empty_project_data()
+
+    normalized_fields = _canonicalize_normalized_fields(normalized_fields)
 
     resolved_fields, resolution_log, invalidated_paths = _resolve_field_candidates(
         normalized_fields
@@ -279,8 +329,20 @@ def build_project_data_from_extraction(
 
     field_schema_index = _build_field_schema_index()
 
+    field_citations: Dict[str, Any] = {}
+    for entry in resolution_log:
+        path = _canonicalize_path(entry.get("path"))
+        winner = entry.get("winner", {})
+        citation = winner.get("citation")
+        if path and citation:
+            field_citations[path] = citation
+
+    canonical_resolved_fields: Dict[str, Any] = {}
     for path, value in resolved_fields.items():
-        field_def = field_schema_index.get(path)
+        canonical_path = _canonicalize_path(path)
+        canonical_resolved_fields[canonical_path] = value
+
+        field_def = field_schema_index.get(canonical_path)
 
         if field_def:
             normalized_value = normalize_field_value(field_def, value)
@@ -290,18 +352,22 @@ def build_project_data_from_extraction(
         if normalized_value is None:
             continue
 
-        set_nested_value(data, path, normalized_value)
+        set_nested_value(data, canonical_path, normalized_value)
+
+    canonical_invalidated_paths = [
+        _canonicalize_path(path) for path in invalidated_paths
+    ]
 
     if return_resolution_artifacts:
         return {
             "project_data": data,
-            "resolved_fields": resolved_fields,
+            "resolved_fields": canonical_resolved_fields,
             "field_resolution_log": resolution_log,
-            "invalidated_paths": invalidated_paths,
+            "field_citations": field_citations,
+            "invalidated_paths": canonical_invalidated_paths,
         }
 
     return data
-
 
 def extract_project_data_from_contexts(
     ai_client,
