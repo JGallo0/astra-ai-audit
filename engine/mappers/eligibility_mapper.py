@@ -69,12 +69,10 @@ def apply_local_heuristics(
             r"project removals?.{0,60}>\s*emissions?",
             r"removals?.{0,60}exceed.{0,40}emissions?",
             r"positive net removals?",
+            r"net removals?.{0,40}(positive|exceed|greater than)",
             r"negative carbon footprint",
-            r"-\s*2[,\.]?[0-9]{3}",
-            r"3\.72\s*t\/t",
-            r"3[,\.]72\s*t\/t",
-            r"kgco2eq",
-            r"tco2e\/t",
+            r"net (ghg|co2e|co2eq).{0,30}(negative|below zero)",
+            r"overall climate impact.{0,30}negative",
         ]
         if any(re.search(p, combined_text, re.IGNORECASE | re.DOTALL) for p in strong_patterns):
             upsert_field(
