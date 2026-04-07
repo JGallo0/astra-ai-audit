@@ -34,6 +34,11 @@ PROJECT-SPECIFIC GUIDANCE (critical):
   Fill with explicit ownership/control evidence references (e.g., land title, concession,
   lease agreement, supply contract, operator authorization, right-to-operate statement).
   Return a list_string of evidence labels found in source text; do not invent document names.
+  You may aggregate distributed evidence across the document when each item is explicit.
+  Accept strongly-supported implicit control wording such as:
+  "project proponent controls the site", "exclusive right to operate", or
+  "authorized to manage biomass/feedstock at site", but only when tied to a concrete document
+  or formal statement in the source text.
 """
 
 
