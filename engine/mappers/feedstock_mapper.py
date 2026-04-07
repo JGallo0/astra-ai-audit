@@ -29,6 +29,10 @@ For feedstock.source_locations:
 - extract only explicit biomass sourcing places (city/municipality/state/region/site)
 - return list_string values exactly grounded in the text
 - do not infer locations from company headquarters or generic country mentions
+- accept strongly-supported implicit sourcing phrasing when location is explicit, e.g.
+  "feedstock is procured/collected/sourced from [location]"
+- combine distributed evidence across sections if each location mention is explicit
+- if only transport route or destination is given (without source), return null
 """
 
 
