@@ -125,7 +125,6 @@ def _candidate_score(item: Dict[str, Any]) -> float:
     action = item.get("resolution_action", "set")
     evidence_mode = item.get("evidence_mode", "")
     evidence_strength = item.get("evidence_strength", "")
-    citation = item.get("citation") or {}
 
     score = 0.0
     score += _action_priority(action)
@@ -136,42 +135,10 @@ def _candidate_score(item: Dict[str, Any]) -> float:
     if item.get("fill_method") == "fallback":
         score -= 15.0
 
-    has_citation_document = bool((citation.get("document") or "").strip()) if isinstance(citation, dict) else False
-    has_citation_excerpt = bool((citation.get("excerpt") or "").strip()) if isinstance(citation, dict) else False
-    if has_citation_document:
-        score += 3.0
-    if has_citation_excerpt:
-        score += 2.0
-    if _normalize_text(evidence_mode) == "direct" and not has_citation_document:
-        score -= 10.0
-
     if item.get("value") is None:
         score -= 1000.0
 
     return score
-
-
-def _candidate_details(item: Dict[str, Any]) -> Dict[str, Any]:
-    return {
-        "value": item.get("value"),
-        "extractor": item.get("extractor"),
-        "confidence": item.get("confidence"),
-        "evidence_mode": item.get("evidence_mode"),
-        "evidence_strength": item.get("evidence_strength"),
-        "fill_method": item.get("fill_method"),
-        "resolution_action": item.get("resolution_action", "set"),
-        "inference_rule_id": item.get("inference_rule_id"),
-        "original_path": item.get("original_path") or item.get("path"),
-        "path": item.get("path"),
-        "citation": item.get("citation", {}),
-        "score": _candidate_score(item),
-    }
-
-
-def _rejected_candidate_details(item: Dict[str, Any], reason: str) -> Dict[str, Any]:
-    payload = _candidate_details(item)
-    payload["rejected_reason"] = reason
-    return payload
 
 
 def _collect_invalidated_paths(
@@ -192,10 +159,9 @@ def _collect_invalidated_paths(
 
         if action in {"reclassify", "semantic_override", "override", "invalidate", "clear"}:
             for path in related_paths:
-                canonical_path = canonicalize_path(path)
-                invalidated.setdefault(canonical_path, []).append(
+                invalidated.setdefault(path, []).append(
                     {
-                        "by_path": canonicalize_path(item.get("path") or ""),
+                        "by_path": item.get("path"),
                         "action": action,
                         "rule": item.get("inference_rule_id") or item.get("extractor"),
                         "confidence": item.get("confidence"),
@@ -214,7 +180,6 @@ def _group_candidates_by_path(
         path = item.get("path")
         if not path:
             continue
-        canonical_path = canonicalize_path(path)
 
         action = _normalize_text(item.get("resolution_action", "set"))
 
@@ -224,10 +189,7 @@ def _group_candidates_by_path(
         if item.get("value") is None:
             continue
 
-        candidate = dict(item)
-        candidate["original_path"] = path
-        candidate["path"] = canonical_path
-        grouped.setdefault(canonical_path, []).append(candidate)
+        grouped.setdefault(path, []).append(item)
 
     return grouped
 
@@ -242,8 +204,6 @@ def _resolve_field_candidates(
     resolution_log: List[Dict[str, Any]] = []
 
     for path, candidates in grouped.items():
-        ranked_all = sorted(candidates, key=_candidate_score, reverse=True)
-
         if path in invalidated_paths:
             override_candidates = [
                 c for c in candidates
@@ -263,24 +223,22 @@ def _resolve_field_candidates(
 
                 winner = ranked[0]
                 resolved_fields[path] = winner.get("value")
-                winner_id = id(winner)
 
                 resolution_log.append(
                     {
                         "path": path,
                         "status": "resolved_via_override",
-                        "winner": _candidate_details(winner),
-                        "candidates": [_candidate_details(item) for item in ranked_all],
-                        "rejected_candidates": [
-                            _rejected_candidate_details(
-                                item,
-                                "path_invalidated_non_override_candidate"
-                                if _normalize_text(item.get("resolution_action")) not in {"semantic_override", "override", "reclassify"}
-                                else "lower_score_than_override_winner",
-                            )
-                            for item in ranked_all
-                            if id(item) != winner_id
-                        ],
+                        "winner": {
+                            "value": winner.get("value"),
+                            "extractor": winner.get("extractor"),
+                            "confidence": winner.get("confidence"),
+                            "evidence_mode": winner.get("evidence_mode"),
+                            "evidence_strength": winner.get("evidence_strength"),
+                            "fill_method": winner.get("fill_method"),
+                            "resolution_action": winner.get("resolution_action", "set"),
+                            "inference_rule_id": winner.get("inference_rule_id"),
+                            "citation": winner.get("citation", {}),
+                        },
                         "invalidated_by": invalidated_paths[path],
                         "candidate_count": len(candidates),
                     }
@@ -291,40 +249,50 @@ def _resolve_field_candidates(
                 {
                     "path": path,
                     "status": "invalidated_by_other_rule",
-                    "candidates": [_candidate_details(item) for item in ranked_all],
-                    "rejected_candidates": [
-                        _rejected_candidate_details(
-                            item,
-                            "path_invalidated_and_no_override_candidate",
-                        )
-                        for item in ranked_all
-                    ],
                     "invalidated_by": invalidated_paths[path],
                     "candidate_count": len(candidates),
                 }
             )
             continue
 
-        winner = ranked_all[0]
+        ranked = sorted(
+            candidates,
+            key=_candidate_score,
+            reverse=True,
+        )
+
+        winner = ranked[0]
         resolved_fields[path] = winner.get("value")
-        winner_id = id(winner)
 
         resolution_log.append(
             {
                 "path": path,
                 "status": "resolved",
-                "winner": _candidate_details(winner),
-                "candidates": [_candidate_details(item) for item in ranked_all],
-                "rejected_candidates": [
-                    _rejected_candidate_details(
-                        item,
-                        "lower_score_than_winner",
-                    )
-                    for item in ranked_all
-                    if id(item) != winner_id
+                "winner": {
+                    "value": winner.get("value"),
+                    "extractor": winner.get("extractor"),
+                    "confidence": winner.get("confidence"),
+                    "evidence_mode": winner.get("evidence_mode"),
+                    "evidence_strength": winner.get("evidence_strength"),
+                    "fill_method": winner.get("fill_method"),
+                    "resolution_action": winner.get("resolution_action", "set"),
+                    "inference_rule_id": winner.get("inference_rule_id"),
+                    "citation": winner.get("citation", {}),
+                },
+                "losers": [
+                    {
+                        "value": item.get("value"),
+                        "extractor": item.get("extractor"),
+                        "confidence": item.get("confidence"),
+                        "evidence_mode": item.get("evidence_mode"),
+                        "evidence_strength": item.get("evidence_strength"),
+                        "fill_method": item.get("fill_method"),
+                        "resolution_action": item.get("resolution_action", "set"),
+                        "inference_rule_id": item.get("inference_rule_id"),
+                    }
+                    for item in ranked[1:]
                 ],
-                "losers": [_candidate_details(item) for item in ranked_all if id(item) != winner_id],
-                "candidate_count": len(ranked_all),
+                "candidate_count": len(ranked),
             }
         )
     return resolved_fields, resolution_log, invalidated_paths
@@ -345,15 +313,14 @@ def build_project_data_from_extraction(
     # Monta indice de citacoes: {path -> citation} a partir do resolution_log
     field_citations: Dict[str, Any] = {}
     for entry in resolution_log:
-        path = canonicalize_path(entry.get("path") or "")
+        path = entry.get("path")
         winner = entry.get("winner", {})
         citation = winner.get("citation")
         if path and citation:
             field_citations[path] = citation
 
     for path, value in resolved_fields.items():
-        canonical_path = canonicalize_path(path)
-        field_def = field_schema_index.get(canonical_path) or field_schema_index.get(path)
+        field_def = field_schema_index.get(path)
 
         if field_def:
             normalized_value = normalize_field_value(field_def, value)
@@ -363,6 +330,7 @@ def build_project_data_from_extraction(
         if normalized_value is None:
             continue
 
+        canonical_path = canonicalize_path(path)
         set_nested_value(data, canonical_path, normalized_value)
 
     if return_resolution_artifacts:
