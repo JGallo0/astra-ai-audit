@@ -35,21 +35,29 @@ def get_empty_project_data():
             "maintenance_plan": False,
         },
 
-        "biochar_characterization": {
-            "carbon_content": None,
-            "h_c_ratio": None,
-            "o_c_ratio": None,
-            "sampling_method": None,
-            "sampling_frequency": None,
-            "approach_description": None,
-            "ongoing_monitoring_plan": None,
-            "pollutants": {
-                "PAHs": None,
-                "heavy_metals": None,
-                "PCBs": None,
-                "dioxins": None,
-                "furans": None,
-            },
+        "biochar": {
+            "characterization": {
+                "carbon_content": None,
+                "h_c_ratio": None,
+                "o_c_ratio": None,
+                "sampling_method": None,
+                "sampling_frequency": None,
+                "approach_description": None,
+                "ongoing_monitoring_plan": None,
+                "chemical_analysis_performed": None,
+                "lab_reports": [],
+                "required_measurements_complete": None,
+                "measurement_values": {},
+                "contaminant_testing": None,
+                "contaminant_testing_frequency": None,
+                "pollutants": {
+                    "PAHs": None,
+                    "heavy_metals": None,
+                    "PCBs": None,
+                    "dioxins": None,
+                    "furans": None,
+                },
+            }
         },
 
         "storage": {
@@ -185,8 +193,8 @@ def get_demo_project_data():
     }
 
     # Mantém compatibilidade com o schema original também
-    data["biochar_characterization"]["approach_description"] = True
-    data["biochar_characterization"]["ongoing_monitoring_plan"] = True
+    data["biochar"]["characterization"]["approach_description"] = True
+    data["biochar"]["characterization"]["ongoing_monitoring_plan"] = True
 
     # Rastreabilidade
     data["traceability"] = {
