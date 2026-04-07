@@ -39,6 +39,21 @@ EXTRACTION_FIELDS = [
     # PROJECT
     # =========================================================
     {
+        "path": "project.country",
+        "type": "string",
+        "description": "Country where the project is implemented.",
+    },
+    {
+        "path": "project.locations",
+        "type": "list_string",
+        "description": "Project locations/sites described in project documentation.",
+    },
+    {
+        "path": "project.ownership_evidence",
+        "type": "list_string",
+        "description": "Evidence references supporting project ownership or control rights.",
+    },
+    {
         "path": "project.project_boundary_defined",
         "type": "boolean",
         "description": "Whether the project boundary is explicitly defined.",
@@ -159,6 +174,11 @@ EXTRACTION_FIELDS = [
         "path": "feedstock.biomass_type",
         "type": "string",
         "description": "Biomass/feedstock type.",
+    },
+    {
+        "path": "feedstock.source_locations",
+        "type": "list_string",
+        "description": "Source locations from which feedstock biomass is procured.",
     },
     {
         "path": "feedstock.certification_scheme",
