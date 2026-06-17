@@ -631,6 +631,43 @@ def get_logic(logic_key):
     return logic_fn
 
 
+def run_core_cross_checks(project_data):
+    """Verifica consistências cruzadas entre campos do projeto.
+    Retorna lista de findings, cada um com 'paths' e 'message'.
+    Implementação futura — retorna lista vazia por ora."""
+    return []
+
+
+def compute_confidence_from_field_scores(status, field_scores):
+    """Estima confiança da avaliação com base nos field_scores e status."""
+    if not field_scores:
+        base = {"compliant": 0.85, "partial": 0.55, "non_compliant": 0.70,
+                "not_applicable": 1.0, "error": 0.20}.get(status, 0.30)
+        return base
+    scores = [f.get("score", 0) for f in field_scores if isinstance(f, dict)]
+    if not scores:
+        return 0.30
+    avg = sum(scores) / len(scores)
+    return round(min(max(avg / 100.0, 0.0), 1.0), 4)
+
+
+def classify_evidence_strength(field_scores):
+    """Classifica a força da evidência com base nos field_scores."""
+    if not field_scores:
+        return "none"
+    scores = [f.get("score", 0) for f in field_scores if isinstance(f, dict)]
+    if not scores:
+        return "none"
+    avg = sum(scores) / len(scores)
+    if avg >= 80:
+        return "strong"
+    if avg >= 55:
+        return "moderate"
+    if avg >= 25:
+        return "weak"
+    return "insufficient"
+
+
 def run_engine(project_data, requirements):
     results = []
     cross_check_findings = run_core_cross_checks(project_data)
