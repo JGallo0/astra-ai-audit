@@ -92,7 +92,8 @@ app = FastAPI(title="Co2mply API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL, "http://localhost:5173", "http://localhost:5174"],
+    allow_origins=["http://localhost:5173", "http://localhost:5174"],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
