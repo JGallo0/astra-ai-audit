@@ -751,12 +751,6 @@ def apply_inference_rules(project_data: dict) -> dict:
         if feedstock.get("certification_scheme"):
             traceability["chain_of_custody_diagram"] = True
 
-    # 10. sampling.batch_definition_days — plano de amostragem implica definição de lote
-    sampling = data.setdefault("sampling", {})
-    if sampling.get("batch_definition_days") is None:
-        if sampling.get("sampling_plan_defined") is True:
-            sampling["batch_definition_days"] = "as_per_sampling_plan"
-
     return data
 
 
