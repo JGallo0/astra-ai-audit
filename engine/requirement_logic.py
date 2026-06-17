@@ -738,6 +738,25 @@ def apply_inference_rules(project_data: dict) -> dict:
                 and ghg.get("system_boundary_defined") is True):
             quant["lca_performed"] = True
 
+    # 8. storage.soil.deployment_methods — storage_pathway "soil" implica aplicação ao solo
+    storage_soil = storage.setdefault("soil", {})
+    if not storage_soil.get("deployment_methods"):
+        if methodology.get("storage_pathway") == "soil":
+            storage_soil["deployment_methods"] = "soil_application"
+
+    # 9. traceability.chain_of_custody_diagram — inferir apenas quando None (não extraído)
+    # Certificação de sustentabilidade implica rastreabilidade formal da cadeia
+    traceability = data.setdefault("traceability", {})
+    if traceability.get("chain_of_custody_diagram") is None:
+        if feedstock.get("certification_scheme"):
+            traceability["chain_of_custody_diagram"] = True
+
+    # 10. sampling.batch_definition_days — plano de amostragem implica definição de lote
+    sampling = data.setdefault("sampling", {})
+    if sampling.get("batch_definition_days") is None:
+        if sampling.get("sampling_plan_defined") is True:
+            sampling["batch_definition_days"] = "as_per_sampling_plan"
+
     return data
 
 

@@ -639,6 +639,21 @@ class AuditEngine:
 
                 adjusted_results.append(item)
 
+            # Nível 3 — score mínimo por status em modo desenvolvimento
+            # future_evidence_required = crédito mínimo de 35 (intenção reconhecida)
+            # partial = crédito mínimo de 45 (evidência parcial presente)
+            _DEV_MIN_SCORE = {
+                "future_evidence_required": 35,
+                "partial": 45,
+            }
+            for item in adjusted_results:
+                status = item.get("status")
+                min_score = _DEV_MIN_SCORE.get(status)
+                if min_score is not None:
+                    current = item.get("requirement_score") or 0
+                    if current < min_score:
+                        item["requirement_score"] = min_score
+
             results = adjusted_results
 
         # =========================================================
