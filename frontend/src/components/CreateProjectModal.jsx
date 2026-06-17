@@ -3,9 +3,8 @@ import axios from 'axios'
 
 const API = import.meta.env.VITE_API_BASE || ''
 
-export default function CreateProjectModal({ methodologies, onClose, onCreated }) {
+export default function CreateProjectModal({ onClose, onCreated }) {
   const [name, setName] = useState('')
-  const [methodology, setMethodology] = useState(methodologies[0]?.key || 'isometric')
   const [files, setFiles] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -20,7 +19,6 @@ export default function CreateProjectModal({ methodologies, onClose, onCreated }
     try {
       const fd = new FormData()
       fd.append('name', name.trim())
-      fd.append('methodology', methodology)
       files.forEach(f => fd.append('files', f))
       const { data } = await axios.post(`${API}/api/projects`, fd)
       onCreated(data)
@@ -38,7 +36,10 @@ export default function CreateProjectModal({ methodologies, onClose, onCreated }
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal">
-        <div className="modal-title">Novo projeto de carbono</div>
+        <div className="modal-title">Novo projeto (PDD)</div>
+        <div className="alert alert-info" style={{ marginBottom: 16, fontSize: 12 }}>
+          Adicione o PDD e os documentos do projeto. A metodologia será escolhida ao iniciar uma auditoria.
+        </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -50,15 +51,6 @@ export default function CreateProjectModal({ methodologies, onClose, onCreated }
               placeholder="Ex.: Nova Esperança Biochar 2025"
               autoFocus
             />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Metodologia</label>
-            <select className="form-select" value={methodology} onChange={e => setMethodology(e.target.value)}>
-              {methodologies.map(m => (
-                <option key={m.key} value={m.key}>{m.label} {m.version}</option>
-              ))}
-            </select>
           </div>
 
           <div className="form-group">
@@ -84,7 +76,7 @@ export default function CreateProjectModal({ methodologies, onClose, onCreated }
             </div>
             {files.length > 0 && (
               <div className="mt-2" style={{ fontSize: 12, color: 'var(--text-2)' }}>
-                {files.length} arquivo(s) selecionado(s):
+                {files.length} arquivo(s):
                 {files.map((f, i) => (
                   <span key={i} style={{ display: 'block', marginLeft: 8 }}>• {f.name}</span>
                 ))}
@@ -99,7 +91,9 @@ export default function CreateProjectModal({ methodologies, onClose, onCreated }
               Cancelar
             </button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? <><span className="spinner" style={{ width:14, height:14 }} /> Criando...</> : 'Criar projeto'}
+              {loading
+                ? <><span className="spinner" style={{ width:14, height:14 }} /> Criando vector store...</>
+                : 'Criar projeto'}
             </button>
           </div>
         </form>

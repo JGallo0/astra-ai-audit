@@ -123,7 +123,6 @@ def list_projects():
 @app.post("/api/projects")
 async def create_project(
     name: str = Form(...),
-    methodology: str = Form(...),
     files: List[UploadFile] = File(default=[]),
 ):
     vs = openai_client.vector_stores.create(name=f"[Co2mply] {name}")
@@ -137,13 +136,11 @@ async def create_project(
         )
 
     project_id = str(uuid.uuid4())
-    methodology_vs_id = METHODOLOGY_REGISTRY.get(methodology, {}).get("vector_store_id", "")
-
     _db_execute(
         """INSERT INTO ca_projects
-           (id, name, methodology, project_vector_store_id, methodology_vector_store_id, doc_count, created_at)
-           VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-        (project_id, name, methodology, vs_id, methodology_vs_id, len(files), _now()),
+           (id, name, project_vector_store_id, doc_count, created_at)
+           VALUES (%s, %s, %s, %s, %s)""",
+        (project_id, name, vs_id, len(files), _now()),
     )
     return _db_fetchone("SELECT * FROM ca_projects WHERE id = %s", (project_id,))
 
@@ -180,6 +177,7 @@ async def upload_documents(project_id: str, files: List[UploadFile] = File(...))
 # ── Audit ─────────────────────────────────────────────────────────────────────
 
 class AuditRequest(BaseModel):
+    methodology: str = "isometric"   # escolhido pelo usuário no momento da auditoria
     modules: Optional[List[str]] = None
     enable_reanalysis: bool = True
 
@@ -194,7 +192,7 @@ async def start_audit(project_id: str, req: AuditRequest, background_tasks: Back
 
     _db_execute(
         "INSERT INTO ca_audit_runs (id, project_id, methodology, modules, status, created_at) VALUES (%s,%s,%s,%s,%s,%s)",
-        (run_id, project_id, p.get("methodology"), json.dumps(req.modules), "running", _now()),
+        (run_id, project_id, req.methodology, json.dumps(req.modules), "running", _now()),
     )
 
     background_tasks.add_task(_run_audit, run_id, dict(p), req)
@@ -202,8 +200,9 @@ async def start_audit(project_id: str, req: AuditRequest, background_tasks: Back
 
 def _run_audit(run_id: str, project: dict, req: AuditRequest):
     try:
-        methodology_key = project.get("methodology", "isometric")
+        methodology_key = req.methodology
         requirements = _load_requirements(methodology_key)
+        methodology_vs_id = METHODOLOGY_REGISTRY.get(methodology_key, {}).get("vector_store_id", "")
 
         if not HAS_ENGINE:
             raise RuntimeError("AuditEngine não disponível.")
@@ -212,7 +211,7 @@ def _run_audit(run_id: str, project: dict, req: AuditRequest):
             api_key=OPENAI_API_KEY,
             model=OPENAI_MODEL,
             project_vector_store_id=project.get("project_vector_store_id", ""),
-            methodology_vector_store_id=project.get("methodology_vector_store_id", ""),
+            methodology_vector_store_id=methodology_vs_id,
             project_name=project.get("name", ""),
             requirements=requirements,
         )

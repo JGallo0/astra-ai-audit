@@ -4,7 +4,7 @@
 CREATE TABLE IF NOT EXISTS ca_projects (
   id                          TEXT PRIMARY KEY,
   name                        TEXT NOT NULL,
-  methodology                 TEXT NOT NULL,
+  methodology                 TEXT,           -- opcional; metodologia é escolhida na auditoria
   project_vector_store_id     TEXT NOT NULL,
   methodology_vector_store_id TEXT,
   doc_count                   INTEGER DEFAULT 0,
