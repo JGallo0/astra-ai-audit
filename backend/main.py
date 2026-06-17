@@ -177,9 +177,9 @@ async def upload_documents(project_id: str, files: List[UploadFile] = File(...))
 # ── Audit ─────────────────────────────────────────────────────────────────────
 
 class AuditRequest(BaseModel):
-    methodology: str = "isometric"   # escolhido pelo usuário no momento da auditoria
+    methodology: str = "isometric"
     modules: Optional[List[str]] = None
-    enable_reanalysis: bool = True
+    audit_mode: str = "development"   # "development" | "operational"
 
 @app.post("/api/projects/{project_id}/audit")
 async def start_audit(project_id: str, req: AuditRequest, background_tasks: BackgroundTasks):
@@ -215,14 +215,22 @@ def _run_audit(run_id: str, project: dict, req: AuditRequest):
             project_name=project.get("name", ""),
             requirements=requirements,
         )
-        result = engine.run_full_audit(
+
+        # Usa o mesmo método que o Streamlit: motor determinístico estruturado
+        output = engine.run_structured_engine_audit(
             selected_modules=req.modules or None,
-            enable_auto_reanalysis=req.enable_reanalysis,
+            audit_mode=req.audit_mode,
         )
+
+        # Remove campos de contexto grandes antes de salvar no banco
+        _LARGE_FIELDS = {"project_context", "methodology_context", "project_hits",
+                         "methodology_hits", "raw_extraction"}
+        result = {k: v for k, v in output.items() if k not in _LARGE_FIELDS}
+
         _audit_runs[run_id].update({"status": "completed", "result": result})
         _db_execute(
             "UPDATE ca_audit_runs SET status=%s, result=%s, completed_at=%s WHERE id=%s",
-            ("completed", json.dumps(result), _now(), run_id),
+            ("completed", json.dumps(result, default=str), _now(), run_id),
         )
     except Exception as e:
         _audit_runs[run_id].update({"status": "error", "error": str(e)})

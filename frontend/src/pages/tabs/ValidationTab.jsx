@@ -9,14 +9,38 @@ const MODULES = [
   'Emissões', 'Amostragem', 'Rastreabilidade', 'Gestão', 'Salvaguardas',
 ]
 
+// Motor estruturado retorna status em inglês; run_full_audit (legado) em português
 const STATUS_CLS = {
-  'Conforme':              'compliance-status-conforme',
-  'Parcialmente conforme': 'compliance-status-parcial',
-  'Não conforme':          'compliance-status-nao',
-  'Não evidenciado':       'compliance-status-evidenciado',
+  // inglês (run_structured_engine_audit)
+  'compliant':                  'compliance-status-conforme',
+  'partial':                    'compliance-status-parcial',
+  'non_compliant':              'compliance-status-nao',
+  'not_applicable':             'compliance-status-evidenciado',
+  'future_evidence_required':   'compliance-status-parcial',
+  'error':                      'compliance-status-evidenciado',
+  // português (legado / run_full_audit)
+  'Conforme':                   'compliance-status-conforme',
+  'Parcialmente conforme':      'compliance-status-parcial',
+  'Não conforme':               'compliance-status-nao',
+  'Não evidenciado':            'compliance-status-evidenciado',
+  'Erro de análise':            'compliance-status-evidenciado',
 }
 
-const RISK_CLS = { baixo: 'badge-green', medio: 'badge-amber', alto: 'badge-red' }
+const STATUS_LABEL = {
+  compliant:                'Conforme',
+  partial:                  'Parcialmente conforme',
+  non_compliant:            'Não conforme',
+  not_applicable:           'Não aplicável',
+  future_evidence_required: 'Evidência futura',
+  error:                    'Erro de análise',
+}
+
+const RISK_CLS = {
+  low: 'badge-green', baixo: 'badge-green',
+  medium: 'badge-amber', medio: 'badge-amber',
+  high: 'badge-red', alto: 'badge-red',
+  none: 'badge-gray', unknown: 'badge-gray',
+}
 
 function ScoreGauge({ score }) {
   const color = score >= 75 ? 'var(--green)' : score >= 50 ? 'var(--amber)' : 'var(--red)'
@@ -47,8 +71,8 @@ export default function ValidationTab() {
   const [auditRuns, setAuditRuns]   = useState([])
   const [selectedRun, setSelectedRun] = useState(null)
   const [selectedModules, setSelectedModules] = useState([])
+  const [auditMode, setAuditMode]   = useState('development')
   const [running, setRunning]       = useState(false)
-  const [reanalysis, setReanalysis] = useState(true)
   const [pollingId, setPollingId]   = useState(null)
 
   useEffect(() => {
@@ -81,7 +105,7 @@ export default function ValidationTab() {
       const { data } = await axios.post(`${API}/api/projects/${selectedProjectId}/audit`, {
         methodology: selectedMethodology,
         modules: selectedModules.length > 0 ? selectedModules : null,
-        enable_reanalysis: reanalysis,
+        audit_mode: auditMode,
       })
       const runId = data.run_id
       const id = setInterval(async () => {
@@ -98,12 +122,16 @@ export default function ValidationTab() {
   const selectedProject = projects.find(p => p.id === selectedProjectId)
   const selectedMethodologyMeta = methodologies.find(m => m.key === selectedMethodology)
 
-  const result      = selectedRun?.result || {}
-  const findings    = result.findings || result.results || []
-  const score       = result.compliance_score || result.score || 0
-  const compliant   = findings.filter(f => f.status === 'Conforme').length
-  const partial     = findings.filter(f => f.status === 'Parcialmente conforme').length
-  const nonComp     = findings.filter(f => ['Não conforme','Não evidenciado'].includes(f.status)).length
+  const result   = selectedRun?.result || {}
+  const findings = result.results || result.findings || []
+  // run_structured_engine_audit retorna score em score_data.score
+  const score    = result.score_data?.score ?? result.compliance_score ?? result.score ?? 0
+  const scoreLabel = result.score_label || ''
+
+  const compliant  = findings.filter(f => ['compliant','Conforme'].includes(f.status)).length
+  const partial    = findings.filter(f => ['partial','future_evidence_required','Parcialmente conforme'].includes(f.status)).length
+  const nonComp    = findings.filter(f => ['non_compliant','Não conforme','Não evidenciado','error'].includes(f.status)).length
+  const notAppl    = findings.filter(f => f.status === 'not_applicable').length
 
   return (
     <div>
@@ -161,11 +189,26 @@ export default function ValidationTab() {
           {/* ── Configurar ── */}
           {tab === 'run' && (
             <div className="card">
-              <div className="card-title">Módulos de análise</div>
-              <div className="alert alert-info" style={{ marginBottom:12, fontSize:12 }}>
-                Deixe vazio para auditar todos os módulos da metodologia selecionada.
+              <div className="card-title">Modo de auditoria</div>
+              <div className="flex gap-2" style={{ marginBottom:20 }}>
+                {[
+                  { key:'development',  label:'Desenvolvimento', desc:'Lacunas de evidência futura marcadas como parciais' },
+                  { key:'operational',  label:'Operacional',     desc:'Avaliação estrita — evidência deve estar presente' },
+                ].map(m => (
+                  <button key={m.key}
+                    className={`btn ${auditMode === m.key ? 'btn-primary' : 'btn-ghost'}`}
+                    onClick={() => setAuditMode(m.key)}
+                    title={m.desc}>
+                    {m.label}
+                  </button>
+                ))}
               </div>
-              <div className="flex" style={{ flexWrap:'wrap', gap:8, marginBottom:16 }}>
+
+              <div className="card-title" style={{ marginBottom:8 }}>Módulos de análise</div>
+              <div className="alert alert-info" style={{ marginBottom:12, fontSize:12 }}>
+                Deixe vazio para auditar todos os módulos. Selecione apenas os aplicáveis ao projeto.
+              </div>
+              <div className="flex" style={{ flexWrap:'wrap', gap:8, marginBottom:20 }}>
                 {MODULES.map(m => (
                   <button key={m}
                     className={`btn btn-sm ${selectedModules.includes(m) ? 'btn-primary' : 'btn-ghost'}`}
@@ -174,15 +217,6 @@ export default function ValidationTab() {
                     {m}
                   </button>
                 ))}
-              </div>
-
-              <div className="flex items-center gap-2" style={{ marginBottom:20 }}>
-                <input type="checkbox" id="reanalysis" checked={reanalysis}
-                  onChange={e => setReanalysis(e.target.checked)}
-                  style={{ width:16, height:16, accentColor:'var(--navy)' }} />
-                <label htmlFor="reanalysis" style={{ fontSize:13, fontWeight:500, cursor:'pointer' }}>
-                  Re-análise automática de requisitos com baixa confiança
-                </label>
               </div>
 
               <button className="btn btn-primary btn-lg" onClick={startAudit} disabled={running}>
@@ -216,11 +250,11 @@ export default function ValidationTab() {
                 <>
                   <div className="grid-4" style={{marginBottom:16}}>
                     <div className="kpi-card flex items-center gap-3">
-                      <ScoreGauge score={score} />
+                      <ScoreGauge score={Math.round(score)} />
                       <div>
                         <div className="kpi-label">Score de Conformidade</div>
                         <div style={{fontSize:12,color:'var(--text-2)',marginTop:4}}>
-                          {score>=75?'Alto':score>=50?'Médio':'Baixo'}
+                          {scoreLabel || (score>=75?'Alto':score>=50?'Médio':'Baixo')}
                         </div>
                       </div>
                     </div>
@@ -230,11 +264,11 @@ export default function ValidationTab() {
                     </div>
                     <div className="kpi-card">
                       <div className="kpi-value" style={{color:'var(--amber)'}}>{partial}</div>
-                      <div className="kpi-label">Parcialmente conformes</div>
+                      <div className="kpi-label">Parciais / Ev. futura</div>
                     </div>
                     <div className="kpi-card">
                       <div className="kpi-value" style={{color:'var(--red)'}}>{nonComp}</div>
-                      <div className="kpi-label">Não conformes</div>
+                      <div className="kpi-label">Não conformes{notAppl > 0 ? ` · ${notAppl} N/A` : ''}</div>
                     </div>
                   </div>
 
@@ -274,11 +308,11 @@ export default function ValidationTab() {
                                   <td style={{fontSize:11,color:'var(--text-3)'}}>{f.requirement_id}</td>
                                   <td><span className="badge badge-blue" style={{fontSize:10}}>{f.module}</span></td>
                                   <td style={{maxWidth:320,fontSize:12}}>{f.title}</td>
-                                  <td><span className={STATUS_CLS[f.status]||'compliance-status-evidenciado'}>{f.status}</span></td>
+                                  <td><span className={STATUS_CLS[f.status]||'compliance-status-evidenciado'}>{STATUS_LABEL[f.status]||f.status}</span></td>
                                   <td><span className={`badge ${RISK_CLS[f.risk]||'badge-gray'}`}>{f.risk}</span></td>
                                   <td style={{fontWeight:700,
-                                    color:f.score>=75?'var(--green)':f.score>=50?'var(--amber)':'var(--red)'}}>
-                                    {f.score}
+                                    color:(f.requirement_score??f.score??0)>=75?'var(--green)':(f.requirement_score??f.score??0)>=50?'var(--amber)':'var(--red)'}}>
+                                    {Math.round(f.requirement_score??f.score??0)}
                                   </td>
                                 </tr>
                               ))}
