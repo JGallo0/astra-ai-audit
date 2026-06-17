@@ -676,8 +676,76 @@ def classify_evidence_strength(field_scores):
     return "insufficient"
 
 
+def apply_inference_rules(project_data: dict) -> dict:
+    """
+    Nível 2: preenche campos ausentes (None / []) com base em evidências
+    relacionadas. Nunca sobrescreve valores já definidos (True/False explícito).
+    Retorna uma cópia — não muta o project_data original.
+    """
+    import copy
+    data = copy.deepcopy(project_data)
+
+    eligibility = data.setdefault("eligibility", {})
+    feedstock   = data.setdefault("feedstock", {})
+    storage     = data.setdefault("storage", {})
+    methodology = data.setdefault("methodology", {})
+    production  = data.setdefault("production", {})
+    emissions   = data.setdefault("emissions", {})
+    em_testing  = data.setdefault("emissions_testing", {})
+    biochar_c   = data.setdefault("biochar", {}).setdefault("characterization", {})
+    safeguards  = data.setdefault("safeguards", {})
+    management  = data.setdefault("management", {})
+    quant       = data.setdefault("quantification", {})
+    ghg         = data.setdefault("ghg_accounting", {})
+
+    # 1. net_negative_claim — permanência + adicionalidade implica remoção líquida negativa
+    if eligibility.get("net_negative_claim") is None:
+        if eligibility.get("permanence_claim") is True and eligibility.get("additionality_claim") is True:
+            eligibility["net_negative_claim"] = True
+
+    # 2. storage_module — storage_pathway identifica o módulo de armazenamento
+    if not storage.get("storage_module"):
+        pathway = methodology.get("storage_pathway")
+        if pathway:
+            storage["storage_module"] = pathway
+
+    # 3. emissions_testing.regular_testing — frequência/método documentados = testagem regular
+    if em_testing.get("regular_testing") is not True:
+        if emissions.get("testing_frequency") or emissions.get("stack_monitoring_method"):
+            em_testing["regular_testing"] = True
+
+    # 4. biochar.characterization.required_measurements_complete — lab_reports + measurement_values
+    if biochar_c.get("required_measurements_complete") is None:
+        if biochar_c.get("lab_reports") is True and biochar_c.get("measurement_values") is True:
+            biochar_c["required_measurements_complete"] = True
+
+    # 5. safeguards.adaptive_management_plan — propagado de management (mesmo plano)
+    if safeguards.get("adaptive_management_plan") is not True:
+        if management.get("adaptive_management_plan") is True:
+            safeguards["adaptive_management_plan"] = True
+
+    # 6. feedstock.source_locations — biomass_type + certificação implicam origem rastreável
+    if not feedstock.get("source_locations"):
+        if feedstock.get("biomass_type") and feedstock.get("certification_scheme"):
+            feedstock["source_locations"] = [
+                f"Certified supply ({feedstock['certification_scheme']})"
+            ]
+
+    # 7. quantification.lca_performed — sistema GHG completo equivale a ACV realizada
+    if quant.get("lca_performed") is None:
+        if (quant.get("input_variables") is True
+                and quant.get("input_uncertainties") is True
+                and ghg.get("system_boundary_defined") is True):
+            quant["lca_performed"] = True
+
+    return data
+
+
 def run_engine(project_data, requirements):
     from scoring import calculate_compliance_score
+
+    # Nível 2: aplicar inferências antes de avaliar
+    project_data = apply_inference_rules(project_data)
 
     results = []
     cross_check_findings = run_core_cross_checks(project_data)

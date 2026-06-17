@@ -582,8 +582,28 @@ class AuditEngine:
             raise TypeError(f"run_engine must return a list, got {type(results).__name__}")
 
         # =========================================================
-        # AJUSTE POR MODO
+        # AJUSTE POR MODO (Nível 3)
         # =========================================================
+
+        # Campos estruturais fundamentais: falha aqui mantém non_compliant mesmo em dev
+        _STRUCTURAL_FIELDS = {
+            "eligibility.additionality_claim",
+            "eligibility.durability_years",
+            "eligibility.net_negative_claim",
+            "eligibility.eligible_pathway",
+            "methodology.standard",
+            "methodology.pathway",
+        }
+
+        # Keywords que indicam gap operacional/documental (evidência futura esperada)
+        _OPERATIONAL_KEYWORDS = [
+            "lab", "monitoring", "measurement", "data", "testing", "emissions",
+            "chain_of_custody", "source_location", "deployment", "sampling",
+            "sensor", "maintenance", "lca", "characterization", "calibration",
+            "diagram", "permit", "assessment", "mitigation", "location",
+            "ownership", "country", "traceability", "reporting", "plan",
+        ]
+
         if audit_mode == "development":
             adjusted_results = []
 
@@ -591,28 +611,31 @@ class AuditEngine:
                 item = dict(r)
 
                 if item.get("status") == "non_compliant":
-                    missing_fields = item.get("missing_fields", []) or []
-                    failed_fields = item.get("failed_fields", []) or []
+                    failed_fields  = set(item.get("failed_fields",  []) or [])
+                    missing_fields = list(item.get("missing_fields", []) or [])
+                    req_score      = item.get("requirement_score") or 0
 
-                    if missing_fields and not failed_fields:
-                        missing_fields_text = " ".join(missing_fields).lower()
+                    # Verifica se algum campo estrutural fundamental falhou
+                    has_structural_failure = bool(failed_fields & _STRUCTURAL_FIELDS)
 
-                        if any(k in missing_fields_text for k in [
-                            "lab", "monitoring", "measurement", "data", "testing", "emissions"
-                        ]):
+                    if not has_structural_failure:
+                        # Determinar tipo de gap: operacional vs estrutural-documental
+                        all_fields_text = " ".join(
+                            list(failed_fields) + missing_fields
+                        ).lower()
+                        is_operational = any(
+                            k in all_fields_text for k in _OPERATIONAL_KEYWORDS
+                        )
+
+                        if is_operational:
                             item["status"] = "future_evidence_required"
-
-                            original_notes = item.get("notes", []) or []
-                            item["notes"] = list(original_notes) + [
-                                "Projeto em desenvolvimento: evidência futura requerida."
-                            ]
+                            note = "Projeto em desenvolvimento: evidência operacional futura requerida."
                         else:
                             item["status"] = "partial"
+                            note = "Projeto em desenvolvimento: lacuna documental a complementar."
 
-                            original_notes = item.get("notes", []) or []
-                            item["notes"] = list(original_notes) + [
-                                "Projeto em desenvolvimento: lacuna estrutural."
-                            ]
+                        original_notes = item.get("notes", []) or []
+                        item["notes"] = list(original_notes) + [note]
 
                 adjusted_results.append(item)
 
