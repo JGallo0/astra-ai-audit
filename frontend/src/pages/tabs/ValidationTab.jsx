@@ -159,12 +159,34 @@ export default function ValidationTab() {
         </div>
 
         {selectedProject && selectedMethodologyMeta && (
-          <div className="mt-3 flex items-center gap-2">
-            <span className="badge badge-blue" style={{ fontSize:12 }}>{selectedProject.name}</span>
-            <span style={{ color:'var(--text-3)', fontWeight:700 }}>×</span>
-            <span className="badge badge-green" style={{ fontSize:12 }}>
-              {selectedMethodologyMeta.label} {selectedMethodologyMeta.version}
-            </span>
+          <div className="mt-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="badge badge-blue" style={{ fontSize:12 }}>{selectedProject.name}</span>
+              <span style={{ color:'var(--text-3)', fontWeight:700 }}>×</span>
+              <span className="badge badge-green" style={{ fontSize:12 }}>
+                {selectedMethodologyMeta.label} {selectedMethodologyMeta.version}
+              </span>
+              <span
+                className="badge badge-gray"
+                style={{ fontSize:10 }}
+                title="Os dados extraídos do PDD ficam em cache. Auditorias repetidas são 100% determinísticas."
+              >
+                {selectedProject.project_data ? '⚡ cache ativo' : '🔄 extração na 1ª auditoria'}
+              </span>
+            </div>
+            {selectedProject.project_data && (
+              <button
+                className="btn btn-sm btn-ghost"
+                title="Força nova extração LLM dos dados do projeto (use após adicionar documentos)"
+                onClick={async () => {
+                  if (!confirm('Invalidar cache e forçar nova extração na próxima auditoria?')) return
+                  await axios.post(`${API}/api/projects/${selectedProject.id}/reset-cache`)
+                  alert('Cache invalidado. A próxima auditoria fará nova extração.')
+                }}
+              >
+                Atualizar dados
+              </button>
+            )}
           </div>
         )}
       </div>

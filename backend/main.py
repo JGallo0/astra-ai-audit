@@ -166,6 +166,14 @@ def delete_project(project_id: str):
     _db_execute("DELETE FROM ca_projects WHERE id = %s", (project_id,))
     return {"ok": True}
 
+@app.post("/api/projects/{project_id}/reset-cache")
+def reset_project_data_cache(project_id: str):
+    """Invalida o cache de project_data — próxima auditoria fará nova extração LLM."""
+    _db_execute(
+        "UPDATE ca_projects SET project_data = NULL WHERE id = %s", (project_id,)
+    )
+    return {"ok": True, "message": "Cache invalidado. Próxima auditoria fará nova extração."}
+
 @app.post("/api/projects/{project_id}/documents")
 async def upload_documents(project_id: str, files: List[UploadFile] = File(...)):
     p = _db_fetchone("SELECT project_vector_store_id, doc_count FROM ca_projects WHERE id = %s", (project_id,))
@@ -181,7 +189,11 @@ async def upload_documents(project_id: str, files: List[UploadFile] = File(...))
         )
 
     new_count = (p.get("doc_count") or 0) + len(files)
-    _db_execute("UPDATE ca_projects SET doc_count = %s WHERE id = %s", (new_count, project_id))
+    # Invalida cache de project_data — novos documentos exigem nova extração
+    _db_execute(
+        "UPDATE ca_projects SET doc_count = %s, project_data = NULL WHERE id = %s",
+        (new_count, project_id),
+    )
     return {"uploaded": [f.filename for f in files]}
 
 # ── Audit ─────────────────────────────────────────────────────────────────────
@@ -217,6 +229,16 @@ def _run_audit(run_id: str, project: dict, req: AuditRequest):
         if not HAS_ENGINE:
             raise RuntimeError("AuditEngine não disponível.")
 
+        # ── Cache de project_data ─────────────────────────────────────────────
+        # Se já foi extraído antes, reutiliza → auditoria 100% determinística
+        # Se não, extrai via LLM (temperature=0) e salva para próximas vezes
+        project_id = project["id"]
+        cached_pd_row = _db_fetchone(
+            "SELECT project_data FROM ca_projects WHERE id = %s", (project_id,)
+        )
+        cached_project_data = (cached_pd_row or {}).get("project_data")
+        cache_hit = cached_project_data is not None
+
         engine = AuditEngine(
             api_key=OPENAI_API_KEY,
             model=OPENAI_MODEL,
@@ -226,16 +248,24 @@ def _run_audit(run_id: str, project: dict, req: AuditRequest):
             requirements=requirements,
         )
 
-        # Usa o mesmo método que o Streamlit: motor determinístico estruturado
         output = engine.run_structured_engine_audit(
             selected_modules=req.modules or None,
             audit_mode=req.audit_mode,
+            cached_project_data=cached_project_data,
         )
+
+        # Salva project_data no cache se foi uma extração nova
+        if not cache_hit and output.get("project_data"):
+            _db_execute(
+                "UPDATE ca_projects SET project_data = %s WHERE id = %s",
+                (json.dumps(output["project_data"], default=str), project_id),
+            )
 
         # Remove campos de contexto grandes antes de salvar no banco
         _LARGE_FIELDS = {"project_context", "methodology_context", "project_hits",
                          "methodology_hits", "raw_extraction"}
         result = {k: v for k, v in output.items() if k not in _LARGE_FIELDS}
+        result["cache_hit"] = cache_hit  # útil para debug no frontend
 
         _audit_runs[run_id].update({"status": "completed", "result": result})
         _db_execute(

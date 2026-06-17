@@ -516,6 +516,7 @@ class AuditEngine:
         self,
         selected_modules: Optional[List[str]] = None,
         audit_mode: str = "development",
+        cached_project_data: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         if not self.requirements:
             raise ValueError("Nenhum requisito estruturado foi carregado para a metodologia selecionada.")
@@ -525,17 +526,25 @@ class AuditEngine:
             if not selected_modules or req.get("module") in selected_modules
         ]
 
-        contexts = self._build_structured_contexts()
-
-        mapped = extract_project_data_from_contexts(
-            ai_client=self._call_llm_json_extraction,
-            project_context=contexts["project_context"],
-            methodology_context=contexts["methodology_context"],
-            project_hits=contexts["project_hits"],
-            methodology_hits=contexts["methodology_hits"],
-        )
-
-        project_data = mapped["project_data"]
+        if cached_project_data is not None:
+            # Cache hit: pula extração LLM, resultado 100% determinístico
+            project_data = cached_project_data
+            contexts = {
+                "queries": [], "project_context": "",
+                "methodology_context": "", "project_hits": [], "methodology_hits": [],
+            }
+            mapped = {"normalized_fields": [], "raw_extraction": {}}
+        else:
+            # Cache miss: extrai project_data via LLM (temperature=0)
+            contexts = self._build_structured_contexts()
+            mapped = extract_project_data_from_contexts(
+                ai_client=self._call_llm_json_extraction,
+                project_context=contexts["project_context"],
+                methodology_context=contexts["methodology_context"],
+                project_hits=contexts["project_hits"],
+                methodology_hits=contexts["methodology_hits"],
+            )
+            project_data = mapped["project_data"]
 
         # =========================================================
         # DEBUG 1 — OUTPUT DO RUN_ENGINE
@@ -1231,6 +1240,7 @@ Resumo das expectativas por requisito:
                 response = self.client.responses.create(
                     model=self.model,
                     input=prompt,
+                    temperature=0,  # determinismo: mesma entrada → mesma saída
                 )
                 text = getattr(response, "output_text", "") or ""
                 if text.strip():
