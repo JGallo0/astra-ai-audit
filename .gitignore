@@ -3,3 +3,11 @@
 __pycache__/
 *.pyc
 outputs/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Backend
+backend/.env
+backend/backend/
