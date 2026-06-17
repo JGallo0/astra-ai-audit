@@ -12,7 +12,6 @@ import json
 import uuid
 from datetime import datetime
 import io
-import importlib
 import psycopg2
 import psycopg2.extras
 
@@ -67,13 +66,24 @@ def _now() -> str:
     return datetime.utcnow().isoformat() + "Z"
 
 def _load_requirements(methodology_key: str) -> list:
-    mod_path = METHODOLOGY_REGISTRY.get(methodology_key, {}).get("requirements_module")
-    if not mod_path:
-        return []
+    """Replica exatamente o que o Streamlit faz:
+    1. Carrega ISOMETRIC_REQUIREMENTS (IDs ELIG_001, ADD_001…) via get_requirements_for_methodology
+    2. Enriquece cada req com req["logic"] = nome da função via REQUIREMENT_LOGIC_MAP
+    """
     try:
-        mod = importlib.import_module(mod_path)
-        return getattr(mod, "REQUIREMENTS", [])
-    except Exception:
+        from methodology_requirements import get_requirements_for_methodology
+        from engine.requirement_logic_map import REQUIREMENT_LOGIC_MAP
+
+        raw = get_requirements_for_methodology(methodology_key)
+        requirements = []
+        for req in raw:
+            r = dict(req)  # cópia rasa para não mutar o módulo global
+            req_id = r.get("id") or r.get("requirement_id")
+            r["logic"] = REQUIREMENT_LOGIC_MAP.get(req_id)
+            requirements.append(r)
+        return requirements
+    except Exception as e:
+        print(f"[_load_requirements] erro: {e}")
         return []
 
 # ── App ───────────────────────────────────────────────────────────────────────
