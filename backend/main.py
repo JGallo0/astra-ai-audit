@@ -282,7 +282,7 @@ def _run_audit(run_id: str, project: dict, req: AuditRequest):
 @app.get("/api/audit/{run_id}")
 def get_audit_run(run_id: str):
     if run_id in _audit_runs:
-        return _audit_runs[run_id]
+        return {"id": run_id, **_audit_runs[run_id]}  # id sempre presente
     r = _db_fetchone("SELECT * FROM ca_audit_runs WHERE id = %s", (run_id,))
     if not r:
         raise HTTPException(404, "Run não encontrado")
