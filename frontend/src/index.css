@@ -62,11 +62,16 @@ html, body, #root {
 .sidebar-logo-card {
   background: #fff;
   border-radius: 8px;
-  padding: 8px 12px;
+  overflow: hidden;
+  padding: 0;
+  line-height: 0;
 }
 
 .sidebar-logo-card img {
-  width: 100%;
+  width: 150%;
+  margin-left: -25%;
+  margin-top: -18%;
+  margin-bottom: -18%;
   height: auto;
   display: block;
 }
