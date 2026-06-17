@@ -55,24 +55,23 @@ html, body, #root {
 }
 
 .sidebar-logo {
-  padding: 24px 20px 16px;
+  padding: 16px 14px;
   border-bottom: 1px solid rgba(255,255,255,.1);
 }
 
-.sidebar-logo img {
-  height: 36px;
-  width: auto;
-  display: block;
+.sidebar-logo-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.sidebar-logo-text {
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  opacity: .7;
-  margin-top: 6px;
+.sidebar-logo-card img {
+  height: 32px;
+  width: auto;
+  display: block;
 }
 
 .sidebar-project {

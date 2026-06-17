@@ -52,8 +52,9 @@ function Sidebar({ projects, activeProject, setActiveProject, onNewProject }) {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
-        <img src="/logo-co2mply.png" alt="Co2mply" style={{ maxHeight: 40 }} onError={e => { e.target.style.display='none' }} />
-        <div className="sidebar-logo-text">Co2mply</div>
+        <div className="sidebar-logo-card">
+          <img src="/logo-co2mply.png" alt="Co2mply" />
+        </div>
       </div>
 
       <div className="sidebar-project">
