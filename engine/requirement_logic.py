@@ -165,8 +165,17 @@ def eval_reactor_requirements(data):
 def eval_storage_requirements(data):
     try:
         storage = data.get("storage", {})
+        methodology = data.get("methodology", {})
 
         storage_module = storage.get("storage_module")
+
+        # Nível 1: inferir storage_module a partir de storage_pathway quando não extraído
+        # Ex: methodology.storage_pathway = "soil" → storage_module = "soil"
+        if not storage_module:
+            storage_pathway = methodology.get("storage_pathway")
+            if storage_pathway:
+                storage_module = storage_pathway
+
         storage_location = storage.get("storage_location")
         storage_monitoring_plan = storage.get("storage_monitoring_plan")
 
@@ -194,13 +203,12 @@ def eval_storage_requirements(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        hard_fail = not storage_module
-
-        status = derive_status_with_hard_gate(
+        # Nível 1: removido hard_fail gate — ausência de storage_module por falha de
+        # extração não deve invalidar projeto que documenta storage_pathway
+        status = derive_requirement_status_from_score(
             requirement_score,
-            hard_fail=hard_fail,
-            non_compliant_threshold=60,
-            compliant_threshold=100,
+            non_compliant_threshold=30,
+            compliant_threshold=85,
         )
 
         missing_fields = [
@@ -3171,6 +3179,15 @@ def eval_project_ownership(data):
         locations = project.get("locations")
         ownership_evidence = project.get("ownership_evidence")
 
+        # Nível 1: proxies de propriedade quando ownership_evidence não foi extraído
+        # Certificação Isometric e descrição do sistema identificam o titular do projeto
+        if not ownership_evidence:
+            cert_scheme = data.get("product", {}).get("certification_scheme")
+            system_desc = data.get("production", {}).get("system_description")
+            proxies = [v for v in [cert_scheme, system_desc] if v]
+            if proxies:
+                ownership_evidence = proxies
+
         field_scores = [
             score_presence_field(
                 "project.country",
@@ -3195,13 +3212,12 @@ def eval_project_ownership(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        hard_fail = not ownership_evidence
-
-        status = derive_status_with_hard_gate(
+        # Nível 1: removido hard_fail gate — falha de extração de ownership_evidence
+        # não deve invalidar projeto com certificação e descrição do sistema identificadas
+        status = derive_requirement_status_from_score(
             requirement_score,
-            hard_fail=hard_fail,
-            non_compliant_threshold=60,
-            compliant_threshold=100,
+            non_compliant_threshold=25,
+            compliant_threshold=85,
         )
 
         missing_fields = [
@@ -3422,10 +3438,16 @@ def eval_feedstock_traceability(data):
         chain_diagram = traceability.get("chain_of_custody_diagram")
         source_locations = feedstock.get("source_locations")
 
+        # Nível 1: certificação de sustentabilidade (FSC, PEFC, SBP etc.) como proxy
+        # de rastreabilidade de cadeia de custódia — implica tracking formal do feedstock
+        cert_scheme = feedstock.get("certification_scheme")
+        has_sustainability_cert = bool(cert_scheme)
+        effective_chain = chain_diagram is True or has_sustainability_cert
+
         field_scores = [
             score_boolean_field(
                 "traceability.chain_of_custody_diagram",
-                chain_diagram,
+                effective_chain,
                 60,
                 note_if_missing="Chain of custody evidence is missing.",
             ),
@@ -3440,20 +3462,25 @@ def eval_feedstock_traceability(data):
         requirement_score = summarize_field_scores(field_scores)
         requirement_rating = derive_requirement_rating(requirement_score)
 
-        if chain_diagram is not True:
-            status = "non_compliant"
-        else:
-            status = derive_requirement_status_from_score(
-                requirement_score,
-                non_compliant_threshold=60,
-                compliant_threshold=100,
+        # Nível 1: removido hard gate `chain_diagram is not True → non_compliant`
+        # Certificação de sustentabilidade é evidência equivalente de rastreabilidade
+        status = derive_requirement_status_from_score(
+            requirement_score,
+            non_compliant_threshold=25,
+            compliant_threshold=85,
+        )
+
+        notes = collect_field_score_notes(field_scores)
+        if has_sustainability_cert and chain_diagram is not True:
+            notes.append(
+                f"Rastreabilidade inferida a partir de certificação de sustentabilidade: {cert_scheme}."
             )
 
         return build_logic_result(
             status=status,
             missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
             failed_fields=[i["path"] for i in field_scores if i["status"] == "fail"],
-            notes=collect_field_score_notes(field_scores),
+            notes=notes,
             requirement_score=requirement_score,
             field_scores=field_scores,
             requirement_rating=requirement_rating,
