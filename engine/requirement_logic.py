@@ -669,10 +669,10 @@ def classify_evidence_strength(field_scores):
 
 
 def run_engine(project_data, requirements):
+    from scoring import calculate_compliance_score
+
     results = []
     cross_check_findings = run_core_cross_checks(project_data)
-    module_summary = aggregate_module_summary(results)
-    top_risks = build_top_risks(results, limit=5)
 
     for req in requirements:
         req_id = req.get("id")
@@ -874,6 +874,10 @@ def run_engine(project_data, requirements):
             "gap": gap,
             "recommendation": recommendation,
         })
+
+    score_data    = calculate_compliance_score(results)
+    module_summary = aggregate_module_summary(results)
+    top_risks     = build_top_risks(results, limit=5)
 
     return {
         "results": results,
