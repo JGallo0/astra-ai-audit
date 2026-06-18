@@ -24,6 +24,12 @@ from engine.requirement_logic import (
     collect_field_score_notes,
 )
 
+def _derive_status(score, nc=50, c=100):
+    """Wrapper com args posicionais para derive_requirement_status_from_score."""
+    return derive_requirement_status_from_score(
+        score, non_compliant_threshold=nc, compliant_threshold=c
+    )
+
 
 # ── Helpers internos ──────────────────────────────────────────────────────────
 
@@ -194,7 +200,7 @@ def eval_biochar_chemical_properties_v1(data, audit_mode="development"):
         if hc_ratio is None:
             notes.append("Operacional: H/Corg obrigatório — laudos laboratoriais exigidos.")
 
-    status = derive_requirement_status_from_score(requirement_score, threshold_nc, threshold_c)
+    status = _derive_status(requirement_score, threshold_nc, threshold_c)
     return build_logic_result(
         status=status,
         missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
@@ -230,7 +236,7 @@ def eval_biochar_laboratory_v1(data, audit_mode="development"):
     notes.append(f"[Protocolo] {CITATION}")
 
     threshold = 60 if audit_mode == "operational" else 30
-    status = derive_requirement_status_from_score(requirement_score, threshold, 90)
+    status = _derive_status(requirement_score, threshold, 90)
 
     return build_logic_result(
         status=status,
@@ -306,7 +312,7 @@ def eval_sampling_procedure_v1(data, audit_mode="development"):
     notes.append(f"[Protocolo] {CITATION}")
 
     threshold_nc = 50 if audit_mode == "operational" else 30
-    status = derive_requirement_status_from_score(requirement_score, threshold_nc, 85)
+    status = _derive_status(requirement_score, threshold_nc, 85)
 
     return build_logic_result(
         status=status,
@@ -376,7 +382,7 @@ def eval_durability_selection_v1(data, audit_mode="development"):
         notes.append(f"H/Corg = {hc_ratio:.3f} {'✓ < 0.5' if hc_ratio < 0.5 else '✗ ≥ 0.5'}.")
 
     threshold_nc = 50 if audit_mode == "operational" else 25
-    status = derive_requirement_status_from_score(requirement_score, threshold_nc, 80)
+    status = _derive_status(requirement_score, threshold_nc, 80)
 
     return build_logic_result(
         status=status,
@@ -435,7 +441,7 @@ def eval_durability_soil_temp_v1(data, audit_mode="development"):
         notes.append(f"Método: {soil_temp_method}")
 
     threshold_nc = 50 if audit_mode == "operational" else 25
-    status = derive_requirement_status_from_score(requirement_score, threshold_nc, 85)
+    status = _derive_status(requirement_score, threshold_nc, 85)
 
     return build_logic_result(
         status=status,
@@ -510,7 +516,7 @@ def eval_pollution_prevention_v1(data, audit_mode="development"):
         notes.append(f"PCDD/F = {pcdd_f} ng/kg {'✓ ≤ 20' if pcdd_f <= 20 else '✗ > 20 (excede limite)'}.")
 
     threshold_nc = 50 if audit_mode == "operational" else 20
-    status = derive_requirement_status_from_score(requirement_score, threshold_nc, 85)
+    status = _derive_status(requirement_score, threshold_nc, 85)
 
     return build_logic_result(
         status=status,
@@ -564,7 +570,7 @@ def eval_reactor_design_v1(data, audit_mode="development"):
         notes.append("Operacional: diagrama atualizado e registros de manutenção exigidos para verificação.")
         threshold_nc, threshold_c = 50, 85
 
-    status = derive_requirement_status_from_score(requirement_score, threshold_nc, threshold_c)
+    status = _derive_status(requirement_score, threshold_nc, threshold_c)
 
     return build_logic_result(
         status=status,
@@ -611,7 +617,7 @@ def eval_adaptive_management_v1(data, audit_mode="development"):
     notes.append("Os 4 gatilhos obrigatórios de pausa/stop: (1) falha de instrumentos, (2) poluentes > threshold, (3) não conformidade regulatória, (4) risco à saúde.")
 
     threshold_nc = 50 if audit_mode == "operational" else 40
-    status = derive_requirement_status_from_score(requirement_score, threshold_nc, 85)
+    status = _derive_status(requirement_score, threshold_nc, 85)
 
     return build_logic_result(
         status=status,
@@ -627,7 +633,7 @@ def eval_adaptive_management_v1(data, audit_mode="development"):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# STUBS ESTRUTURADOS — retornam resultado válido, implementação futura
+# FUNÇÕES IMPLEMENTADAS — Fase 2
 # ══════════════════════════════════════════════════════════════════════════════
 
 def eval_protocol_eligibility_v1(data, audit_mode="development"):
@@ -640,7 +646,7 @@ def eval_protocol_eligibility_v1(data, audit_mode="development"):
                              note_if_missing="Pathway de elegibilidade não especificado."),
     ]
     score = summarize_field_scores(field_scores)
-    status = derive_requirement_status_from_score(score, 30, 80)
+    status = _derive_status(score, 30, 80)
     return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
         failed_fields=[], notes=collect_field_score_notes(field_scores),
         requirement_score=score, field_scores=field_scores, requirement_rating=derive_requirement_rating(score))
@@ -655,7 +661,7 @@ def eval_project_ownership_v1(data, audit_mode="development"):
                              note_if_missing="Nome do projeto/entidade proprietária não identificado."),
     ]
     score = summarize_field_scores(field_scores)
-    status = derive_requirement_status_from_score(score, 40, 85)
+    status = _derive_status(score, 40, 85)
     return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
         failed_fields=[], notes=collect_field_score_notes(field_scores),
         requirement_score=score, field_scores=field_scores, requirement_rating=derive_requirement_rating(score))
@@ -668,13 +674,31 @@ def eval_technical_description_v1(data, audit_mode="development"):
         score_presence_field("production.pyrolysis_technology", tech, 40, note_if_missing="Tecnologia de pirólise não identificada."),
     ]
     score = summarize_field_scores(field_scores)
-    status = derive_requirement_status_from_score(score, 30, 80)
+    status = _derive_status(score, 30, 80)
     return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
         failed_fields=[], notes=collect_field_score_notes(field_scores),
         requirement_score=score, field_scores=field_scores, requirement_rating=derive_requirement_rating(score))
 
 def eval_project_participants_v1(data, audit_mode="development"):
-    return _stub("R-F6R7-0", "Lista de participantes do projeto", audit_mode)
+    """R-F6R7-0: Lista completa de organizações participantes com 7 campos obrigatórios."""
+    project = data.get("project", {})
+    ownership = project.get("ownership_evidence")
+    name = project.get("name")
+    # O schema não captura participantes individuais ainda — usa proxies
+    field_scores = [
+        score_presence_field("project.name", name, 30, note_if_missing="Entidade proponente não identificada."),
+        score_presence_field("project.ownership_evidence", ownership, 70,
+                             note_if_missing="Lista de participantes (nome, papel, registro, endereço, contato, email, telefone) não fornecida."),
+    ]
+    score = summarize_field_scores(field_scores)
+    notes = collect_field_score_notes(field_scores)
+    notes.append("[Protocolo] Isometric Standard v1.7, R-F6R7-0 — todos os 7 campos obrigatórios por organização.")
+    status = _derive_status(score, 30, 80)
+    return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+        failed_fields=[], notes=notes, requirement_score=score, field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score),
+        gap="Lista de participantes incompleta ou ausente." if score < 30 else "",
+        recommendation="Fornecer tabela com todos os participantes: nome, papel, número de registro, endereço, pessoa de contato, email e telefone." if score < 30 else "")
 
 def eval_project_locations_v1(data, audit_mode="development"):
     project = data.get("project", {})
@@ -685,13 +709,32 @@ def eval_project_locations_v1(data, audit_mode="development"):
         score_presence_field("project.locations", locations, 60, note_if_missing="Coordenadas ou endereço do projeto não fornecidos."),
     ]
     score = summarize_field_scores(field_scores)
-    status = derive_requirement_status_from_score(score, 30, 80)
+    status = _derive_status(score, 30, 80)
     return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
         failed_fields=[], notes=collect_field_score_notes(field_scores),
         requirement_score=score, field_scores=field_scores, requirement_rating=derive_requirement_rating(score))
 
 def eval_removal_capacity_v1(data, audit_mode="development"):
-    return _stub("R-XT6V-0", "Capacidade estimada de remoção de carbono (tCO2 por período de crédito)", audit_mode)
+    """R-XT6V-0: Estimativa de capacidade líquida de remoção em tCO2e por período de crédito."""
+    ghg = data.get("ghg_accounting", {})
+    quant = data.get("quantification", {})
+    net_cdr = ghg.get("net_cdr") or ghg.get("co2_stored") or ghg.get("co2_removed")
+    has_accounting = ghg.get("system_boundary_defined") and quant.get("input_variables")
+    field_scores = [
+        score_presence_field("ghg_accounting.net_cdr", net_cdr, 60,
+                             note_if_missing="Estimativa numérica de remoção líquida (tCO2e) não fornecida."),
+        score_boolean_field("ghg_accounting.system_boundary_defined", has_accounting, 40,
+                            note_if_missing="Metodologia de cálculo da remoção não evidenciada."),
+    ]
+    score = summarize_field_scores(field_scores)
+    notes = collect_field_score_notes(field_scores)
+    notes.append("[Protocolo] Isometric Standard v1.7, R-XT6V-0 — estimativa em tCO2e para o período de crédito completo.")
+    status = _derive_status(score, 30, 80)
+    return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+        failed_fields=[], notes=notes, requirement_score=score, field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score),
+        gap="Capacidade de remoção líquida não estimada quantitativamente." if score < 30 else "",
+        recommendation="Fornecer estimativa em tCO2e para o período de crédito completo, com metodologia de cálculo descrita." if score < 30 else "")
 
 def eval_system_boundary_v1(data, audit_mode="development"):
     ghg = data.get("ghg_accounting", {})
@@ -702,7 +745,7 @@ def eval_system_boundary_v1(data, audit_mode="development"):
         score_boolean_field("ghg_accounting.baseline_defined", ghg.get("baseline_defined"), 20, note_if_missing="Baseline não definido."),
     ]
     score = summarize_field_scores(field_scores)
-    status = derive_requirement_status_from_score(score, 40, 85)
+    status = _derive_status(score, 40, 85)
     return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
         failed_fields=[], notes=collect_field_score_notes(field_scores),
         requirement_score=score, field_scores=field_scores, requirement_rating=derive_requirement_rating(score))
@@ -715,13 +758,33 @@ def eval_baseline_v1(data, audit_mode="development"):
         score_presence_field("feedstock.pre_project_biomass_use", feedstock.get("pre_project_biomass_use"), 40, note_if_missing="Uso pré-projeto do feedstock (cenário counterfactual) não descrito."),
     ]
     score = summarize_field_scores(field_scores)
-    status = derive_requirement_status_from_score(score, 40, 85)
+    status = _derive_status(score, 40, 85)
     return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
         failed_fields=[], notes=collect_field_score_notes(field_scores),
         requirement_score=score, field_scores=field_scores, requirement_rating=derive_requirement_rating(score))
 
 def eval_leakage_v1(data, audit_mode="development"):
-    return _stub("R-HF2G-0", "Avaliação de leakage (emissões fora do boundary)", audit_mode)
+    """R-HF2G-0: Avaliação robusta de leakage — emissões fora do boundary causadas pelo projeto."""
+    ghg = data.get("ghg_accounting", {})
+    leakage = ghg.get("leakage_emissions")
+    boundary = ghg.get("system_boundary_defined")
+    CITATION = "Isometric Standard v1.7, R-HF2G-0 — leakage quantificado e deduzido das remoções"
+    field_scores = [
+        score_boolean_field("ghg_accounting.system_boundary_defined", boundary, 40,
+                            note_if_missing="Boundary do sistema não definido — impossível avaliar leakage."),
+        score_presence_field("ghg_accounting.leakage_emissions", leakage, 60,
+                             note_if_missing="Avaliação de leakage não realizada ou não quantificada."),
+    ]
+    score = summarize_field_scores(field_scores)
+    notes = collect_field_score_notes(field_scores)
+    notes.append(f"[Protocolo] {CITATION}")
+    threshold = 50 if audit_mode == "operational" else 25
+    status = _derive_status(score, threshold, 85)
+    return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+        failed_fields=[], notes=notes, requirement_score=score, field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score),
+        gap="Leakage não avaliado ou não deduzido das remoções." if score < threshold else "",
+        recommendation="Avaliar potenciais aumentos de emissões GHG fora do boundary causados pelo projeto e quantificar para dedução. Referência: Isometric Standard v1.7, R-HF2G-0." if score < threshold else "")
 
 def eval_financial_additionality_v1(data, audit_mode="development"):
     eligibility = data.get("eligibility", {})
@@ -734,13 +797,35 @@ def eval_financial_additionality_v1(data, audit_mode="development"):
     score = summarize_field_scores(field_scores)
     if add_claim is not True:
         return _non_compliant("Adicionalidade financeira não declarada.", "Demonstrar que remoções de carbono são o propósito principal E principal fonte de receita; OU fornecer análise de IRR demonstrando barreiras econômicas.", "Isometric Standard v1.7, R-53Y5-0")
-    status = derive_requirement_status_from_score(score, 50, 85)
+    status = _derive_status(score, 50, 85)
     return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
         failed_fields=[], notes=collect_field_score_notes(field_scores),
         requirement_score=score, field_scores=field_scores, requirement_rating=derive_requirement_rating(score))
 
 def eval_common_practice_additionality_v1(data, audit_mode="development"):
-    return _stub("R-RRST-0", "Análise de prática comum (common practice additionality)", audit_mode)
+    """R-RRST-0: Atividades similares não são prática comum.
+    Biochar abaixo de TRL 8/9 → adicionalidade automática.
+    TRL ≥ 7 → análise geográfica completa exigida.
+    """
+    eligibility = data.get("eligibility", {})
+    add_claim = eligibility.get("additionality_claim")
+    CITATION = "Isometric Standard v1.7, R-RRST-0 — common practice additionality"
+    # Biochar é tecnologia emergente (geralmente TRL 4-7) → adicionalidade automática
+    # Se additionality_claim está presente, assume que a análise foi feita
+    field_scores = [
+        score_boolean_field("eligibility.additionality_claim", add_claim, 100,
+                            note_if_missing="Análise de prática comum (common practice) não realizada."),
+    ]
+    score = summarize_field_scores(field_scores)
+    notes = collect_field_score_notes(field_scores)
+    notes.append(f"[Protocolo] {CITATION}")
+    notes.append("Biochar geralmente abaixo de TRL 8/9 — adicionalidade de prática comum tipicamente automática.")
+    status = _derive_status(score, 50, 90)
+    return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+        failed_fields=[], notes=notes, requirement_score=score, field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score),
+        gap="Adicionalidade de prática comum não demonstrada." if score < 50 else "",
+        recommendation="Se TRL < 8: declarar que biochar não é prática comum. Se TRL ≥ 7: análise geográfica completa com avaliação de atividades similares." if score < 50 else "")
 
 def eval_environmental_additionality_v1(data, audit_mode="development"):
     eligibility = data.get("eligibility", {})
@@ -755,7 +840,28 @@ def eval_environmental_additionality_v1(data, audit_mode="development"):
         notes=["Impacto climático líquido negativo declarado."], requirement_score=100, field_scores=field_scores, requirement_rating="strong")
 
 def eval_regulatory_additionality_v1(data, audit_mode="development"):
-    return _stub("R-983D-0", "Adicionalidade regulatória (projeto não exigido por lei)", audit_mode)
+    """R-983D-0: Projeto não exigido por leis, regulamentos ou obrigações vinculantes existentes."""
+    legal = data.get("legal", {})
+    safeguards = data.get("safeguards", {})
+    permits = safeguards.get("permits_documented")
+    legal_req = legal.get("applicable_environmental_requirements")
+    CITATION = "Isometric Standard v1.7, R-983D-0 — regulatory additionality"
+    # Se o projeto tem conformidade legal mas não é exigido por lei = adicionalidade
+    field_scores = [
+        score_boolean_field("legal.applicable_environmental_requirements", legal_req, 60,
+                            note_if_missing="Requisitos regulatórios aplicáveis não identificados — adicionalidade regulatória não avaliável."),
+        score_boolean_field("safeguards.permits_documented", permits, 40,
+                            note_if_missing="Permissões e licenças não documentadas."),
+    ]
+    score = summarize_field_scores(field_scores)
+    notes = collect_field_score_notes(field_scores)
+    notes.append(f"[Protocolo] {CITATION}")
+    status = _derive_status(score, 40, 85)
+    return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+        failed_fields=[], notes=notes, requirement_score=score, field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score),
+        gap="Adicionalidade regulatória não demonstrada." if score < 40 else "",
+        recommendation="Evidenciar que o projeto não é exigido por leis ou regulamentos existentes. Se parcialmente regulado, demonstrar que as remoções excedem o mínimo legal." if score < 40 else "")
 
 def eval_regulatory_compliance_v1(data, audit_mode="development"):
     legal = data.get("legal", {})
@@ -764,13 +870,38 @@ def eval_regulatory_compliance_v1(data, audit_mode="development"):
         score_boolean_field("legal.applicable_environmental_requirements", compliant, 100, note_if_missing="Conformidade com requisitos legais ambientais não evidenciada."),
     ]
     score = summarize_field_scores(field_scores)
-    status = derive_requirement_status_from_score(score, 50, 90)
+    status = _derive_status(score, 50, 90)
     return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
         failed_fields=[], notes=collect_field_score_notes(field_scores),
         requirement_score=score, field_scores=field_scores, requirement_rating=derive_requirement_rating(score))
 
 def eval_reversals_v1(data, audit_mode="development"):
-    return _stub("R-V143-0", "Avaliação de risco de reversão e tamanho do buffer pool", audit_mode)
+    """R-V143-0: Avaliação de risco de reversão e buffer pool.
+    Para biochar em solo: Very Low Risk → 2% buffer pool (protocolo, Section 7.1).
+    """
+    methodology = data.get("methodology", {})
+    management = data.get("management", {})
+    storage_pathway = methodology.get("storage_pathway", "")
+    adaptive_plan = management.get("adaptive_management_plan")
+    pause_cond = management.get("pause_or_stop_conditions")
+    CITATION = "Isometric Biochar Storage in Soil Environments v1.2, Section 7.1 — buffer pool 2%"
+    field_scores = [
+        score_boolean_field("management.adaptive_management_plan", adaptive_plan, 50,
+                            note_if_missing="Plano de gestão adaptativa (mitigação de risco de reversão) ausente."),
+        score_boolean_field("management.pause_or_stop_conditions", pause_cond, 50,
+                            note_if_missing="Condições de pausa/parada para prevenção de reversão não definidas."),
+    ]
+    score = summarize_field_scores(field_scores)
+    notes = collect_field_score_notes(field_scores)
+    notes.append(f"[Protocolo] {CITATION}")
+    if storage_pathway == "soil":
+        notes.append("Biochar em solo: classificado como Very Low Risk → buffer pool = 2% dos créditos emitidos.")
+    status = _derive_status(score, 40, 85)
+    return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+        failed_fields=[], notes=notes, requirement_score=score, field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score),
+        gap="Avaliação de risco de reversão incompleta." if score < 40 else "",
+        recommendation="Completar o questionário de risco de reversão do Isometric. Para armazenamento em solo: buffer pool = 2%. Documentar plano de mitigação de reversões (combustão acidental, remoção do solo)." if score < 40 else "")
 
 def eval_uncertainty_analysis_v1(data, audit_mode="development"):
     quant = data.get("quantification", {})
@@ -780,16 +911,64 @@ def eval_uncertainty_analysis_v1(data, audit_mode="development"):
         score_boolean_field("quantification.storage_emissions_accounted", quant.get("storage_emissions_accounted"), 20, note_if_missing="Emissões de armazenamento não contabilizadas."),
     ]
     score = summarize_field_scores(field_scores)
-    status = derive_requirement_status_from_score(score, 40, 85)
+    status = _derive_status(score, 40, 85)
     return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
         failed_fields=[], notes=collect_field_score_notes(field_scores),
         requirement_score=score, field_scores=field_scores, requirement_rating=derive_requirement_rating(score))
 
 def eval_proxies_models_v1(data, audit_mode="development"):
-    return _stub("R-NZQ2-0", "Modelos utilizados descritos e justificados", audit_mode)
+    """R-NZQ2-0: Modelos e proxies descritos com fonte, validação empírica e incerteza."""
+    quant = data.get("quantification", {})
+    ghg = data.get("ghg_accounting", {})
+    # O projeto usa o modelo Fdurable do Isometric — proxy: se H/C e soil temp documentados
+    hc = data.get("biochar", {}).get("characterization", {}).get("h_c_ratio") or \
+         data.get("biochar", {}).get("characterization", {}).get("hc_ratio")
+    soil_temp = data.get("storage", {}).get("soil", {}).get("annual_avg_temp_celsius")
+    methodology_standard = data.get("methodology", {}).get("standard")
+    CITATION = "Isometric Standard v1.7, R-NZQ2-0 — modelos com fonte peer-reviewed, parâmetros e validação"
+    field_scores = [
+        score_presence_field("biochar.characterization.h_c_ratio", hc, 40,
+                             note_if_missing="H/Corg não informado — modelo Fdurable não pode ser calculado."),
+        score_presence_field("storage.soil.annual_avg_temp_celsius", soil_temp, 35,
+                             note_if_missing="Temperatura do solo não fornecida — parâmetro do modelo Fdurable ausente."),
+        score_presence_field("methodology.standard", methodology_standard, 25,
+                             note_if_missing="Modelo de durabilidade (Equação Fdurable do Isometric) não referenciado."),
+    ]
+    score = summarize_field_scores(field_scores)
+    notes = collect_field_score_notes(field_scores)
+    notes.append(f"[Protocolo] {CITATION}")
+    notes.append("Modelo principal: Equação Fdurable,200 = min(0.95, 1 - [c + (a + b·ln(Tsoil))·H/Corg]) com parâmetros conservadores do Isometric.")
+    status = _derive_status(score, 30, 80)
+    return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+        failed_fields=[], notes=notes, requirement_score=score, field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score))
 
 def eval_data_collection_v1(data, audit_mode="development"):
-    return _stub("R-GYA1-0", "Abordagem de coleta e armazenamento de dados (retenção mínima 5 anos)", audit_mode)
+    """R-GYA1-0: Coleta, armazenamento e retenção de dados.
+    Hard gate operacional: retenção mínima de 5 anos.
+    """
+    management = data.get("management", {})
+    monitoring_triggers = management.get("monitoring_triggers")
+    info_sharing = management.get("information_sharing_plan")
+    CITATION = "Isometric Standard v1.7, R-GYA1-0 — retenção mínima de 5 anos, backup, responsáveis"
+    field_scores = [
+        score_boolean_field("management.information_sharing_plan", info_sharing, 50,
+                            note_if_missing="Plano de transmissão e armazenamento de dados não documentado."),
+        score_boolean_field("management.monitoring_triggers", monitoring_triggers, 50,
+                            note_if_missing="Procedimentos de coleta e responsáveis pelos dados não definidos."),
+    ]
+    score = summarize_field_scores(field_scores)
+    notes = collect_field_score_notes(field_scores)
+    notes.append(f"[Protocolo] {CITATION}")
+    if audit_mode == "operational":
+        notes.append("Operacional: sistema de retenção ≥ 5 anos deve estar implementado com evidências.")
+    threshold = 50 if audit_mode == "operational" else 25
+    status = _derive_status(score, threshold, 85)
+    return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+        failed_fields=[], notes=notes, requirement_score=score, field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score),
+        gap="Abordagem de coleta e armazenamento de dados não documentada." if score < threshold else "",
+        recommendation="Documentar: como dados são coletados/transmitidos, período de retenção (mínimo 5 anos), procedimentos de backup e responsáveis. Referência: R-GYA1-0." if score < threshold else "")
 
 def eval_environmental_social_impact_v1(data, audit_mode="development"):
     safeguards = data.get("safeguards", {})
@@ -801,28 +980,158 @@ def eval_environmental_social_impact_v1(data, audit_mode="development"):
         score_boolean_field("safeguards.environmental_risk_assessment", env_risk, 50, note_if_missing="Avaliação de impacto ambiental/social não realizada."),
     ]
     score = summarize_field_scores(field_scores)
-    status = derive_requirement_status_from_score(score, 30, 80)
+    status = _derive_status(score, 30, 80)
     return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
         failed_fields=[], notes=collect_field_score_notes(field_scores),
         requirement_score=score, field_scores=field_scores, requirement_rating=derive_requirement_rating(score))
 
 def eval_sustainable_development_v1(data, audit_mode="development"):
-    return _stub("R-BWX0-0", "Alinhamento com ODS relevantes", audit_mode)
+    """R-BWX0-0: Alinhamento com ODS relevantes demonstrado."""
+    safeguards = data.get("safeguards", {})
+    management = data.get("management", {})
+    # Proxies: plano adaptativo + sem dano social = alinhamento com ODS
+    adaptive = management.get("adaptive_management_plan") or safeguards.get("adaptive_management_plan")
+    no_social_harm = safeguards.get("stakeholder_input_process") or management.get("information_sharing_plan")
+    field_scores = [
+        score_boolean_field("management.adaptive_management_plan", adaptive, 50,
+                            note_if_missing="Nenhuma evidência de práticas sustentáveis documentadas."),
+        score_boolean_field("safeguards.stakeholder_input_process", no_social_harm, 50,
+                            note_if_missing="Engajamento com ODS sociais não evidenciado."),
+    ]
+    score = summarize_field_scores(field_scores)
+    notes = collect_field_score_notes(field_scores)
+    notes.append("[Protocolo] Isometric Standard v1.7, R-BWX0-0 — ODS relevantes: ODS 13 (Ação Climática), ODS 2 (Fome Zero), ODS 15 (Vida Terrestre).")
+    status = _derive_status(score, 25, 75)
+    return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+        failed_fields=[], notes=notes, requirement_score=score, field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score))
 
 def eval_project_closure_v1(data, audit_mode="development"):
-    return _stub("R-6VFZ-0", "Plano de encerramento do projeto", audit_mode)
+    """R-6VFZ-0: Condições de encerramento e plano de fechamento pós-cessação."""
+    management = data.get("management", {})
+    pause_cond = management.get("pause_or_stop_conditions")
+    adaptive = management.get("adaptive_management_plan")
+    field_scores = [
+        score_boolean_field("management.pause_or_stop_conditions", pause_cond, 60,
+                            note_if_missing="Condições de encerramento do projeto não definidas."),
+        score_boolean_field("management.adaptive_management_plan", adaptive, 40,
+                            note_if_missing="Ações pós-cessação não documentadas."),
+    ]
+    score = summarize_field_scores(field_scores)
+    notes = collect_field_score_notes(field_scores)
+    notes.append("[Protocolo] Isometric Standard v1.7, R-6VFZ-0 — condições de encerramento e ações pós-cessação.")
+    status = _derive_status(score, 25, 75)
+    return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+        failed_fields=[], notes=notes, requirement_score=score, field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score),
+        gap="Plano de encerramento do projeto não documentado." if score < 25 else "",
+        recommendation="Descrever: (1) condições sob as quais o projeto será encerrado, (2) ações pós-cessação (monitoramento residual, relatório final, transferência de créditos)." if score < 25 else "")
 
 def eval_site_selection_v1(data, audit_mode="development"):
-    return _stub("R-M760-0", "Amostras de solo baseline coletadas antes da aplicação de biochar", audit_mode)
+    """R-M760-0: Amostras de solo baseline antes da aplicação (solo: pH, umidade, bulk density, SOC, nutrientes).
+    Aplicável apenas para storage_pathway = soil.
+    """
+    methodology = data.get("methodology", {})
+    if methodology.get("storage_pathway") != "soil":
+        return build_logic_result(status="not_applicable", missing_fields=[], failed_fields=[],
+            notes=["Requisito aplicável apenas para projetos com armazenamento em solo."],
+            requirement_score=None, field_scores=[], requirement_rating=None)
+    # Proxies: monitoramento de solo e adaptive management
+    management = data.get("management", {})
+    monitoring = management.get("monitoring_triggers")
+    CITATION = "Isometric Biochar Storage in Soil Environments v1.2, R-M760-0 — baseline soil samples"
+    field_scores = [
+        score_boolean_field("management.monitoring_triggers", monitoring, 100,
+                            note_if_missing="Plano de monitoramento de solo não documentado. Amostras baseline (pH, umidade, bulk density, SOC) exigidas antes da aplicação."),
+    ]
+    score = summarize_field_scores(field_scores)
+    notes = collect_field_score_notes(field_scores)
+    notes.append(f"[Protocolo] {CITATION}")
+    notes.append("Profundidade de coleta: máximo da profundidade de revolvimento ou 30 cm (o que for maior). Coleta randomizada preferida.")
+    threshold = 50 if audit_mode == "operational" else 20
+    status = _derive_status(score, threshold, 85)
+    return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+        failed_fields=[], notes=notes, requirement_score=score, field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score),
+        gap="Amostras de solo baseline não coletadas antes da aplicação de biochar." if score < threshold else "",
+        recommendation="Coletar amostras de solo baseline ANTES da primeira aplicação: pH (ISO 10390), umidade, bulk density, tipo/textura, disponibilidade de nutrientes e SOC (ISO 10694). Profundidade: ≤ 30cm ou profundidade de revolvimento." if score < threshold else "")
 
 def eval_co_benefits_v1(data, audit_mode="development"):
-    return _stub("R-1YC3-0", "Co-benefícios de saúde do solo (opcional)", audit_mode)
+    """R-1YC3-0: Co-benefícios de saúde do solo documentados (opcional, não hard gate)."""
+    management = data.get("management", {})
+    adaptive = management.get("adaptive_management_plan")
+    # Optional — score encourages documentation but doesn't penalize absence
+    field_scores = [
+        score_boolean_field("management.adaptive_management_plan", adaptive, 100,
+                            note_if_missing="Co-benefícios de solo não documentados (opcional)."),
+    ]
+    score = summarize_field_scores(field_scores)
+    notes = ["[Protocolo] Isometric Biochar Storage in Soil Environments v1.2, R-1YC3-0 — co-benefícios opcionais."]
+    if score < 50:
+        notes.append("Oportunidade: documentar co-benefícios aumenta valor do projeto. Ex: remediação de poluentes, redução de compactação, aumento de retenção de água, carbono orgânico do solo.")
+    # Non hard gate: any presence is partial, full documentation is compliant
+    status = "partial" if score < 50 else "compliant"
+    return build_logic_result(status=status, missing_fields=[], failed_fields=[],
+        notes=notes, requirement_score=max(score, 35), field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score))
 
 def eval_stakeholder_consultation_v1(data, audit_mode="development"):
-    return _stub("R-ZHRN-0/R-E579-0", "Consulta a stakeholders e mecanismo de reclamações", audit_mode)
+    """R-ZHRN-0 + R-E579-0: Consulta a stakeholders documentada + mecanismo de reclamações.
+    Hard gate: consulta DEVE ser documentada.
+    Prazos: reconhecimento ≤ 14 dias, resolução ≤ 60 dias.
+    """
+    safeguards = data.get("safeguards", {})
+    management = data.get("management", {})
+    stakeholder_input = safeguards.get("stakeholder_input_process")
+    info_sharing = management.get("information_sharing_plan")
+    CITATION = "Isometric Standard v1.7, R-ZHRN-0/R-E579-0 — consulta iterativa, acessível, transparente"
+    field_scores = [
+        score_boolean_field("safeguards.stakeholder_input_process", stakeholder_input, 60,
+                            note_if_missing="Processo de consulta a stakeholders não documentado (convites, comentários recebidos, ações tomadas)."),
+        score_boolean_field("management.information_sharing_plan", info_sharing, 40,
+                            note_if_missing="Mecanismo de reclamações não definido (reconhecimento ≤14 dias, resolução ≤60 dias)."),
+    ]
+    score = summarize_field_scores(field_scores)
+    notes = collect_field_score_notes(field_scores)
+    notes.append(f"[Protocolo] {CITATION}")
+    notes.append("Prazos obrigatórios: reconhecimento de reclamações ≤ 14 dias; resolução ou escalação ≤ 60 dias.")
+    threshold = 50 if audit_mode == "operational" else 35
+    status = _derive_status(score, threshold, 85)
+    return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+        failed_fields=[], notes=notes, requirement_score=score, field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score),
+        gap="Consulta a stakeholders não documentada ou mecanismo de reclamações ausente." if score < threshold else "",
+        recommendation="Documentar: (1) como stakeholders foram convidados, (2) resumo dos comentários, (3) como foram considerados. Disponibilizar contato público; reconhecer reclamações em ≤ 14 dias." if score < threshold else "")
 
 def eval_monitoring_requirements_v1(data, audit_mode="development"):
-    return _stub("R-ENZR-0", "Tabela de parâmetros monitorados (fonte, frequência, QA/QC, evidências)", audit_mode)
+    """R-ENZR-0: Tabela de parâmetros monitorados com fonte, frequência, QA/QC e evidências.
+    Hard gate em desenvolvimento: tabela deve existir no PDD.
+    """
+    management = data.get("management", {})
+    emissions = data.get("emissions", {})
+    monitoring = management.get("monitoring_triggers")
+    has_emissions_method = bool(emissions.get("stack_monitoring_method") or emissions.get("testing_frequency"))
+    CITATION = "Isometric Standard v1.7, R-ENZR-0 — tabela de parâmetros monitorados (fonte, frequência, QA/QC)"
+    field_scores = [
+        score_boolean_field("management.monitoring_triggers", monitoring, 50,
+                            note_if_missing="Tabela de parâmetros monitorados não fornecida no PDD."),
+        score_boolean_field("emissions.stack_monitoring_method", has_emissions_method, 50,
+                            note_if_missing="Parâmetros de emissões (fonte, frequência, método) não documentados na tabela."),
+    ]
+    score = summarize_field_scores(field_scores)
+    notes = collect_field_score_notes(field_scores)
+    notes.append(f"[Protocolo] {CITATION}")
+    if audit_mode == "development":
+        notes.append("Tabela deve cobrir: parâmetro, fonte de dados, frequência de medição, procedimentos QA/QC e evidências planejadas.")
+    else:
+        notes.append("Operacional: tabela deve refletir dados reais coletados com registros de QA/QC executados.")
+    threshold = 50 if audit_mode == "operational" else 35
+    status = _derive_status(score, threshold, 85)
+    return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+        failed_fields=[], notes=notes, requirement_score=score, field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score),
+        gap="Tabela de parâmetros monitorados ausente ou incompleta." if score < threshold else "",
+        recommendation="Criar tabela no PDD/Apêndice com todos os parâmetros do protocolo selecionado: para cada parâmetro indicar fonte de dados, frequência, procedimentos QA/QC e tipo de evidência. Referência: R-ENZR-0." if score < threshold else "")
 
 def eval_biochar_char_standards_v1(data, audit_mode="development"):
     char = data.get("biochar", {}).get("characterization", {})
@@ -833,13 +1142,34 @@ def eval_biochar_char_standards_v1(data, audit_mode="development"):
         score_presence_field("biochar.characterization.sampling_method", method, 40, note_if_missing="Normas de análise química e física não listadas."),
     ]
     score = summarize_field_scores(field_scores)
-    status = derive_requirement_status_from_score(score, 30, 80)
+    status = _derive_status(score, 30, 80)
     return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
         failed_fields=[], notes=collect_field_score_notes(field_scores),
         requirement_score=score, field_scores=field_scores, requirement_rating=derive_requirement_rating(score))
 
 def eval_biochar_physical_properties_v1(data, audit_mode="development"):
-    return _stub("R-7W1N-0", "Propriedades físicas do biochar medidas (porosidade, BET, granulometria)", audit_mode)
+    """R-7W1N-0: Propriedades físicas do biochar medidas (porosidade, BET, granulometria).
+    Recomendado, não hard gate.
+    """
+    char = data.get("biochar", {}).get("characterization", {})
+    lab = char.get("lab_reports")
+    chem_done = char.get("chemical_analysis_performed")
+    CITATION = "Isometric Biochar Storage in Soil Environments v1.2, R-7W1N-0 — propriedades físicas recomendadas"
+    field_scores = [
+        score_boolean_field("biochar.characterization.lab_reports", lab, 60,
+                            note_if_missing="Laudos de análise física (porosidade, BET, granulometria) não fornecidos."),
+        score_boolean_field("biochar.characterization.chemical_analysis_performed", chem_done, 40,
+                            note_if_missing="Análise laboratorial do biochar não realizada."),
+    ]
+    score = summarize_field_scores(field_scores)
+    notes = collect_field_score_notes(field_scores)
+    notes.append(f"[Protocolo] {CITATION}")
+    notes.append("Análises recomendadas: porosidade (ISO 15901), superfície específica BET (ISO 9277), distribuição granulométrica (ISO 565 ou ISO 13320).")
+    # Non hard gate — partial acceptable even in operational
+    status = _derive_status(score, 20, 75)
+    return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+        failed_fields=[], notes=notes, requirement_score=max(score, 35), field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score))
 
 
 # ── Registry de funções (usado pelo run_engine para lookup) ──────────────────

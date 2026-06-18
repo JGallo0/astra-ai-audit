@@ -415,6 +415,8 @@ def build_logic_result(
     requirement_score=None,
     field_scores=None,
     requirement_rating=None,
+    gap=None,
+    recommendation=None,
 ):
     return {
         "status": status,
@@ -424,6 +426,10 @@ def build_logic_result(
         "requirement_score": requirement_score,
         "field_scores": field_scores or [],
         "requirement_rating": requirement_rating,
+        # v1: gap e recommendation podem ser definidos pela função de lógica
+        # run_engine usa esses valores se presentes, senão gera os genéricos
+        "_gap_override": gap,
+        "_recommendation_override": recommendation,
     }
 
 def score_boolean_field(
@@ -754,7 +760,7 @@ def apply_inference_rules(project_data: dict) -> dict:
     return data
 
 
-def run_engine(project_data, requirements):
+def run_engine(project_data, requirements, audit_mode="development"):
     from scoring import calculate_compliance_score
 
     # Nível 2: aplicar inferências antes de avaliar
@@ -830,9 +836,12 @@ def run_engine(project_data, requirements):
             })
             continue
 
-        # 3) Executa a lógica
+        # 3) Executa a lógica — tenta com audit_mode (v1), fallback sem (legacy)
         try:
-            logic_output = logic_fn(project_data)
+            try:
+                logic_output = logic_fn(project_data, audit_mode=audit_mode)
+            except TypeError:
+                logic_output = logic_fn(project_data)
         except Exception as e:
             results.append({
                 "requirement_id": req_id,
@@ -931,11 +940,12 @@ def run_engine(project_data, requirements):
 
         methodology_basis = build_methodology_basis_text(req)
 
-        gap, recommendation = build_gap_and_recommendation(
-            status,
-            missing_fields,
-            failed_fields,
+        _gap_gen, _rec_gen = build_gap_and_recommendation(
+            status, missing_fields, failed_fields,
         )
+        # Preferir gap/recommendation da função de lógica (v1) se presentes
+        gap = logic_output.get("_gap_override") or _gap_gen if isinstance(logic_output, dict) else _gap_gen
+        recommendation = logic_output.get("_recommendation_override") or _rec_gen if isinstance(logic_output, dict) else _rec_gen
 
         # 7) Monta saída estruturada
         results.append({
@@ -962,6 +972,10 @@ def run_engine(project_data, requirements):
             "methodology_basis": methodology_basis,
             "gap": gap,
             "recommendation": recommendation,
+            # v1 fields (source traceability)
+            "source_url": req.get("source_url", ""),
+            "requirement_text": req.get("requirement_text", ""),
+            "audit_mode": audit_mode,
         })
 
     score_data    = calculate_compliance_score(results)

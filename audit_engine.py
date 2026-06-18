@@ -549,7 +549,7 @@ class AuditEngine:
         # =========================================================
         # DEBUG 1 — OUTPUT DO RUN_ENGINE
         # =========================================================
-        engine_output = run_engine(project_data, filtered_requirements)
+        engine_output = run_engine(project_data, filtered_requirements, audit_mode=audit_mode)
 
         if not isinstance(engine_output, dict):
             raise TypeError(
