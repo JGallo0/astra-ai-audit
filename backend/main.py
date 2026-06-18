@@ -311,11 +311,19 @@ def download_report(run_id: str, format: str = Query("json")):
         r = _db_fetchone("SELECT * FROM ca_audit_runs WHERE id=%s", (run_id,))
         if r:
             result_raw = r.get("result")
-            run = {"status": r["status"], "result": json.loads(result_raw) if isinstance(result_raw, str) else result_raw}
+            run = {
+                "id": r["id"],
+                "status": r["status"],
+                "result": json.loads(result_raw) if isinstance(result_raw, str) else result_raw,
+            }
     if not run or run.get("status") != "completed":
         raise HTTPException(404, "Auditoria não concluída")
 
     result = run.get("result", {})
+    results_list = result.get("results", result.get("findings", []))
+    score_data  = result.get("score_data", {})
+    audit_mode  = result.get("audit_mode", "development")
+    score_label = result.get("score_label", "")
 
     if format == "json":
         content = json.dumps(result, ensure_ascii=False, indent=2).encode("utf-8")
@@ -323,20 +331,70 @@ def download_report(run_id: str, format: str = Query("json")):
             io.BytesIO(content), media_type="application/json",
             headers={"Content-Disposition": f'attachment; filename="audit_{run_id}.json"'},
         )
+
     try:
-        from aia import generate_compliance_matrix_pdf, generate_compliance_matrix_docx
-        if format == "pdf":
-            buf = generate_compliance_matrix_pdf(result)
-            return StreamingResponse(io.BytesIO(buf), media_type="application/pdf",
-                headers={"Content-Disposition": f'attachment; filename="audit_{run_id}.pdf"'})
-        if format == "docx":
-            buf = generate_compliance_matrix_docx(result)
-            return StreamingResponse(io.BytesIO(buf),
+        from app_pages.validation_utils import (
+            build_audit_dataframe,
+            matrix_to_pdf_bytes,
+            matrix_to_docx_bytes,
+            build_full_audit_text,
+            pdf_from_text_branded,
+            docx_from_text,
+        )
+
+        # ── Compliance Matrix (PDF / DOCX) ────────────────────────────────
+        if format in ("pdf", "docx"):
+            # Enriquecer results com campo 'score' esperado pelo build_audit_dataframe
+            for r in results_list:
+                if "score" not in r:
+                    r["score"] = r.get("requirement_score")
+
+            df = build_audit_dataframe(results_list)
+            title = f"CO2mply | Compliance Matrix — {score_label} ({score_data.get('score', 0):.1f}%) [{audit_mode}]"
+
+            if format == "pdf":
+                buf = matrix_to_pdf_bytes(df, title)
+                return StreamingResponse(
+                    io.BytesIO(buf), media_type="application/pdf",
+                    headers={"Content-Disposition": f'attachment; filename="compliance_matrix_{run_id}.pdf"'},
+                )
+            else:
+                buf = matrix_to_docx_bytes(df, title)
+                return StreamingResponse(
+                    io.BytesIO(buf),
+                    media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    headers={"Content-Disposition": f'attachment; filename="compliance_matrix_{run_id}.docx"'},
+                )
+
+        # ── Audit Summary (PDF text) ──────────────────────────────────────
+        if format == "summary_pdf":
+            from scoring import summarize_results
+            summary = summarize_results(results_list)
+            text = build_full_audit_text(summary, results_list)
+            buf = pdf_from_text_branded(
+                f"CO2mply | Audit Summary", text, brand_name="CO2mply"
+            )
+            return StreamingResponse(
+                io.BytesIO(buf), media_type="application/pdf",
+                headers={"Content-Disposition": f'attachment; filename="audit_summary_{run_id}.pdf"'},
+            )
+
+        # ── Audit Summary (DOCX) ─────────────────────────────────────────
+        if format == "summary_docx":
+            from scoring import summarize_results
+            summary = summarize_results(results_list)
+            text = build_full_audit_text(summary, results_list)
+            buf = docx_from_text("CO2mply | Audit Summary", text)
+            return StreamingResponse(
+                io.BytesIO(buf),
                 media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                headers={"Content-Disposition": f'attachment; filename="audit_{run_id}.docx"'})
+                headers={"Content-Disposition": f'attachment; filename="audit_summary_{run_id}.docx"'},
+            )
+
     except Exception as e:
         raise HTTPException(500, f"Geração de relatório falhou: {e}")
-    raise HTTPException(400, "Formato não suportado")
+
+    raise HTTPException(400, f"Formato não suportado: {format}. Use: json, pdf, docx, summary_pdf, summary_docx")
 
 # ── Chat ──────────────────────────────────────────────────────────────────────
 

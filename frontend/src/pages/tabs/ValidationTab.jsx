@@ -422,18 +422,26 @@ export default function ValidationTab() {
                           Clique em qualquer linha para ver gap, recomendação e link para o protocolo
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2" style={{flexWrap:'wrap'}}>
                         <button className="btn btn-sm btn-ghost"
                           onClick={() => window.open(`${API}/api/audit/${selectedRun.id}/report?format=json`)}>
                           ⬇ JSON
                         </button>
                         <button className="btn btn-sm btn-outline"
                           onClick={() => window.open(`${API}/api/audit/${selectedRun.id}/report?format=pdf`)}>
-                          ⬇ PDF
+                          ⬇ Matriz PDF
                         </button>
                         <button className="btn btn-sm btn-outline"
                           onClick={() => window.open(`${API}/api/audit/${selectedRun.id}/report?format=docx`)}>
-                          ⬇ DOCX
+                          ⬇ Matriz DOCX
+                        </button>
+                        <button className="btn btn-sm btn-ghost"
+                          onClick={() => window.open(`${API}/api/audit/${selectedRun.id}/report?format=summary_pdf`)}>
+                          ⬇ Resumo PDF
+                        </button>
+                        <button className="btn btn-sm btn-ghost"
+                          onClick={() => window.open(`${API}/api/audit/${selectedRun.id}/report?format=summary_docx`)}>
+                          ⬇ Resumo DOCX
                         </button>
                       </div>
                     </div>
