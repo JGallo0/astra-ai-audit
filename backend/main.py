@@ -454,18 +454,23 @@ def download_report(run_id: str, format: str = Query("json")):
 
             score_val = score_data.get("score", 0)
             mode_label = "Desenvolvimento" if audit_mode == "development" else "Operacional"
-            title = f"CO2mply | Compliance Matrix — {score_label} ({score_val:.1f}%) [{mode_label}]"
-
-            # Gerar texto limpo da matriz
-            matrix_text = _build_matrix_text(results_list, score_val, score_label, mode_label)
 
             if format == "pdf":
-                buf = pdf_from_text_branded(title, matrix_text, brand_name="CO2mply")
+                from backend.report_generator import generate_compliance_matrix_pdf
+                buf = generate_compliance_matrix_pdf(
+                    results=results_list,
+                    score_data={**score_data, "score_label": score_label},
+                    audit_mode=audit_mode,
+                    project_name="Projeto CO2mply",
+                )
                 return StreamingResponse(
                     io.BytesIO(buf), media_type="application/pdf",
                     headers={"Content-Disposition": f'attachment; filename="compliance_matrix_{run_id}.pdf"'},
                 )
             else:
+                # DOCX: usa texto limpo
+                title = f"CO2mply | Compliance Matrix — {score_label} ({score_val:.1f}%) [{mode_label}]"
+                matrix_text = _build_matrix_text(results_list, score_val, score_label, mode_label)
                 buf = docx_from_text(title, matrix_text)
                 return StreamingResponse(
                     io.BytesIO(buf),
