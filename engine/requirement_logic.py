@@ -751,11 +751,43 @@ def apply_inference_rules(project_data: dict) -> dict:
             storage_soil["deployment_methods"] = "soil_application"
 
     # 9. traceability.chain_of_custody_diagram — inferir apenas quando None (não extraído)
-    # Certificação de sustentabilidade implica rastreabilidade formal da cadeia
     traceability = data.setdefault("traceability", {})
     if traceability.get("chain_of_custody_diagram") is None:
         if feedstock.get("certification_scheme"):
             traceability["chain_of_custody_diagram"] = True
+
+    # 10. production.system_description ← project.description
+    # O extrator às vezes popula project.description em vez de production.system_description
+    project = data.setdefault("project", {})
+    if not production.get("system_description"):
+        proj_desc = project.get("description")
+        if proj_desc and isinstance(proj_desc, str) and len(proj_desc) > 20:
+            production["system_description"] = proj_desc
+
+    # 11. eligibility.eligible_pathway ← methodology.storage_pathway
+    # Se o pathway de armazenamento foi identificado, o eligible_pathway é o mesmo
+    if not eligibility.get("eligible_pathway"):
+        storage_pathway = methodology.get("storage_pathway")
+        if storage_pathway:
+            eligibility["eligible_pathway"] = storage_pathway
+
+    # 12. Normalização de campos booleanos mal extraídos como dict vazio {}
+    # O LLM às vezes retorna {} quando não encontra evidência — tratar como None
+    def _normalize_bool_field(d: dict, key: str):
+        val = d.get(key)
+        if isinstance(val, dict) and len(val) == 0:
+            d[key] = None
+        elif isinstance(val, list) and len(val) == 0:
+            d[key] = None
+
+    legal = data.setdefault("legal", {})
+    _normalize_bool_field(legal, "applicable_environmental_requirements")
+    _normalize_bool_field(legal, "regulatory_measurement_methods")
+    _normalize_bool_field(safeguards, "environmental_risk_assessment")
+    _normalize_bool_field(safeguards, "social_risk_assessment")
+    _normalize_bool_field(safeguards, "permits_documented")
+    _normalize_bool_field(safeguards, "stakeholder_input_process")
+    _normalize_bool_field(safeguards, "mitigation_plan")
 
     return data
 
