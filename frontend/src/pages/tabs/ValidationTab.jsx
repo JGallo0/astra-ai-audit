@@ -9,30 +9,20 @@ const MODULES = [
   'Emissões', 'Amostragem', 'Rastreabilidade', 'Gestão', 'Salvaguardas',
 ]
 
-// Motor estruturado retorna status em inglês; run_full_audit (legado) em português
-const STATUS_CLS = {
-  // inglês (run_structured_engine_audit)
-  'compliant':                  'compliance-status-conforme',
-  'partial':                    'compliance-status-parcial',
-  'non_compliant':              'compliance-status-nao',
-  'not_applicable':             'compliance-status-evidenciado',
-  'future_evidence_required':   'compliance-status-parcial',
-  'error':                      'compliance-status-evidenciado',
-  // português (legado / run_full_audit)
-  'Conforme':                   'compliance-status-conforme',
-  'Parcialmente conforme':      'compliance-status-parcial',
-  'Não conforme':               'compliance-status-nao',
-  'Não evidenciado':            'compliance-status-evidenciado',
-  'Erro de análise':            'compliance-status-evidenciado',
-}
-
-const STATUS_LABEL = {
-  compliant:                'Conforme',
-  partial:                  'Parcialmente conforme',
-  non_compliant:            'Não conforme',
-  not_applicable:           'Não aplicável',
-  future_evidence_required: 'Evidência futura',
-  error:                    'Erro de análise',
+// Status config — ícone, label, cor (motor v1 inglês + legado português)
+const STATUS_CONFIG = {
+  compliant:                { icon: '✅', label: 'Conforme',              color: 'var(--green)',  bg: 'var(--green-light)' },
+  partial:                  { icon: '⚠️', label: 'Parcial',               color: 'var(--amber)',  bg: 'var(--amber-light)' },
+  non_compliant:            { icon: '❌', label: 'Não conforme',          color: 'var(--red)',    bg: 'var(--red-light)' },
+  not_applicable:           { icon: '—',  label: 'N/A',                   color: 'var(--text-3)', bg: '#F1F5F9' },
+  future_evidence_required: { icon: '🔮', label: 'Evidência futura',      color: '#7C3AED',       bg: '#F5F3FF' },
+  error:                    { icon: '⚠',  label: 'Erro de análise',       color: 'var(--text-2)', bg: '#F1F5F9' },
+  // legado
+  'Conforme':               { icon: '✅', label: 'Conforme',              color: 'var(--green)',  bg: 'var(--green-light)' },
+  'Parcialmente conforme':  { icon: '⚠️', label: 'Parcial',               color: 'var(--amber)',  bg: 'var(--amber-light)' },
+  'Não conforme':           { icon: '❌', label: 'Não conforme',          color: 'var(--red)',    bg: 'var(--red-light)' },
+  'Não evidenciado':        { icon: '—',  label: 'Não evidenciado',       color: 'var(--text-3)', bg: '#F1F5F9' },
+  'Erro de análise':        { icon: '⚠',  label: 'Erro',                  color: 'var(--text-2)', bg: '#F1F5F9' },
 }
 
 const RISK_CLS = {
@@ -40,6 +30,107 @@ const RISK_CLS = {
   medium: 'badge-amber', medio: 'badge-amber',
   high: 'badge-red', alto: 'badge-red',
   none: 'badge-gray', unknown: 'badge-gray',
+}
+
+function StatusBadge({ status }) {
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.error
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 4,
+      padding: '3px 8px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+      color: cfg.color, background: cfg.bg,
+    }}>
+      <span style={{ fontSize: 10 }}>{cfg.icon}</span>
+      {cfg.label}
+    </span>
+  )
+}
+
+function FindingRow({ f }) {
+  const [open, setOpen] = useState(false)
+  const score = Math.round(f.requirement_score ?? f.score ?? 0)
+  const scoreColor = score >= 75 ? 'var(--green)' : score >= 50 ? 'var(--amber)' : 'var(--red)'
+
+  return (
+    <>
+      <tr
+        onClick={() => setOpen(o => !o)}
+        style={{ cursor: 'pointer' }}
+        className={open ? 'finding-row-open' : ''}
+      >
+        <td style={{ width: 110 }}>
+          {f.source_url
+            ? <a href={f.source_url} target="_blank" rel="noreferrer"
+                style={{ fontSize: 11, color: 'var(--navy)', fontWeight: 600, textDecoration: 'none' }}
+                onClick={e => e.stopPropagation()}>
+                {f.requirement_id} ↗
+              </a>
+            : <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600 }}>{f.requirement_id}</span>
+          }
+        </td>
+        <td>
+          <span className="badge badge-blue" style={{ fontSize: 10 }}>
+            {(f.module || '').split(':').pop().replace(/_/g, ' ')}
+          </span>
+        </td>
+        <td style={{ fontSize: 12, maxWidth: 280 }}>
+          <span style={{ fontWeight: 600 }}>{f.title}</span>
+        </td>
+        <td><StatusBadge status={f.status} /></td>
+        <td>
+          <span className={`badge ${RISK_CLS[f.risk] || 'badge-gray'}`} style={{ fontSize: 10 }}>
+            {f.risk}
+          </span>
+        </td>
+        <td style={{ fontWeight: 700, color: scoreColor, textAlign: 'right', width: 48 }}>
+          {score}
+        </td>
+        <td style={{ width: 20, color: 'var(--text-3)', fontSize: 12 }}>
+          {open ? '▲' : '▼'}
+        </td>
+      </tr>
+
+      {open && (
+        <tr style={{ background: '#FAFBFD' }}>
+          <td colSpan={7} style={{ padding: '10px 16px 14px', borderBottom: '1px solid var(--border)' }}>
+            {f.requirement_text && (
+              <div style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 8,
+                padding: '6px 10px', background: '#EFF3F9', borderRadius: 6,
+                borderLeft: '3px solid var(--navy)' }}>
+                <span style={{ fontWeight: 700, color: 'var(--navy)' }}>Protocolo: </span>
+                {f.requirement_text}
+              </div>
+            )}
+            {f.gap && (
+              <div style={{ marginBottom: 6 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--red)' }}>Gap: </span>
+                <span style={{ fontSize: 12, color: 'var(--text)' }}>{f.gap}</span>
+              </div>
+            )}
+            {f.recommendation && (
+              <div style={{ marginBottom: 6 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--green)' }}>Recomendação: </span>
+                <span style={{ fontSize: 12, color: 'var(--text)' }}>{f.recommendation}</span>
+              </div>
+            )}
+            {f.notes && f.notes.length > 0 && (
+              <div style={{ fontSize: 11, color: 'var(--text-2)', marginTop: 4 }}>
+                {f.notes.filter(n => !n.startsWith('[Protocolo]')).map((n, i) => (
+                  <div key={i} style={{ marginBottom: 2 }}>• {n}</div>
+                ))}
+              </div>
+            )}
+            {f.source_url && (
+              <a href={f.source_url} target="_blank" rel="noreferrer"
+                style={{ fontSize: 11, color: 'var(--navy)', fontWeight: 600, marginTop: 6, display: 'inline-block' }}>
+                📖 Ver no Isometric Registry →
+              </a>
+            )}
+          </td>
+        </tr>
+      )}
+    </>
+  )
 }
 
 function ScoreGauge({ score }) {
@@ -270,33 +361,67 @@ export default function ValidationTab() {
 
               {selectedRun?.status === 'completed' && (
                 <>
+                  {/* ── Header com badges de modo e projeto ── */}
+                  <div className="flex items-center gap-2" style={{ marginBottom: 14, flexWrap: 'wrap' }}>
+                    <span style={{
+                      padding: '4px 12px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+                      background: result.audit_mode === 'operational' ? '#FEF2F2' : '#EFF6FF',
+                      color: result.audit_mode === 'operational' ? 'var(--red)' : 'var(--navy)',
+                    }}>
+                      {result.audit_mode === 'operational' ? '⚡ Modo Operacional' : '🔧 Modo Desenvolvimento'}
+                    </span>
+                    {selectedProject && (
+                      <span className="badge badge-blue" style={{ fontSize: 11 }}>
+                        {selectedProject.name}
+                      </span>
+                    )}
+                    {selectedMethodologyMeta && (
+                      <span className="badge badge-green" style={{ fontSize: 11 }}>
+                        {selectedMethodologyMeta.label} {selectedMethodologyMeta.version}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* ── KPIs ── */}
                   <div className="grid-4" style={{marginBottom:16}}>
                     <div className="kpi-card flex items-center gap-3">
                       <ScoreGauge score={Math.round(score)} />
                       <div>
                         <div className="kpi-label">Score de Conformidade</div>
                         <div style={{fontSize:12,color:'var(--text-2)',marginTop:4}}>
-                          {scoreLabel || (score>=75?'Alto':score>=50?'Médio':'Baixo')}
+                          {scoreLabel || (score>=75?'Good':score>=50?'Moderate':'Critical')}
                         </div>
                       </div>
                     </div>
                     <div className="kpi-card">
                       <div className="kpi-value" style={{color:'var(--green)'}}>{compliant}</div>
-                      <div className="kpi-label">Conformes</div>
+                      <div className="kpi-label flex items-center gap-1">
+                        <span style={{fontSize:13}}>✅</span> Conformes
+                      </div>
                     </div>
                     <div className="kpi-card">
                       <div className="kpi-value" style={{color:'var(--amber)'}}>{partial}</div>
-                      <div className="kpi-label">Parciais / Ev. futura</div>
+                      <div className="kpi-label flex items-center gap-1">
+                        <span style={{fontSize:13}}>⚠️</span> Parciais
+                      </div>
                     </div>
                     <div className="kpi-card">
-                      <div className="kpi-value" style={{color:'var(--red)'}}>{nonComp}</div>
-                      <div className="kpi-label">Não conformes{notAppl > 0 ? ` · ${notAppl} N/A` : ''}</div>
+                      <div className="kpi-value" style={{color:'#7C3AED'}}>{findings.filter(f=>f.status==='future_evidence_required').length}</div>
+                      <div className="kpi-label flex items-center gap-1">
+                        <span style={{fontSize:13}}>🔮</span> Ev. futura{nonComp > 0 ? ` · ${nonComp} ❌` : ''}
+                      </div>
                     </div>
                   </div>
 
+                  {/* ── Matriz de Conformidade ── */}
                   <div className="card">
                     <div className="flex items-center justify-between" style={{marginBottom:14}}>
-                      <div className="card-title" style={{marginBottom:0}}>Matriz de Conformidade</div>
+                      <div>
+                        <div className="card-title" style={{marginBottom:2}}>Matriz de Conformidade</div>
+                        <div style={{fontSize:11,color:'var(--text-2)'}}>
+                          Clique em qualquer linha para ver gap, recomendação e link para o protocolo
+                        </div>
+                      </div>
                       <div className="flex gap-2">
                         <button className="btn btn-sm btn-ghost"
                           onClick={() => window.open(`${API}/api/audit/${selectedRun.id}/report?format=json`)}>
@@ -320,24 +445,17 @@ export default function ValidationTab() {
                           <table>
                             <thead>
                               <tr>
-                                <th style={{width:80}}>ID</th><th>Módulo</th><th>Requisito</th>
-                                <th>Status</th><th>Risco</th><th style={{width:60}}>Score</th>
+                                <th style={{width:110}}>ID</th>
+                                <th>Módulo</th>
+                                <th>Requisito</th>
+                                <th>Status</th>
+                                <th>Risco</th>
+                                <th style={{width:48, textAlign:'right'}}>Score</th>
+                                <th style={{width:20}}></th>
                               </tr>
                             </thead>
                             <tbody>
-                              {findings.map((f, i) => (
-                                <tr key={i}>
-                                  <td style={{fontSize:11,color:'var(--text-3)'}}>{f.requirement_id}</td>
-                                  <td><span className="badge badge-blue" style={{fontSize:10}}>{f.module}</span></td>
-                                  <td style={{maxWidth:320,fontSize:12}}>{f.title}</td>
-                                  <td><span className={STATUS_CLS[f.status]||'compliance-status-evidenciado'}>{STATUS_LABEL[f.status]||f.status}</span></td>
-                                  <td><span className={`badge ${RISK_CLS[f.risk]||'badge-gray'}`}>{f.risk}</span></td>
-                                  <td style={{fontWeight:700,
-                                    color:(f.requirement_score??f.score??0)>=75?'var(--green)':(f.requirement_score??f.score??0)>=50?'var(--amber)':'var(--red)'}}>
-                                    {Math.round(f.requirement_score??f.score??0)}
-                                  </td>
-                                </tr>
-                              ))}
+                              {findings.map((f, i) => <FindingRow key={i} f={f} />)}
                             </tbody>
                           </table>
                         </div>

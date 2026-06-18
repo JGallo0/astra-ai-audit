@@ -421,6 +421,8 @@ tbody td {
 
 tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover td { background: #F8FAFC; }
+tbody tr.finding-row-open td { background: #EFF3F9; }
+tbody tr:has(+ tr > td[colspan]) td { border-bottom: none; }
 
 /* ── Modal ───────────────────────────────────────────────────────── */
 
