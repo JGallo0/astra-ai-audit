@@ -133,13 +133,102 @@ EXTRACTION_FIELDS = [
     },
 
     # =========================================================
-    # SAMPLING
+    # BIOCHAR CHARACTERIZATION — numeric (Phase 3, R-XXXX protocol-native)
+    # =========================================================
+    {
+        "path": "biochar.characterization.h_c_ratio",
+        "type": "float",
+        "requirement_id": "R-VGXA-0",
+        "guidance_id": "G-TY6S-0",
+        "description": "H/Corg molar ratio from elemental analysis. Protocol hard gate: must be < 0.5 for 200-year durability.",
+        "extraction_hint": "Search for 'H/C ratio', 'H/Corg', 'hydrogen to carbon ratio', 'hydrogen to organic carbon'. Extract the numeric value (e.g. 0.43). Often in biochar characterization appendix.",
+    },
+    {
+        "path": "biochar.characterization.o_c_ratio",
+        "type": "float",
+        "requirement_id": "R-VGXA-0",
+        "guidance_id": "G-27Y3-0",
+        "description": "O/Corg molar ratio from elemental analysis. Protocol threshold: < 0.2.",
+        "extraction_hint": "Search for 'O/C ratio', 'O/Corg', 'oxygen to organic carbon ratio'. Extract numeric value.",
+    },
+    {
+        "path": "biochar.characterization.pcb_mg_kg",
+        "type": "float",
+        "requirement_id": "R-MY64-0",
+        "description": "PCB (polychlorinated biphenyls) concentration in mg/kg DM. WBC limit: ≤ 0.2 mg/kg.",
+        "extraction_hint": "Search for 'PCB', 'polychlorinated biphenyls' in biochar analysis results. Extract numeric value in mg/kg.",
+    },
+    {
+        "path": "biochar.characterization.pcdd_f_ng_kg",
+        "type": "float",
+        "requirement_id": "R-MY64-0",
+        "description": "PCDD/F (dioxins/furans) in ng/kg DM. WBC limit: ≤ 20 ng/kg.",
+        "extraction_hint": "Search for 'PCDD/F', 'dioxins', 'furans', 'polychlorinated dibenzo-p-dioxins' in analysis. Extract numeric value in ng/kg.",
+    },
+    {
+        "path": "biochar.characterization.pah_epa16_mg_kg",
+        "type": "float",
+        "requirement_id": "R-MY64-0",
+        "description": "Sum of 16 EPA PAHs in mg/kg DM. Must be declared.",
+        "extraction_hint": "Search for 'PAH', 'polycyclic aromatic hydrocarbons', 'sum of EPA 16 PAHs'. Extract numeric value in mg/kg.",
+    },
+
+    # =========================================================
+    # STORAGE — soil temperature (Phase 3, R-F5RZ-0)
+    # =========================================================
+    {
+        "path": "storage.soil.annual_avg_temp_celsius",
+        "type": "float",
+        "requirement_id": "R-F5RZ-0",
+        "description": "Annual average soil temperature in °C used in Fdurable calculation (200-year option).",
+        "extraction_hint": "Search for soil temperature value used in durability/Fdurable calculation, e.g. '18.5°C', 'mean soil temperature'. Extract numeric value.",
+    },
+    {
+        "path": "storage.soil.temperature_method",
+        "type": "string",
+        "requirement_id": "R-F5RZ-0",
+        "allowed_values": ["direct_measurement", "global_database", "lembrechts_2022"],
+        "description": "Method to obtain annual average soil temperature.",
+        "extraction_hint": "Search for whether soil temperature comes from direct field measurement or from global database (Lembrechts et al. 2022 or equivalent).",
+    },
+
+    # =========================================================
+    # SAMPLING — numeric (Phase 3, R-S8K1-1)
     # =========================================================
     {
         "path": "sampling.method",
         "type": "string",
         "allowed_values": ["A", "B"],
         "description": "Sampling method used by the project.",
+    },
+    {
+        "path": "sampling.sampling_method",
+        "type": "string",
+        "requirement_id": "R-S8K1-1",
+        "allowed_values": ["method_a", "method_b"],
+        "description": "Sampling method: Method A (every batch) or Method B (1 per 10 batches, after 30 samples).",
+        "extraction_hint": "Search for explicit mention of 'Method A', 'Method B', or sampling frequency (every batch vs every 10 batches).",
+    },
+    {
+        "path": "sampling.sample_count",
+        "type": "integer",
+        "requirement_id": "R-S8K1-1",
+        "description": "Total number of biochar samples collected. Protocol requires ≥ 30 before using Method B.",
+        "extraction_hint": "Search for total sample count, e.g. '45 samples collected', '30 samples minimum'. Extract integer.",
+    },
+    {
+        "path": "sampling.samples_per_batch",
+        "type": "integer",
+        "requirement_id": "R-S8K1-1",
+        "description": "Number of samples per production batch. Protocol minimum: 3.",
+        "extraction_hint": "Search for 'samples per batch', 'minimum 3 samples', 'three replicates per batch'. Extract integer.",
+    },
+    {
+        "path": "sampling.sample_age_months",
+        "type": "float",
+        "requirement_id": "R-S8K1-1",
+        "description": "Maximum age of eligible samples in months. Protocol: only ≤ 6 months eligible.",
+        "extraction_hint": "Search for sample age window, e.g. '6 months', 'last six months'. Extract numeric value.",
     },
     {
         "path": "sampling.batch_definition_days",
@@ -150,6 +239,31 @@ EXTRACTION_FIELDS = [
         "path": "sampling.sampling_plan_defined",
         "type": "boolean",
         "description": "Whether a sampling plan is evidenced.",
+    },
+
+    # =========================================================
+    # PROJECT — location and ownership (Phase 3, R-A5B6-0, R-M858-0)
+    # =========================================================
+    {
+        "path": "project.country",
+        "type": "string",
+        "requirement_id": "R-A5B6-0",
+        "description": "Country where the project is located.",
+        "extraction_hint": "Search for country name in project location section. R-A5B6-0 requires at least one address/geo-coordinate.",
+    },
+    {
+        "path": "project.locations",
+        "type": "list",
+        "requirement_id": "R-A5B6-0",
+        "description": "Project addresses and/or geo-coordinates.",
+        "extraction_hint": "Search for specific addresses, GPS coordinates (lat/lon), city/state/country of project facilities.",
+    },
+    {
+        "path": "project.ownership_evidence",
+        "type": "list",
+        "requirement_id": "R-M858-0",
+        "description": "Evidence of legal ownership over carbon removal rights.",
+        "extraction_hint": "Search for company name, legal entity name, registration number, ownership contract mention, project proponent identification.",
     },
 
     # =========================================================

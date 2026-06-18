@@ -106,6 +106,11 @@ def build_field_specs(fields: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         }
         if "allowed_values" in f:
             item["allowed_values"] = f["allowed_values"]
+        # Phase 3: include requirement_id and extraction_hint when present
+        if "requirement_id" in f:
+            item["requirement_id"] = f["requirement_id"]
+        if "extraction_hint" in f:
+            item["extraction_hint"] = f["extraction_hint"]
         specs.append(item)
     return specs
 
@@ -388,15 +393,15 @@ RULES:
 2. Use methodology context only to interpret terms, not as proof of project compliance.
 3. Return ONLY valid JSON.
 4. If evidence is ambiguous, prefer null over false.
-5. For booleans:
-   - true only when evidence clearly supports the field
-   - false only when the text clearly indicates contradiction/absence
-   - null when uncertain
-6. If the document is pre-operational, do NOT assume measured operational evidence exists.
-7. Do NOT output false merely because the evidence was not found in the provided excerpt.
-   If not found or unclear, return null.
-8. Include short evidence text and confidence between 0 and 1.
-9. Use source="project" unless the field is clearly methodological in nature.
+5. For booleans: true=clearly evidenced, false=clearly contradicted, null=uncertain/not found.
+6. For floats/integers: extract the actual numeric value when found. Return null if not present.
+7. For lists: extract all matching items as a JSON array. Return [] if none found.
+8. If the document is pre-operational, do NOT assume measured operational evidence exists.
+9. Do NOT output false merely because the evidence was not found. If not found, return null.
+10. Include short evidence text and confidence between 0 and 1.
+11. Use source="project" unless clearly methodological.
+12. If a field has a requirement_id, the PDD likely has a dedicated section for that requirement —
+    search that section first. If a field has an extraction_hint, follow it precisely.
 
 DOMAIN INSTRUCTIONS:
 {domain_instructions}

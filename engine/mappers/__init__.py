@@ -14,6 +14,7 @@ from engine.mappers.traceability_mapper import run_traceability_mapper
 from engine.mappers.fallback_mapper import run_fallback_mapper
 from engine.mappers.emissions_mapper import run_emissions_mapper
 from engine.mappers.management_mapper import run_management_mapper
+from engine.mappers.biochar_characterization_mapper import run_biochar_characterization_mapper
 
 
 REQUIREMENT_HINTS = {
@@ -981,6 +982,8 @@ def run_mapper_pipeline(
         ("traceability_mapper", run_traceability_mapper, "traceability"),
         ("emissions_mapper", run_emissions_mapper, "emissions"),
         ("management_mapper", run_management_mapper, "management"),
+        # Phase 3: numeric values from biochar characterization (H/C, O/C, contaminants)
+        ("biochar_characterization_mapper", run_biochar_characterization_mapper, "production"),
     ]
 
     for name, fn, domain in mapper_runs:

@@ -152,6 +152,92 @@ def apply_local_heuristics(
                 evidence_mode="direct",
             )
 
+    # ── Phase 3: project location and ownership (R-A5B6-0, R-M858-0) ────────
+
+    # project.country — "located in Brazil", "California, USA", "in the United States"
+    if field_map.get("project.country", {}).get("value") is None:
+        country_patterns = [
+            (r"\blocated\s+in\s+(Brazil|USA|United\s+States|Canada|Germany|Netherlands|UK|United\s+Kingdom|Australia|India|China|Japan)\b", 1),
+            (r"\b(Brazil|California|Oregon|Washington|Texas)\b.*\bUSA\b|\bUSA\b.*\b(California|Oregon|Washington|Texas)\b", None),
+            (r"\b(Brasil|Brazil)\b", "Brazil"),
+            (r"\bCalifornia\b|\bCA\b.*\bUSA\b", "United States"),
+        ]
+        for pattern, group in country_patterns:
+            m = re.search(pattern, text, re.IGNORECASE)
+            if m:
+                country = m.group(group) if isinstance(group, int) else group
+                if country:
+                    upsert_field(
+                        field_map,
+                        path="project.country",
+                        value=str(country),
+                        evidence=f"Regex: country '{country}' mentioned.",
+                        extractor="eligibility_mapper",
+                        fill_method="heuristic",
+                        confidence=0.85,
+                        evidence_strength="moderate",
+                        evidence_mode="direct",
+                    )
+                    break
+
+    # project.locations — GPS coordinates or city/state
+    if not field_map.get("project.locations", {}).get("value"):
+        # GPS pattern: "38.123, -122.456" or "lat: 38.1, lon: -122.4"
+        gps = re.findall(r"[-+]?\d{1,3}\.\d{3,}[°,]\s*[-+]?\d{1,3}\.\d{3,}", text)
+        if gps:
+            upsert_field(
+                field_map,
+                path="project.locations",
+                value=gps[:3],
+                evidence=f"Regex: GPS coordinates found: {gps[:1]}.",
+                extractor="eligibility_mapper",
+                fill_method="heuristic",
+                confidence=0.92,
+                evidence_strength="strong",
+                evidence_mode="direct",
+            )
+        else:
+            # City/state/country mention
+            location_m = re.search(
+                r"(?:located\s+(?:in|at)|facility\s+(?:in|at)|project\s+(?:in|at))\s+([A-Z][a-zA-Z\s,]+(?:County|State|Province|CA|OR|WA|MG|SP|PR))",
+                text, re.IGNORECASE,
+            )
+            if location_m:
+                upsert_field(
+                    field_map,
+                    path="project.locations",
+                    value=[location_m.group(1).strip()],
+                    evidence=f"Regex: location '{location_m.group(1)}'.",
+                    extractor="eligibility_mapper",
+                    fill_method="heuristic",
+                    confidence=0.78,
+                    evidence_strength="moderate",
+                    evidence_mode="direct",
+                )
+
+    # project.ownership_evidence — company name + certification
+    if not field_map.get("project.ownership_evidence", {}).get("value"):
+        # Certification scheme as proxy
+        cert_m = re.search(r"(Isometric|Puro\.Earth|Verra|Gold Standard)\s+(?:certified|registered|project|standard)", text, re.IGNORECASE)
+        company_m = re.search(r"([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*\s+(?:Inc\.|LLC|Ltd\.|Corp\.|S\.A\.|Ltda\.))", text)
+        proxies = []
+        if cert_m:
+            proxies.append(f"{cert_m.group(1)} certification")
+        if company_m:
+            proxies.append(company_m.group(1).strip())
+        if proxies:
+            upsert_field(
+                field_map,
+                path="project.ownership_evidence",
+                value=proxies,
+                evidence=f"Regex: ownership proxies found: {proxies}.",
+                extractor="eligibility_mapper",
+                fill_method="heuristic",
+                confidence=0.72,
+                evidence_strength="moderate",
+                evidence_mode="inferred",
+            )
+
     return merge_normalized_fields(list(field_map.values()))
 
 

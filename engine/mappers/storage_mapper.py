@@ -120,6 +120,59 @@ def apply_local_heuristics(
                 evidence_mode="direct",
             )
 
+    # ── Phase 3: soil temperature (R-F5RZ-0) ────────────────────────────────
+
+    # Annual average soil temperature: "18.5°C", "mean soil temperature of 20°C"
+    if field_map.get("storage.soil.annual_avg_temp_celsius", {}).get("value") is None:
+        m = re.search(
+            r"(?:annual\s+average\s+|mean\s+|average\s+)?soil\s+temperature\s+(?:of\s+|=\s*|:\s*)?(\d+\.?\d*)\s*°?C",
+            text, re.IGNORECASE,
+        )
+        if not m:
+            m = re.search(
+                r"Tsoil\s*[=:]\s*(\d+\.?\d*)",
+                text, re.IGNORECASE,
+            )
+        if m:
+            upsert_field(
+                field_map,
+                path="storage.soil.annual_avg_temp_celsius",
+                value=float(m.group(1)),
+                evidence=f"Regex: soil temperature = {m.group(1)}°C.",
+                extractor="storage_mapper",
+                fill_method="heuristic",
+                confidence=0.88,
+                evidence_strength="strong",
+                evidence_mode="direct",
+            )
+
+    # Temperature method: direct measurement vs global database
+    if field_map.get("storage.soil.temperature_method", {}).get("value") is None:
+        if re.search(r"Lembrechts|global\s+(?:soil\s+temperature\s+)?database", text, re.IGNORECASE):
+            upsert_field(
+                field_map,
+                path="storage.soil.temperature_method",
+                value="lembrechts_2022",
+                evidence="Regex: reference to Lembrechts et al. or global database.",
+                extractor="storage_mapper",
+                fill_method="heuristic",
+                confidence=0.90,
+                evidence_strength="strong",
+                evidence_mode="direct",
+            )
+        elif re.search(r"soil\s+temperature\s+(?:measurement|sensor|monitoring|measured)", text, re.IGNORECASE):
+            upsert_field(
+                field_map,
+                path="storage.soil.temperature_method",
+                value="direct_measurement",
+                evidence="Regex: direct soil temperature measurement mentioned.",
+                extractor="storage_mapper",
+                fill_method="heuristic",
+                confidence=0.80,
+                evidence_strength="moderate",
+                evidence_mode="direct",
+            )
+
     return merge_normalized_fields(list(field_map.values()))
 
 

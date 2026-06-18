@@ -16,6 +16,14 @@ from engine.mappers.base import (
 
 SAMPLING_PREFIXES = ["sampling."]
 
+# Phase 3: new numeric paths
+_NUMERIC_PATHS = [
+    "sampling.sample_count",
+    "sampling.samples_per_batch",
+    "sampling.sample_age_months",
+    "sampling.sampling_method",
+]
+
 
 def get_fields() -> List[Dict[str, Any]]:
     return filter_fields_by_prefixes(EXTRACTION_FIELDS, SAMPLING_PREFIXES)
@@ -163,6 +171,57 @@ def apply_local_heuristics(
                 evidence_strength="strong",
                 evidence_mode="direct",
             )
+
+    # ── Phase 3: numeric fields ──────────────────────────────────────────────
+
+    # sampling.samples_per_batch — "3 samples per batch", "minimum 3 replicates"
+    if field_map.get("sampling.samples_per_batch", {}).get("value") is None:
+        m = re.search(
+            r"(\d+)\s*(?:representative\s+)?samples?\s*(?:per|from each|from\s+each)\s+(?:production\s+)?batch",
+            text, re.IGNORECASE,
+        )
+        if m:
+            n = int(m.group(1))
+            upsert_field(field_map, path="sampling.samples_per_batch", value=n,
+                evidence=f"Regex: {n} samples per batch.", extractor="sampling_mapper",
+                fill_method="heuristic", confidence=0.90, evidence_strength="strong", evidence_mode="direct")
+        elif re.search(r"minimum\s+(?:of\s+)?3\s+samples?", text, re.IGNORECASE):
+            upsert_field(field_map, path="sampling.samples_per_batch", value=3,
+                evidence="Regex: 'minimum 3 samples' found.", extractor="sampling_mapper",
+                fill_method="heuristic", confidence=0.85, evidence_strength="moderate", evidence_mode="direct")
+
+    # sampling.sample_count — "30 samples collected", "45 biochar samples"
+    if field_map.get("sampling.sample_count", {}).get("value") is None:
+        m = re.search(
+            r"(\d{2,4})\s*(?:biochar\s+)?samples?\s+(?:collected|analyzed|measured|taken)",
+            text, re.IGNORECASE,
+        )
+        if m:
+            upsert_field(field_map, path="sampling.sample_count", value=int(m.group(1)),
+                evidence=f"Regex: {m.group(1)} samples.", extractor="sampling_mapper",
+                fill_method="heuristic", confidence=0.82, evidence_strength="moderate", evidence_mode="direct")
+
+    # sampling.sample_age_months — "6 months", "last 6 months", "within 6 months"
+    if field_map.get("sampling.sample_age_months", {}).get("value") is None:
+        m = re.search(
+            r"(?:within|last|previous|preceding)\s+(\d+)\s+months?",
+            text, re.IGNORECASE,
+        )
+        if m:
+            upsert_field(field_map, path="sampling.sample_age_months", value=float(m.group(1)),
+                evidence=f"Regex: '{m.group(0)}'.", extractor="sampling_mapper",
+                fill_method="heuristic", confidence=0.80, evidence_strength="moderate", evidence_mode="direct")
+
+    # sampling.sampling_method — "method a" / "method b"
+    if field_map.get("sampling.sampling_method", {}).get("value") is None:
+        if re.search(r"\bmethod\s+a\b", text, re.IGNORECASE):
+            upsert_field(field_map, path="sampling.sampling_method", value="method_a",
+                evidence="Regex: explicit Method A.", extractor="sampling_mapper",
+                fill_method="heuristic", confidence=0.92, evidence_strength="strong", evidence_mode="direct")
+        elif re.search(r"\bmethod\s+b\b", text, re.IGNORECASE):
+            upsert_field(field_map, path="sampling.sampling_method", value="method_b",
+                evidence="Regex: explicit Method B.", extractor="sampling_mapper",
+                fill_method="heuristic", confidence=0.92, evidence_strength="strong", evidence_mode="direct")
 
     return merge_normalized_fields(list(field_map.values()))
 
