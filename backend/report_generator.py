@@ -128,9 +128,21 @@ def _make_page_cb(project_name: str, date_str: str):
         # Header bar
         canvas.setFillColor(_c(NAVY))
         canvas.rect(0, h - 1.3*cm, w, 1.3*cm, fill=1, stroke=0)
+
+        # Logo no canto esquerdo do header — imagem 1536×1024 (ratio 1.5)
+        # Altura máxima = barra 1.3cm - 2× padding 0.08cm = 1.14cm
+        LOGO_H_HDR = 1.14 * cm
+        LOGO_W_HDR = LOGO_H_HDR * (1536 / 1024)   # = 1.71 cm
+        LOGO_Y_HDR = h - 1.3*cm + (1.3*cm - LOGO_H_HDR) / 2   # centrado na barra
+        if os.path.exists(LOGO_PATH):
+            canvas.drawImage(
+                LOGO_PATH,
+                ML, LOGO_Y_HDR,
+                width=LOGO_W_HDR, height=LOGO_H_HDR,
+                preserveAspectRatio=True, mask="auto",
+            )
+
         canvas.setFillColor(colors.white)
-        canvas.setFont("Helvetica-Bold", 8.5)
-        canvas.drawString(ML, h - 0.83*cm, "CO2mply")
         canvas.setFont("Helvetica", 7.5)
         canvas.drawRightString(w - MR, h - 0.83*cm, "Carbon Compliance Intelligence")
 
@@ -193,18 +205,7 @@ def generate_compliance_matrix_pdf(
     cb = _make_page_cb(project_name, date_str)
     story = []
 
-    # ── Logo — preserve aspect ratio (image is 1536×1024, ratio 1.5:1) ──────────
-    if os.path.exists(LOGO_PATH):
-        LOGO_W = 4.5 * cm
-        LOGO_H = LOGO_W * (1024 / 1536)   # = 3.0 cm  (correct ratio)
-        logo = Image(LOGO_PATH, width=LOGO_W, height=LOGO_H)
-        logo.hAlign = "LEFT"
-        story.append(logo)
-        story.append(Spacer(1, 0.1*cm))
-    else:
-        story.append(_p('<font name="Helvetica-Bold" size="18" color="#1A3160">CO2mply</font>',
-                        _style(fontSize=18)))
-        story.append(Spacer(1, 0.3*cm))
+    story.append(Spacer(1, 0.3*cm))
 
     # ── Title block ─────────────────────────────────────────────────────────────
     story.append(_p("Compliance Audit Report",

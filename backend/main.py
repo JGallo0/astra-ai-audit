@@ -422,13 +422,28 @@ def download_report(run_id: str, format: str = Query("json")):
             mode_label = "Desenvolvimento" if audit_mode == "development" else "Operacional"
 
             if format == "pdf":
-                # PDF usa o gerador próprio — passa dados brutos sem pré-processar
+                # Buscar nome real do projeto no banco
+                proj_name = "Projeto CO2mply"
+                proj_id = run.get("project_id") or result.get("project_id")
+                if proj_id:
+                    proj_row = _db_fetchone(
+                        "SELECT name FROM ca_projects WHERE id=%s", (proj_id,)
+                    )
+                    if proj_row and proj_row.get("name"):
+                        proj_name = proj_row["name"]
+                # Fallback: tentar extrair do project_data
+                if proj_name == "Projeto CO2mply":
+                    pd = result.get("project_data", {})
+                    proj_name = (pd.get("project", {}).get("name")
+                                 or pd.get("product", {}).get("certification_scheme", "")
+                                 or proj_name)
+
                 from backend.report_generator import generate_compliance_matrix_pdf
                 buf = generate_compliance_matrix_pdf(
                     results=results_list,
                     score_data={**score_data, "score_label": score_label},
                     audit_mode=audit_mode,
-                    project_name="Projeto CO2mply",
+                    project_name=proj_name,
                 )
                 return StreamingResponse(
                     io.BytesIO(buf), media_type="application/pdf",
