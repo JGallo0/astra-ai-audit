@@ -193,12 +193,14 @@ def generate_compliance_matrix_pdf(
     cb = _make_page_cb(project_name, date_str)
     story = []
 
-    # ── Logo ────────────────────────────────────────────────────────────────────
+    # ── Logo — preserve aspect ratio (image is 1536×1024, ratio 1.5:1) ──────────
     if os.path.exists(LOGO_PATH):
-        logo = Image(LOGO_PATH, width=5.5*cm, height=2.0*cm)
+        LOGO_W = 4.5 * cm
+        LOGO_H = LOGO_W * (1024 / 1536)   # = 3.0 cm  (correct ratio)
+        logo = Image(LOGO_PATH, width=LOGO_W, height=LOGO_H)
         logo.hAlign = "LEFT"
         story.append(logo)
-        story.append(Spacer(1, 0.3*cm))
+        story.append(Spacer(1, 0.1*cm))
     else:
         story.append(_p('<font name="Helvetica-Bold" size="18" color="#1A3160">CO2mply</font>',
                         _style(fontSize=18)))
