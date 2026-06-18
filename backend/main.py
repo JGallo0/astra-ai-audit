@@ -431,12 +431,12 @@ def download_report(run_id: str, format: str = Query("json")):
                     )
                     if proj_row and proj_row.get("name"):
                         proj_name = proj_row["name"]
-                # Fallback: tentar extrair do project_data
+                # Fallback: project.name do project_data (não certification_scheme)
                 if proj_name == "Projeto CO2mply":
                     pd = result.get("project_data", {})
-                    proj_name = (pd.get("project", {}).get("name")
-                                 or pd.get("product", {}).get("certification_scheme", "")
-                                 or proj_name)
+                    pname = pd.get("project", {}).get("name")
+                    if pname and isinstance(pname, str) and len(pname) < 60:
+                        proj_name = pname
 
                 from backend.report_generator import generate_compliance_matrix_pdf
                 buf = generate_compliance_matrix_pdf(
