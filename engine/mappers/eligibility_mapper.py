@@ -153,6 +153,8 @@ def apply_local_heuristics(
             )
 
     # ── Phase 3: project location and ownership (R-A5B6-0, R-M858-0) ────────
+    # Use project_text (already defined above)
+    text = project_text  # alias for consistency with other mappers
 
     # project.country — "located in Brazil", "California, USA", "in the United States"
     if field_map.get("project.country", {}).get("value") is None:
