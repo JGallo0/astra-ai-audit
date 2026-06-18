@@ -776,7 +776,7 @@ def run_engine(project_data, requirements, audit_mode="development"):
         applies_if = req.get("applies_if", {})
         fields_evaluated = req.get("fields", [])
 
-        # 1) Verifica aplicabilidade
+        # 1a) Verifica aplicabilidade por configuração do projeto
         if not requirement_applies(project_data, applies_if):
             results.append({
                 "requirement_id": req_id,
@@ -802,6 +802,45 @@ def run_engine(project_data, requirements, audit_mode="development"):
                 "methodology_basis": build_methodology_basis_text(req),
                 "gap": "",
                 "recommendation": "",
+                "source_url": req.get("source_url", ""),
+                "requirement_text": req.get("requirement_text", ""),
+                "audit_mode": audit_mode,
+            })
+            continue
+
+        # 1b) Verifica aplicabilidade por modo de auditoria (development vs operational)
+        mode_applicability = req.get("mode_applicability", "both")
+        if mode_applicability == "operational_only" and audit_mode == "development":
+            results.append({
+                "requirement_id": req_id,
+                "requirement_name": req_name,
+                "title": req_name,
+                "module": req.get("module"),
+                "status": "not_applicable",
+                "risk": "none",
+                "confidence": 1.0,
+                "missing_fields": [],
+                "failed_fields": [],
+                "notes": [
+                    "Requisito aplicável apenas em projetos operacionais.",
+                    "Em fase de desenvolvimento/PDD, a evidência operacional ainda não existe — não penaliza o score.",
+                ],
+                "logic_key": logic_key,
+                "fields_evaluated": fields_evaluated,
+                "requirement_score": None,
+                "requirement_score_normalized": 0.0,
+                "priority_score": 0.0,
+                "field_scores": [],
+                "requirement_rating": None,
+                "evidence_strength": "none",
+                "cross_checks": [],
+                "project_evidence": "",
+                "methodology_basis": build_methodology_basis_text(req),
+                "gap": "",
+                "recommendation": "Providencie esta evidência quando o projeto estiver operacional.",
+                "source_url": req.get("source_url", ""),
+                "requirement_text": req.get("requirement_text", ""),
+                "audit_mode": audit_mode,
             })
             continue
 

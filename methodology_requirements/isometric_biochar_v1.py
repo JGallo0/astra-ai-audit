@@ -302,6 +302,7 @@ ISOMETRIC_BIOCHAR_V1 = [
         "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-1T2Y-0",
         "logic": "eval_durability_selection_v1",
         "type": "requirement",
+        "mode_applicability": "operational_only",
         "applies_if": {"methodology.standard": "Isometric"},
         "guidance_ids": ["G-Q6GV-0"],
         "evidence_timing": _both(
@@ -319,6 +320,7 @@ ISOMETRIC_BIOCHAR_V1 = [
         "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-F5RZ-0",
         "logic": "eval_durability_soil_temp_v1",
         "type": "requirement",
+        "mode_applicability": "operational_only",
         "applies_if": {
             "methodology.standard": "Isometric",
             "methodology.storage_pathway": "soil",
@@ -491,6 +493,7 @@ ISOMETRIC_BIOCHAR_V1 = [
         "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-5KQC-0",
         "logic": "eval_environmental_social_impact_v1",
         "type": "requirement",
+        "mode_applicability": "operational_only",
         "applies_if": {
             "methodology.standard": "Isometric",
             "methodology.storage_pathway": "soil",
@@ -581,6 +584,7 @@ ISOMETRIC_BIOCHAR_V1 = [
         "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-M760-0",
         "logic": "eval_site_selection_v1",
         "type": "requirement",
+        "mode_applicability": "operational_only",
         "applies_if": {
             "methodology.standard": "Isometric",
             "methodology.storage_pathway": "soil",
@@ -603,6 +607,7 @@ ISOMETRIC_BIOCHAR_V1 = [
         "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-1YC3-0",
         "logic": "eval_co_benefits_v1",
         "type": "requirement",
+        "mode_applicability": "operational_only",
         "applies_if": {
             "methodology.standard": "Isometric",
             "methodology.storage_pathway": "soil",
@@ -739,6 +744,7 @@ ISOMETRIC_BIOCHAR_V1 = [
         "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-S8K1-1",
         "logic": "eval_sampling_procedure_v1",
         "type": "requirement",
+        "mode_applicability": "operational_only",
         "applies_if": {"methodology.standard": "Isometric"},
         "guidance_ids": ["G-VZQQ-0", "G-MP0D-0", "G-DC93-0"],
         "evidence_timing": _both(
@@ -758,6 +764,7 @@ ISOMETRIC_BIOCHAR_V1 = [
         "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-CXEP-0",
         "logic": "eval_biochar_char_standards_v1",
         "type": "requirement",
+        "mode_applicability": "operational_only",
         "applies_if": {"methodology.standard": "Isometric"},
         "guidance_ids": ["G-AK6B-0", "G-39F1-0"],
         "evidence_timing": _design_only(
@@ -774,6 +781,7 @@ ISOMETRIC_BIOCHAR_V1 = [
         "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-7W1N-0",
         "logic": "eval_biochar_physical_properties_v1",
         "type": "requirement",
+        "mode_applicability": "operational_only",
         "applies_if": {"methodology.standard": "Isometric"},
         "guidance_ids": ["G-XQ9H-0", "G-510V-0", "G-PDJ7-0"],
         "evidence_timing": _both(
@@ -791,6 +799,7 @@ ISOMETRIC_BIOCHAR_V1 = [
         "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-VGXA-0",
         "logic": "eval_biochar_chemical_properties_v1",
         "type": "requirement",
+        "mode_applicability": "operational_only",
         "applies_if": {"methodology.standard": "Isometric"},
         "guidance_ids": [
             "G-K3Q0-0", "G-4G8C-0", "G-TDEA-0", "G-1Q5M-0", "G-X6H2-0",
@@ -812,6 +821,7 @@ ISOMETRIC_BIOCHAR_V1 = [
         "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-2TMM-0",
         "logic": "eval_biochar_laboratory_v1",
         "type": "requirement",
+        "mode_applicability": "operational_only",
         "applies_if": {"methodology.standard": "Isometric"},
         "guidance_ids": ["G-67T6-0", "G-DHHG-0", "G-W504-0", "G-MV8T-0"],
         "evidence_timing": _both(
