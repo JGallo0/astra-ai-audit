@@ -1,3 +1,4 @@
+from engine.requirement_logic_v1 import LOGIC_REGISTRY_V1
 from engine.requirement_logic import (
     adaptive_management_plan,
     biochar_characterization_approach,
@@ -131,4 +132,7 @@ LOGIC_REGISTRY = {
     "sampling_batch_definition": sampling_batch_definition,
     "pyrolysis_gas_end_use_accounting": pyrolysis_gas_end_use_accounting,
     "biochar_incorporation_documentation": biochar_incorporation_documentation,
+    # engine v1 (R-XXXX protocol-native)
+    **LOGIC_REGISTRY_V1,
 }
+
