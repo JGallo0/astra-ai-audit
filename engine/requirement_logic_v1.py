@@ -332,8 +332,9 @@ def eval_durability_selection_v1(data, audit_mode="development"):
     R-7C8E-0: Opção de durabilidade selecionada (200 ou 1000 anos).
     R-1T2Y-0: Durabilidade demonstrada acima do threshold.
 
-    Hard gate: durabilidade > 200 anos (threshold mínimo do protocolo).
-    Hard gate operacional: H/Corg < 0.5 com laudo laboratorial.
+    Desenvolvimento: verifica se a opção foi selecionada e descrita no PDD.
+                     H/Corg NÃO é exigido (é evidência operacional — R-VGXA-0).
+    Operacional:     H/Corg < 0.5 obrigatório com laudo laboratorial.
     """
     eligibility  = data.get("eligibility", {})
     methodology  = data.get("methodology", {})
@@ -344,45 +345,58 @@ def eval_durability_selection_v1(data, audit_mode="development"):
     hc_ratio          = char.get("h_c_ratio") or char.get("hc_ratio")
     permanence_claim  = eligibility.get("permanence_claim")
 
-    CITATION = "Isometric Standard v1.7 — R-7C8E-0/R-1T2Y-0; Biochar Storage in Soil Environments v1.2 Section 5.1"
+    CITATION = "Isometric Standard v1.7 — R-7C8E-0; Biochar Storage in Soil Environments v1.2 Section 5.1"
 
-    # Hard gate: durabilidade mínima
+    # Hard gate universal: durabilidade mínima declarada
     if durability_years is not None and durability_years < 200:
         return _non_compliant(
             gap=f"Durabilidade declarada = {durability_years} anos — mínimo exigido pelo protocolo é 200 anos.",
-            recommendation="Selecionar opção de 200 anos ou 1000 anos conforme protocolo Isometric. Demonstrar com H/Corg < 0.5.",
+            recommendation="Selecionar opção de 200 ou 1000 anos conforme protocolo Isometric.",
             citation=CITATION,
             score=0,
         )
 
-    # Hard gate operacional: H/C precisa estar medido
-    if audit_mode == "operational" and hc_ratio is None:
-        return _non_compliant(
-            gap="H/Corg não medido — impossível demonstrar durabilidade sem análise laboratorial.",
-            recommendation="Realizar análise elementar (H, C) por ISO 29541:2025 em laboratório ISO 17025. H/Corg < 0.5 obrigatório.",
-            citation=CITATION,
-            score=0,
-        )
-
-    field_scores = [
-        score_presence_field("methodology.durability_option", durability_option, 40,
-                             note_if_missing="Opção de durabilidade (200 ou 1000 anos) não selecionada."),
-        score_boolean_field("eligibility.permanence_claim", permanence_claim, 30,
-                            note_if_missing="Claim de permanência não declarado."),
-        score_presence_field("biochar.characterization.h_c_ratio", hc_ratio, 30,
-                             note_if_missing="H/Corg não medido — requerido para cálculo Fdurable."),
-    ]
+    if audit_mode == "development":
+        # Dev: avaliar apenas se a opção está selecionada e o claim de permanência existe
+        field_scores = [
+            score_presence_field("methodology.durability_option", durability_option, 60,
+                                 note_if_missing="Opção de durabilidade (200 ou 1000 anos) não selecionada no PDD."),
+            score_boolean_field("eligibility.permanence_claim", permanence_claim, 40,
+                                note_if_missing="Claim de permanência de longo prazo não declarado no PDD."),
+        ]
+        notes_extra = []
+        if durability_option:
+            notes_extra.append(f"Opção selecionada no PDD: {durability_option} anos.")
+        notes_extra.append("H/Corg e laudos laboratoriais serão avaliados em modo Operacional (R-VGXA-0).")
+        threshold_nc, threshold_c = 30, 80
+    else:
+        # Operacional: H/C obrigatório com laudo
+        if hc_ratio is None:
+            return _non_compliant(
+                gap="H/Corg não medido — impossível demonstrar durabilidade sem análise laboratorial.",
+                recommendation="Realizar análise elementar (H, C) por ISO 29541:2025 em laboratório ISO 17025. H/Corg < 0.5 obrigatório.",
+                citation=CITATION,
+                score=0,
+            )
+        field_scores = [
+            score_presence_field("methodology.durability_option", durability_option, 40,
+                                 note_if_missing="Opção de durabilidade não selecionada."),
+            score_boolean_field("eligibility.permanence_claim", permanence_claim, 30,
+                                note_if_missing="Claim de permanência não declarado."),
+            score_presence_field("biochar.characterization.h_c_ratio", hc_ratio, 30,
+                                 note_if_missing="H/Corg não medido — requerido para cálculo Fdurable."),
+        ]
+        notes_extra = []
+        if hc_ratio is not None:
+            notes_extra.append(f"H/Corg = {hc_ratio:.3f} — {'< 0.5 OK' if hc_ratio < 0.5 else '>= 0.5 FALHOU'}.")
+        threshold_nc, threshold_c = 50, 85
 
     requirement_score = summarize_field_scores(field_scores)
     notes = collect_field_score_notes(field_scores)
     notes.append(f"[Protocolo] {CITATION}")
-    if durability_option:
-        notes.append(f"Opção selecionada: {durability_option} anos.")
-    if hc_ratio is not None:
-        notes.append(f"H/Corg = {hc_ratio:.3f} {'✓ < 0.5' if hc_ratio < 0.5 else '✗ ≥ 0.5'}.")
+    notes.extend(notes_extra)
 
-    threshold_nc = 50 if audit_mode == "operational" else 25
-    status = _derive_status(requirement_score, threshold_nc, 80)
+    status = _derive_status(requirement_score, threshold_nc, threshold_c)
 
     return build_logic_result(
         status=status,
@@ -917,31 +931,66 @@ def eval_uncertainty_analysis_v1(data, audit_mode="development"):
         requirement_score=score, field_scores=field_scores, requirement_rating=derive_requirement_rating(score))
 
 def eval_proxies_models_v1(data, audit_mode="development"):
-    """R-NZQ2-0: Modelos e proxies descritos com fonte, validação empírica e incerteza."""
+    """
+    R-NZQ2-0: Modelos e proxies descritos com fonte, validação empírica e incerteza.
+
+    Desenvolvimento: verificar se o PDD DESCREVE o modelo Fdurable e sua metodologia.
+                     Valores numéricos (H/C, temperatura) são operacionais — não exigidos aqui.
+    Operacional:     verificar se H/C e temperatura do solo estão presentes para cálculo real.
+    """
+    methodology = data.get("methodology", {})
     quant = data.get("quantification", {})
     ghg = data.get("ghg_accounting", {})
-    # O projeto usa o modelo Fdurable do Isometric — proxy: se H/C e soil temp documentados
-    hc = data.get("biochar", {}).get("characterization", {}).get("h_c_ratio") or \
-         data.get("biochar", {}).get("characterization", {}).get("hc_ratio")
-    soil_temp = data.get("storage", {}).get("soil", {}).get("annual_avg_temp_celsius")
-    methodology_standard = data.get("methodology", {}).get("standard")
+    methodology_standard = methodology.get("standard")
+    durability_option = methodology.get("durability_option")
     CITATION = "Isometric Standard v1.7, R-NZQ2-0 — modelos com fonte peer-reviewed, parâmetros e validação"
-    field_scores = [
-        score_presence_field("biochar.characterization.h_c_ratio", hc, 40,
-                             note_if_missing="H/Corg não informado — modelo Fdurable não pode ser calculado."),
-        score_presence_field("storage.soil.annual_avg_temp_celsius", soil_temp, 35,
-                             note_if_missing="Temperatura do solo não fornecida — parâmetro do modelo Fdurable ausente."),
-        score_presence_field("methodology.standard", methodology_standard, 25,
-                             note_if_missing="Modelo de durabilidade (Equação Fdurable do Isometric) não referenciado."),
-    ]
+
+    if audit_mode == "development":
+        # Dev: o PDD deve MENCIONAR o modelo que será usado (Fdurable Isometric)
+        # Proxy: se o standard é Isometric e a opção de durabilidade está selecionada,
+        # o modelo Fdurable está implicitamente referenciado
+        field_scores = [
+            score_presence_field("methodology.standard", methodology_standard, 60,
+                                 note_if_missing="Padrão metodológico (Isometric) não identificado no PDD."),
+            score_presence_field("methodology.durability_option", durability_option, 40,
+                                 note_if_missing="Opção de durabilidade não selecionada — modelo Fdurable não identificável."),
+        ]
+        notes_extra = [
+            "Desenvolvimento: verificar se o PDD referencia o modelo Fdurable do Isometric.",
+            "Equação Fdurable,200 = min(0.95, 1-[c+(a+b·ln(Tsoil))·H/Corg]) — parâmetros a/b/c fornecidos pelo Isometric.",
+            "H/Corg e temperatura do solo serão avaliados em modo Operacional.",
+        ]
+        threshold_nc, threshold_c = 25, 75
+    else:
+        # Operacional: valores numéricos necessários para o cálculo
+        hc = data.get("biochar", {}).get("characterization", {}).get("h_c_ratio") or \
+             data.get("biochar", {}).get("characterization", {}).get("hc_ratio")
+        soil_temp = data.get("storage", {}).get("soil", {}).get("annual_avg_temp_celsius")
+        field_scores = [
+            score_presence_field("biochar.characterization.h_c_ratio", hc, 45,
+                                 note_if_missing="H/Corg não informado — modelo Fdurable não pode ser calculado."),
+            score_presence_field("storage.soil.annual_avg_temp_celsius", soil_temp, 35,
+                                 note_if_missing="Temperatura do solo não fornecida — parâmetro Tsoil ausente."),
+            score_presence_field("methodology.standard", methodology_standard, 20,
+                                 note_if_missing="Padrão metodológico não identificado."),
+        ]
+        notes_extra = ["Operacional: H/Corg e Tsoil necessários para cálculo do Fdurable."]
+        threshold_nc, threshold_c = 40, 85
+
     score = summarize_field_scores(field_scores)
     notes = collect_field_score_notes(field_scores)
     notes.append(f"[Protocolo] {CITATION}")
-    notes.append("Modelo principal: Equação Fdurable,200 = min(0.95, 1 - [c + (a + b·ln(Tsoil))·H/Corg]) com parâmetros conservadores do Isometric.")
-    status = _derive_status(score, 30, 80)
-    return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
-        failed_fields=[], notes=notes, requirement_score=score, field_scores=field_scores,
-        requirement_rating=derive_requirement_rating(score))
+    notes.extend(notes_extra)
+    status = _derive_status(score, threshold_nc, threshold_c)
+    return build_logic_result(
+        status=status,
+        missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
+        failed_fields=[],
+        notes=notes,
+        requirement_score=score,
+        field_scores=field_scores,
+        requirement_rating=derive_requirement_rating(score),
+    )
 
 def eval_data_collection_v1(data, audit_mode="development"):
     """R-GYA1-0: Coleta, armazenamento e retenção de dados.
