@@ -304,6 +304,80 @@ def list_audit_runs(project_id: str):
     )
     return rows
 
+_STATUS_LABELS = {
+    "compliant": "Conforme",
+    "partial": "Parcial",
+    "non_compliant": "Não conforme",
+    "not_applicable": "N/A",
+    "future_evidence_required": "Evidência futura",
+    "error": "Erro",
+}
+
+def _build_matrix_text(results: list, score: float, score_label: str, mode_label: str) -> str:
+    """Gera texto limpo da Compliance Matrix sem redundâncias."""
+    counts = {}
+    for r in results:
+        s = r.get("status", "unknown")
+        counts[s] = counts.get(s, 0) + 1
+
+    lines = [
+        f"Score de Conformidade: {score:.1f}% — {score_label} | Modo: {mode_label}",
+        "",
+        f"Conformes: {counts.get('compliant', 0)}  |  "
+        f"Parciais: {counts.get('partial', 0) + counts.get('future_evidence_required', 0)}  |  "
+        f"Não conformes: {counts.get('non_compliant', 0)}  |  "
+        f"N/A (operacional): {counts.get('not_applicable', 0)}",
+        "",
+        "─" * 60,
+        "",
+    ]
+
+    for r in results:
+        status = r.get("status", "")
+        status_label = _STATUS_LABELS.get(status, status)
+        req_score = r.get("requirement_score")
+        score_str = "N/A" if (status == "not_applicable" or req_score is None) else f"{float(req_score):.0f}"
+        risk = r.get("risk", "") or ""
+
+        lines.append(f"## {r.get('requirement_id', '')} — {r.get('title', '')}")
+        lines.append(f"Status: {status_label}  |  Risco: {risk}  |  Score: {score_str}")
+
+        _GENERIC = {
+            "Maintain current evidence and proceed to validation readiness.",
+            "Partial evidence available; some required elements are incomplete.",
+            "Core requirement not met or insufficiently evidenced.",
+            "Provide missing documentation and strengthen evidence for identified gaps.",
+            "Strengthen consistency and completeness of existing evidence.",
+            "Establish missing core elements required for compliance.",
+            "Correct failed conditions and provide full supporting evidence before validation.",
+            "Providencie esta evidência quando o projeto estiver operacional.",
+        }
+
+        # Gap — só se específico
+        gap = (r.get("gap") or "").strip()
+        if gap and gap not in _GENERIC:
+            lines.append(f"Gap: {gap}")
+
+        # Recommendation — só se específica
+        rec = (r.get("recommendation") or "").strip()
+        if rec and rec not in _GENERIC:
+            lines.append(f"Recomendação: {rec}")
+
+        # Notes — limpar e mostrar
+        notes = r.get("notes") or []
+        if isinstance(notes, list):
+            clean = [n for n in notes if n and not n.startswith("[Protocolo]") and "desenvolvimento:" not in n.lower() and "operacional:" not in n.lower()]
+            if clean:
+                for n in clean[:2]:  # máx 2 notas por item
+                    lines.append(f"• {n}")
+        elif isinstance(notes, str) and notes.strip():
+            lines.append(f"• {notes}")
+
+        lines.append("")
+
+    return "\n".join(lines)
+
+
 @app.get("/api/audit/{run_id}/report")
 def download_report(run_id: str, format: str = Query("json")):
     run = _audit_runs.get(run_id)
@@ -344,22 +418,55 @@ def download_report(run_id: str, format: str = Query("json")):
 
         # ── Compliance Matrix (PDF / DOCX) ────────────────────────────────
         if format in ("pdf", "docx"):
-            # Enriquecer results com campo 'score' esperado pelo build_audit_dataframe
+            # Pré-processar results para melhor apresentação no relatório
             for r in results_list:
-                if "score" not in r:
-                    r["score"] = r.get("requirement_score")
+                # score: nan → "N/A" para not_applicable
+                req_score = r.get("requirement_score")
+                if r.get("status") == "not_applicable" or req_score is None:
+                    r["score"] = "N/A"
+                else:
+                    r["score"] = round(float(req_score), 1)
 
-            df = build_audit_dataframe(results_list)
-            title = f"CO2mply | Compliance Matrix — {score_label} ({score_data.get('score', 0):.1f}%) [{audit_mode}]"
+                # notes: lista Python → texto legível
+                notes = r.get("notes") or []
+                if isinstance(notes, list):
+                    clean = [n for n in notes if n and not n.startswith("[Protocolo]")]
+                    r["notes"] = " | ".join(clean) if clean else ""
+
+                # methodology_basis: remover o genérico "Module: X | Requirement ID: Y"
+                mb = r.get("methodology_basis", "")
+                if mb and mb.startswith("Module:"):
+                    r["methodology_basis"] = ""
+
+                # gap e recommendation: deixar vazio se for texto genérico
+                for field in ("gap", "recommendation", "project_evidence"):
+                    val = r.get(field, "")
+                    if val in (
+                        "Maintain current evidence and proceed to validation readiness.",
+                        "Partial evidence available; some required elements are incomplete.",
+                        "Core requirement not met or insufficiently evidenced.",
+                        "Provide missing documentation and strengthen evidence for identified gaps.",
+                        "Strengthen consistency and completeness of existing evidence.",
+                        "Establish missing core elements required for compliance.",
+                        "Correct failed conditions and provide full supporting evidence before validation.",
+                    ):
+                        r[field] = ""
+
+            score_val = score_data.get("score", 0)
+            mode_label = "Desenvolvimento" if audit_mode == "development" else "Operacional"
+            title = f"CO2mply | Compliance Matrix — {score_label} ({score_val:.1f}%) [{mode_label}]"
+
+            # Gerar texto limpo da matriz
+            matrix_text = _build_matrix_text(results_list, score_val, score_label, mode_label)
 
             if format == "pdf":
-                buf = matrix_to_pdf_bytes(df, title)
+                buf = pdf_from_text_branded(title, matrix_text, brand_name="CO2mply")
                 return StreamingResponse(
                     io.BytesIO(buf), media_type="application/pdf",
                     headers={"Content-Disposition": f'attachment; filename="compliance_matrix_{run_id}.pdf"'},
                 )
             else:
-                buf = matrix_to_docx_bytes(df, title)
+                buf = docx_from_text(title, matrix_text)
                 return StreamingResponse(
                     io.BytesIO(buf),
                     media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
