@@ -15,6 +15,7 @@ from engine.mappers.base import (
 
 MANAGEMENT_PREFIXES = [
     "management.",
+    "safeguards.",   # Phase 3+: safeguards fields used by eval_environmental_social_impact_v1
 ]
 
 MANAGEMENT_EXTRA_PATHS = [

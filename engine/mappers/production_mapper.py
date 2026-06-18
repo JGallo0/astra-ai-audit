@@ -135,6 +135,37 @@ def apply_local_heuristics(
             )
 
     # ------------------------------------------------------------------
+    # production.system_description  (R-NK7R-0, R-7X0X-0)
+    # ------------------------------------------------------------------
+    current = field_map.get("production.system_description", {}).get("value")
+    if not current:
+        # Look for narrative descriptions of the production system
+        desc_patterns = [
+            r"(?:the\s+project\s+(?:uses?|utilizes?|operates?|employs?))\s+(.{30,250})",
+            r"(?:biochar\s+is\s+(?:produced?|generated?|made?))\s+(?:using|via|through|by)\s+(.{20,200})",
+            r"(?:pyrolysis\s+(?:system|process|technology|reactor))\s+(?:is|consists?|operates?)\s+(.{20,200})",
+            r"(?:the\s+facility|the\s+plant|the\s+system)\s+(?:consists?|comprises?|uses?)\s+(.{20,200})",
+            r"(?:production\s+(?:system|process|technology))[:\s]+(.{20,250})",
+        ]
+        for pattern in desc_patterns:
+            m = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
+            if m:
+                desc = re.sub(r"\s+", " ", m.group(1)).strip()[:300]
+                if len(desc) > 20:
+                    upsert_field(
+                        field_map,
+                        path="production.system_description",
+                        value=desc,
+                        evidence=f"Heuristic: system description extracted.",
+                        extractor="production_mapper",
+                        fill_method="heuristic",
+                        confidence=0.72,
+                        evidence_strength="moderate",
+                        evidence_mode="direct",
+                    )
+                    break
+
+    # ------------------------------------------------------------------
     # production.reactor_design_diagram
     # ------------------------------------------------------------------
     current = field_map.get("production.reactor_design_diagram", {}).get("value")

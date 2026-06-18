@@ -1022,16 +1022,29 @@ def eval_data_collection_v1(data, audit_mode="development"):
 def eval_environmental_social_impact_v1(data, audit_mode="development"):
     safeguards = data.get("safeguards", {})
     management = data.get("management", {})
+    legal = data.get("legal", {})
+
+    # Adaptive management: check management first, then safeguards
     adaptive = management.get("adaptive_management_plan") or safeguards.get("adaptive_management_plan")
-    env_risk = safeguards.get("environmental_risk_assessment") or safeguards.get("social_risk_assessment")
+
+    # Environmental risk: check safeguards (now extracted), fallback to legal compliance
+    env_risk = (safeguards.get("environmental_risk_assessment")
+                or safeguards.get("social_risk_assessment")
+                or legal.get("applicable_environmental_requirements"))  # proxy
+
     field_scores = [
-        score_boolean_field("management.adaptive_management_plan", adaptive, 50, note_if_missing="Plano de gestão adaptativa não evidenciado."),
-        score_boolean_field("safeguards.environmental_risk_assessment", env_risk, 50, note_if_missing="Avaliação de impacto ambiental/social não realizada."),
+        score_boolean_field("management.adaptive_management_plan", adaptive, 50,
+                            note_if_missing="Plano de gestão adaptativa não evidenciado no PDD."),
+        score_boolean_field("safeguards.environmental_risk_assessment", env_risk, 50,
+                            note_if_missing="Avaliação de impacto ambiental/social não descrita no PDD."),
     ]
     score = summarize_field_scores(field_scores)
+    notes = collect_field_score_notes(field_scores)
+    if legal.get("applicable_environmental_requirements") and not safeguards.get("environmental_risk_assessment"):
+        notes.append("Conformidade ambiental legal identificada como proxy de avaliação de impacto.")
     status = _derive_status(score, 30, 80)
     return build_logic_result(status=status, missing_fields=[i["path"] for i in field_scores if i["status"] == "missing"],
-        failed_fields=[], notes=collect_field_score_notes(field_scores),
+        failed_fields=[], notes=notes,
         requirement_score=score, field_scores=field_scores, requirement_rating=derive_requirement_rating(score))
 
 def eval_sustainable_development_v1(data, audit_mode="development"):

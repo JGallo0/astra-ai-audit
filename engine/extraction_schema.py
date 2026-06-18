@@ -39,9 +39,23 @@ EXTRACTION_FIELDS = [
     # PROJECT
     # =========================================================
     {
+        "path": "project.name",
+        "type": "string",
+        "requirement_id": "R-F6R7-0",
+        "description": "Official name of the carbon project as stated in the PDD.",
+        "extraction_hint": "Look for the project title, project name, or project proponent name at the top of the document or in the project description section.",
+    },
+    {
         "path": "project.project_boundary_defined",
         "type": "boolean",
         "description": "Whether the project boundary is explicitly defined.",
+    },
+    {
+        "path": "project.description",
+        "type": "string",
+        "requirement_id": "R-NK7R-0",
+        "description": "Brief description of what the project does and why it is eligible under the selected protocol.",
+        "extraction_hint": "Look for the project overview, project description, or eligibility justification section. Should describe the carbon removal activity.",
     },
 
     # =========================================================
@@ -423,6 +437,38 @@ EXTRACTION_FIELDS = [
         "path": "monitoring_reporting.verification_ready",
         "type": "boolean",
         "description": "Whether the project appears verification-ready from a monitoring/reporting perspective.",
+    },
+
+    # =========================================================
+    # SAFEGUARDS (maps to eval_environmental_social_impact_v1)
+    # =========================================================
+    {
+        "path": "safeguards.environmental_risk_assessment",
+        "type": "boolean",
+        "requirement_id": "R-X9EC-0",
+        "description": "Whether an environmental impact assessment or risk assessment is evidenced in the PDD.",
+        "extraction_hint": "Look for environmental impact assessment, EIA, environmental risk assessment, or environmental safeguards section.",
+    },
+    {
+        "path": "safeguards.social_risk_assessment",
+        "type": "boolean",
+        "requirement_id": "R-R81B-0",
+        "description": "Whether a social impact assessment or social risk assessment is evidenced.",
+        "extraction_hint": "Look for social impact assessment, stakeholder engagement, social safeguards, labor rights, community impact.",
+    },
+    {
+        "path": "safeguards.permits_documented",
+        "type": "boolean",
+        "requirement_id": "R-KQCS-0",
+        "description": "Whether environmental permits and regulatory approvals are documented.",
+        "extraction_hint": "Look for permits, licenses, regulatory approvals, air emissions permits, environmental authorizations.",
+    },
+    {
+        "path": "safeguards.stakeholder_input_process",
+        "type": "boolean",
+        "requirement_id": "R-ZHRN-0",
+        "description": "Whether a stakeholder consultation process is evidenced.",
+        "extraction_hint": "Look for stakeholder consultation, community engagement, public participation, stakeholder input process.",
     },
 
     # =========================================================

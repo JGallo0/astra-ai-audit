@@ -19,6 +19,13 @@ ELIGIBILITY_PATHS = [
     "methodology.standard",
     "methodology.pathway",
     "methodology.production_subpathway",
+    # Phase 3+: project identity fields
+    "project.name",
+    "project.description",
+    "project.country",
+    "project.locations",
+    "project.ownership_evidence",
+    "project.project_boundary_defined",
 ]
 
 
@@ -152,9 +159,58 @@ def apply_local_heuristics(
                 evidence_mode="direct",
             )
 
-    # ── Phase 3: project location and ownership (R-A5B6-0, R-M858-0) ────────
+    # ── Phase 3+: project name, description, location and ownership ──────────
     # Use project_text (already defined above)
     text = project_text  # alias for consistency with other mappers
+
+    # project.name — project title or proponent company name
+    if field_map.get("project.name", {}).get("value") is None:
+        # Pattern 1: "Project: XYZ" or "Project Name: XYZ"
+        m = re.search(r"(?:project\s+name|project\s+title|name\s+of\s+project)\s*[:\-]\s*([^\n]{3,60})", text, re.IGNORECASE)
+        if not m:
+            # Pattern 2: Title case phrases likely to be project name at top of document
+            m = re.search(r"^([A-Z][A-Za-z\s&]+(?:Biochar|Carbon|Project|Farm|Forest|Energy)[A-Za-z\s]*)", text[:500], re.MULTILINE)
+        if not m:
+            # Pattern 3: "Biochar [Name]" as project identifier
+            m = re.search(r"((?:Biochar|Carbon)\s+[A-Z][A-Za-z\s]+(?:Project|Farm|Initiative|Programme)?)", text[:1000])
+        if m:
+            name = m.group(1).strip()[:80]
+            if len(name) > 3:
+                upsert_field(
+                    field_map,
+                    path="project.name",
+                    value=name,
+                    evidence=f"Heuristic: project name '{name}'.",
+                    extractor="eligibility_mapper",
+                    fill_method="heuristic",
+                    confidence=0.75,
+                    evidence_strength="moderate",
+                    evidence_mode="direct",
+                )
+
+    # project.description — brief description/eligibility justification
+    if field_map.get("project.description", {}).get("value") is None:
+        desc_patterns = [
+            r"(?:project\s+description|project\s+overview|about\s+the\s+project)\s*[:\n]\s*(.{50,300})",
+            r"(?:the\s+project\s+(?:involves|consists|aims|produces|converts))\s+(.{30,200})",
+            r"(?:this\s+project\s+(?:produces|converts|uses|applies))\s+(.{30,200})",
+        ]
+        for pattern in desc_patterns:
+            m = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
+            if m:
+                desc = re.sub(r"\s+", " ", m.group(1)).strip()[:300]
+                upsert_field(
+                    field_map,
+                    path="project.description",
+                    value=desc,
+                    evidence=f"Heuristic: project description found.",
+                    extractor="eligibility_mapper",
+                    fill_method="heuristic",
+                    confidence=0.70,
+                    evidence_strength="moderate",
+                    evidence_mode="direct",
+                )
+                break
 
     # project.country — "located in Brazil", "California, USA", "in the United States"
     if field_map.get("project.country", {}).get("value") is None:
