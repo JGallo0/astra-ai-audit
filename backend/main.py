@@ -418,44 +418,11 @@ def download_report(run_id: str, format: str = Query("json")):
 
         # ── Compliance Matrix (PDF / DOCX) ────────────────────────────────
         if format in ("pdf", "docx"):
-            # Pré-processar results para melhor apresentação no relatório
-            for r in results_list:
-                # score: nan → "N/A" para not_applicable
-                req_score = r.get("requirement_score")
-                if r.get("status") == "not_applicable" or req_score is None:
-                    r["score"] = "N/A"
-                else:
-                    r["score"] = round(float(req_score), 1)
-
-                # notes: lista Python → texto legível
-                notes = r.get("notes") or []
-                if isinstance(notes, list):
-                    clean = [n for n in notes if n and not n.startswith("[Protocolo]")]
-                    r["notes"] = " | ".join(clean) if clean else ""
-
-                # methodology_basis: remover o genérico "Module: X | Requirement ID: Y"
-                mb = r.get("methodology_basis", "")
-                if mb and mb.startswith("Module:"):
-                    r["methodology_basis"] = ""
-
-                # gap e recommendation: deixar vazio se for texto genérico
-                for field in ("gap", "recommendation", "project_evidence"):
-                    val = r.get(field, "")
-                    if val in (
-                        "Maintain current evidence and proceed to validation readiness.",
-                        "Partial evidence available; some required elements are incomplete.",
-                        "Core requirement not met or insufficiently evidenced.",
-                        "Provide missing documentation and strengthen evidence for identified gaps.",
-                        "Strengthen consistency and completeness of existing evidence.",
-                        "Establish missing core elements required for compliance.",
-                        "Correct failed conditions and provide full supporting evidence before validation.",
-                    ):
-                        r[field] = ""
-
-            score_val = score_data.get("score", 0)
+            score_val  = score_data.get("score", 0)
             mode_label = "Desenvolvimento" if audit_mode == "development" else "Operacional"
 
             if format == "pdf":
+                # PDF usa o gerador próprio — passa dados brutos sem pré-processar
                 from backend.report_generator import generate_compliance_matrix_pdf
                 buf = generate_compliance_matrix_pdf(
                     results=results_list,

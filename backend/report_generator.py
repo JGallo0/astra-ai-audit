@@ -1,6 +1,6 @@
 """
 CO2mply — Professional PDF Report Generator
-Uses ReportLab to produce branded compliance audit reports.
+ReportLab-based branded compliance matrix.
 """
 import io
 import os
@@ -9,58 +9,59 @@ from typing import Any, Dict, List, Optional
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm, mm
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    KeepTogether, HRFlowable, PageBreak,
+    KeepTogether, HRFlowable, Image,
 )
 from reportlab.platypus.flowables import Flowable
-from reportlab.lib.utils import ImageReader
 
-# ── Brand colours ─────────────────────────────────────────────────────────────
+# ── Brand colours ──────────────────────────────────────────────────────────────
 
-C_NAVY       = colors.HexColor("#1A3160")   # primary navy (sidebar)
-C_NAVY_LIGHT = colors.HexColor("#E8EDF5")   # very light navy tint
-C_GREEN      = colors.HexColor("#16A34A")   # compliant
-C_GREEN_BG   = colors.HexColor("#F0FDF4")
-C_AMBER      = colors.HexColor("#D97706")   # partial
-C_AMBER_BG   = colors.HexColor("#FFFBEB")
-C_PURPLE     = colors.HexColor("#7C3AED")   # future_evidence
-C_PURPLE_BG  = colors.HexColor("#F5F3FF")
-C_RED        = colors.HexColor("#DC2626")   # non_compliant
-C_RED_BG     = colors.HexColor("#FEF2F2")
-C_GRAY       = colors.HexColor("#6B7280")   # N/A
-C_GRAY_BG    = colors.HexColor("#F9FAFB")
-C_BORDER     = colors.HexColor("#E5E7EB")
-C_TEXT       = colors.HexColor("#0F172A")
-C_TEXT2      = colors.HexColor("#475569")
-C_WHITE      = colors.white
+NAVY        = "#1A3160"
+NAVY_LIGHT  = "#EEF2FA"
+GREEN       = "#16A34A"
+GREEN_BG    = "#F0FDF4"
+AMBER       = "#B45309"
+AMBER_BG    = "#FFFBEB"
+PURPLE      = "#6D28D9"
+PURPLE_BG   = "#F5F3FF"
+RED         = "#DC2626"
+RED_BG      = "#FEF2F2"
+GRAY_DARK   = "#4B5563"
+GRAY_MID    = "#9CA3AF"
+GRAY_BG     = "#F3F4F6"
+BORDER      = "#E5E7EB"
+TEXT        = "#111827"
+TEXT2       = "#6B7280"
+
+def _c(h): return colors.HexColor(h)
 
 PAGE_W, PAGE_H = A4
-MARGIN_L = 2.0 * cm
-MARGIN_R = 2.0 * cm
-MARGIN_T = 2.5 * cm
-MARGIN_B = 2.0 * cm
+ML = 1.8 * cm
+MR = 1.8 * cm
+MT = 2.2 * cm   # after header bar
+MB = 1.8 * cm   # above footer
 
 LOGO_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "assets", "auditoria_logo.png"
+    "assets", "auditoria_logo.png",
 )
 
 # ── Status config ──────────────────────────────────────────────────────────────
 
-STATUS_CONFIG = {
-    "compliant":                ("Conforme",         C_GREEN,  C_GREEN_BG),
-    "partial":                  ("Parcial",           C_AMBER,  C_AMBER_BG),
-    "future_evidence_required": ("Ev. Futura",        C_PURPLE, C_PURPLE_BG),
-    "non_compliant":            ("Não conforme",      C_RED,    C_RED_BG),
-    "not_applicable":           ("N/A",               C_GRAY,   C_GRAY_BG),
-    "error":                    ("Erro",              C_GRAY,   C_GRAY_BG),
+STATUS = {
+    "compliant":                ("Conforme",    GREEN,  GREEN_BG),
+    "partial":                  ("Parcial",     AMBER,  AMBER_BG),
+    "future_evidence_required": ("Ev. Futura",  PURPLE, PURPLE_BG),
+    "non_compliant":            ("Não conforme",RED,    RED_BG),
+    "not_applicable":           ("N/A",         GRAY_MID, GRAY_BG),
+    "error":                    ("Erro",        GRAY_MID, GRAY_BG),
 }
 
-GENERIC_MESSAGES = {
+GENERIC = {
     "Maintain current evidence and proceed to validation readiness.",
     "Partial evidence available; some required elements are incomplete.",
     "Core requirement not met or insufficiently evidenced.",
@@ -71,28 +72,29 @@ GENERIC_MESSAGES = {
     "Providencie esta evidência quando o projeto estiver operacional.",
 }
 
-# ── Helpers ────────────────────────────────────────────────────────────────────
-
-def _status_label(status: str) -> str:
-    return STATUS_CONFIG.get(status, ("?", C_GRAY, C_GRAY_BG))[0]
-
-def _status_color(status: str) -> colors.Color:
-    return STATUS_CONFIG.get(status, ("?", C_GRAY, C_GRAY_BG))[1]
-
-def _status_bg(status: str) -> colors.Color:
-    return STATUS_CONFIG.get(status, ("?", C_GRAY, C_GRAY_BG))[2]
+def _lbl(s): return STATUS.get(s, ("?", GRAY_MID, GRAY_BG))[0]
+def _fg(s):  return STATUS.get(s, ("?", GRAY_MID, GRAY_BG))[1]
+def _bg(s):  return STATUS.get(s, ("?", GRAY_MID, GRAY_BG))[2]
 
 def _clean_notes(notes) -> List[str]:
-    if isinstance(notes, list):
-        return [n for n in notes
-                if n and not n.startswith("[Protocolo]")
-                and "desenvolvimento:" not in n.lower()
-                and "operacional:" not in n.lower()
-                and n not in GENERIC_MESSAGES]
-    return []
+    if isinstance(notes, str):
+        # Already joined string — split back and clean
+        parts = [n.strip() for n in notes.split("|") if n.strip()]
+    elif isinstance(notes, list):
+        parts = [str(n).strip() for n in notes if n]
+    else:
+        return []
+    return [
+        n for n in parts
+        if n
+        and not n.startswith("[Protocolo]")
+        and "desenvolvimento:" not in n.lower()
+        and "operacional:" not in n.lower()
+        and n not in GENERIC
+    ]
 
 def _score_str(r: dict) -> str:
-    s = r.get("requirement_score") or r.get("score")
+    s = r.get("requirement_score")
     if r.get("status") == "not_applicable" or s is None:
         return "N/A"
     try:
@@ -100,17 +102,14 @@ def _score_str(r: dict) -> str:
     except Exception:
         return "N/A"
 
-def _score_color(r: dict) -> colors.Color:
-    s = r.get("requirement_score") or r.get("score")
-    if s is None:
-        return C_GRAY
+def _score_color(r: dict) -> str:
+    s = r.get("requirement_score")
+    if s is None: return GRAY_MID
     try:
         v = float(s)
-        if v >= 85:  return C_GREEN
-        if v >= 60:  return C_AMBER
-        return C_RED
+        return GREEN if v >= 85 else AMBER if v >= 60 else RED
     except Exception:
-        return C_GRAY
+        return GRAY_MID
 
 def _group_by_module(results: List[dict]) -> Dict[str, List[dict]]:
     groups: Dict[str, List[dict]] = {}
@@ -119,87 +118,54 @@ def _group_by_module(results: List[dict]) -> Dict[str, List[dict]]:
         groups.setdefault(mod, []).append(r)
     return groups
 
-# ── Page template (header/footer via canvas callbacks) ─────────────────────────
+# ── Page callbacks ─────────────────────────────────────────────────────────────
 
-class _HeaderFooter:
-    def __init__(self, project_name: str, date_str: str):
-        self.project_name = project_name
-        self.date_str = date_str
-
-    def on_page(self, canvas, doc):
+def _make_page_cb(project_name: str, date_str: str):
+    def cb(canvas, doc):
         canvas.saveState()
         w, h = A4
 
-        # ── Top header bar ──────────────────────────────────────────────────
-        canvas.setFillColor(C_NAVY)
-        canvas.rect(0, h - 1.4 * cm, w, 1.4 * cm, fill=1, stroke=0)
-
-        canvas.setFillColor(C_WHITE)
-        canvas.setFont("Helvetica-Bold", 9)
-        canvas.drawString(MARGIN_L, h - 0.9 * cm, "CO2mply")
-        canvas.setFont("Helvetica", 8)
-        canvas.drawRightString(w - MARGIN_R, h - 0.9 * cm, "Carbon Compliance Intelligence")
-
-        # ── Bottom footer ────────────────────────────────────────────────────
-        canvas.setFillColor(C_BORDER)
-        canvas.rect(MARGIN_L, 1.3 * cm, w - MARGIN_L - MARGIN_R, 0.03 * cm, fill=1, stroke=0)
-
-        canvas.setFillColor(C_TEXT2)
+        # Header bar
+        canvas.setFillColor(_c(NAVY))
+        canvas.rect(0, h - 1.3*cm, w, 1.3*cm, fill=1, stroke=0)
+        canvas.setFillColor(colors.white)
+        canvas.setFont("Helvetica-Bold", 8.5)
+        canvas.drawString(ML, h - 0.83*cm, "CO2mply")
         canvas.setFont("Helvetica", 7.5)
-        canvas.drawString(MARGIN_L, 0.7 * cm,
-                          f"CO2mply | Auditoria de Conformidade — {self.project_name}")
-        canvas.drawRightString(w - MARGIN_R, 0.7 * cm,
-                               f"Página {doc.page}  |  {self.date_str}")
+        canvas.drawRightString(w - MR, h - 0.83*cm, "Carbon Compliance Intelligence")
 
-        # ── Confidential watermark ────────────────────────────────────────
+        # Footer line
+        canvas.setStrokeColor(_c(BORDER))
+        canvas.setLineWidth(0.5)
+        canvas.line(ML, 1.5*cm, w - MR, 1.5*cm)
+
+        # Footer text
+        canvas.setFillColor(_c(TEXT2))
+        canvas.setFont("Helvetica", 7)
+        canvas.drawString(ML, 0.85*cm,
+                          f"CO2mply | Auditoria de Conformidade — {project_name}")
+        canvas.setFont("Helvetica", 7)
+        canvas.drawRightString(w - MR, 0.85*cm,
+                               f"Página {doc.page}  |  {date_str}")
         canvas.setFont("Helvetica", 6.5)
-        canvas.setFillColor(C_GRAY)
-        canvas.drawCentredString(w / 2, 0.7 * cm, "CONFIDENCIAL")
+        canvas.setFillColor(_c(GRAY_MID))
+        canvas.drawCentredString(w/2, 0.85*cm, "CONFIDENCIAL")
 
         canvas.restoreState()
 
+    return cb
 
-# ── Score circle (custom Flowable) ─────────────────────────────────────────────
+# ── Helpers ────────────────────────────────────────────────────────────────────
 
-class ScoreCircle(Flowable):
-    def __init__(self, score: float, label: str, size: float = 2.8 * cm):
-        Flowable.__init__(self)
-        self.score = score
-        self.label = label
-        self.size = size
-        self.width = size
-        self.height = size
+def _p(text, style): return Paragraph(text, style)
 
-    def draw(self):
-        r = self.size / 2
-        cx, cy = r, r
+def _style(**kw) -> ParagraphStyle:
+    base = dict(fontName="Helvetica", fontSize=9, leading=12,
+                textColor=_c(TEXT), spaceAfter=0, spaceBefore=0)
+    base.update(kw)
+    return ParagraphStyle("s", **base)
 
-        # Background circle
-        self.canv.setFillColor(C_NAVY_LIGHT)
-        self.canv.circle(cx, cy, r, fill=1, stroke=0)
-
-        # Color ring (arc drawn as a series of lines — simplified as colored circle)
-        score = self.score
-        if score >= 85:   ring_color = C_GREEN
-        elif score >= 60: ring_color = C_AMBER
-        else:             ring_color = C_RED
-        self.canv.setStrokeColor(ring_color)
-        self.canv.setLineWidth(4)
-        self.canv.circle(cx, cy, r - 3, fill=0, stroke=1)
-
-        # Score text
-        self.canv.setFillColor(C_NAVY)
-        self.canv.setFont("Helvetica-Bold", 16)
-        score_str = f"{score:.0f}%"
-        self.canv.drawCentredString(cx, cy + 2, score_str)
-
-        # Label
-        self.canv.setFont("Helvetica", 6)
-        self.canv.setFillColor(C_TEXT2)
-        self.canv.drawCentredString(cx, cy - 9, self.label)
-
-
-# ── Main generator ─────────────────────────────────────────────────────────────
+# ── Main function ──────────────────────────────────────────────────────────────
 
 def generate_compliance_matrix_pdf(
     results: List[dict],
@@ -208,270 +174,240 @@ def generate_compliance_matrix_pdf(
     project_name: str = "Projeto",
     methodology: str = "Isometric Biochar",
 ) -> bytes:
-    """Generate a professional compliance matrix PDF."""
-    buffer = io.BytesIO()
 
-    score = float(score_data.get("score", 0))
-    score_label = score_data.get("score_label", "")
-    mode_label = "Desenvolvimento" if audit_mode == "development" else "Operacional"
-    date_str = datetime.now().strftime("%d/%m/%Y")
+    score      = float(score_data.get("score", 0))
+    score_lbl  = score_data.get("score_label", "")
+    mode_lbl   = "Desenvolvimento" if audit_mode == "development" else "Operacional"
+    date_str   = datetime.now().strftime("%d/%m/%Y")
 
-    hf = _HeaderFooter(project_name, date_str)
-
+    buf = io.BytesIO()
     doc = SimpleDocTemplate(
-        buffer,
-        pagesize=A4,
-        leftMargin=MARGIN_L,
-        rightMargin=MARGIN_R,
-        topMargin=MARGIN_T + 0.3 * cm,
-        bottomMargin=MARGIN_B + 0.8 * cm,
+        buf, pagesize=A4,
+        leftMargin=ML, rightMargin=MR,
+        topMargin=MT + 1.5*cm,   # space for header bar
+        bottomMargin=MB + 1.2*cm, # space for footer
         title=f"CO2mply | Compliance Matrix — {project_name}",
         author="CO2mply",
     )
 
-    styles = getSampleStyleSheet()
+    cb = _make_page_cb(project_name, date_str)
     story = []
 
-    # ── Cover / Header block ──────────────────────────────────────────────────
-
-    # Logo
+    # ── Logo ────────────────────────────────────────────────────────────────────
     if os.path.exists(LOGO_PATH):
-        from reportlab.platypus import Image
-        logo = Image(LOGO_PATH, width=6 * cm, height=2.2 * cm)
+        logo = Image(LOGO_PATH, width=5.5*cm, height=2.0*cm)
         logo.hAlign = "LEFT"
         story.append(logo)
+        story.append(Spacer(1, 0.3*cm))
     else:
-        story.append(Paragraph(
-            '<font size="20" color="#1A3160"><b>CO2mply</b></font>',
-            ParagraphStyle("logo", fontName="Helvetica-Bold", fontSize=20)
-        ))
+        story.append(_p('<font name="Helvetica-Bold" size="18" color="#1A3160">CO2mply</font>',
+                        _style(fontSize=18)))
+        story.append(Spacer(1, 0.3*cm))
 
-    story.append(Spacer(1, 0.5 * cm))
+    # ── Title block ─────────────────────────────────────────────────────────────
+    story.append(_p("Compliance Audit Report",
+                    _style(fontName="Helvetica-Bold", fontSize=22, leading=28,
+                           textColor=_c(NAVY), spaceAfter=4)))
+    story.append(_p(f"Padrão: {methodology}  ·  Modo: {mode_lbl}",
+                    _style(fontSize=10, leading=14, textColor=_c(TEXT2), spaceAfter=2)))
+    story.append(_p(f"Projeto: {project_name}  ·  Data: {date_str}",
+                    _style(fontSize=10, leading=14, textColor=_c(TEXT2), spaceAfter=10)))
+    story.append(HRFlowable(width="100%", thickness=1, color=_c(BORDER)))
+    story.append(Spacer(1, 0.5*cm))
 
-    # Title
-    title_style = ParagraphStyle(
-        "cover_title",
-        fontName="Helvetica-Bold",
-        fontSize=22,
-        textColor=C_NAVY,
-        spaceAfter=4,
-    )
-    story.append(Paragraph("Compliance Audit Report", title_style))
-
-    sub_style = ParagraphStyle(
-        "cover_sub",
-        fontName="Helvetica",
-        fontSize=11,
-        textColor=C_TEXT2,
-        spaceAfter=2,
-    )
-    story.append(Paragraph(f"Padrão: {methodology}  |  Modo: {mode_label}", sub_style))
-    story.append(Paragraph(f"Projeto: {project_name}  |  Data: {date_str}", sub_style))
-    story.append(Spacer(1, 0.4 * cm))
-    story.append(HRFlowable(width="100%", thickness=1, color=C_BORDER))
-    story.append(Spacer(1, 0.5 * cm))
-
-    # ── Score summary row ──────────────────────────────────────────────────────
-
+    # ── KPI block ────────────────────────────────────────────────────────────────
     counts = {}
     for r in results:
         s = r.get("status", "unknown")
         counts[s] = counts.get(s, 0) + 1
 
-    n_compliant = counts.get("compliant", 0)
-    n_partial   = counts.get("partial", 0) + counts.get("future_evidence_required", 0)
-    n_noncomp   = counts.get("non_compliant", 0)
-    n_na        = counts.get("not_applicable", 0)
-    n_total     = sum(c for s, c in counts.items() if s != "not_applicable")
+    n_conf   = counts.get("compliant", 0)
+    n_part   = counts.get("partial", 0) + counts.get("future_evidence_required", 0)
+    n_nonc   = counts.get("non_compliant", 0)
+    n_na     = counts.get("not_applicable", 0)
 
-    def _kpi_cell(value: str, label: str, color: colors.Color) -> List:
-        return [
-            Paragraph(f'<font size="22" color="{color.hexval()}"><b>{value}</b></font>',
-                      ParagraphStyle("kpi", alignment=TA_CENTER)),
-            Paragraph(f'<font size="8" color="#6B7280">{label}</font>',
-                      ParagraphStyle("kpi_lbl", alignment=TA_CENTER)),
-        ]
+    score_color = GREEN if score >= 85 else AMBER if score >= 60 else RED
 
-    if score >= 85:   score_c = C_GREEN
-    elif score >= 60: score_c = C_AMBER
-    else:             score_c = C_RED
+    kpi_col_w = (PAGE_W - ML - MR) / 5
 
+    # Two-row KPI table: values row + labels row
     kpi_table = Table(
-        [[
-            ScoreCircle(score, score_label or "Score", size=3.2 * cm),
-            Table([_kpi_cell(str(n_compliant), "Conformes", C_GREEN)],   colWidths=[3.5*cm]),
-            Table([_kpi_cell(str(n_partial),   "Parciais",  C_AMBER)],   colWidths=[3.5*cm]),
-            Table([_kpi_cell(str(n_noncomp),   "Não conf.", C_RED)],     colWidths=[3.5*cm]),
-            Table([_kpi_cell(str(n_na),        "N/A (op.)", C_GRAY)],    colWidths=[3.5*cm]),
-        ]],
-        colWidths=[3.5*cm, 3.5*cm, 3.5*cm, 3.5*cm, 3.5*cm],
+        [
+            # Row 1: values
+            [
+                _p(f'<font name="Helvetica-Bold" size="22" color="{score_color}">{score:.0f}%</font>',
+                   _style(alignment=TA_CENTER, fontSize=22, leading=26)),
+                _p(f'<font name="Helvetica-Bold" size="18" color="{GREEN}">{n_conf}</font>',
+                   _style(alignment=TA_CENTER, fontSize=18, leading=22)),
+                _p(f'<font name="Helvetica-Bold" size="18" color="{AMBER}">{n_part}</font>',
+                   _style(alignment=TA_CENTER, fontSize=18, leading=22)),
+                _p(f'<font name="Helvetica-Bold" size="18" color="{RED if n_nonc else GRAY_MID}">{n_nonc}</font>',
+                   _style(alignment=TA_CENTER, fontSize=18, leading=22)),
+                _p(f'<font name="Helvetica-Bold" size="18" color="{GRAY_MID}">{n_na}</font>',
+                   _style(alignment=TA_CENTER, fontSize=18, leading=22)),
+            ],
+            # Row 2: labels
+            [
+                _p(f'<font size="8" color="{TEXT2}">{score_lbl}</font>',
+                   _style(alignment=TA_CENTER, fontSize=8, leading=10)),
+                _p(f'<font size="8" color="{TEXT2}">Conformes</font>',
+                   _style(alignment=TA_CENTER, fontSize=8, leading=10)),
+                _p(f'<font size="8" color="{TEXT2}">Parciais</font>',
+                   _style(alignment=TA_CENTER, fontSize=8, leading=10)),
+                _p(f'<font size="8" color="{TEXT2}">Não conf.</font>',
+                   _style(alignment=TA_CENTER, fontSize=8, leading=10)),
+                _p(f'<font size="8" color="{TEXT2}">N/A (op.)</font>',
+                   _style(alignment=TA_CENTER, fontSize=8, leading=10)),
+            ],
+        ],
+        colWidths=[kpi_col_w] * 5,
+        rowHeights=[1.4*cm, 0.7*cm],
     )
     kpi_table.setStyle(TableStyle([
-        ("ALIGN",       (0, 0), (-1, -1), "CENTER"),
-        ("VALIGN",      (0, 0), (-1, -1), "MIDDLE"),
-        ("BACKGROUND",  (0, 0), (-1, -1), C_NAVY_LIGHT),
-        ("ROUNDEDCORNERS", [6]),
-        ("TOPPADDING",  (0, 0), (-1, -1), 12),
-        ("BOTTOMPADDING",(0, 0), (-1, -1), 12),
+        ("BACKGROUND",    (0, 0), (-1, -1), _c(NAVY_LIGHT)),
+        ("ALIGN",         (0, 0), (-1, -1), "CENTER"),
+        ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING",    (0, 0), (-1, -1), 10),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+        ("LEFTPADDING",   (0, 0), (-1, -1), 4),
+        ("RIGHTPADDING",  (0, 0), (-1, -1), 4),
+        ("LINEAFTER",     (0, 0), (3, 0), 0.5, _c(BORDER)),
+        ("BOX",           (0, 0), (-1, -1), 0.5, _c(BORDER)),
     ]))
     story.append(kpi_table)
-    story.append(Spacer(1, 0.7 * cm))
+    story.append(Spacer(1, 0.7*cm))
 
-    # ── Matrix by module ──────────────────────────────────────────────────────
+    # ── Matrix ───────────────────────────────────────────────────────────────────
+
+    TABLE_W = PAGE_W - ML - MR
+    COL_W   = [2.8*cm, TABLE_W - 2.8*cm - 2.6*cm - 1.6*cm, 2.6*cm, 1.6*cm]
+
+    s_id    = _style(fontName="Helvetica-Bold", fontSize=8, textColor=_c(NAVY), leading=11)
+    s_req   = _style(fontName="Helvetica-Bold", fontSize=8.5, leading=12)
+    s_note  = _style(fontName="Helvetica-Oblique", fontSize=7.5, textColor=_c(GRAY_DARK),
+                     leading=10, leftIndent=0, spaceAfter=1)
+    s_hdr   = _style(fontName="Helvetica-Bold", fontSize=7, textColor=_c(TEXT2),
+                     alignment=TA_LEFT, leading=9)
+    s_hdr_c = _style(fontName="Helvetica-Bold", fontSize=7, textColor=_c(TEXT2),
+                     alignment=TA_CENTER, leading=9)
+    s_mod   = _style(fontName="Helvetica-Bold", fontSize=9, textColor=_c("#FFFFFF"),
+                     leading=12)
+
+    def _col_header_row():
+        return [
+            _p("ID", s_hdr),
+            _p("REQUISITO", s_hdr),
+            _p("STATUS", s_hdr_c),
+            _p("SCORE", s_hdr_c),
+        ]
 
     groups = _group_by_module(results)
-
-    module_style = ParagraphStyle(
-        "module",
-        fontName="Helvetica-Bold",
-        fontSize=10,
-        textColor=C_WHITE,
-        spaceBefore=12,
-        spaceAfter=4,
-    )
-    req_title_style = ParagraphStyle(
-        "req_title",
-        fontName="Helvetica-Bold",
-        fontSize=8.5,
-        textColor=C_TEXT,
-        leading=11,
-    )
-    detail_style = ParagraphStyle(
-        "detail",
-        fontName="Helvetica",
-        fontSize=7.5,
-        textColor=C_TEXT2,
-        leading=10,
-    )
-    note_style = ParagraphStyle(
-        "note",
-        fontName="Helvetica-Oblique",
-        fontSize=7,
-        textColor=C_TEXT2,
-        leading=9,
-        leftIndent=6,
-    )
-
-    COL_WIDTHS = [3.2*cm, 8.8*cm, 2.4*cm, 1.6*cm]  # ID | Requirement | Status | Score
-    FULL_W = sum(COL_WIDTHS)
 
     for module_name, reqs in groups.items():
         # Module header
         mod_header = Table(
-            [[Paragraph(module_name.upper(), module_style)]],
-            colWidths=[FULL_W],
+            [[_p(module_name.upper(), s_mod)]],
+            colWidths=[TABLE_W],
         )
         mod_header.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, -1), C_NAVY),
-            ("TOPPADDING",  (0, 0), (-1, -1), 5),
-            ("BOTTOMPADDING",(0, 0), (-1, -1), 5),
-            ("LEFTPADDING", (0, 0), (-1, -1), 8),
+            ("BACKGROUND",    (0, 0), (-1, -1), _c(NAVY)),
+            ("TOPPADDING",    (0, 0), (-1, -1), 6),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ("LEFTPADDING",   (0, 0), (-1, -1), 10),
         ]))
-        story.append(KeepTogether([mod_header, Spacer(1, 1)]))
 
-        # Column header
-        col_header = Table(
-            [[
-                Paragraph('<font size="7" color="#475569"><b>ID</b></font>',
-                          ParagraphStyle("ch", alignment=TA_LEFT)),
-                Paragraph('<font size="7" color="#475569"><b>REQUISITO</b></font>',
-                          ParagraphStyle("ch", alignment=TA_LEFT)),
-                Paragraph('<font size="7" color="#475569"><b>STATUS</b></font>',
-                          ParagraphStyle("ch", alignment=TA_CENTER)),
-                Paragraph('<font size="7" color="#475569"><b>SCORE</b></font>',
-                          ParagraphStyle("ch", alignment=TA_CENTER)),
-            ]],
-            colWidths=COL_WIDTHS,
-        )
-        col_header.setStyle(TableStyle([
-            ("BACKGROUND",   (0, 0), (-1, -1), colors.HexColor("#F1F5F9")),
-            ("TOPPADDING",   (0, 0), (-1, -1), 4),
-            ("BOTTOMPADDING",(0, 0), (-1, -1), 4),
-            ("LEFTPADDING",  (0, 0), (-1, -1), 6),
-            ("LINEBELOW",    (0, 0), (-1, -1), 0.5, C_BORDER),
-        ]))
-        story.append(col_header)
+        # Column header row + all requirement rows
+        table_data = [_col_header_row()]
+        row_styles = [
+            # Column header row styling
+            ("BACKGROUND",    (0, 0), (-1, 0), _c("#F1F5F9")),
+            ("LINEBELOW",     (0, 0), (-1, 0), 0.5, _c(BORDER)),
+            ("TOPPADDING",    (0, 0), (-1, 0), 5),
+            ("BOTTOMPADDING", (0, 0), (-1, 0), 5),
+        ]
 
-        # Requirement rows
-        for req in reqs:
-            status = req.get("status", "")
-            lbl, fg, bg = STATUS_CONFIG.get(status, ("?", C_GRAY, C_GRAY_BG))
-            score_txt = _score_str(req)
-            score_color = _score_color(req)
+        for i, req in enumerate(reqs, start=1):
+            status  = req.get("status", "")
+            lbl     = _lbl(status)
+            fg      = _fg(status)
+            bg      = _bg(status)
+            sc_str  = _score_str(req)
+            sc_col  = _score_color(req)
+            req_id  = req.get("requirement_id", "")
+            title   = req.get("title") or req.get("requirement_name", "")
 
-            req_id = req.get("requirement_id", "")
-            title  = req.get("title", req.get("requirement_name", ""))
+            # Gap
+            gap = (req.get("gap") or "").strip()
+            if gap in GENERIC: gap = ""
 
             # Notes
             notes = _clean_notes(req.get("notes"))
-            gap   = (req.get("gap") or "").strip()
-            if gap in GENERIC_MESSAGES: gap = ""
 
-            # Build detail cell content
-            detail_parts = []
-            if gap:
-                detail_parts.append(Paragraph(f"<b>Gap:</b> {gap}", note_style))
-            for n in notes[:2]:
-                detail_parts.append(Paragraph(f"• {n}", note_style))
+            # Build requirement cell
+            req_cell_content = [_p(title, s_req)]
+            if status == "not_applicable":
+                req_cell_content.append(_p(
+                    "Evidência aplicável em Modo Operacional — não penaliza o score.", s_note))
+            else:
+                if gap:
+                    req_cell_content.append(_p(f"→ {gap}", s_note))
+                for n in notes[:2]:
+                    req_cell_content.append(_p(f"• {n}", s_note))
 
-            req_cell = [Paragraph(title, req_title_style)] + detail_parts
-
-            # Status badge cell
-            status_para = Paragraph(
-                f'<font size="7.5" color="{fg.hexval()}"><b>{lbl}</b></font>',
-                ParagraphStyle("sb", alignment=TA_CENTER, leading=9),
+            # Status badge paragraph
+            s_badge = _style(
+                fontName="Helvetica-Bold", fontSize=8,
+                textColor=_c(fg), alignment=TA_CENTER, leading=10,
+            )
+            s_score = _style(
+                fontName="Helvetica-Bold", fontSize=9.5,
+                textColor=_c(sc_col), alignment=TA_CENTER, leading=11,
             )
 
-            # Score cell
-            score_para = Paragraph(
-                f'<font size="9" color="{score_color.hexval()}"><b>{score_txt}</b></font>',
-                ParagraphStyle("sc", alignment=TA_CENTER),
-            )
+            table_data.append([
+                _p(req_id, s_id),
+                req_cell_content,
+                _p(lbl, s_badge),
+                _p(sc_str, s_score),
+            ])
 
-            row_data = [[
-                Paragraph(f'<font size="8" color="{C_NAVY.hexval()}"><b>{req_id}</b></font>',
-                          ParagraphStyle("rid", leading=10)),
-                req_cell,
-                status_para,
-                score_para,
-            ]]
-
-            row_table = Table(row_data, colWidths=COL_WIDTHS)
-            row_table.setStyle(TableStyle([
-                ("BACKGROUND",    (0, 0), (-1, -1), bg),
-                ("LEFTPADDING",   (0, 0), (-1, -1), 6),
-                ("RIGHTPADDING",  (0, 0), (-1, -1), 6),
-                ("TOPPADDING",    (0, 0), (-1, -1), 6),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-                ("VALIGN",        (0, 0), (-1, -1), "TOP"),
-                ("ALIGN",         (2, 0), (3, 0), "CENTER"),
-                ("VALIGN",        (2, 0), (3, 0), "MIDDLE"),
-                ("LINEBELOW",     (0, 0), (-1, -1), 0.3, C_BORDER),
-                ("LEFTBORDERPADDING", (0, 0), (0, -1), 0),
+            row_styles += [
+                ("BACKGROUND",    (0, i), (-1, i), _c(bg)),
+                ("TOPPADDING",    (0, i), (-1, i), 6),
+                ("BOTTOMPADDING", (0, i), (-1, i), 6),
+                ("LINEBELOW",     (0, i), (-1, i), 0.3, _c(BORDER)),
+                ("VALIGN",        (0, i), (-1, i), "TOP"),
+                ("ALIGN",         (2, i), (3, i),  "CENTER"),
+                ("VALIGN",        (2, i), (3, i),  "MIDDLE"),
                 # Left accent bar by status color
-                ("LINEBEFORE", (0, 0), (0, -1), 3, fg),
-            ]))
-            story.append(row_table)
+                ("LINEBEFORE",    (0, i), (0, i),  3, _c(fg)),
+            ]
 
-        story.append(Spacer(1, 0.4 * cm))
+        row_styles += [
+            # All rows: padding & font
+            ("LEFTPADDING",   (0, 0), (-1, -1), 8),
+            ("RIGHTPADDING",  (0, 0), (-1, -1), 8),
+            ("FONTNAME",      (0, 0), (-1, 0),  "Helvetica-Bold"),
+            ("FONTSIZE",      (0, 0), (-1, 0),  7),
+        ]
 
-    # ── Footer note ───────────────────────────────────────────────────────────
-    story.append(HRFlowable(width="100%", thickness=0.5, color=C_BORDER))
-    story.append(Spacer(1, 0.2 * cm))
-    footer_note = ParagraphStyle(
-        "footer_note", fontName="Helvetica-Oblique", fontSize=7, textColor=C_GRAY
-    )
-    story.append(Paragraph(
+        module_table = Table(table_data, colWidths=COL_W, repeatRows=1)
+        module_table.setStyle(TableStyle(row_styles))
+
+        # KeepTogether só para o header + linha de colunas — a tabela pode quebrar
+        story.append(KeepTogether([mod_header, Spacer(1, 1)]))
+        story.append(module_table)
+        story.append(Spacer(1, 0.5*cm))
+
+    # ── Footer note ──────────────────────────────────────────────────────────────
+    story.append(HRFlowable(width="100%", thickness=0.4, color=_c(BORDER)))
+    story.append(Spacer(1, 0.2*cm))
+    story.append(_p(
         "Este relatório foi gerado automaticamente pelo motor determinístico CO2mply. "
-        "Os resultados refletem a análise dos documentos do projeto contra os critérios do protocolo selecionado. "
-        "Documento confidencial — para uso exclusivo do proponente do projeto.",
-        footer_note,
+        "Os resultados refletem a análise dos documentos do projeto contra os critérios do "
+        "protocolo selecionado. Documento confidencial — para uso exclusivo do proponente do projeto.",
+        _style(fontName="Helvetica-Oblique", fontSize=7, textColor=_c(GRAY_MID), leading=10),
     ))
 
-    # ── Build ─────────────────────────────────────────────────────────────────
-    doc.build(
-        story,
-        onFirstPage=hf.on_page,
-        onLaterPages=hf.on_page,
-    )
-    return buffer.getvalue()
+    doc.build(story, onFirstPage=cb, onLaterPages=cb)
+    return buf.getvalue()
