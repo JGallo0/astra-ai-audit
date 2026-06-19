@@ -423,3 +423,252 @@ def generate_compliance_matrix_pdf(
 
     doc.build(story, onFirstPage=cb, onLaterPages=cb)
     return buf.getvalue()
+
+
+# ── Audit Summary PDF ──────────────────────────────────────────────────────────
+
+def generate_audit_summary_pdf(
+    results: List[dict],
+    score_data: dict,
+    audit_mode: str = "development",
+    project_name: str = "Projeto",
+    methodology: str = "Isometric Biochar",
+) -> bytes:
+    """Executive-style audit summary: 2-3 pages, only what matters."""
+
+    score      = float(score_data.get("score", 0))
+    score_lbl  = score_data.get("score_label", "")
+    mode_lbl   = "Desenvolvimento" if audit_mode == "development" else "Operacional"
+    date_str   = datetime.now().strftime("%d/%m/%Y")
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buf, pagesize=A4,
+        leftMargin=ML, rightMargin=MR,
+        topMargin=MT + 1.8*cm,
+        bottomMargin=MB + 1.2*cm,
+        title=f"CO2mply | Resumo de Auditoria — {project_name}",
+        author="CO2mply",
+    )
+
+    cb = _make_page_cb(project_name, date_str)
+    story = []
+
+    TABLE_W = PAGE_W - ML - MR
+    score_color = GREEN if score >= 85 else AMBER if score >= 60 else RED
+
+    # ── Header block ───────────────────────────────────────────────────────────
+    story.append(Spacer(1, 0.2*cm))
+    story.append(_p("Resumo Executivo de Auditoria",
+                    _style(fontName="Helvetica-Bold", fontSize=20, leading=26,
+                           textColor=_c(NAVY), spaceAfter=4)))
+    story.append(_p(f"Padrão: {methodology}  ·  Modo: {mode_lbl}",
+                    _style(fontSize=10, leading=14, textColor=_c(TEXT2), spaceAfter=2)))
+    story.append(_p(f"Projeto: {project_name}  ·  Data: {date_str}",
+                    _style(fontSize=10, leading=14, textColor=_c(TEXT2), spaceAfter=8)))
+    story.append(HRFlowable(width="100%", thickness=1, color=_c(BORDER)))
+    story.append(Spacer(1, 0.4*cm))
+
+    # ── Score banner ───────────────────────────────────────────────────────────
+    counts = {}
+    for r in results:
+        s = r.get("status", "unknown")
+        counts[s] = counts.get(s, 0) + 1
+
+    n_conf  = counts.get("compliant", 0)
+    n_part  = counts.get("partial", 0) + counts.get("future_evidence_required", 0)
+    n_nonc  = counts.get("non_compliant", 0)
+    n_na    = counts.get("not_applicable", 0)
+    n_total = n_conf + n_part + n_nonc  # excluindo N/A
+
+    # Score + verdict box
+    verdict = (
+        "O projeto demonstra alta aderência ao protocolo. "
+        "Os gaps identificados são documentais e de fácil resolução antes da submissão."
+        if score >= 80 else
+        "O projeto apresenta boa estrutura mas requer complementação em seções importantes "
+        "antes da submissão para validação."
+        if score >= 65 else
+        "O projeto necessita de atenção significativa antes da submissão. "
+        "Veja os gaps prioritários abaixo."
+    )
+
+    score_banner = Table(
+        [[
+            # Score — coluna mais larga para "87%" caber em uma linha
+            _p(f'<font name="Helvetica-Bold" size="30" color="{score_color}">{score:.0f}%</font>',
+               _style(alignment=TA_CENTER, fontSize=30, leading=36)),
+            # Verdict text
+            [
+                _p(f'<font name="Helvetica-Bold" size="12" color="{score_color}">{score_lbl}</font>',
+                   _style(fontSize=12, fontName="Helvetica-Bold", leading=16,
+                          textColor=_c(score_color))),
+                _p(verdict, _style(fontSize=9, leading=13, textColor=_c(TEXT2))),
+                Spacer(1, 0.2*cm),
+                _p(f'<font size="8" color="{TEXT2}">Requisitos avaliados: {n_total}  '
+                   f'|  Não aplicáveis (modo operacional): {n_na}</font>',
+                   _style(fontSize=8, leading=11, textColor=_c(TEXT2))),
+            ],
+        ]],
+        colWidths=[4.0*cm, TABLE_W - 4.0*cm],
+    )
+    score_banner.setStyle(TableStyle([
+        ("BACKGROUND",    (0, 0), (-1, -1), _c(NAVY_LIGHT)),
+        ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
+        ("ALIGN",         (0, 0), (0, 0),   "CENTER"),
+        ("TOPPADDING",    (0, 0), (-1, -1), 12),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+        ("LEFTPADDING",   (0, 0), (-1, -1), 14),
+        ("RIGHTPADDING",  (0, 0), (-1, -1), 14),
+        ("LINEAFTER",     (0, 0), (0, 0),   0.5, _c(BORDER)),
+        ("BOX",           (0, 0), (-1, -1), 0.5, _c(BORDER)),
+    ]))
+    story.append(score_banner)
+    story.append(Spacer(1, 0.5*cm))
+
+    # ── Status summary row ─────────────────────────────────────────────────────
+    kpi_col = TABLE_W / 3
+
+    def _sum_kpi(val, lbl, color, sub=""):
+        return [
+            _p(f'<font name="Helvetica-Bold" size="22" color="{color}">{val}</font>',
+               _style(alignment=TA_CENTER, fontSize=22, leading=26)),
+            _p(f'<font size="8.5" color="{TEXT2}"><b>{lbl}</b></font>',
+               _style(alignment=TA_CENTER, fontSize=8.5, leading=11)),
+        ] + ([_p(f'<font size="7.5" color="{GRAY_MID}">{sub}</font>',
+                 _style(alignment=TA_CENTER, fontSize=7.5, leading=9))] if sub else [])
+
+    kpi_row = Table(
+        [[
+            _sum_kpi(str(n_conf),  "✓ Conformes",    GREEN),
+            _sum_kpi(str(n_part),  "⚠ Parciais / Ev. futura", AMBER),
+            _sum_kpi(str(n_nonc),  "✗ Não conformes", RED if n_nonc else GRAY_MID),
+        ]],
+        colWidths=[kpi_col] * 3,
+    )
+    kpi_row.setStyle(TableStyle([
+        ("ALIGN",         (0, 0), (-1, -1), "CENTER"),
+        ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING",    (0, 0), (-1, -1), 10),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+        ("LINEAFTER",     (0, 0), (1, 0),   0.5, _c(BORDER)),
+        ("BOX",           (0, 0), (-1, -1), 0.5, _c(BORDER)),
+    ]))
+    story.append(kpi_row)
+    story.append(Spacer(1, 0.6*cm))
+
+    # ── Gaps prioritários ──────────────────────────────────────────────────────
+    gaps = [r for r in results
+            if r.get("status") in ("partial", "non_compliant", "future_evidence_required")]
+    gaps.sort(key=lambda r: (r.get("requirement_score") or 0))  # pior score primeiro
+
+    if gaps:
+        # Section header
+        sec_hdr = Table(
+            [[_p("GAPS PRIORITÁRIOS — AÇÕES RECOMENDADAS",
+                 _style(fontName="Helvetica-Bold", fontSize=9, textColor=_c("#FFFFFF"), leading=12))]],
+            colWidths=[TABLE_W],
+        )
+        sec_hdr.setStyle(TableStyle([
+            ("BACKGROUND",    (0, 0), (-1, -1), _c(NAVY)),
+            ("TOPPADDING",    (0, 0), (-1, -1), 5),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+            ("LEFTPADDING",   (0, 0), (-1, -1), 10),
+        ]))
+        story.append(sec_hdr)
+        story.append(Spacer(1, 2))
+
+        s_gap_id  = _style(fontName="Helvetica-Bold", fontSize=8, textColor=_c(NAVY), leading=11)
+        s_gap_ttl = _style(fontName="Helvetica-Bold", fontSize=9, leading=12)
+        s_gap_txt = _style(fontSize=8.5, leading=11, textColor=_c(TEXT2))
+        s_gap_act = _style(fontName="Helvetica-Bold", fontSize=8.5, leading=11, textColor=_c(GREEN))
+
+        GAP_W = [2.2*cm, TABLE_W - 2.2*cm - 1.4*cm, 1.4*cm]
+
+        # Column headers
+        col_hdr = Table([[
+            _p("ID", _style(fontName="Helvetica-Bold", fontSize=7, textColor=_c(TEXT2))),
+            _p("REQUISITO / AÇÃO RECOMENDADA",
+               _style(fontName="Helvetica-Bold", fontSize=7, textColor=_c(TEXT2))),
+            _p("SCORE", _style(fontName="Helvetica-Bold", fontSize=7,
+                               textColor=_c(TEXT2), alignment=TA_CENTER)),
+        ]], colWidths=GAP_W)
+        col_hdr.setStyle(TableStyle([
+            ("BACKGROUND",    (0, 0), (-1, -1), _c("#F1F5F9")),
+            ("TOPPADDING",    (0, 0), (-1, -1), 4),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ("LEFTPADDING",   (0, 0), (-1, -1), 8),
+            ("LINEBELOW",     (0, 0), (-1, -1), 0.5, _c(BORDER)),
+        ]))
+        story.append(col_hdr)
+
+        for req in gaps:
+            status = req.get("status", "")
+            lbl, fg, bg = STATUS.get(status, ("?", GRAY_MID, GRAY_BG))
+            sc   = _score_str(req)
+            sc_c = _score_color(req)
+            rid  = req.get("requirement_id", "")
+            ttl  = req.get("title") or req.get("requirement_name", "")
+
+            gap = (req.get("gap") or "").strip()
+            if gap in GENERIC: gap = ""
+
+            notes = _clean_notes(req.get("notes"))
+
+            rec = (req.get("recommendation") or "").strip()
+            if rec in GENERIC: rec = ""
+
+            # Build content cell
+            content = [_p(ttl, s_gap_ttl)]
+            if gap:
+                content.append(_p(f"Gap: {gap}", s_gap_txt))
+            elif notes:
+                content.append(_p(f"Gap: {notes[0]}", s_gap_txt))
+            if rec:
+                content.append(_p(f"→ {rec}", s_gap_act))
+
+            row = Table([[
+                _p(f'{rid}\n<font size="7" color="{fg}"><b>{lbl}</b></font>', s_gap_id),
+                content,
+                _p(sc, _style(fontName="Helvetica-Bold", fontSize=11,
+                               textColor=_c(sc_c), alignment=TA_CENTER)),
+            ]], colWidths=GAP_W)
+            row.setStyle(TableStyle([
+                ("BACKGROUND",    (0, 0), (-1, -1), _c(bg)),
+                ("TOPPADDING",    (0, 0), (-1, -1), 7),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+                ("LEFTPADDING",   (0, 0), (-1, -1), 8),
+                ("RIGHTPADDING",  (0, 0), (-1, -1), 8),
+                ("VALIGN",        (0, 0), (-1, -1), "TOP"),
+                ("ALIGN",         (2, 0), (2, 0),   "CENTER"),
+                ("VALIGN",        (2, 0), (2, 0),   "MIDDLE"),
+                ("LINEBELOW",     (0, 0), (-1, -1), 0.3, _c(BORDER)),
+                ("LINEBEFORE",    (0, 0), (0, 0),   3, _c(fg)),
+            ]))
+            story.append(row)
+
+    story.append(Spacer(1, 0.6*cm))
+
+    # ── N/A note ──────────────────────────────────────────────────────────────
+    if n_na > 0:
+        story.append(_p(
+            f"ℹ {n_na} requisito(s) marcados como N/A — aplicáveis apenas em projetos operacionais "
+            f"(análises laboratoriais, amostragem real, temperatura do solo). "
+            f"Não penalizam o score em Modo Desenvolvimento.",
+            _style(fontSize=8, leading=11, textColor=_c(TEXT2),
+                   fontName="Helvetica-Oblique"),
+        ))
+        story.append(Spacer(1, 0.4*cm))
+
+    # ── Footer note ────────────────────────────────────────────────────────────
+    story.append(HRFlowable(width="100%", thickness=0.4, color=_c(BORDER)))
+    story.append(Spacer(1, 0.2*cm))
+    story.append(_p(
+        "Este resumo foi gerado automaticamente pelo motor determinístico CO2mply. "
+        "Os resultados refletem a análise dos documentos do projeto contra os critérios do "
+        "protocolo selecionado. Documento confidencial — para uso exclusivo do proponente do projeto.",
+        _style(fontName="Helvetica-Oblique", fontSize=7, textColor=_c(GRAY_MID), leading=10),
+    ))
+
+    doc.build(story, onFirstPage=cb, onLaterPages=cb)
+    return buf.getvalue()

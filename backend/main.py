@@ -460,13 +460,14 @@ def download_report(run_id: str, format: str = Query("json")):
                     headers={"Content-Disposition": f'attachment; filename="compliance_matrix_{run_id}.docx"'},
                 )
 
-        # ── Audit Summary (PDF text) ──────────────────────────────────────
+        # ── Audit Summary (PDF executivo) ─────────────────────────────────
         if format == "summary_pdf":
-            from scoring import summarize_results
-            summary = summarize_results(results_list)
-            text = build_full_audit_text(summary, results_list)
-            buf = pdf_from_text_branded(
-                f"CO2mply | Audit Summary", text, brand_name="CO2mply"
+            from backend.report_generator import generate_audit_summary_pdf
+            buf = generate_audit_summary_pdf(
+                results=results_list,
+                score_data={**score_data, "score_label": score_label},
+                audit_mode=audit_mode,
+                project_name=proj_name,
             )
             return StreamingResponse(
                 io.BytesIO(buf), media_type="application/pdf",
