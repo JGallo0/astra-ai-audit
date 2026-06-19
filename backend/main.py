@@ -271,7 +271,20 @@ def _run_audit(run_id: str, project: dict, req: AuditRequest):
         _LARGE_FIELDS = {"project_context", "methodology_context", "project_hits",
                          "methodology_hits", "raw_extraction"}
         result = {k: v for k, v in output.items() if k not in _LARGE_FIELDS}
-        result["cache_hit"] = cache_hit  # útil para debug no frontend
+        result["cache_hit"] = cache_hit
+
+        # Calcular Project Readiness Rating e incluir no resultado
+        try:
+            from backend.rating_service import compute_readiness_rating
+            rating = compute_readiness_rating(
+                results=output.get("results", []),
+                overall_score=float(output.get("score_data", {}).get("score", 0)),
+                audit_mode=req.audit_mode,
+            )
+            result["readiness_rating"] = rating
+        except Exception as e:
+            result["readiness_rating"] = None
+            print(f"[rating] erro: {e}")
 
         _audit_runs[run_id].update({"status": "completed", "result": result})
         _db_execute(

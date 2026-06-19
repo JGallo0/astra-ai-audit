@@ -133,6 +133,111 @@ function FindingRow({ f }) {
   )
 }
 
+// ── Project Readiness Rating components ──────────────────────────────────────
+
+const GRADE_COLORS = {
+  'A+': { bg: '#F0FDF4', border: '#16A34A', text: '#15803D' },
+  'A':  { bg: '#F0FDF4', border: '#16A34A', text: '#15803D' },
+  'B+': { bg: '#FFFBEB', border: '#D97706', text: '#B45309' },
+  'B':  { bg: '#FFFBEB', border: '#D97706', text: '#B45309' },
+  'C':  { bg: '#FEF2F2', border: '#DC2626', text: '#B91C1C' },
+}
+
+const DIM_LABELS = {
+  carbon:       'Carbon Accounting',
+  additionality:'Additionality',
+  permanence:   'Permanência',
+  safeguards:   'Salvaguardas',
+  integrity:    'Integridade do PDD',
+}
+
+function GradeBadge({ grade, label, score }) {
+  const colors = GRADE_COLORS[grade] || GRADE_COLORS['C']
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 16,
+      background: colors.bg, border: `2px solid ${colors.border}`,
+      borderRadius: 12, padding: '14px 22px',
+    }}>
+      <div style={{ textAlign: 'center', flexShrink: 0 }}>
+        <div style={{ fontSize: 42, fontWeight: 900, color: colors.text, lineHeight: 1 }}>
+          {grade}
+        </div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: colors.text, marginTop: 2,
+          textTransform: 'uppercase', letterSpacing: '.06em' }}>
+          Project Readiness
+        </div>
+      </div>
+      <div style={{ borderLeft: `1px solid ${colors.border}`, paddingLeft: 16 }}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: colors.text }}>{label}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 2 }}>
+          Score numérico: <strong>{score}%</strong>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DimBar({ dimKey, dim }) {
+  const s = dim.score || 0
+  const color = s >= 80 ? '#16A34A' : s >= 60 ? '#D97706' : '#DC2626'
+  const label = DIM_LABELS[dimKey] || dimKey
+  const naNote = dim.na_count > 0 ? ` (${dim.na_count} N/A op.)` : ''
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{label}{naNote}</span>
+        <span style={{ fontSize: 12, fontWeight: 700, color }}>{s.toFixed(0)}%</span>
+      </div>
+      <div style={{ height: 7, background: 'var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: `${Math.min(s, 100)}%`,
+          background: color, borderRadius: 4, transition: 'width .4s' }} />
+      </div>
+    </div>
+  )
+}
+
+function ReadinessRating({ rating }) {
+  if (!rating) return null
+  const dims = rating.dimensions || {}
+  return (
+    <div className="card" style={{ marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        marginBottom: 14 }}>
+        <div>
+          <div className="card-title" style={{ marginBottom: 2 }}>Project Readiness Score</div>
+          <div style={{ fontSize: 11, color: 'var(--text-2)' }}>
+            {rating.phase} · Modo {rating.audit_mode === 'development' ? 'Desenvolvimento' : 'Operacional'}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        {/* Grade badge */}
+        <GradeBadge grade={rating.grade} label={rating.label} score={rating.overall_score} />
+
+        {/* Dimensional bars */}
+        <div style={{ flex: 1, minWidth: 220 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)',
+            textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 10 }}>
+            Por Dimensão
+          </div>
+          {Object.entries(dims).map(([key, dim]) => (
+            <DimBar key={key} dimKey={key} dim={dim} />
+          ))}
+        </div>
+      </div>
+
+      {rating.description && (
+        <div style={{ marginTop: 12, padding: '8px 12px', background: 'var(--bg-app)',
+          borderRadius: 7, fontSize: 12, color: 'var(--text-2)', lineHeight: 1.5 }}>
+          {rating.description}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function ScoreGauge({ score }) {
   const color = score >= 75 ? 'var(--green)' : score >= 50 ? 'var(--amber)' : 'var(--red)'
   return (
@@ -213,11 +318,11 @@ export default function ValidationTab() {
   const selectedProject = projects.find(p => p.id === selectedProjectId)
   const selectedMethodologyMeta = methodologies.find(m => m.key === selectedMethodology)
 
-  const result   = selectedRun?.result || {}
-  const findings = result.results || result.findings || []
-  // run_structured_engine_audit retorna score em score_data.score
-  const score    = result.score_data?.score ?? result.compliance_score ?? result.score ?? 0
-  const scoreLabel = result.score_label || ''
+  const result        = selectedRun?.result || {}
+  const findings      = result.results || result.findings || []
+  const score         = result.score_data?.score ?? result.compliance_score ?? result.score ?? 0
+  const scoreLabel    = result.score_label || ''
+  const readinessRating = result.readiness_rating || null
 
   const compliant  = findings.filter(f => ['compliant','Conforme'].includes(f.status)).length
   const partial    = findings.filter(f => ['partial','future_evidence_required','Parcialmente conforme'].includes(f.status)).length
@@ -381,6 +486,9 @@ export default function ValidationTab() {
                       </span>
                     )}
                   </div>
+
+                  {/* ── Project Readiness Rating ── */}
+                  <ReadinessRating rating={readinessRating} />
 
                   {/* ── KPIs ── */}
                   <div className="grid-4" style={{marginBottom:16}}>
