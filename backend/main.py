@@ -416,28 +416,25 @@ def download_report(run_id: str, format: str = Query("json")):
             docx_from_text,
         )
 
+        # ── Nome do projeto (usado em todos os formatos) ──────────────────
+        proj_name = "Projeto CO2mply"
+        proj_id = run.get("project_id") or result.get("project_id")
+        if proj_id:
+            proj_row = _db_fetchone("SELECT name FROM ca_projects WHERE id=%s", (proj_id,))
+            if proj_row and proj_row.get("name"):
+                proj_name = proj_row["name"]
+        if proj_name == "Projeto CO2mply":
+            pd = result.get("project_data", {})
+            pname = pd.get("project", {}).get("name")
+            if pname and isinstance(pname, str) and len(pname) < 60:
+                proj_name = pname
+
         # ── Compliance Matrix (PDF / DOCX) ────────────────────────────────
         if format in ("pdf", "docx"):
             score_val  = score_data.get("score", 0)
             mode_label = "Desenvolvimento" if audit_mode == "development" else "Operacional"
 
             if format == "pdf":
-                # Buscar nome real do projeto no banco
-                proj_name = "Projeto CO2mply"
-                proj_id = run.get("project_id") or result.get("project_id")
-                if proj_id:
-                    proj_row = _db_fetchone(
-                        "SELECT name FROM ca_projects WHERE id=%s", (proj_id,)
-                    )
-                    if proj_row and proj_row.get("name"):
-                        proj_name = proj_row["name"]
-                # Fallback: project.name do project_data (não certification_scheme)
-                if proj_name == "Projeto CO2mply":
-                    pd = result.get("project_data", {})
-                    pname = pd.get("project", {}).get("name")
-                    if pname and isinstance(pname, str) and len(pname) < 60:
-                        proj_name = pname
-
                 from backend.report_generator import generate_compliance_matrix_pdf
                 buf = generate_compliance_matrix_pdf(
                     results=results_list,
