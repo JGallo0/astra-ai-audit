@@ -45,10 +45,13 @@ MR = 1.8 * cm
 MT = 2.2 * cm   # after header bar
 MB = 1.8 * cm   # above footer
 
-LOGO_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "assets", "auditoria_logo.png",
-)
+_ASSETS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Usar logo transparente (fundo removido, cropada); fallback para original
+LOGO_PATH = os.path.join(_ASSETS, "assets", "logo_transparent.png")
+if not os.path.exists(LOGO_PATH):
+    LOGO_PATH = os.path.join(_ASSETS, "assets", "auditoria_logo.png")
+# Ratio do logo transparente cropado: 743×320 = 2.32
+LOGO_RATIO = 743 / 320
 
 # ── Status config ──────────────────────────────────────────────────────────────
 
@@ -125,31 +128,31 @@ def _make_page_cb(project_name: str, date_str: str):
         canvas.saveState()
         w, h = A4
 
-        # Header bar — cinza claro, alto o suficiente para logo visível
-        HDR_H = 3.5 * cm
+        # Header bar — 1.6cm, fundo cinza claro
+        HDR_H = 1.6 * cm
         canvas.setFillColor(_c("#F1F5F9"))
         canvas.rect(0, h - HDR_H, w, HDR_H, fill=1, stroke=0)
-        # Linha inferior da barra (navy)
         canvas.setStrokeColor(_c(NAVY))
-        canvas.setLineWidth(1.5)
+        canvas.setLineWidth(1.2)
         canvas.line(0, h - HDR_H, w, h - HDR_H)
 
-        # Logo — ratio 1536×1024 = 1.5, altura 3.0cm → largura 4.5cm (~3x anterior)
-        LOGO_H_HDR = 3.0 * cm
-        LOGO_W_HDR = LOGO_H_HDR * (1536 / 1024)   # = 4.5 cm
-        LOGO_PAD   = (HDR_H - LOGO_H_HDR) / 2      # padding vertical
-        LOGO_Y_HDR = h - HDR_H + LOGO_PAD
+        # Logo transparente, centralizada verticalmente na barra
+        # Ratio 743×320 = 2.32 | altura = header - 2×padding
+        PAD_V = 0.15 * cm
+        LOGO_H = HDR_H - 2 * PAD_V          # altura ajustada à barra
+        LOGO_W = LOGO_H * LOGO_RATIO         # largura proporcional
+        LOGO_Y = h - HDR_H + PAD_V
         if os.path.exists(LOGO_PATH):
             canvas.drawImage(
                 LOGO_PATH,
-                ML, LOGO_Y_HDR,
-                width=LOGO_W_HDR, height=LOGO_H_HDR,
+                ML, LOGO_Y,
+                width=LOGO_W, height=LOGO_H,
                 preserveAspectRatio=True, mask="auto",
             )
 
-        # Texto "Carbon Compliance Intelligence" — alinhado à direita, centrado na barra
+        # Texto direito
         canvas.setFillColor(_c(NAVY))
-        canvas.setFont("Helvetica", 9)
+        canvas.setFont("Helvetica", 8.5)
         canvas.drawRightString(w - MR, h - HDR_H/2 - 0.15*cm, "Carbon Compliance Intelligence")
 
         # Footer line
@@ -202,7 +205,7 @@ def generate_compliance_matrix_pdf(
     doc = SimpleDocTemplate(
         buf, pagesize=A4,
         leftMargin=ML, rightMargin=MR,
-        topMargin=MT + 3.7*cm,   # space for header bar (3.5cm tall)
+        topMargin=MT + 1.8*cm,   # space for header bar (1.6cm)
         bottomMargin=MB + 1.2*cm, # space for footer
         title=f"CO2mply | Compliance Matrix — {project_name}",
         author="CO2mply",
