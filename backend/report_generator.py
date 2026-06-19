@@ -125,8 +125,8 @@ def _make_page_cb(project_name: str, date_str: str):
         canvas.saveState()
         w, h = A4
 
-        # Header bar — fundo cinza claro para a logo dark ficar visível
-        HDR_H = 1.8 * cm
+        # Header bar — cinza claro, alto o suficiente para logo visível
+        HDR_H = 3.5 * cm
         canvas.setFillColor(_c("#F1F5F9"))
         canvas.rect(0, h - HDR_H, w, HDR_H, fill=1, stroke=0)
         # Linha inferior da barra (navy)
@@ -134,10 +134,11 @@ def _make_page_cb(project_name: str, date_str: str):
         canvas.setLineWidth(1.5)
         canvas.line(0, h - HDR_H, w, h - HDR_H)
 
-        # Logo — ratio 1536×1024 = 1.5, altura 1.5cm → largura 2.25cm
-        LOGO_H_HDR = 1.5 * cm
-        LOGO_W_HDR = LOGO_H_HDR * (1536 / 1024)   # = 2.25 cm
-        LOGO_Y_HDR = h - HDR_H + (HDR_H - LOGO_H_HDR) / 2   # centrado verticalmente
+        # Logo — ratio 1536×1024 = 1.5, altura 3.0cm → largura 4.5cm (~3x anterior)
+        LOGO_H_HDR = 3.0 * cm
+        LOGO_W_HDR = LOGO_H_HDR * (1536 / 1024)   # = 4.5 cm
+        LOGO_PAD   = (HDR_H - LOGO_H_HDR) / 2      # padding vertical
+        LOGO_Y_HDR = h - HDR_H + LOGO_PAD
         if os.path.exists(LOGO_PATH):
             canvas.drawImage(
                 LOGO_PATH,
@@ -146,9 +147,9 @@ def _make_page_cb(project_name: str, date_str: str):
                 preserveAspectRatio=True, mask="auto",
             )
 
-        # Texto direito — navy sobre fundo claro
+        # Texto "Carbon Compliance Intelligence" — alinhado à direita, centrado na barra
         canvas.setFillColor(_c(NAVY))
-        canvas.setFont("Helvetica", 8)
+        canvas.setFont("Helvetica", 9)
         canvas.drawRightString(w - MR, h - HDR_H/2 - 0.15*cm, "Carbon Compliance Intelligence")
 
         # Footer line
@@ -201,7 +202,7 @@ def generate_compliance_matrix_pdf(
     doc = SimpleDocTemplate(
         buf, pagesize=A4,
         leftMargin=ML, rightMargin=MR,
-        topMargin=MT + 2.0*cm,   # space for header bar (now 1.8cm tall)
+        topMargin=MT + 3.7*cm,   # space for header bar (3.5cm tall)
         bottomMargin=MB + 1.2*cm, # space for footer
         title=f"CO2mply | Compliance Matrix — {project_name}",
         author="CO2mply",
