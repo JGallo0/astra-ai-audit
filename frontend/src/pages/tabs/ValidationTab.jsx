@@ -432,16 +432,8 @@ export default function ValidationTab() {
                           ⬇ Matriz PDF
                         </button>
                         <button className="btn btn-sm btn-outline"
-                          onClick={() => window.open(`${API}/api/audit/${selectedRun.id}/report?format=docx`)}>
-                          ⬇ Matriz DOCX
-                        </button>
-                        <button className="btn btn-sm btn-ghost"
                           onClick={() => window.open(`${API}/api/audit/${selectedRun.id}/report?format=summary_pdf`)}>
                           ⬇ Resumo PDF
-                        </button>
-                        <button className="btn btn-sm btn-ghost"
-                          onClick={() => window.open(`${API}/api/audit/${selectedRun.id}/report?format=summary_docx`)}>
-                          ⬇ Resumo DOCX
                         </button>
                       </div>
                     </div>
