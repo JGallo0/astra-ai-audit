@@ -128,8 +128,8 @@ function DeveloperView({ data }) {
         {summary.critical_count === 0 && summary.attention_count === 0 && (
           <div style={{ marginTop: 14, padding: '10px 14px', background: '#F0FDF4',
                         border: '1px solid #16A34A', borderRadius: 8, fontSize: 13, color: GREEN }}>
-            ✅ Nenhum gap crítico identificado. O projeto está pronto para a vistoria do VVB —
-            verifique os itens de verificação operacional abaixo para antecipar o que o VVB irá solicitar.
+            ✅ Nenhum gap crítico identificado. O projeto está bem preparado para a vistoria —
+            consulte o Checklist Pré-VVB para antecipar o que o verificador irá solicitar in loco.
           </div>
         )}
       </div>
@@ -140,7 +140,7 @@ function DeveloperView({ data }) {
       <PriorityGroup icon="🟡" color={AMBER} bg="#FFFBEB" label="Atenção — fortalecer evidências"
         items={attention} defaultOpen={true} />
       <PriorityGroup icon="🔵" color={BLUE} bg="#EFF6FF"
-        label="Verificação Operacional — o VVB irá solicitar em operação"
+        label="Checklist Pré-VVB — o que o verificador irá solicitar em operação"
         items={operational_upcoming} defaultOpen={false} />
     </div>
   )
@@ -256,11 +256,11 @@ function VVBView({ data }) {
         <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: NAVY, marginBottom: 4 }}>
-              Plano de Verificação — {data.methodology}
+              Checklist Pré-VVB — {data.methodology}
             </div>
             <div style={{ fontSize: 13, color: '#6B7280', lineHeight: 1.5 }}>
-              Checklist de inspeção presencial e documentos a solicitar ao proponente.
-              Os requisitos marcados como <b style={{ color: BLUE }}>OP.ONLY</b> só se aplicam em projetos operacionais.
+              Itens de inspeção presencial e documentos a preparar antes da vistoria do verificador independente.
+              Requisitos <b style={{ color: BLUE }}>OP.ONLY</b> são exigidos apenas em projetos operacionais.
             </div>
           </div>
           <div style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
@@ -326,8 +326,8 @@ export default function VerificacaoTab({ project }) {
       <div style={{ display: 'flex', gap: 0, marginBottom: 20, border: `1px solid ${NAVY}`,
                     borderRadius: 8, overflow: 'hidden', width: 'fit-content' }}>
         {[
-          { value: 'developer', icon: '🏗️', label: 'Desenvolvedor', sub: 'Prontidão para vistoria' },
-          { value: 'vvb',       icon: '🔍', label: 'VVB',           sub: 'Plano de inspeção' },
+          { value: 'developer', icon: '🏗️', label: 'Desenvolvedor',       sub: 'Prontidão para vistoria' },
+          { value: 'vvb',       icon: '📋', label: 'Checklist Pré-VVB', sub: 'Itens para preparar o site' },
         ].map(opt => (
           <button key={opt.value} onClick={() => handleRoleChange(opt.value)} style={{
             padding: '10px 22px', border: 'none', cursor: 'pointer',

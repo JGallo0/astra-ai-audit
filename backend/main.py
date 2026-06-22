@@ -647,6 +647,37 @@ def get_verificacao(project_id: str, role: str = Query("developer"), methodology
 
 # ── Dashboard Stats ───────────────────────────────────────────────────────────
 
+@app.get("/api/dashboard/portfolio")
+def dashboard_portfolio():
+    """Projetos enriquecidos com dados da última auditoria — para portfolio view."""
+    projects = _db_fetch("SELECT * FROM ca_projects ORDER BY created_at DESC")
+    for p in projects:
+        run = _db_fetchone(
+            """SELECT id, result, completed_at, audit_mode
+               FROM ca_audit_runs
+               WHERE project_id=%s AND status='completed'
+               ORDER BY created_at DESC LIMIT 1""",
+            (p["id"],),
+        )
+        if run:
+            res = run.get("result") or {}
+            if isinstance(res, str):
+                try: res = json.loads(res)
+                except: res = {}
+            rating = res.get("readiness_rating") or {}
+            score  = (res.get("score_data") or {}).get("score")
+            p["last_audit"] = {
+                "id":           run["id"],
+                "grade":        rating.get("grade"),
+                "label":        rating.get("label"),
+                "score":        round(float(score), 1) if score is not None else None,
+                "audit_mode":   res.get("audit_mode", run.get("audit_mode", "development")),
+                "completed_at": str(run.get("completed_at") or ""),
+            }
+        else:
+            p["last_audit"] = None
+    return projects
+
 @app.get("/api/dashboard/stats")
 def dashboard_stats():
     rows = _db_fetch("SELECT result FROM ca_audit_runs WHERE status='completed'")

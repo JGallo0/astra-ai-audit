@@ -150,10 +150,15 @@ def _make_page_cb(project_name: str, date_str: str):
                 preserveAspectRatio=True, mask="auto",
             )
 
-        # Texto direito
+        # Texto direito — "Co2mply by Astra Carbon"
+        line_y_top = h - HDR_H/2 + 0.12*cm
+        line_y_bot = h - HDR_H/2 - 0.22*cm
         canvas.setFillColor(_c(NAVY))
-        canvas.setFont("Helvetica", 8.5)
-        canvas.drawRightString(w - MR, h - HDR_H/2 - 0.15*cm, "Carbon Compliance Intelligence")
+        canvas.setFont("Helvetica-Bold", 9)
+        canvas.drawRightString(w - MR, line_y_top, "Co2mply")
+        canvas.setFillColor(_c(GRAY_MID))
+        canvas.setFont("Helvetica", 7.5)
+        canvas.drawRightString(w - MR, line_y_bot, "by Astra Carbon")
 
         # Footer line
         canvas.setStrokeColor(_c(BORDER))
@@ -508,9 +513,9 @@ def generate_readiness_certificate_pdf(
         logo.hAlign = "LEFT"
         story.append(logo)
     story.append(Spacer(1, 0.25*cm))
-    story.append(_p("CERTIFICADO DE PRONTIDÃO DO PROJETO",
-        _style(fontName="Helvetica-Bold", fontSize=10, leading=13,
-               textColor=_c(TEXT2), letterSpacing=1.5)))
+    story.append(_p("CERTIFICADO DE PRONTIDÃO DO PROJETO  ·  Co2mply by Astra Carbon",
+        _style(fontName="Helvetica-Bold", fontSize=9, leading=13,
+               textColor=_c(TEXT2), letterSpacing=1.0)))
     story.append(_p("Project Readiness Certificate",
         _style(fontName="Helvetica-Bold", fontSize=26, leading=32,
                textColor=_c(NAVY), spaceAfter=5)))
