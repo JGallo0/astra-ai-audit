@@ -9,7 +9,7 @@ import StubTab from './tabs/StubTab'
 const TAB_MAP = {
   'chat':           { label: 'Chat Técnico',        component: ChatTab },
   'validacao':      { label: 'Validação',            component: ValidationTab },
-  'pre-viabilidade':{ label: 'Pré-Viabilidade',     component: PreViabilidadeTab },
+  'fit-metodologico':{ label: 'Fit Metodológico',    component: PreViabilidadeTab },
   'data-room':      { label: 'Data Room',            component: DataRoomTab },
   'viabilidade':    { label: 'Viabilidade Completa', component: () => <StubTab icon="📊" title="Viabilidade Completa" desc="Avaliação de maturidade e prontidão do projeto. Em desenvolvimento." /> },
   'verificacao':    { label: 'Verificação',           component: () => <StubTab icon="🛡️" title="Verificação" desc="Suporte ao ciclo V&V. Em desenvolvimento." /> },

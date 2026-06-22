@@ -21,7 +21,7 @@ const NAV = [
       { label: 'Dashboard',       icon: '⬛', path: '/' },
       { label: 'Chat Técnico',    icon: '💬', path: '/chat' },
       { label: 'Validação',       icon: '✅', path: '/validacao' },
-      { label: 'Pré-Viabilidade', icon: '🔍', path: '/pre-viabilidade' },
+      { label: 'Fit Metodológico', icon: '🔍', path: '/fit-metodologico' },
       { label: 'Viabilidade',     icon: '📊', path: '/viabilidade' },
       { label: 'Verificação',     icon: '🛡️',  path: '/verificacao' },
     ],
@@ -139,7 +139,7 @@ function AppShell() {
               <Route path="/"                 element={<Dashboard />} />
               <Route path="/chat"             element={<ProjectDetail tab="chat" />} />
               <Route path="/validacao"        element={<ProjectDetail tab="validacao" />} />
-              <Route path="/pre-viabilidade"  element={<ProjectDetail tab="pre-viabilidade" />} />
+              <Route path="/fit-metodologico" element={<ProjectDetail tab="fit-metodologico" />} />
               <Route path="/viabilidade"      element={<ProjectDetail tab="viabilidade" />} />
               <Route path="/verificacao"      element={<ProjectDetail tab="verificacao" />} />
               <Route path="/data-room"        element={<ProjectDetail tab="data-room" />} />
