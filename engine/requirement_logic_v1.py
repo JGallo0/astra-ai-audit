@@ -454,6 +454,43 @@ def eval_durability_soil_temp_v1(data, audit_mode="development"):
     if audit_mode == "development" and soil_temp_method:
         notes.append(f"Método: {soil_temp_method}")
 
+    # ── Validação independente via Copernicus C3S (modo operacional) ──────────
+    c3s_note = None
+    if audit_mode == "operational":
+        try:
+            from backend.copernicus_service import validate_project_soil_temp
+            validation = validate_project_soil_temp(data)
+            c3s_temp = validation.get("c3s_temp")
+            v_status = validation.get("status")
+
+            if c3s_temp is not None:
+                c3s_note = f"Copernicus ERA5-Land C3S: {c3s_temp}°C (média anual do solo, 0-7cm)"
+                if v_status == "validated":
+                    c3s_note += " ✓ Consistente com temperatura reportada."
+                elif v_status == "divergence_flag":
+                    div = validation.get("divergence_c", 0)
+                    c3s_note += f" ⚠ Divergência de {div:.1f}°C — revisar dados reportados."
+                    # Flag extra field as failed — penaliza score
+                    field_scores.append({
+                        "path": "storage.soil.c3s_validation",
+                        "score": 0, "weight": 20, "status": "fail",
+                        "notes": [c3s_note],
+                    })
+                elif v_status == "no_coordinates":
+                    c3s_note = "Copernicus C3S: coordenadas GPS não disponíveis para validação."
+            elif "error" in validation:
+                err = validation["error"]
+                if "COPERNICUS_API_KEY" in err:
+                    c3s_note = "Copernicus C3S: API key não configurada."
+                else:
+                    c3s_note = f"Copernicus C3S: {err[:80]}"
+        except Exception:
+            pass  # C3S validation is non-blocking
+
+    if c3s_note:
+        notes.append(f"[C3S] {c3s_note}")
+
+    requirement_score = summarize_field_scores(field_scores)
     threshold_nc = 50 if audit_mode == "operational" else 25
     status = _derive_status(requirement_score, threshold_nc, 85)
 

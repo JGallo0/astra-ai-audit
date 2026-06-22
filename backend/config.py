@@ -14,6 +14,9 @@ DB_USER     = os.environ.get("DB_USER", "")
 DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
 DB_PORT     = int(os.environ.get("DB_PORT", "5432"))
 
+COPERNICUS_API_KEY = os.environ.get("COPERNICUS_API_KEY", "")
+COPERNICUS_URL     = "https://cds.climate.copernicus.eu/api"
+
 VECTOR_STORE_ID_ISOMETRIC     = os.environ.get("VECTOR_STORE_ID_ISOMETRIC", "")
 VECTOR_STORE_ID_NOVA_ESPERANCA = os.environ.get("VECTOR_STORE_ID_NOVA_ESPERANCA", "")
 VECTOR_STORE_ID_VERRA_VCS     = os.environ.get("VECTOR_STORE_ID_VERRA_VCS", "")
