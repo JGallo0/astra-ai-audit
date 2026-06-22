@@ -11,13 +11,23 @@ const GREEN = '#16A34A'
 const RED   = '#DC2626'
 const AMBER = '#B45309'
 
-function fmtBRL(v) {
-  if (v == null) return '—'
-  const abs = Math.abs(v)
-  if (abs >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`
-  if (abs >= 1_000)     return `R$ ${(v / 1_000).toFixed(0)}k`
-  return `R$ ${v.toFixed(0)}`
+const CURRENCY_SYMBOLS = {
+  BRL:'R$', USD:'$', EUR:'€', GBP:'£', CLP:'CLP$', COP:'COP$',
+  MXN:'MX$', DKK:'kr', SEK:'kr', NOK:'kr', AUD:'A$', CAD:'C$',
+  ZAR:'R', INR:'₹', JPY:'¥',
 }
+
+function fmtMoeda(v, currency = 'BRL') {
+  if (v == null) return '—'
+  const sym = CURRENCY_SYMBOLS[currency] || currency
+  const abs = Math.abs(v)
+  const neg = v < 0 ? '-' : ''
+  if (abs >= 1_000_000) return `${neg}${sym} ${(abs / 1_000_000).toFixed(1)}M`
+  if (abs >= 1_000)     return `${neg}${sym} ${(abs / 1_000).toFixed(0)}k`
+  return `${neg}${sym} ${Math.round(abs)}`
+}
+// Alias para compatibilidade interna
+const fmtBRL = (v, cur) => fmtMoeda(v, cur)
 function fmtPct(v) { return v == null ? '—' : `${Number(v).toFixed(1)}%` }
 
 // ── Slider component ──────────────────────────────────────────────────────────
@@ -55,7 +65,7 @@ function FCLTooltip({ active, payload, label }) {
       <div style={{ fontWeight: 700, marginBottom: 4 }}>{label}</div>
       {payload.map(p => (
         <div key={p.name} style={{ color: p.value >= 0 ? GREEN : RED }}>
-          {p.name}: {fmtBRL(p.value)}
+          {p.name}: {fmtMoeda(p.value)}
         </div>
       ))}
     </div>
@@ -126,7 +136,8 @@ export default function FinancialLabTab({ project }) {
   )
 
   // ── Dados para gráficos ───────────────────────────────────────────────────
-  const r = resultado || {}
+  const r      = resultado || {}
+  const cur    = r.moeda_projeto || form.moeda_projeto || 'BRL'
   const anos   = r.anos || []
   const fcl    = r.fcl_anual || []
   const acum   = r.fcl_acumulado || []
@@ -202,15 +213,18 @@ export default function FinancialLabTab({ project }) {
           <div className="card">
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-2)', marginBottom: 12,
                           textTransform: 'uppercase', letterSpacing: 1 }}>Custos & Financeiro</div>
-            <Slider label="CAPEX total" name="capex_total_brl"
-              value={form.capex_total_brl} min={500000} max={30000000} step={100000}
-              fmt={v => fmtBRL(v)} onChange={setField} />
-            <Slider label="OPEX anual" name="opex_anual_brl"
-              value={form.opex_anual_brl} min={100000} max={10000000} step={50000}
-              fmt={v => fmtBRL(v)} onChange={setField} />
+            <Slider label="CAPEX total" name="capex_total"
+              value={form.capex_total} min={500000} max={30000000} step={100000}
+              fmt={v => fmtMoeda(v, cur)} onChange={setField} />
+            <Slider label="OPEX anual" name="opex_anual"
+              value={form.opex_anual} min={100000} max={10000000} step={50000}
+              fmt={v => fmtMoeda(v, cur)} onChange={setField} />
             <Slider label="WACC" name="wacc"
               value={form.wacc} min={0.05} max={0.30} step={0.005}
               fmt={v => `${(v * 100).toFixed(1)}%`} onChange={setField} />
+            <Slider label="Alíquota efetiva IR" name="aliquota_efetiva_ir"
+              value={form.aliquota_efetiva_ir} min={0} max={0.45} step={0.01}
+              fmt={v => `${(v * 100).toFixed(0)}%`} onChange={setField} />
           </div>
         </div>
 
@@ -220,9 +234,9 @@ export default function FinancialLabTab({ project }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 16 }}>
             {[
               { label: 'TIR', value: irr != null ? `${irr.toFixed(1)}%` : '—', color: irrColor, sub: `WACC ${wacc_pct.toFixed(0)}%` },
-              { label: 'VPL', value: fmtBRL(r.npv_brl), color: (r.npv_brl || 0) >= 0 ? GREEN : RED },
+              { label: 'VPL', value: fmtMoeda(r.npv, cur), color: (r.npv || 0) >= 0 ? GREEN : RED },
               { label: 'Payback', value: r.payback_year || 'N/A' },
-              { label: 'EBITDA Ano 1', value: fmtBRL(r.ebitda_yr1), sub: r.margem_ebitda_pct != null ? `${r.margem_ebitda_pct.toFixed(0)}% margem` : '' },
+              { label: 'EBITDA Ano 1', value: fmtMoeda(r.ebitda_yr1, cur), sub: r.margem_ebitda_pct != null ? `${r.margem_ebitda_pct.toFixed(0)}% margem` : '' },
             ].map(k => (
               <div key={k.label} style={{ background: 'white', border: '1px solid var(--border)',
                                           borderRadius: 10, padding: '12px 14px' }}>
