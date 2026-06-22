@@ -542,6 +542,190 @@ def download_report(run_id: str, format: str = Query("json")):
 
     raise HTTPException(400, f"Formato não suportado: {format}. Use: json, pdf, summary_pdf, certificate")
 
+# ── Dashboard Stats ───────────────────────────────────────────────────────────
+
+@app.get("/api/dashboard/stats")
+def dashboard_stats():
+    rows = _db_fetch("SELECT result FROM ca_audit_runs WHERE status='completed'")
+    scores = []
+    for r in rows:
+        res = r.get("result") or {}
+        if isinstance(res, str):
+            try: res = json.loads(res)
+            except: continue
+        score = (res.get("score_data") or {}).get("score")
+        if score is not None:
+            try: scores.append(float(score))
+            except: pass
+    return {
+        "total_audits": len(rows),
+        "avg_score": round(sum(scores) / len(scores), 1) if scores else None,
+    }
+
+# ── Documents (Data Room) ──────────────────────────────────────────────────────
+
+@app.get("/api/projects/{project_id}/documents")
+def list_documents(project_id: str):
+    p = _db_fetchone("SELECT project_vector_store_id FROM ca_projects WHERE id=%s", (project_id,))
+    if not p:
+        raise HTTPException(404, "Projeto não encontrado")
+    vs_id = p.get("project_vector_store_id", "")
+    if not vs_id:
+        return []
+    try:
+        vs_files = openai_client.vector_stores.files.list(vector_store_id=vs_id)
+    except Exception as e:
+        raise HTTPException(500, f"Erro ao listar arquivos: {e}")
+    docs = []
+    for vf in vs_files.data:
+        try:
+            fi = openai_client.files.retrieve(vf.id)
+            docs.append({
+                "file_id": vf.id,
+                "filename": fi.filename,
+                "size_bytes": fi.bytes,
+                "status": vf.status,
+                "created_at": vf.created_at,
+            })
+        except Exception:
+            docs.append({"file_id": vf.id, "filename": vf.id, "size_bytes": 0, "status": vf.status, "created_at": vf.created_at})
+    docs.sort(key=lambda d: d.get("created_at") or 0, reverse=True)
+    return docs
+
+@app.delete("/api/projects/{project_id}/documents/{file_id}")
+def delete_document(project_id: str, file_id: str):
+    p = _db_fetchone("SELECT project_vector_store_id, doc_count FROM ca_projects WHERE id=%s", (project_id,))
+    if not p:
+        raise HTTPException(404, "Projeto não encontrado")
+    vs_id = p.get("project_vector_store_id", "")
+    try:
+        openai_client.vector_stores.files.delete(vector_store_id=vs_id, file_id=file_id)
+    except Exception:
+        pass
+    try:
+        openai_client.files.delete(file_id)
+    except Exception:
+        pass
+    new_count = max(0, (p.get("doc_count") or 1) - 1)
+    _db_execute(
+        "UPDATE ca_projects SET doc_count=%s, project_data=NULL WHERE id=%s",
+        (new_count, project_id),
+    )
+    return {"ok": True}
+
+# ── Pré-Viabilidade (Screening) ────────────────────────────────────────────────
+
+_METHODOLOGY_SCREENING: dict = {
+    "isometric": {
+        "name": "Isometric Biochar v1.2",
+        "criteria": [
+            {"id": "feedstock",     "label": "Feedstock elegível",        "desc": "Biomassa residual ou resíduos (não culturas dedicadas para energia)"},
+            {"id": "process",       "label": "Processo de conversão",     "desc": "Pirólise ou gaseificação gerando biochar com carbono estável"},
+            {"id": "storage",       "label": "Via de armazenamento",       "desc": "Aplicação em solo, ambiente construído ou outro storage permanente"},
+            {"id": "additionality", "label": "Adicionalidade financeira",  "desc": "Projeto não seria viável sem receita de créditos de carbono"},
+            {"id": "baseline",      "label": "Linha de base definível",    "desc": "Contrafactual quantificável para o destino do feedstock sem o projeto"},
+            {"id": "permanence",    "label": "Permanência > 200 anos",     "desc": "H/Corg < 0.5, O/Corg < 0.2 (verificável via análise elemental do biochar)"},
+        ],
+    },
+    "puro": {
+        "name": "Puro.Earth Biochar",
+        "criteria": [
+            {"id": "feedstock",     "label": "Feedstock certificável",     "desc": "Biomassa residual com cadeia de custódia documentável"},
+            {"id": "process",       "label": "Processo de pirólise",       "desc": "Temperatura e tempo de residência monitorados e registrados"},
+            {"id": "permanence",    "label": "Permanência ≥ 100 anos",     "desc": "H/Corg < 0.7; resultado de análise elemental obrigatório"},
+            {"id": "additionality", "label": "Adicionalidade",             "desc": "Ausência de incentivo regulatório que tornaria o projeto viável sem carbono"},
+            {"id": "monitoring",    "label": "Plano de monitoramento",     "desc": "Procedimentos de amostragem e análise laboratorial ISO 17025 definidos"},
+        ],
+    },
+}
+
+@app.post("/api/projects/{project_id}/screening")
+async def run_screening(project_id: str, methodology: str = "isometric"):
+    p = _db_fetchone("SELECT * FROM ca_projects WHERE id=%s", (project_id,))
+    if not p:
+        raise HTTPException(404, "Projeto não encontrado")
+
+    cfg = _METHODOLOGY_SCREENING.get(methodology)
+    if not cfg:
+        raise HTTPException(400, f"Sem critérios de triagem para '{methodology}'")
+
+    # Context: prefer cached project_data
+    cached_data = p.get("project_data")
+    if isinstance(cached_data, str):
+        try: cached_data = json.loads(cached_data)
+        except: cached_data = None
+
+    if cached_data:
+        context = json.dumps(cached_data, ensure_ascii=False, indent=2)[:7000]
+    else:
+        # Quick RAG via Responses API
+        vs_id = p.get("project_vector_store_id", "")
+        methodology_vs_id = METHODOLOGY_REGISTRY.get(methodology, {}).get("vector_store_id", "")
+        vs_ids = [v for v in [vs_id, methodology_vs_id] if v]
+        try:
+            tools = [{"type": "file_search", "vector_store_ids": vs_ids}] if vs_ids else []
+            rag = openai_client.responses.create(
+                model=OPENAI_MODEL,
+                input="Descreva o projeto: tipo de feedstock, processo de conversão, via de armazenamento, localização, escala e receita esperada com carbono.",
+                tools=tools,
+            )
+            context = rag.output_text or "Informações insuficientes nos documentos."
+        except Exception as e:
+            context = f"Não foi possível extrair contexto do projeto ({e}). Faça uma auditoria completa primeiro."
+
+    criteria_text = "\n".join(
+        f'- {c["id"]} | {c["label"]}: {c["desc"]}' for c in cfg["criteria"]
+    )
+    n = len(cfg["criteria"])
+    threshold_eligible = max(1, n - 1)
+    threshold_possible = max(1, n // 2)
+
+    prompt = f"""Analise se este projeto de carbono atende os critérios de elegibilidade do padrão {cfg['name']}.
+
+DADOS DO PROJETO:
+{context}
+
+CRITÉRIOS A AVALIAR ({n} no total):
+{criteria_text}
+
+VEREDICTO:
+- "elegível": {threshold_eligible} ou mais critérios = pass
+- "possível": {threshold_possible}–{threshold_eligible-1} critérios = pass (restantes partial/fail)
+- "inelegível": menos de {threshold_possible} critérios = pass
+
+Retorne APENAS JSON válido (sem markdown):
+{{
+  "verdict": "elegível" | "possível" | "inelegível",
+  "confidence": <0-100>,
+  "summary": "<2-3 frases objetivas sobre o fit do projeto com o padrão>",
+  "checks": [
+    {{"criterion_id": "<id>", "label": "<label>", "result": "pass" | "partial" | "fail", "note": "<observação específica baseada nos dados>"}}
+  ],
+  "key_actions": ["<próxima ação concreta 1>", "<próxima ação concreta 2>", "<próxima ação concreta 3>"]
+}}"""
+
+    resp = openai_client.chat.completions.create(
+        model=OPENAI_MODEL,
+        messages=[
+            {"role": "system", "content": "Especialista em certificação de projetos de carbono. Responda apenas com JSON válido, sem markdown."},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0,
+        response_format={"type": "json_object"},
+    )
+
+    raw = resp.choices[0].message.content
+    try:
+        result = json.loads(raw)
+    except Exception:
+        result = {"verdict": "possível", "confidence": 0, "summary": raw, "checks": [], "key_actions": []}
+
+    result["methodology"] = methodology
+    result["methodology_name"] = cfg["name"]
+    result["criteria_count"] = n
+    result["used_cache"] = cached_data is not None
+    return result
+
 # ── Chat ──────────────────────────────────────────────────────────────────────
 
 class ChatRequest(BaseModel):

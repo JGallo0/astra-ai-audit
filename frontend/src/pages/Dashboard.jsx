@@ -1,19 +1,26 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import { AppCtx } from '../App'
 
-const STATUS_BADGE = {
-  completed: { label: 'Concluído', cls: 'badge-green' },
-  running:   { label: 'Em execução', cls: 'badge-amber' },
-  error:     { label: 'Erro', cls: 'badge-red' },
-}
-
 export default function Dashboard() {
-  const { projects } = useContext(AppCtx)
+  const { projects, activeProject, setActiveProject, API } = useContext(AppCtx)
   const navigate = useNavigate()
+  const [stats, setStats] = useState({ total_audits: null, avg_score: null })
 
-  const total = projects.length
+  useEffect(() => {
+    axios.get(`${API}/api/dashboard/stats`).then(r => setStats(r.data)).catch(() => {})
+  }, [API])
+
+  function openProject(p) {
+    setActiveProject(p)
+    navigate('/validacao')
+  }
+
+  const total   = projects.length
   const withDocs = projects.filter(p => (p.doc_count || 0) > 0).length
+  const avgDisplay = stats.avg_score != null ? `${stats.avg_score}%` : '—'
+  const auditDisplay = stats.total_audits != null ? stats.total_audits : '—'
 
   return (
     <div>
@@ -32,11 +39,11 @@ export default function Dashboard() {
           <div className="kpi-label">Com documentos</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-value" style={{ color: 'var(--green)' }}>—</div>
+          <div className="kpi-value" style={{ color: 'var(--green)' }}>{auditDisplay}</div>
           <div className="kpi-label">Auditorias concluídas</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-value">—</div>
+          <div className="kpi-value">{avgDisplay}</div>
           <div className="kpi-label">Score médio</div>
         </div>
       </div>
@@ -65,11 +72,13 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {projects.map(p => (
-                  <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => navigate('/validacao')}>
+                  <tr
+                    key={p.id}
+                    style={{ cursor: 'pointer', background: activeProject?.id === p.id ? 'var(--navy-light)' : undefined }}
+                    onClick={() => openProject(p)}
+                  >
                     <td><span className="font-bold">{p.name}</span></td>
-                    <td>
-                      <span className="badge badge-blue">{p.methodology}</span>
-                    </td>
+                    <td><span className="badge badge-blue">{p.methodology || 'isometric'}</span></td>
                     <td>{p.doc_count || 0} arquivo(s)</td>
                     <td style={{ color: 'var(--text-2)', fontSize: 12 }}>
                       {p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : '—'}
@@ -77,7 +86,7 @@ export default function Dashboard() {
                     <td>
                       <button
                         className="btn btn-sm btn-outline"
-                        onClick={e => { e.stopPropagation(); navigate('/validacao') }}
+                        onClick={e => { e.stopPropagation(); openProject(p) }}
                       >
                         Abrir
                       </button>

@@ -119,7 +119,7 @@ function AppShell() {
     setShowCreate(false)
   }
 
-  const ctx = { API, activeProject, projects, methodologies, refreshProjects: () => {
+  const ctx = { API, activeProject, setActiveProject, projects, methodologies, refreshProjects: () => {
     axios.get(`${API}/api/projects`).then(r => setProjects(r.data)).catch(() => {})
   }}
 
