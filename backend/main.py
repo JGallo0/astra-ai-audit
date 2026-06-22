@@ -496,10 +496,25 @@ def download_report(run_id: str, format: str = Query("json")):
                 headers={"Content-Disposition": f'attachment; filename="audit_summary_{run_id}.docx"'},
             )
 
+        # ── Project Readiness Certificate ─────────────────────────────────
+        if format == "certificate":
+            rating = result.get("readiness_rating")
+            if not rating:
+                raise HTTPException(404, "Rating não disponível — execute uma auditoria primeiro.")
+            from backend.report_generator import generate_readiness_certificate_pdf
+            buf = generate_readiness_certificate_pdf(
+                rating=rating,
+                project_name=proj_name,
+            )
+            return StreamingResponse(
+                io.BytesIO(buf), media_type="application/pdf",
+                headers={"Content-Disposition": f'attachment; filename="readiness_certificate_{run_id}.pdf"'},
+            )
+
     except Exception as e:
         raise HTTPException(500, f"Geração de relatório falhou: {e}")
 
-    raise HTTPException(400, f"Formato não suportado: {format}. Use: json, pdf, docx, summary_pdf, summary_docx")
+    raise HTTPException(400, f"Formato não suportado: {format}. Use: json, pdf, summary_pdf, certificate")
 
 # ── Chat ──────────────────────────────────────────────────────────────────────
 

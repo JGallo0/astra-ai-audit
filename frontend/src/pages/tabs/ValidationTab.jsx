@@ -531,10 +531,13 @@ export default function ValidationTab() {
                         </div>
                       </div>
                       <div className="flex gap-2" style={{flexWrap:'wrap'}}>
-                        <button className="btn btn-sm btn-ghost"
-                          onClick={() => window.open(`${API}/api/audit/${selectedRun.id}/report?format=json`)}>
-                          ⬇ JSON
-                        </button>
+                        {readinessRating && (
+                          <button className="btn btn-sm btn-primary"
+                            onClick={() => window.open(`${API}/api/audit/${selectedRun.id}/report?format=certificate`)}
+                            title="Certificado de 1 página — acompanha o PDD em submissões">
+                            ⬇ Certificado
+                          </button>
+                        )}
                         <button className="btn btn-sm btn-outline"
                           onClick={() => window.open(`${API}/api/audit/${selectedRun.id}/report?format=pdf`)}>
                           ⬇ Matriz PDF
@@ -542,6 +545,10 @@ export default function ValidationTab() {
                         <button className="btn btn-sm btn-outline"
                           onClick={() => window.open(`${API}/api/audit/${selectedRun.id}/report?format=summary_pdf`)}>
                           ⬇ Resumo PDF
+                        </button>
+                        <button className="btn btn-sm btn-ghost"
+                          onClick={() => window.open(`${API}/api/audit/${selectedRun.id}/report?format=json`)}>
+                          ⬇ JSON
                         </button>
                       </div>
                     </div>

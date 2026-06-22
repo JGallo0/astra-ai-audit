@@ -425,6 +425,172 @@ def generate_compliance_matrix_pdf(
     return buf.getvalue()
 
 
+# ── Project Readiness Certificate PDF ─────────────────────────────────────────
+
+def generate_readiness_certificate_pdf(
+    rating: Dict[str, Any],
+    project_name: str = "Projeto",
+    methodology: str = "Isometric Biochar",
+) -> bytes:
+    """Single-page certificate of Project Readiness Score."""
+    grade       = rating.get("grade", "C")
+    label       = rating.get("label", "")
+    description = rating.get("description", "")
+    overall     = float(rating.get("overall_score", 0))
+    audit_mode  = rating.get("audit_mode", "development")
+    phase       = rating.get("phase", "PDD Audit")
+    dims        = rating.get("dimensions", {})
+    date_str    = datetime.now().strftime("%d/%m/%Y")
+
+    GRADE_COLORS = {
+        "A+": (GREEN, GREEN_BG), "A":  (GREEN, GREEN_BG),
+        "B+": (AMBER, AMBER_BG), "B":  (AMBER, AMBER_BG),
+        "C":  (RED,   RED_BG),
+    }
+    grade_fg, grade_bg = GRADE_COLORS.get(grade, (GRAY_MID, GRAY_BG))
+
+    DIM_LABELS = {
+        "carbon": "Carbon Accounting", "additionality": "Additionality",
+        "permanence": "Permanência",   "safeguards": "Salvaguardas",
+        "integrity": "Integridade PDD",
+    }
+    DIM_ORDER = ["carbon", "additionality", "permanence", "safeguards", "integrity"]
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buf, pagesize=A4,
+        leftMargin=2.2*cm, rightMargin=2.2*cm,
+        topMargin=1.8*cm, bottomMargin=1.8*cm,
+        title=f"CO2mply | Project Readiness Certificate — {project_name}",
+        author="CO2mply",
+    )
+    TABLE_W = PAGE_W - 4.4*cm
+    story   = []
+
+    # ── Logo + heading ─────────────────────────────────────────────────────────
+    if os.path.exists(LOGO_PATH):
+        logo = Image(LOGO_PATH, width=1.4*cm * LOGO_RATIO, height=1.4*cm)
+        logo.hAlign = "LEFT"
+        story.append(logo)
+    story.append(Spacer(1, 0.2*cm))
+    story.append(_p("CERTIFICADO DE PRONTIDÃO DO PROJETO",
+        _style(fontName="Helvetica-Bold", fontSize=9, leading=12,
+               textColor=_c(TEXT2), letterSpacing=1.5)))
+    story.append(_p("Project Readiness Certificate",
+        _style(fontName="Helvetica-Bold", fontSize=22, leading=28,
+               textColor=_c(NAVY), spaceAfter=4)))
+    story.append(HRFlowable(width="100%", thickness=2, color=_c(NAVY)))
+    story.append(Spacer(1, 0.35*cm))
+
+    # ── Project info bar ───────────────────────────────────────────────────────
+    info = Table([[
+        _p(f'<b>Projeto:</b> {project_name}', _style(fontSize=10, leading=14)),
+        _p(f'<b>Padrão:</b> {methodology}',   _style(fontSize=10, leading=14, alignment=TA_CENTER)),
+        _p(f'<b>Data:</b> {date_str}',        _style(fontSize=10, leading=14, alignment=TA_RIGHT)),
+    ]], colWidths=[TABLE_W*0.45, TABLE_W*0.35, TABLE_W*0.20])
+    info.setStyle(TableStyle([
+        ("BACKGROUND", (0,0),(-1,-1), _c(NAVY_LIGHT)),
+        ("TOPPADDING",    (0,0),(-1,-1), 7), ("BOTTOMPADDING", (0,0),(-1,-1), 7),
+        ("LEFTPADDING",   (0,0),(-1,-1), 10), ("RIGHTPADDING",  (0,0),(-1,-1), 10),
+        ("BOX", (0,0),(-1,-1), 0.5, _c(BORDER)),
+    ]))
+    story.append(info)
+    story.append(Spacer(1, 0.45*cm))
+
+    # ── Grade block ────────────────────────────────────────────────────────────
+    GRADE_W = 3.6*cm
+    grade_cell = Table([[
+        _p(grade, _style(fontName="Helvetica-Bold", fontSize=80, leading=88,
+                         textColor=_c(grade_fg), alignment=TA_CENTER)),
+    ]], colWidths=[GRADE_W], rowHeights=[3.2*cm])
+    grade_cell.setStyle(TableStyle([
+        ("BACKGROUND", (0,0),(-1,-1), _c(grade_bg)),
+        ("ALIGN",  (0,0),(-1,-1), "CENTER"), ("VALIGN", (0,0),(-1,-1), "MIDDLE"),
+        ("BOX",    (0,0),(-1,-1), 2.5, _c(grade_fg)),
+    ]))
+
+    verdict = [
+        _p(label, _style(fontName="Helvetica-Bold", fontSize=18, leading=22, textColor=_c(grade_fg))),
+        Spacer(1, 0.12*cm),
+        _p(f'Score: <b>{overall:.1f}%</b>  ·  {phase}  ·  '
+           f'Modo {"Desenvolvimento" if audit_mode == "development" else "Operacional"}',
+           _style(fontSize=9, leading=13, textColor=_c(TEXT2))),
+        Spacer(1, 0.18*cm),
+        _p(description, _style(fontSize=10, leading=15, textColor=_c(TEXT))),
+    ]
+    main_row = Table([[grade_cell, verdict]],
+                     colWidths=[GRADE_W + 0.8*cm, TABLE_W - GRADE_W - 0.8*cm])
+    main_row.setStyle(TableStyle([
+        ("VALIGN", (0,0),(-1,-1), "MIDDLE"),
+        ("LEFTPADDING",   (1,0),(1,0), 18),
+        ("TOPPADDING",    (0,0),(-1,-1), 0), ("BOTTOMPADDING", (0,0),(-1,-1), 0),
+    ]))
+    story.append(main_row)
+    story.append(Spacer(1, 0.45*cm))
+
+    # ── Dimensional scores ─────────────────────────────────────────────────────
+    story.append(HRFlowable(width="100%", thickness=0.5, color=_c(BORDER)))
+    story.append(Spacer(1, 0.2*cm))
+    story.append(_p("Avaliação por Dimensão",
+        _style(fontName="Helvetica-Bold", fontSize=10, leading=14, textColor=_c(NAVY), spaceAfter=5)))
+
+    col_w = TABLE_W / len(DIM_ORDER)
+    lbl_row, sc_row, bar_row = [], [], []
+    for dk in DIM_ORDER:
+        dim = dims.get(dk, {})
+        s   = float(dim.get("score", 0))
+        na  = dim.get("na_count", 0)
+        sc  = GREEN if s >= 80 else AMBER if s >= 60 else RED
+        na_txt = f"\n({na} N/A)" if na else ""
+
+        lbl_row.append(_p(DIM_LABELS.get(dk, dk) + na_txt,
+            _style(fontName="Helvetica-Bold", fontSize=7.5, leading=10,
+                   alignment=TA_CENTER, textColor=_c(TEXT2))))
+        sc_row.append(_p(f"{s:.0f}%",
+            _style(fontName="Helvetica-Bold", fontSize=17, leading=22,
+                   alignment=TA_CENTER, textColor=_c(sc))))
+
+        inner_w  = col_w - 0.8*cm
+        fill_w   = max(0.05, inner_w * s / 100)
+        rest_w   = max(0.05, inner_w - fill_w)
+        bar = Table([["", ""]], colWidths=[fill_w, rest_w])
+        bar.setStyle(TableStyle([
+            ("BACKGROUND",    (0,0),(0,0), _c(sc)),
+            ("BACKGROUND",    (1,0),(1,0), _c(BORDER)),
+            ("TOPPADDING",    (0,0),(-1,-1), 4), ("BOTTOMPADDING", (0,0),(-1,-1), 4),
+            ("LEFTPADDING",   (0,0),(-1,-1), 0), ("RIGHTPADDING",  (0,0),(-1,-1), 0),
+        ]))
+        bar_row.append(bar)
+
+    dim_tbl = Table([lbl_row, sc_row, bar_row], colWidths=[col_w]*len(DIM_ORDER))
+    dim_tbl.setStyle(TableStyle([
+        ("ALIGN",  (0,0),(-1,-1), "CENTER"), ("VALIGN", (0,0),(-1,-1), "MIDDLE"),
+        ("TOPPADDING",    (0,0),(-1,0), 6), ("BOTTOMPADDING", (0,0),(-1,0), 4),
+        ("TOPPADDING",    (0,1),(-1,1), 2), ("BOTTOMPADDING", (0,1),(-1,1), 4),
+        ("TOPPADDING",    (0,2),(-1,2), 2), ("BOTTOMPADDING", (0,2),(-1,2), 8),
+        ("LEFTPADDING",   (0,0),(-1,-1), 4), ("RIGHTPADDING", (0,0),(-1,-1), 4),
+        ("LINEAFTER",     (0,0),(3,-1), 0.4, _c(BORDER)),
+        ("BOX",           (0,0),(-1,-1), 0.5, _c(BORDER)),
+        ("BACKGROUND",    (0,0),(-1, 0), _c(NAVY_LIGHT)),
+    ]))
+    story.append(dim_tbl)
+    story.append(Spacer(1, 0.35*cm))
+
+    # ── Disclaimer ─────────────────────────────────────────────────────────────
+    story.append(HRFlowable(width="100%", thickness=0.4, color=_c(BORDER)))
+    story.append(Spacer(1, 0.15*cm))
+    story.append(_p(
+        f"Este certificado atesta que o projeto <b>{project_name}</b> foi avaliado pelo motor "
+        f"determinístico CO2mply contra os critérios do protocolo <b>{methodology}</b> em <b>{date_str}</b>. "
+        f"O Project Readiness Score avalia a completude e consistência documental do PDD — "
+        f"é uma auditoria de prontidão, não uma rating de crédito de carbono. "
+        f"CO2mply · Carbon Compliance Intelligence · v1.0",
+        _style(fontName="Helvetica-Oblique", fontSize=7, leading=10, textColor=_c(GRAY_MID))))
+
+    doc.build(story)
+    return buf.getvalue()
+
+
 # ── Audit Summary PDF ──────────────────────────────────────────────────────────
 
 def generate_audit_summary_pdf(
