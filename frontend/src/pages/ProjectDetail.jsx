@@ -4,17 +4,20 @@ import ChatTab from './tabs/ChatTab'
 import ValidationTab from './tabs/ValidationTab'
 import DataRoomTab from './tabs/DataRoomTab'
 import PreViabilidadeTab from './tabs/PreViabilidadeTab'
+import ViabilidadeTab from './tabs/ViabilidadeTab'
+import FinancialLabTab from './tabs/FinancialLabTab'
 import StubTab from './tabs/StubTab'
 
 const TAB_MAP = {
-  'chat':           { label: 'Chat Técnico',        component: ChatTab },
-  'validacao':      { label: 'Validação',            component: ValidationTab },
-  'fit-metodologico':{ label: 'Fit Metodológico',    component: PreViabilidadeTab },
-  'data-room':      { label: 'Data Room',            component: DataRoomTab },
-  'viabilidade':    { label: 'Viabilidade Completa', component: () => <StubTab icon="📊" title="Viabilidade Completa" desc="Avaliação de maturidade e prontidão do projeto. Em desenvolvimento." /> },
-  'verificacao':    { label: 'Verificação',           component: () => <StubTab icon="🛡️" title="Verificação" desc="Suporte ao ciclo V&V. Em desenvolvimento." /> },
-  'doc-filler':     { label: 'Preencher Documento',  component: () => <StubTab icon="📝" title="Preencher Documento" desc="Preenchimento automático de PDDs e DPPs. Em desenvolvimento." /> },
-  'sheet-filler':   { label: 'Preencher Planilha',   component: () => <StubTab icon="📋" title="Preencher Planilha" desc="Automação de planilhas de parâmetros. Em desenvolvimento." /> },
+  'chat':              { label: 'Chat Técnico',       component: ChatTab },
+  'validacao':         { label: 'Validação',           component: ValidationTab },
+  'fit-metodologico':  { label: 'Fit Metodológico',   component: PreViabilidadeTab },
+  'viabilidade':       { label: 'Viabilidade',        component: ViabilidadeTab },
+  'financial-lab':     { label: 'Financial Lab',      component: FinancialLabTab },
+  'data-room':         { label: 'Data Room',          component: DataRoomTab },
+  'verificacao':       { label: 'Verificação',        component: () => <StubTab icon="🛡️" title="Verificação" desc="Suporte ao ciclo V&V. Em desenvolvimento." /> },
+  'doc-filler':        { label: 'Preencher Documento',component: () => <StubTab icon="📝" title="Preencher Documento" desc="Preenchimento automático de PDDs e DPPs. Em desenvolvimento." /> },
+  'sheet-filler':      { label: 'Preencher Planilha', component: () => <StubTab icon="📋" title="Preencher Planilha" desc="Automação de planilhas de parâmetros. Em desenvolvimento." /> },
 }
 
 export default function ProjectDetail({ tab }) {

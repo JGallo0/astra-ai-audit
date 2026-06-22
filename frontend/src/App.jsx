@@ -23,6 +23,7 @@ const NAV = [
       { label: 'Validação',       icon: '✅', path: '/validacao' },
       { label: 'Fit Metodológico', icon: '🔍', path: '/fit-metodologico' },
       { label: 'Viabilidade',     icon: '📊', path: '/viabilidade' },
+      { label: 'Financial Lab',   icon: '⚗️',  path: '/financial-lab' },
       { label: 'Verificação',     icon: '🛡️',  path: '/verificacao' },
     ],
   },
@@ -141,6 +142,7 @@ function AppShell() {
               <Route path="/validacao"        element={<ProjectDetail tab="validacao" />} />
               <Route path="/fit-metodologico" element={<ProjectDetail tab="fit-metodologico" />} />
               <Route path="/viabilidade"      element={<ProjectDetail tab="viabilidade" />} />
+              <Route path="/financial-lab"    element={<ProjectDetail tab="financial-lab" />} />
               <Route path="/verificacao"      element={<ProjectDetail tab="verificacao" />} />
               <Route path="/data-room"        element={<ProjectDetail tab="data-room" />} />
               <Route path="/doc-filler"       element={<ProjectDetail tab="doc-filler" />} />

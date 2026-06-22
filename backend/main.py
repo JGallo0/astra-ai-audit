@@ -542,6 +542,83 @@ def download_report(run_id: str, format: str = Query("json")):
 
     raise HTTPException(400, f"Formato não suportado: {format}. Use: json, pdf, summary_pdf, certificate")
 
+# ── Viabilidade ───────────────────────────────────────────────────────────────
+
+@app.on_event("startup")
+def _create_viabilidade_table():
+    try:
+        _db_execute("""
+            CREATE TABLE IF NOT EXISTS ca_viabilidade (
+                project_id TEXT PRIMARY KEY,
+                premissas  JSONB,
+                resultado  JSONB,
+                fonte      TEXT,
+                updated_at TIMESTAMPTZ DEFAULT now()
+            )
+        """)
+    except Exception:
+        pass
+
+@app.get("/api/projects/{project_id}/viabilidade")
+def get_viabilidade(project_id: str):
+    row = _db_fetchone("SELECT * FROM ca_viabilidade WHERE project_id=%s", (project_id,))
+    if not row:
+        return {"premissas": None, "resultado": None}
+    for key in ("premissas", "resultado"):
+        if isinstance(row.get(key), str):
+            try: row[key] = json.loads(row[key])
+            except: pass
+    return row
+
+@app.post("/api/projects/{project_id}/viabilidade/calculate")
+def calculate_viabilidade(project_id: str, body: dict):
+    from backend.viabilidade_engine import PremissasViabilidade, calcular_viabilidade, premissas_from_dict, validate_premissas
+    p = premissas_from_dict(body.get("premissas", body))
+    resultado = calcular_viabilidade(p)
+    fonte = body.get("fonte", "manual")
+    premissas_dict = {f.name: getattr(p, f.name) for f in __import__('dataclasses').fields(p)}
+    _db_execute(
+        """INSERT INTO ca_viabilidade (project_id, premissas, resultado, fonte, updated_at)
+           VALUES (%s,%s,%s,%s,now())
+           ON CONFLICT (project_id) DO UPDATE
+           SET premissas=EXCLUDED.premissas, resultado=EXCLUDED.resultado,
+               fonte=EXCLUDED.fonte, updated_at=now()""",
+        (project_id, json.dumps(premissas_dict, default=str),
+         json.dumps(resultado, default=str), fonte),
+    )
+    warnings = validate_premissas(premissas_dict)
+    return {"resultado": resultado, "warnings": warnings, "premissas": premissas_dict}
+
+@app.post("/api/projects/{project_id}/viabilidade/extract")
+async def extract_viabilidade(project_id: str, file: UploadFile = File(...)):
+    from backend.viabilidade_service import extract_premissas_from_spreadsheet
+    content = await file.read()
+    extracted = extract_premissas_from_spreadsheet(
+        content, file.filename, openai_client, OPENAI_MODEL
+    )
+    from backend.viabilidade_engine import validate_premissas
+    warnings = validate_premissas(extracted)
+    return {"extracted": extracted, "warnings": warnings}
+
+@app.get("/api/projects/{project_id}/viabilidade/export")
+def export_viabilidade(project_id: str):
+    row = _db_fetchone("SELECT * FROM ca_viabilidade WHERE project_id=%s", (project_id,))
+    if not row:
+        raise HTTPException(404, "Viabilidade não calculada para este projeto")
+    premissas = row.get("premissas") or {}
+    resultado  = row.get("resultado")  or {}
+    if isinstance(premissas, str): premissas = json.loads(premissas)
+    if isinstance(resultado, str):  resultado  = json.loads(resultado)
+    proj = _db_fetchone("SELECT name FROM ca_projects WHERE id=%s", (project_id,))
+    proj_name = (proj or {}).get("name", "Projeto")
+    from backend.viabilidade_service import generate_viabilidade_excel
+    buf = generate_viabilidade_excel(premissas, resultado, proj_name)
+    filename = f"viabilidade_{project_id[:8]}.xlsx"
+    return StreamingResponse(
+        io.BytesIO(buf), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
 # ── Dashboard Stats ───────────────────────────────────────────────────────────
 
 @app.get("/api/dashboard/stats")
