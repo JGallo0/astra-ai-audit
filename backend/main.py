@@ -457,6 +457,15 @@ def download_report(run_id: str, format: str = Query("json")):
             if pname and isinstance(pname, str) and len(pname) < 60:
                 proj_name = pname
 
+        # ── Rating (extrair do resultado ou calcular on-the-fly) ─────────
+        rating_data = result.get("rating") or result.get("readiness_rating")
+        if not rating_data and results_list and score_data:
+            try:
+                from backend.rating_service import compute_readiness_rating
+                rating_data = compute_readiness_rating(results_list, float(score_data.get("score", 0)), audit_mode)
+            except Exception:
+                rating_data = None
+
         # ── Compliance Matrix (PDF / DOCX) ────────────────────────────────
         if format in ("pdf", "docx"):
             score_val  = score_data.get("score", 0)
@@ -469,6 +478,7 @@ def download_report(run_id: str, format: str = Query("json")):
                     score_data={**score_data, "score_label": score_label},
                     audit_mode=audit_mode,
                     project_name=proj_name,
+                    rating=rating_data,
                 )
                 return StreamingResponse(
                     io.BytesIO(buf), media_type="application/pdf",
@@ -493,6 +503,7 @@ def download_report(run_id: str, format: str = Query("json")):
                 score_data={**score_data, "score_label": score_label},
                 audit_mode=audit_mode,
                 project_name=proj_name,
+                rating=rating_data,
             )
             return StreamingResponse(
                 io.BytesIO(buf), media_type="application/pdf",

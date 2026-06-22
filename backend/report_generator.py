@@ -194,12 +194,21 @@ def generate_compliance_matrix_pdf(
     audit_mode: str = "development",
     project_name: str = "Projeto",
     methodology: str = "Isometric Biochar",
+    rating: Optional[Dict[str, Any]] = None,
 ) -> bytes:
 
     score      = float(score_data.get("score", 0))
     score_lbl  = score_data.get("score_label", "")
     mode_lbl   = "Desenvolvimento" if audit_mode == "development" else "Operacional"
     date_str   = datetime.now().strftime("%d/%m/%Y")
+
+    # Rating grade (A+/A/B+/B/C)
+    grade       = (rating or {}).get("grade", "")
+    grade_label = (rating or {}).get("label", score_lbl)
+    _GRADE_FG = {"A+": GREEN,    "A": GREEN,    "B+": AMBER,    "B": AMBER,    "C": RED}
+    _GRADE_BG = {"A+": GREEN_BG, "A": GREEN_BG, "B+": AMBER_BG, "B": AMBER_BG, "C": RED_BG}
+    grade_color    = _GRADE_FG.get(grade, GRAY_MID) if grade else GRAY_MID
+    grade_bg_color = _GRADE_BG.get(grade, NAVY_LIGHT) if grade else NAVY_LIGHT
 
     buf = io.BytesIO()
     doc = SimpleDocTemplate(
@@ -240,15 +249,35 @@ def generate_compliance_matrix_pdf(
 
     score_color = GREEN if score >= 85 else AMBER if score >= 60 else RED
 
-    kpi_col_w = (PAGE_W - ML - MR) / 5
+    TABLE_W_KPI = PAGE_W - ML - MR
+    kpi_col_w   = TABLE_W_KPI / 5
 
-    # Two-row KPI table: values row + labels row
+    # Column 0 value: grade+score stacked (or just score if no grade)
+    if grade:
+        col0_val = [
+            _p(f'<font name="Helvetica-Bold" size="24" color="{grade_color}">{grade}</font>',
+               _style(alignment=TA_CENTER, fontSize=24, leading=28)),
+            _p(f'<font name="Helvetica-Bold" size="13" color="{score_color}">{score:.0f}%</font>',
+               _style(alignment=TA_CENTER, fontSize=13, leading=16)),
+        ]
+        col0_lbl = _p(
+            f'<font size="7.5" color="{grade_color}"><b>{grade_label}</b></font>',
+            _style(alignment=TA_CENTER, fontSize=7.5, leading=9),
+        )
+    else:
+        col0_val = _p(
+            f'<font name="Helvetica-Bold" size="22" color="{score_color}">{score:.0f}%</font>',
+            _style(alignment=TA_CENTER, fontSize=22, leading=26),
+        )
+        col0_lbl = _p(
+            f'<font size="8" color="{TEXT2}">{score_lbl}</font>',
+            _style(alignment=TA_CENTER, fontSize=8, leading=10),
+        )
+
     kpi_table = Table(
         [
-            # Row 1: values
             [
-                _p(f'<font name="Helvetica-Bold" size="22" color="{score_color}">{score:.0f}%</font>',
-                   _style(alignment=TA_CENTER, fontSize=22, leading=26)),
+                col0_val,
                 _p(f'<font name="Helvetica-Bold" size="18" color="{GREEN}">{n_conf}</font>',
                    _style(alignment=TA_CENTER, fontSize=18, leading=22)),
                 _p(f'<font name="Helvetica-Bold" size="18" color="{AMBER}">{n_part}</font>',
@@ -258,10 +287,8 @@ def generate_compliance_matrix_pdf(
                 _p(f'<font name="Helvetica-Bold" size="18" color="{GRAY_MID}">{n_na}</font>',
                    _style(alignment=TA_CENTER, fontSize=18, leading=22)),
             ],
-            # Row 2: labels
             [
-                _p(f'<font size="8" color="{TEXT2}">{score_lbl}</font>',
-                   _style(alignment=TA_CENTER, fontSize=8, leading=10)),
+                col0_lbl,
                 _p(f'<font size="8" color="{TEXT2}">Conformes</font>',
                    _style(alignment=TA_CENTER, fontSize=8, leading=10)),
                 _p(f'<font size="8" color="{TEXT2}">Parciais</font>',
@@ -273,19 +300,27 @@ def generate_compliance_matrix_pdf(
             ],
         ],
         colWidths=[kpi_col_w] * 5,
-        rowHeights=[1.4*cm, 0.7*cm],
+        rowHeights=[1.6*cm, 0.65*cm],
     )
-    kpi_table.setStyle(TableStyle([
-        ("BACKGROUND",    (0, 0), (-1, -1), _c(NAVY_LIGHT)),
+    ts = [
         ("ALIGN",         (0, 0), (-1, -1), "CENTER"),
         ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING",    (0, 0), (-1, -1), 10),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+        ("TOPPADDING",    (0, 0), (-1, 0),  8),
+        ("BOTTOMPADDING", (0, 0), (-1, 0),  6),
+        ("TOPPADDING",    (0, 1), (-1, 1),  4),
+        ("BOTTOMPADDING", (0, 1), (-1, 1),  6),
         ("LEFTPADDING",   (0, 0), (-1, -1), 4),
         ("RIGHTPADDING",  (0, 0), (-1, -1), 4),
-        ("LINEAFTER",     (0, 0), (3, 0), 0.5, _c(BORDER)),
+        ("LINEAFTER",     (0, 0), (3, -1),  0.5, _c(BORDER)),
         ("BOX",           (0, 0), (-1, -1), 0.5, _c(BORDER)),
-    ]))
+        # Column 0 background matches grade
+        ("BACKGROUND",    (0, 0), (0, -1),  _c(grade_bg_color if grade else NAVY_LIGHT)),
+        ("BACKGROUND",    (1, 0), (-1, -1), _c(NAVY_LIGHT)),
+        # Left accent bar on col 0
+        ("LINEBEFORE",    (0, 0), (0, -1),  3,   _c(grade_color if grade else score_color)),
+    ]
+    kpi_table.setStyle(TableStyle(ts))
+
     story.append(kpi_table)
     story.append(Spacer(1, 0.7*cm))
 
@@ -611,6 +646,7 @@ def generate_audit_summary_pdf(
     audit_mode: str = "development",
     project_name: str = "Projeto",
     methodology: str = "Isometric Biochar",
+    rating: Optional[Dict[str, Any]] = None,
 ) -> bytes:
     """Executive-style audit summary: 2-3 pages, only what matters."""
 
@@ -618,6 +654,14 @@ def generate_audit_summary_pdf(
     score_lbl  = score_data.get("score_label", "")
     mode_lbl   = "Desenvolvimento" if audit_mode == "development" else "Operacional"
     date_str   = datetime.now().strftime("%d/%m/%Y")
+
+    # Rating grade
+    grade       = (rating or {}).get("grade", "")
+    grade_label = (rating or {}).get("label", score_lbl)
+    _GRADE_FG = {"A+": GREEN,    "A": GREEN,    "B+": AMBER,    "B": AMBER,    "C": RED}
+    _GRADE_BG = {"A+": GREEN_BG, "A": GREEN_BG, "B+": AMBER_BG, "B": AMBER_BG, "C": RED_BG}
+    grade_color    = _GRADE_FG.get(grade, GRAY_MID) if grade else GRAY_MID
+    grade_bg_color = _GRADE_BG.get(grade, NAVY_LIGHT) if grade else NAVY_LIGHT
 
     buf = io.BytesIO()
     doc = SimpleDocTemplate(
@@ -671,16 +715,39 @@ def generate_audit_summary_pdf(
         "Veja os gaps prioritários abaixo."
     )
 
+    if grade:
+        left_cell = [
+            _p(f'<font name="Helvetica-Bold" size="32" color="{grade_color}">{grade}</font>',
+               _style(alignment=TA_CENTER, fontSize=32, leading=36)),
+            _p(f'<font name="Helvetica-Bold" size="14" color="{score_color}">{score:.0f}%</font>',
+               _style(alignment=TA_CENTER, fontSize=14, leading=18)),
+            _p(f'<font size="7.5" color="{grade_color}"><b>{grade_label}</b></font>',
+               _style(alignment=TA_CENTER, fontSize=7.5, leading=10)),
+        ]
+        left_col_w   = 3.2 * cm
+        left_bg      = grade_bg_color
+        divider_col  = grade_color
+    else:
+        left_cell = _p(
+            f'<font name="Helvetica-Bold" size="30" color="{score_color}">{score:.0f}%</font>',
+            _style(alignment=TA_CENTER, fontSize=30, leading=36),
+        )
+        left_col_w   = 4.0 * cm
+        left_bg      = NAVY_LIGHT
+        divider_col  = BORDER
+
+    # Right column: label (em cor do grade) + verdict + meta
+    right_label_color = grade_color if grade else score_color
+    right_label_text  = grade_label if grade else score_lbl
+
     score_banner = Table(
         [[
-            # Score — coluna mais larga para "87%" caber em uma linha
-            _p(f'<font name="Helvetica-Bold" size="30" color="{score_color}">{score:.0f}%</font>',
-               _style(alignment=TA_CENTER, fontSize=30, leading=36)),
-            # Verdict text
+            left_cell,
             [
-                _p(f'<font name="Helvetica-Bold" size="12" color="{score_color}">{score_lbl}</font>',
+                _p(f'<font name="Helvetica-Bold" size="12" color="{right_label_color}">'
+                   f'{right_label_text}</font>',
                    _style(fontSize=12, fontName="Helvetica-Bold", leading=16,
-                          textColor=_c(score_color))),
+                          textColor=_c(right_label_color))),
                 _p(verdict, _style(fontSize=9, leading=13, textColor=_c(TEXT2))),
                 Spacer(1, 0.2*cm),
                 _p(f'<font size="8" color="{TEXT2}">Requisitos avaliados: {n_total}  '
@@ -688,17 +755,20 @@ def generate_audit_summary_pdf(
                    _style(fontSize=8, leading=11, textColor=_c(TEXT2))),
             ],
         ]],
-        colWidths=[4.0*cm, TABLE_W - 4.0*cm],
+        colWidths=[left_col_w, TABLE_W - left_col_w],
     )
     score_banner.setStyle(TableStyle([
-        ("BACKGROUND",    (0, 0), (-1, -1), _c(NAVY_LIGHT)),
+        ("BACKGROUND",    (0, 0), (0, -1),  _c(left_bg)),
+        ("BACKGROUND",    (1, 0), (-1, -1), _c(NAVY_LIGHT)),
         ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
         ("ALIGN",         (0, 0), (0, 0),   "CENTER"),
-        ("TOPPADDING",    (0, 0), (-1, -1), 12),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
-        ("LEFTPADDING",   (0, 0), (-1, -1), 14),
-        ("RIGHTPADDING",  (0, 0), (-1, -1), 14),
-        ("LINEAFTER",     (0, 0), (0, 0),   0.5, _c(BORDER)),
+        ("TOPPADDING",    (0, 0), (-1, -1), 14),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 14),
+        ("LEFTPADDING",   (0, 0), (0, -1),  8),
+        ("RIGHTPADDING",  (0, 0), (0, -1),  8),
+        ("LEFTPADDING",   (1, 0), (-1, -1), 16),
+        ("RIGHTPADDING",  (1, 0), (-1, -1), 14),
+        ("LINEAFTER",     (0, 0), (0, -1),  1.5, _c(divider_col)),
         ("BOX",           (0, 0), (-1, -1), 0.5, _c(BORDER)),
     ]))
     story.append(score_banner)
