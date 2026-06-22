@@ -789,6 +789,28 @@ def apply_inference_rules(project_data: dict) -> dict:
     _normalize_bool_field(safeguards, "stakeholder_input_process")
     _normalize_bool_field(safeguards, "mitigation_plan")
 
+    # 13. legal.applicable_environmental_requirements ← safeguards.permits_documented
+    # Se o projeto tem licenças/permissões documentadas, os requisitos legais estão sendo atendidos
+    if legal.get("applicable_environmental_requirements") is None:
+        if safeguards.get("permits_documented") is True:
+            legal["applicable_environmental_requirements"] = True
+        elif safeguards.get("environmental_risk_assessment") is True:
+            # Avaliação de impacto ambiental implica conhecimento dos requisitos legais
+            legal["applicable_environmental_requirements"] = True
+
+    # 14. eligibility.additionality_evidence ← proxies quando claim existe mas evidence está vazio
+    # Se additionality_claim = True + certificação de feedstock → evidência parcial da adicionalidade
+    if not eligibility.get("additionality_evidence"):
+        if eligibility.get("additionality_claim") is True:
+            proxies = []
+            cert = feedstock.get("certification_scheme")
+            if cert:
+                proxies.append(f"Certified feedstock: {cert}")
+            if eligibility.get("eligible_pathway"):
+                proxies.append(f"Protocol pathway: {eligibility['eligible_pathway']}")
+            if proxies:
+                eligibility["additionality_evidence"] = proxies
+
     return data
 
 

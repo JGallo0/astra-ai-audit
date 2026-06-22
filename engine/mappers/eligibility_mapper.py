@@ -296,6 +296,56 @@ def apply_local_heuristics(
                 evidence_mode="inferred",
             )
 
+    # ── Additionality evidence heuristics ───────────────────────────────────
+    if not field_map.get("eligibility.additionality_evidence", {}).get("value"):
+        # IRR analysis mention
+        irr_m = re.search(
+            r"\b(?:IRR|internal\s+rate\s+of\s+return|hurdle\s+rate|economic\s+viability"
+            r"|carbon\s+price\s+required|break[\-\s]?even|payback\s+period)\b",
+            text, re.IGNORECASE,
+        )
+        revenue_m = re.search(
+            r"\b(?:revenue\s+stream|carbon\s+revenue|credit\s+revenue|carbon\s+finance"
+            r"|sole\s+(?:source|revenue)|primary\s+(?:source|revenue))\b",
+            text, re.IGNORECASE,
+        )
+        if irr_m or revenue_m:
+            evidence_txt = irr_m.group(0) if irr_m else revenue_m.group(0)
+            upsert_field(
+                field_map,
+                path="eligibility.additionality_evidence",
+                value=[f"Financial additionality: {evidence_txt}"],
+                evidence=f"Regex: additionality evidence found: '{evidence_txt}'.",
+                extractor="eligibility_mapper",
+                fill_method="heuristic",
+                confidence=0.75,
+                evidence_strength="moderate",
+                evidence_mode="direct",
+            )
+
+    # ── Legal / regulatory compliance heuristics ─────────────────────────────
+    if field_map.get("legal.applicable_environmental_requirements", {}).get("value") is None:
+        legal_patterns = [
+            r"\b(?:permit|licence|license|authorization|authorisation)\b",
+            r"\b(?:EPA|CEQA|CARB|air\s+quality|environmental\s+regulation|regulatory\s+compliance)\b",
+            r"\b(?:state\s+permit|federal\s+permit|environmental\s+permit|air\s+emission)\b",
+            r"\b(?:comply|compliance)\s+with\s+(?:all|applicable|local|state|federal|national)\b",
+        ]
+        for pat in legal_patterns:
+            if re.search(pat, text, re.IGNORECASE):
+                upsert_field(
+                    field_map,
+                    path="legal.applicable_environmental_requirements",
+                    value=True,
+                    evidence="Regex: regulatory compliance / permit language found in project text.",
+                    extractor="eligibility_mapper",
+                    fill_method="heuristic",
+                    confidence=0.78,
+                    evidence_strength="moderate",
+                    evidence_mode="direct",
+                )
+                break
+
     return merge_normalized_fields(list(field_map.values()))
 
 
