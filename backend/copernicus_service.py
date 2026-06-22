@@ -51,8 +51,8 @@ def _parse_coordinates(locations: Any) -> Optional[Tuple[float, float]]:
     else:
         text = str(locations)
 
-    # GPS decimal degrees pattern
-    m = re.search(r"(-?\d{1,3}\.\d{2,})[,\s]+(-?\d{1,3}\.\d{2,})", text)
+    # GPS decimal degrees pattern — 1+ decimal digit
+    m = re.search(r"(-?\d{1,3}\.\d+)[,\s]+(-?\d{1,3}\.\d+)", text)
     if m:
         lat, lon = float(m.group(1)), float(m.group(2))
         if -90 <= lat <= 90 and -180 <= lon <= 180:
@@ -125,7 +125,6 @@ def get_soil_temperature(
                     "year": str(year),
                     "month": [f"{m:02d}" for m in range(1, 13)],
                     "time": "00:00",
-                    # Small bounding box around the grid cell
                     "area": [
                         grid_lat + GRID_RES,
                         grid_lon - GRID_RES,
@@ -137,9 +136,27 @@ def get_soil_temperature(
                 outfile,
             )
 
-            ds = xr.open_dataset(outfile)
-            # stl1 is in Kelvin — average over all months and spatial cells
-            stl1_k = float(ds["stl1"].values.mean())
+            # CDS may return a zip containing the .nc file
+            import zipfile
+            actual_nc = outfile
+            if zipfile.is_zipfile(outfile):
+                with zipfile.ZipFile(outfile, "r") as zf:
+                    nc_names = [n for n in zf.namelist() if n.endswith(".nc")]
+                    if nc_names:
+                        actual_nc = os.path.join(tmpdir, nc_names[0])
+                        zf.extract(nc_names[0], tmpdir)
+
+            import numpy as np
+            ds = xr.open_dataset(actual_nc, engine="netcdf4")
+
+            # Variable is 'stl1', values in Kelvin
+            # Filter NaN (ocean/no-data pixels) before averaging
+            vals = ds["stl1"].values.flatten()
+            valid = vals[~np.isnan(vals)]
+            if len(valid) == 0:
+                ds.close()
+                return {"error": "Todos os pixels NaN — coordenadas podem estar no oceano ou sem cobertura ERA5-Land."}
+            stl1_k = float(valid.mean())
             ds.close()
 
         temp_celsius = round(stl1_k - 273.15, 2)
