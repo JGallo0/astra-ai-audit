@@ -46,30 +46,58 @@ def _round_grid(lat: float, lon: float) -> Tuple[float, float]:
     return glat, glon
 
 
+
+# Known project locations — fallback when GPS not in text
+# Format: (city_pattern, lat, lon)
+_KNOWN_LOCATIONS = [
+    # Pacific Biochar
+    (r"scotia\s*,?\s*ca",          40.483, -124.102),
+    (r"humboldt\s*county",         40.700, -124.100),
+    # Brazil biochar hubs
+    (r"nova\s*espe[rn]an[çc]a",   -22.90,  -43.17),
+    (r"minas\s*gerais",            -18.50,  -44.00),
+    (r"s[ãa]o\s*paulo",           -23.55,  -46.63),
+    (r"bras[ií]lia",               -15.78,  -47.93),
+    (r"par[aá]\s*de\s*minas",     -19.87,  -44.61),
+    # Europe
+    (r"denmark|danmark",            56.00,    10.00),
+    (r"netherlands|holland",        52.37,     4.89),
+    (r"germany|deutschland",        51.17,    10.45),
+    (r"sweden|sverige",             59.33,    18.07),
+    # US biochar hubs
+    (r"oregon",                    44.00,  -120.50),
+    (r"washington\s*state",        47.40,  -120.50),
+    (r"california",                36.78,  -119.42),
+]
+
+
 def _parse_coordinates(locations: Any) -> Optional[Tuple[float, float]]:
     """
     Extract (lat, lon) from project.locations in various formats:
-      - List: ["40.7128, -74.006"] or ["40.7128,-74.006"]
-      - String: "40.7128, -74.006"
-      - GPS patterns from addresses
+      - GPS decimal: "40.7128, -74.006"
+      - Known location names via lookup table
     """
     if not locations:
         return None
 
-    # Normalise to string
     if isinstance(locations, list):
         text = " ".join(str(x) for x in locations)
     else:
         text = str(locations)
 
-    # GPS decimal degrees pattern — 1+ decimal digit
+    # 1. GPS decimal degrees pattern — 1+ decimal digit
     m = re.search(r"(-?\d{1,3}\.\d+)[,\s]+(-?\d{1,3}\.\d+)", text)
     if m:
         lat, lon = float(m.group(1)), float(m.group(2))
         if -90 <= lat <= 90 and -180 <= lon <= 180:
             return lat, lon
 
-    # DMS pattern (e.g. "40°42'46\"N 74°0'22\"W") — not implemented yet
+    # 2. Known location name lookup (case-insensitive)
+    text_lower = text.lower()
+    for pattern, lat, lon in _KNOWN_LOCATIONS:
+        if re.search(pattern, text_lower):
+            return lat, lon
+
     return None
 
 
