@@ -273,7 +273,7 @@ def _run_audit(run_id: str, project: dict, req: AuditRequest):
         result = {k: v for k, v in output.items() if k not in _LARGE_FIELDS}
         result["cache_hit"] = cache_hit
 
-        # Calcular Project Readiness Rating e incluir no resultado
+        # Calcular Project Readiness Rating
         try:
             from backend.rating_service import compute_readiness_rating
             rating = compute_readiness_rating(
@@ -285,6 +285,21 @@ def _run_audit(run_id: str, project: dict, req: AuditRequest):
         except Exception as e:
             result["readiness_rating"] = None
             print(f"[rating] erro: {e}")
+
+        # Validação climática via Copernicus C3S (stl1 + swvl1)
+        # Executada sempre que há coordenadas — independente do modo de auditoria
+        try:
+            from backend.copernicus_service import validate_project_soil_conditions
+            project_data_for_c3s = output.get("project_data", cached_project_data or {})
+            if project_data_for_c3s:
+                climate = validate_project_soil_conditions(project_data_for_c3s)
+                result["climate_validation"] = climate
+                print(f"[C3S] status={climate.get('status')} lat={climate.get('lat')} lon={climate.get('lon')}")
+            else:
+                result["climate_validation"] = {"status": "no_project_data"}
+        except Exception as e:
+            result["climate_validation"] = {"status": "error", "message": str(e)}
+            print(f"[C3S] erro: {e}")
 
         _audit_runs[run_id].update({"status": "completed", "result": result})
         _db_execute(

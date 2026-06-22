@@ -238,6 +238,139 @@ function ReadinessRating({ rating }) {
   )
 }
 
+// ── Copernicus C3S Climate Validation card ────────────────────────────────────
+
+const RISK_LABELS = {
+  low:    { label: 'Baixo',    color: 'var(--green)',  bg: 'var(--green-light)' },
+  medium: { label: 'Moderado', color: 'var(--amber)',  bg: 'var(--amber-light)' },
+  high:   { label: 'Alto',     color: 'var(--red)',    bg: 'var(--red-light)'   },
+  fire:   { label: 'Incêndio', color: 'var(--red)',    bg: 'var(--red-light)'   },
+}
+
+function ClimateValidation({ data }) {
+  if (!data || data.status === 'no_project_data' || data.status === 'no_coordinates') {
+    return (
+      <div className="card" style={{ marginBottom: 16, opacity: 0.7 }}>
+        <div className="flex items-center gap-2" style={{ marginBottom: 4 }}>
+          <span style={{ fontSize: 14 }}>🌍</span>
+          <div className="card-title" style={{ marginBottom: 0, fontSize: 12 }}>
+            Validação Climática C3S
+          </div>
+          <span className="badge badge-gray" style={{ fontSize: 10 }}>Copernicus ERA5-Land</span>
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--text-2)' }}>
+          {data?.status === 'no_coordinates'
+            ? 'Coordenadas GPS do projeto não disponíveis. Adicione ao PDD para ativar validação independente.'
+            : 'Validação via satélite disponível após auditoria com dados de projeto.'}
+        </div>
+      </div>
+    )
+  }
+
+  const temp   = data.temperature || {}
+  const moist  = data.moisture    || {}
+  const flags  = data.risk_flags  || []
+  const mRisk  = RISK_LABELS[moist.permanence_risk] || RISK_LABELS.medium
+
+  return (
+    <div className="card" style={{ marginBottom: 16 }}>
+      <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+        <div className="flex items-center gap-2">
+          <span style={{ fontSize: 16 }}>🌍</span>
+          <div className="card-title" style={{ marginBottom: 0 }}>Validação Climática C3S</div>
+          <span className="badge badge-blue" style={{ fontSize: 10 }}>Copernicus ERA5-Land</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {flags.length === 0
+            ? <span className="badge badge-green" style={{ fontSize: 11 }}>✓ Sem alertas</span>
+            : <span className="badge badge-red" style={{ fontSize: 11 }}>⚠ {flags.length} alerta(s)</span>
+          }
+          {data.lat && (
+            <span style={{ fontSize: 10, color: 'var(--text-3)' }}>
+              {data.lat?.toFixed(2)}°, {data.lon?.toFixed(2)}°
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        {/* Temperatura do solo */}
+        <div style={{ background: 'var(--bg-app)', borderRadius: 8, padding: '10px 14px' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-2)',
+            textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 4 }}>
+            🌡 Temperatura do Solo (0-7cm)
+          </div>
+          {temp.c3s_temp != null ? (
+            <>
+              <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--navy)' }}>
+                {temp.c3s_temp?.toFixed(1)}°C
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-2)', marginTop: 2 }}>
+                ERA5-Land C3S · média anual
+              </div>
+              {temp.reported_temp != null && (
+                <div style={{ fontSize: 11, marginTop: 6,
+                  color: temp.status === 'validated' ? 'var(--green)' : 'var(--amber)',
+                  fontWeight: 600 }}>
+                  {temp.status === 'validated' ? '✓' : '⚠'} Reportado: {temp.reported_temp}°C
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{ fontSize: 12, color: 'var(--text-3)' }}>
+              {temp.message || 'Dados não disponíveis'}
+            </div>
+          )}
+        </div>
+
+        {/* Umidade do solo */}
+        <div style={{ background: 'var(--bg-app)', borderRadius: 8, padding: '10px 14px' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-2)',
+            textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 4 }}>
+            💧 Umidade do Solo (0-7cm)
+          </div>
+          {moist.c3s_moisture != null ? (
+            <>
+              <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--navy)' }}>
+                {moist.c3s_moisture?.toFixed(3)}
+                <span style={{ fontSize: 13, fontWeight: 500 }}> m³/m³</span>
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-2)', marginTop: 2 }}>
+                ERA5-Land swvl1 · média anual
+              </div>
+              <div style={{
+                marginTop: 6, display: 'inline-block',
+                padding: '2px 8px', borderRadius: 12,
+                background: mRisk.bg, color: mRisk.color,
+                fontSize: 10, fontWeight: 700,
+              }}>
+                Risco permanência: {mRisk.label}
+              </div>
+            </>
+          ) : (
+            <div style={{ fontSize: 12, color: 'var(--text-3)' }}>
+              {moist.risk_note || 'Dados não disponíveis'}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Risk note */}
+      {moist.risk_note && moist.c3s_moisture != null && (
+        <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-2)',
+          padding: '6px 10px', background: mRisk.bg, borderRadius: 6,
+          borderLeft: `3px solid ${mRisk.color}` }}>
+          {moist.risk_note}
+        </div>
+      )}
+
+      <div style={{ marginTop: 8, fontSize: 10, color: 'var(--text-3)' }}>
+        Fonte: Copernicus Climate Change Service (C3S) · ERA5-Land Monthly Means · independente dos dados reportados pelo projeto
+      </div>
+    </div>
+  )
+}
+
 function ScoreGauge({ score }) {
   const color = score >= 75 ? 'var(--green)' : score >= 50 ? 'var(--amber)' : 'var(--red)'
   return (
@@ -318,11 +451,12 @@ export default function ValidationTab() {
   const selectedProject = projects.find(p => p.id === selectedProjectId)
   const selectedMethodologyMeta = methodologies.find(m => m.key === selectedMethodology)
 
-  const result        = selectedRun?.result || {}
-  const findings      = result.results || result.findings || []
-  const score         = result.score_data?.score ?? result.compliance_score ?? result.score ?? 0
-  const scoreLabel    = result.score_label || ''
+  const result          = selectedRun?.result || {}
+  const findings        = result.results || result.findings || []
+  const score           = result.score_data?.score ?? result.compliance_score ?? result.score ?? 0
+  const scoreLabel      = result.score_label || ''
   const readinessRating = result.readiness_rating || null
+  const climateVal      = result.climate_validation || null
 
   const compliant  = findings.filter(f => ['compliant','Conforme'].includes(f.status)).length
   const partial    = findings.filter(f => ['partial','future_evidence_required','Parcialmente conforme'].includes(f.status)).length
@@ -489,6 +623,9 @@ export default function ValidationTab() {
 
                   {/* ── Project Readiness Rating ── */}
                   <ReadinessRating rating={readinessRating} />
+
+                  {/* ── Copernicus C3S Climate Validation ── */}
+                  <ClimateValidation data={climateVal} />
 
                   {/* ── KPIs ── */}
                   <div className="grid-4" style={{marginBottom:16}}>
