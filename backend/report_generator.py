@@ -538,15 +538,21 @@ def generate_readiness_certificate_pdf(
     story.append(Spacer(1, 0.6*cm))
 
     # ── Grade block ────────────────────────────────────────────────────────────
-    GRADE_W = 4.2*cm
+    # Ajusta font size: 2 caracteres (A+, B+) precisam de fonte menor para caber na caixa
+    GRADE_W     = 4.2*cm
+    grade_fs    = 80 if len(grade) > 1 else 96
+    grade_lead  = grade_fs + 10
     grade_cell = Table([[
-        _p(grade, _style(fontName="Helvetica-Bold", fontSize=96, leading=106,
+        _p(grade, _style(fontName="Helvetica-Bold", fontSize=grade_fs, leading=grade_lead,
                          textColor=_c(grade_fg), alignment=TA_CENTER)),
     ]], colWidths=[GRADE_W], rowHeights=[4.0*cm])
     grade_cell.setStyle(TableStyle([
-        ("BACKGROUND", (0,0),(-1,-1), _c(grade_bg)),
-        ("ALIGN",  (0,0),(-1,-1), "CENTER"), ("VALIGN", (0,0),(-1,-1), "MIDDLE"),
-        ("BOX",    (0,0),(-1,-1), 3, _c(grade_fg)),
+        ("BACKGROUND",    (0,0),(-1,-1), _c(grade_bg)),
+        ("ALIGN",         (0,0),(-1,-1), "CENTER"),
+        ("VALIGN",        (0,0),(-1,-1), "MIDDLE"),
+        ("LEFTPADDING",   (0,0),(-1,-1), 6),
+        ("RIGHTPADDING",  (0,0),(-1,-1), 6),
+        ("BOX",           (0,0),(-1,-1), 3, _c(grade_fg)),
     ]))
 
     verdict = [
