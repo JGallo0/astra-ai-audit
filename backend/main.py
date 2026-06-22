@@ -619,6 +619,32 @@ def export_viabilidade(project_id: str):
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
+# ── Verificação (V&V Support) ──────────────────────────────────────────────────
+
+@app.get("/api/projects/{project_id}/verificacao")
+def get_verificacao(project_id: str, role: str = Query("developer"), methodology: str = Query("isometric")):
+    # Latest completed audit
+    run = _db_fetchone(
+        "SELECT result FROM ca_audit_runs WHERE project_id=%s AND status='completed' ORDER BY created_at DESC LIMIT 1",
+        (project_id,),
+    )
+    if not run:
+        raise HTTPException(404, "Nenhuma auditoria concluída para este projeto. Execute uma auditoria primeiro.")
+    result_raw = run.get("result") or {}
+    if isinstance(result_raw, str):
+        result_raw = json.loads(result_raw)
+    audit_results = result_raw.get("results", result_raw.get("findings", []))
+    if not audit_results:
+        raise HTTPException(404, "Resultado de auditoria sem dados de requisitos.")
+
+    from backend.verificacao_service import build_developer_plan, build_vvb_plan
+
+    if role == "vvb":
+        reqs = _load_requirements(methodology)
+        return build_vvb_plan(reqs, audit_results)
+    else:
+        return build_developer_plan(audit_results)
+
 # ── Dashboard Stats ───────────────────────────────────────────────────────────
 
 @app.get("/api/dashboard/stats")

@@ -6,6 +6,7 @@ import DataRoomTab from './tabs/DataRoomTab'
 import PreViabilidadeTab from './tabs/PreViabilidadeTab'
 import ViabilidadeTab from './tabs/ViabilidadeTab'
 import FinancialLabTab from './tabs/FinancialLabTab'
+import VerificacaoTab from './tabs/VerificacaoTab'
 import StubTab from './tabs/StubTab'
 
 const TAB_MAP = {
@@ -15,7 +16,7 @@ const TAB_MAP = {
   'viabilidade':       { label: 'Viabilidade',        component: ViabilidadeTab },
   'financial-lab':     { label: 'Financial Lab',      component: FinancialLabTab },
   'data-room':         { label: 'Data Room',          component: DataRoomTab },
-  'verificacao':       { label: 'Verificação',        component: () => <StubTab icon="🛡️" title="Verificação" desc="Suporte ao ciclo V&V. Em desenvolvimento." /> },
+  'verificacao':       { label: 'Verificação',        component: VerificacaoTab },
   'doc-filler':        { label: 'Preencher Documento',component: () => <StubTab icon="📝" title="Preencher Documento" desc="Preenchimento automático de PDDs e DPPs. Em desenvolvimento." /> },
   'sheet-filler':      { label: 'Preencher Planilha', component: () => <StubTab icon="📋" title="Preencher Planilha" desc="Automação de planilhas de parâmetros. Em desenvolvimento." /> },
 }
