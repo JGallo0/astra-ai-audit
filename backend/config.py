@@ -38,10 +38,10 @@ METHODOLOGY_REGISTRY = {
         "requirements_module": None,
     },
     "puro_earth": {
-        "label": "Puro.Earth",
-        "version": "v2",
+        "label": "Puro.Earth Biochar",
+        "version": "Edition 2025",
         "vector_store_id": VECTOR_STORE_ID_PURO_EARTH,
-        "requirements_module": None,
+        "requirements_module": "methodology_requirements.puro_biochar_v2025",
     },
     "rainbow": {
         "label": "Rainbow Carbon",

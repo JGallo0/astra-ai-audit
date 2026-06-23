@@ -78,7 +78,11 @@ def _load_requirements(methodology_key: str, engine_version: str = "v1") -> list
         from engine.requirement_logic_map import REQUIREMENT_LOGIC_MAP
         from engine.requirement_logic_map_v1 import REQUIREMENT_LOGIC_MAP_V1
 
-        logic_map = REQUIREMENT_LOGIC_MAP_V1 if engine_version == "v1" else REQUIREMENT_LOGIC_MAP
+        from engine.requirement_logic_map_puro_v2025 import REQUIREMENT_LOGIC_MAP_PURO_V2025
+        if engine_version == "v1":
+            logic_map = REQUIREMENT_LOGIC_MAP_PURO_V2025 if methodology_key == "puro_earth" else REQUIREMENT_LOGIC_MAP_V1
+        else:
+            logic_map = REQUIREMENT_LOGIC_MAP
         raw = get_requirements_for_methodology(methodology_key, engine_version=engine_version)
         requirements = []
         for req in raw:

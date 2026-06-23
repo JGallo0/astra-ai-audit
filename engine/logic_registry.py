@@ -1,4 +1,39 @@
 from engine.requirement_logic_v1 import LOGIC_REGISTRY_V1
+from engine.requirement_logic_puro_v2025 import (
+    eval_puro_protocol_eligibility_v1, eval_puro_project_ownership_v1,
+    eval_puro_technical_description_v1, eval_puro_project_participants_v1,
+    eval_puro_project_locations_v1, eval_puro_removal_capacity_v1,
+    eval_puro_feedstock_eligibility_v1, eval_puro_forest_sustainability_v1,
+    eval_puro_land_clearing_v1, eval_puro_product_quality_v1,
+    eval_puro_non_soil_application_v1,
+    eval_puro_system_boundary_v1, eval_puro_ghg_statement_v1,
+    eval_puro_baseline_v1, eval_puro_leakage_v1, eval_puro_uncertainty_v1,
+    eval_puro_models_v1,
+    eval_puro_financial_additionality_v1, eval_puro_common_practice_additionality_v1,
+    eval_puro_environmental_additionality_v1, eval_puro_regulatory_additionality_v1,
+    eval_puro_durability_selection_v1, eval_puro_durability_demonstration_v1,
+    eval_puro_soil_temp_v1, eval_puro_reversals_v1,
+    eval_puro_data_collection_v1, eval_puro_monitoring_parameters_v1,
+    eval_puro_sampling_procedure_v1,
+    eval_puro_regulatory_compliance_v1, eval_puro_env_social_impact_v1,
+    eval_puro_no_net_env_harm_v1, eval_puro_no_net_social_harm_v1,
+    eval_puro_pollution_prevention_v1, eval_puro_adaptive_management_v1,
+    eval_puro_baseline_soil_v1, eval_puro_soil_quality_monitoring_v1,
+    eval_puro_co_benefits_v1,
+    eval_puro_stakeholder_consultation_v1, eval_puro_grievance_v1,
+    eval_puro_reactor_design_v1, eval_puro_gas_sensors_v1,
+    eval_puro_reactor_material_v1, eval_puro_maintenance_v1,
+    eval_puro_characterization_standards_v1, eval_puro_biochar_chemical_v1,
+    eval_puro_biochar_physical_v1, eval_puro_laboratory_v1,
+    eval_puro_closure_plan_v1, eval_puro_sdg_alignment_v1,
+)
+from engine.requirement_logic_map_puro_v2025 import REQUIREMENT_LOGIC_MAP_PURO_V2025
+
+LOGIC_REGISTRY_PURO_V2025 = {
+    fn_name: globals()[fn_name]
+    for fn_name in REQUIREMENT_LOGIC_MAP_PURO_V2025.values()
+    if fn_name in globals()
+}
 from engine.requirement_logic import (
     adaptive_management_plan,
     biochar_characterization_approach,
@@ -132,7 +167,9 @@ LOGIC_REGISTRY = {
     "sampling_batch_definition": sampling_batch_definition,
     "pyrolysis_gas_end_use_accounting": pyrolysis_gas_end_use_accounting,
     "biochar_incorporation_documentation": biochar_incorporation_documentation,
-    # engine v1 (R-XXXX protocol-native)
+    # engine v1 — Isometric (R-XXXX protocol-native)
     **LOGIC_REGISTRY_V1,
+    # engine v1 — Puro.Earth (P-XXXX protocol-native)
+    **LOGIC_REGISTRY_PURO_V2025,
 }
 

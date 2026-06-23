@@ -11,3 +11,6 @@ frontend/dist/
 # Backend
 backend/.env
 backend/backend/
+
+# Biblioteca de metodologias (PDFs locais, não commitados)
+methodology_library/

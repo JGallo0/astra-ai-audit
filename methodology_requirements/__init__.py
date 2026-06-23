@@ -4,6 +4,7 @@ from methodology_requirements.puro_earth_requirements import PURO_EARTH_REQUIREM
 from methodology_requirements.rainbow_requirements import RAINBOW_REQUIREMENTS
 from methodology_requirements.c_sink_requirements import C_SINK_REQUIREMENTS
 from methodology_requirements.isometric_biochar_v1 import ISOMETRIC_BIOCHAR_V1
+from methodology_requirements.puro_biochar_v2025 import PURO_BIOCHAR_V2025
 
 # ── Legacy registry (ELIG_001 style) — mantido para retrocompatibilidade ────
 _LEGACY_REGISTRY = {
@@ -14,10 +15,10 @@ _LEGACY_REGISTRY = {
     "c_sink":     C_SINK_REQUIREMENTS,
 }
 
-# ── Protocol-native registry (R-XXXX style) — engine v1 ────────────────────
+# ── Protocol-native registry (R-XXXX / P-XXXX style) — engine v1 ───────────
 _V1_REGISTRY = {
-    "isometric": ISOMETRIC_BIOCHAR_V1,
-    # futuras metodologias: "verra_vcs": VERRA_VCS_V1, etc.
+    "isometric":  ISOMETRIC_BIOCHAR_V1,
+    "puro_earth": PURO_BIOCHAR_V2025,
 }
 
 
