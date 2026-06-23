@@ -28,6 +28,27 @@ function getCurrency(code) {
 
 // ── Defaults ─────────────────────────────────────────────────────────────────
 
+// Defaults de CAPEX baseados no projeto Nova Esperança (BCNE)
+export const CAPEX_DEFAULTS = [
+  // Infraestrutura
+  { id: 'terraplanagem',        nome: 'Terraplanagem e drenagem',         valor: 300000,  categoria: 'Infraestrutura' },
+  { id: 'infra_civil',          nome: 'Infraestrutura civil',              valor: 400000,  categoria: 'Infraestrutura' },
+  { id: 'subestacao',           nome: 'Subestação de energia',            valor: 400000,  categoria: 'Infraestrutura' },
+  // Equipamentos
+  { id: 'reator_pirolise',      nome: 'Reator de pirólise',               valor: 2210000, categoria: 'Equipamentos' },
+  { id: 'linha_cominuicao',     nome: 'Linha de cominuição / triturador', valor: 240000,  categoria: 'Equipamentos' },
+  { id: 'secador_biomassa',     nome: 'Secador de biomassa',              valor: 150000,  categoria: 'Equipamentos' },
+  { id: 'frete_seguro',         nome: 'Frete, seguro e sobressalentes',   valor: 312000,  categoria: 'Equipamentos' },
+  { id: 'montagem',             nome: 'Montagem e comissionamento',       valor: 450000,  categoria: 'Equipamentos' },
+  // Intangíveis (Carbono)
+  { id: 'acv_lca',              nome: 'Análise de Ciclo de Vida (ACV)',   valor: 45000,   categoria: 'Intangíveis' },
+  { id: 'mrv_dataroom',         nome: 'Plano de MRV e data room',         valor: 150000,  categoria: 'Intangíveis' },
+  { id: 'auditoria_inicial',    nome: 'Auditoria e certificação inicial', valor: 100000,  categoria: 'Intangíveis' },
+  { id: 'servicos_consultoria', nome: 'Consultoria especializada',        valor: 741000,  categoria: 'Intangíveis' },
+]
+
+const CAPEX_TOTAL_DEFAULT = CAPEX_DEFAULTS.reduce((s, i) => s + i.valor, 0) // 5.498.000
+
 // Defaults de OPEX baseados no projeto Nova Esperança (BCNE, 5.000 t/ano feedstock)
 // Valores de referência auditados — ajustar conforme o projeto
 export const OPEX_DEFAULTS = [
@@ -58,8 +79,10 @@ const DEFAULTS = {
   feedstock_t_ano: 5000, yield_pirolise: 0.28, fator_carbono: 2.5,
   preco_credito_usd: 120, fx_rate: 5.70, preco_biochar: 0,
   escalacao_carbono: 0, escalacao_fx: 0,
-  capex_total: 5500000, opex_anual: OPEX_TOTAL_DEFAULT,
-  opex_breakdown: OPEX_DEFAULTS.map(i => ({ ...i })),
+  capex_total:    CAPEX_TOTAL_DEFAULT,
+  capex_breakdown: CAPEX_DEFAULTS.map(i => ({ ...i })),
+  opex_anual:     OPEX_TOTAL_DEFAULT,
+  opex_breakdown:  OPEX_DEFAULTS.map(i => ({ ...i })),
   escalacao_opex: 0, vida_util_anos: 20,
   wacc: 0.12, aliquota_efetiva_ir: 0.20, horizonte_anos: 20, ano_investimento: 2026,
 }
@@ -155,16 +178,22 @@ function KPICard({ label, value, color, sub }) {
 // ── OPEX Detalhado ────────────────────────────────────────────────────────────
 
 const CATEGORIA_COLORS = {
-  'Energia':      '#2563EB',
-  'Mão de Obra':  '#16A34A',
-  'Logística':    '#D97706',
-  'Manutenção':   '#DC2626',
-  'Conformidade': '#7C3AED',
-  'Materiais':    '#0891B2',
-  'Outros':       '#6B7280',
+  // OPEX
+  'Energia':        '#2563EB',
+  'Mão de Obra':    '#16A34A',
+  'Logística':      '#D97706',
+  'Manutenção':     '#DC2626',
+  'Conformidade':   '#7C3AED',
+  'Materiais':      '#0891B2',
+  // CAPEX
+  'Infraestrutura': '#059669',
+  'Equipamentos':   '#1D4ED8',
+  'Intangíveis':    '#9333EA',
+  // Genérico
+  'Outros':         '#6B7280',
 }
 
-function OpexDetailForm({ breakdown, onChange, symbol }) {
+function CostDetailForm({ breakdown, onChange, symbol, totalLabel = 'Total Anual' }) {
   const total = breakdown.reduce((s, i) => s + (parseFloat(i.valor) || 0), 0)
 
   function updateItem(id, field, value) {
@@ -269,7 +298,7 @@ function OpexDetailForm({ breakdown, onChange, symbol }) {
       {/* Total */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     padding: '8px 12px', background: 'var(--navy-light)', borderRadius: 8 }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--navy)' }}>Total OPEX Anual</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--navy)' }}>{totalLabel}</span>
         <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--navy)' }}>
           {symbol} {total.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
         </span>
@@ -306,6 +335,11 @@ export default function ViabilidadeTab({ project }) {
   function setOpexBreakdown(breakdown) {
     const total = breakdown.reduce((s, i) => s + (parseFloat(i.valor) || 0), 0)
     setForm(prev => ({ ...prev, opex_breakdown: breakdown, opex_anual: total }))
+  }
+
+  function setCapexBreakdown(breakdown) {
+    const total = breakdown.reduce((s, i) => s + (parseFloat(i.valor) || 0), 0)
+    setForm(prev => ({ ...prev, capex_breakdown: breakdown, capex_total: total }))
   }
 
   function handleCurrencyChange(code) {
@@ -503,35 +537,47 @@ export default function ViabilidadeTab({ project }) {
           </div>
 
           <div>
-            {/* Bloco 3 */}
+            {/* Bloco 3 — CAPEX */}
             <div className="card" style={{ marginBottom: 16 }}>
-              <SectionTitle n="3" title="Custos" />
-              <FieldRow name="capex_total" label="CAPEX total" unit={`${moeda.symbol} — investimento inicial`}
-                step={100000} min={0}
-                value={form.capex_total} onChange={setField}
-                warnings={[]} confirmedWarnings={{}} onConfirmWarning={() => {}} />
+              <SectionTitle n="3" title="CAPEX — Investimento Inicial" />
               <FieldRow name="vida_util_anos" label="Vida útil (depreciação)" unit="anos"
                 step={1} min={1}
                 value={form.vida_util_anos} onChange={setField}
                 warnings={[]} confirmedWarnings={{}} onConfirmWarning={() => {}} />
-
-              {/* OPEX Detalhado */}
               <div style={{ marginTop: 8, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>OPEX Detalhado</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-2)' }}>{moeda.symbol}/ano por categoria</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ fontSize: 11, color: 'var(--text-2)' }}>
+                    Ref.: Nova Esperança (BCNE). Ajuste conforme seu projeto.
+                  </span>
                 </div>
-                <OpexDetailForm
-                  breakdown={form.opex_breakdown?.length ? form.opex_breakdown : OPEX_DEFAULTS.map(i => ({ ...i }))}
-                  onChange={setOpexBreakdown}
+                <CostDetailForm
+                  breakdown={form.capex_breakdown?.length ? form.capex_breakdown : CAPEX_DEFAULTS.map(i => ({ ...i }))}
+                  onChange={setCapexBreakdown}
                   symbol={moeda.symbol}
+                  totalLabel="Total CAPEX"
                 />
               </div>
             </div>
 
-            {/* Bloco 4 */}
+            {/* Bloco 3b — OPEX */}
+            <div className="card" style={{ marginBottom: 16 }}>
+              <SectionTitle n="4" title="OPEX — Custos Operacionais Anuais" />
+              <div style={{ marginBottom: 6 }}>
+                <span style={{ fontSize: 11, color: 'var(--text-2)' }}>
+                  Ref.: Nova Esperança (BCNE, ~5.000 t/ano feedstock). Ajuste conforme seu projeto.
+                </span>
+              </div>
+              <CostDetailForm
+                breakdown={form.opex_breakdown?.length ? form.opex_breakdown : OPEX_DEFAULTS.map(i => ({ ...i }))}
+                onChange={setOpexBreakdown}
+                symbol={moeda.symbol}
+                totalLabel="Total OPEX Anual"
+              />
+            </div>
+
+            {/* Bloco 5 — Financeiro */}
             <div className="card">
-              <SectionTitle n="4" title="Financeiro" />
+              <SectionTitle n="5" title="Financeiro" />
               <FieldRow name="wacc" label="WACC / Taxa de desconto" unit="fração (0.12 = 12%)"
                 step={0.005} min={0}
                 value={form.wacc} onChange={setField}

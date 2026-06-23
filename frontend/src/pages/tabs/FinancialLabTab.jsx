@@ -5,7 +5,7 @@ import {
   Tooltip, Legend, ResponsiveContainer, ReferenceLine, Cell, ComposedChart,
   PieChart, Pie,
 } from 'recharts'
-import { OPEX_DEFAULTS } from './ViabilidadeTab'
+import { OPEX_DEFAULTS, CAPEX_DEFAULTS } from './ViabilidadeTab'
 import { AppCtx } from '../../App'
 
 const NAVY  = '#1A3160'
@@ -265,67 +265,76 @@ export default function FinancialLabTab({ project }) {
             ))}
           </div>
 
-          {/* OPEX Donut */}
+          {/* CAPEX + OPEX Donuts */}
           {(() => {
-            const breakdown = form.opex_breakdown?.length ? form.opex_breakdown : OPEX_DEFAULTS
             const CAT_COLORS = {
-              'Energia':      '#2563EB', 'Mão de Obra': '#16A34A', 'Logística': '#D97706',
-              'Manutenção':   '#DC2626', 'Conformidade':'#7C3AED', 'Materiais': '#0891B2',
-              'Outros':       '#6B7280',
+              'Energia':'#2563EB','Mão de Obra':'#16A34A','Logística':'#D97706',
+              'Manutenção':'#DC2626','Conformidade':'#7C3AED','Materiais':'#0891B2',
+              'Infraestrutura':'#059669','Equipamentos':'#1D4ED8','Intangíveis':'#9333EA',
+              'Outros':'#6B7280',
             }
-            // Agrupa por categoria
-            const grouped = {}
-            breakdown.forEach(item => {
-              const cat = item.categoria || 'Outros'
-              grouped[cat] = (grouped[cat] || 0) + (parseFloat(item.valor) || 0)
-            })
-            const pieData = Object.entries(grouped)
-              .filter(([, v]) => v > 0)
-              .map(([name, value]) => ({ name, value }))
-            const total = pieData.reduce((s, d) => s + d.value, 0)
 
-            if (!pieData.length) return null
-            return (
-              <div className="card" style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: NAVY, marginBottom: 4 }}>
-                  Composição do OPEX
-                </div>
-                <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-                  <div style={{ flexShrink: 0 }}>
-                    <PieChart width={180} height={180}>
-                      <Pie data={pieData} cx={85} cy={85} innerRadius={52} outerRadius={80}
-                           dataKey="value" paddingAngle={2}>
-                        {pieData.map((d, i) => (
-                          <Cell key={i} fill={CAT_COLORS[d.name] || '#6B7280'} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(v) => [fmtMoeda(v, cur), '']} />
-                    </PieChart>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    {pieData.map(d => (
-                      <div key={d.name} style={{ display: 'flex', justifyContent: 'space-between',
-                                                  alignItems: 'center', marginBottom: 5 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                          <div style={{ width: 10, height: 10, borderRadius: 2, flexShrink: 0,
-                                        background: CAT_COLORS[d.name] || '#6B7280' }} />
-                          <span style={{ fontSize: 12 }}>{d.name}</span>
+            function buildPie(rawBreakdown) {
+              const grouped = {}
+              rawBreakdown.forEach(item => {
+                const cat = item.categoria || 'Outros'
+                grouped[cat] = (grouped[cat] || 0) + (parseFloat(item.valor) || 0)
+              })
+              return Object.entries(grouped).filter(([,v]) => v > 0).map(([name, value]) => ({ name, value }))
+            }
+
+            function DonutCard({ title, pieData }) {
+              const total = pieData.reduce((s, d) => s + d.value, 0)
+              if (!pieData.length) return null
+              return (
+                <div className="card">
+                  <div style={{ fontSize: 13, fontWeight: 700, color: NAVY, marginBottom: 10 }}>{title}</div>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                    <div style={{ flexShrink: 0 }}>
+                      <PieChart width={150} height={150}>
+                        <Pie data={pieData} cx={70} cy={70} innerRadius={44} outerRadius={68}
+                             dataKey="value" paddingAngle={2}>
+                          {pieData.map((d, i) => <Cell key={i} fill={CAT_COLORS[d.name] || '#6B7280'} />)}
+                        </Pie>
+                        <Tooltip formatter={(v) => [fmtMoeda(v, cur), '']} />
+                      </PieChart>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      {pieData.map(d => (
+                        <div key={d.name} style={{ display:'flex', justifyContent:'space-between',
+                                                    alignItems:'center', marginBottom: 4 }}>
+                          <div style={{ display:'flex', alignItems:'center', gap: 6 }}>
+                            <div style={{ width: 9, height: 9, borderRadius: 2, flexShrink: 0,
+                                          background: CAT_COLORS[d.name] || '#6B7280' }} />
+                            <span style={{ fontSize: 11 }}>{d.name}</span>
+                          </div>
+                          <div style={{ fontSize: 11, textAlign: 'right' }}>
+                            <b>{fmtMoeda(d.value, cur)}</b>
+                            <span style={{ color:'var(--text-2)', marginLeft: 3 }}>
+                              {total > 0 ? `${(d.value/total*100).toFixed(0)}%` : ''}
+                            </span>
+                          </div>
                         </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <span style={{ fontSize: 12, fontWeight: 600 }}>{fmtMoeda(d.value, cur)}</span>
-                          <span style={{ fontSize: 10, color: 'var(--text-2)', marginLeft: 4 }}>
-                            {total > 0 ? `${(d.value / total * 100).toFixed(0)}%` : ''}
-                          </span>
-                        </div>
+                      ))}
+                      <div style={{ borderTop:'1px solid var(--border)', marginTop: 5, paddingTop: 5,
+                                    display:'flex', justifyContent:'space-between' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700 }}>Total</span>
+                        <span style={{ fontSize: 11, fontWeight: 700 }}>{fmtMoeda(total, cur)}</span>
                       </div>
-                    ))}
-                    <div style={{ borderTop: '1px solid var(--border)', marginTop: 6, paddingTop: 6,
-                                  display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: 12, fontWeight: 700 }}>Total</span>
-                      <span style={{ fontSize: 12, fontWeight: 700 }}>{fmtMoeda(total, cur)}</span>
                     </div>
                   </div>
                 </div>
+              )
+            }
+
+            const capexPie = buildPie(form.capex_breakdown?.length ? form.capex_breakdown : CAPEX_DEFAULTS)
+            const opexPie  = buildPie(form.opex_breakdown?.length  ? form.opex_breakdown  : OPEX_DEFAULTS)
+
+            if (!capexPie.length && !opexPie.length) return null
+            return (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                <DonutCard title="Composição do CAPEX" pieData={capexPie} />
+                <DonutCard title="Composição do OPEX"  pieData={opexPie}  />
               </div>
             )
           })()}
