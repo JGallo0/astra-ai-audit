@@ -3,7 +3,9 @@ import axios from 'axios'
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, ReferenceLine, Cell, ComposedChart,
+  PieChart, Pie,
 } from 'recharts'
+import { OPEX_DEFAULTS } from './ViabilidadeTab'
 import { AppCtx } from '../../App'
 
 const NAVY  = '#1A3160'
@@ -262,6 +264,71 @@ export default function FinancialLabTab({ project }) {
               </div>
             ))}
           </div>
+
+          {/* OPEX Donut */}
+          {(() => {
+            const breakdown = form.opex_breakdown?.length ? form.opex_breakdown : OPEX_DEFAULTS
+            const CAT_COLORS = {
+              'Energia':      '#2563EB', 'Mão de Obra': '#16A34A', 'Logística': '#D97706',
+              'Manutenção':   '#DC2626', 'Conformidade':'#7C3AED', 'Materiais': '#0891B2',
+              'Outros':       '#6B7280',
+            }
+            // Agrupa por categoria
+            const grouped = {}
+            breakdown.forEach(item => {
+              const cat = item.categoria || 'Outros'
+              grouped[cat] = (grouped[cat] || 0) + (parseFloat(item.valor) || 0)
+            })
+            const pieData = Object.entries(grouped)
+              .filter(([, v]) => v > 0)
+              .map(([name, value]) => ({ name, value }))
+            const total = pieData.reduce((s, d) => s + d.value, 0)
+
+            if (!pieData.length) return null
+            return (
+              <div className="card" style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: NAVY, marginBottom: 4 }}>
+                  Composição do OPEX
+                </div>
+                <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                  <div style={{ flexShrink: 0 }}>
+                    <PieChart width={180} height={180}>
+                      <Pie data={pieData} cx={85} cy={85} innerRadius={52} outerRadius={80}
+                           dataKey="value" paddingAngle={2}>
+                        {pieData.map((d, i) => (
+                          <Cell key={i} fill={CAT_COLORS[d.name] || '#6B7280'} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(v) => [fmtMoeda(v, cur), '']} />
+                    </PieChart>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    {pieData.map(d => (
+                      <div key={d.name} style={{ display: 'flex', justifyContent: 'space-between',
+                                                  alignItems: 'center', marginBottom: 5 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                          <div style={{ width: 10, height: 10, borderRadius: 2, flexShrink: 0,
+                                        background: CAT_COLORS[d.name] || '#6B7280' }} />
+                          <span style={{ fontSize: 12 }}>{d.name}</span>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <span style={{ fontSize: 12, fontWeight: 600 }}>{fmtMoeda(d.value, cur)}</span>
+                          <span style={{ fontSize: 10, color: 'var(--text-2)', marginLeft: 4 }}>
+                            {total > 0 ? `${(d.value / total * 100).toFixed(0)}%` : ''}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                    <div style={{ borderTop: '1px solid var(--border)', marginTop: 6, paddingTop: 6,
+                                  display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: 12, fontWeight: 700 }}>Total</span>
+                      <span style={{ fontSize: 12, fontWeight: 700 }}>{fmtMoeda(total, cur)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
 
           {/* Tornado */}
           {(r.tornado || []).length > 0 && (

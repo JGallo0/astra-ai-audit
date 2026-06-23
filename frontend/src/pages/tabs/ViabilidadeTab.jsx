@@ -28,12 +28,39 @@ function getCurrency(code) {
 
 // ── Defaults ─────────────────────────────────────────────────────────────────
 
+// Defaults de OPEX baseados no projeto Nova Esperança (BCNE, 5.000 t/ano feedstock)
+// Valores de referência auditados — ajustar conforme o projeto
+export const OPEX_DEFAULTS = [
+  // Energia
+  { id: 'energia_eletrica_var', nome: 'Energia elétrica (variável)',    valor: 624000, categoria: 'Energia' },
+  { id: 'demanda_contratada',   nome: 'Demanda elétrica contratada',    valor: 129000, categoria: 'Energia' },
+  { id: 'diesel_startup',       nome: 'Diesel / startup reator',        valor: 19700,  categoria: 'Energia' },
+  // Mão de Obra
+  { id: 'mao_de_obra',          nome: 'Mão de obra operacional',        valor: 355000, categoria: 'Mão de Obra' },
+  // Logística
+  { id: 'logistica_coleta',     nome: 'Coleta de feedstock',            valor: 142000, categoria: 'Logística' },
+  { id: 'logistica_transporte', nome: 'Transporte de feedstock',        valor: 237000, categoria: 'Logística' },
+  // Manutenção
+  { id: 'manutencao_reator',    nome: 'O&M do reator e equipamentos',   valor: 22000,  categoria: 'Manutenção' },
+  // Conformidade (carbono)
+  { id: 'auditoria',            nome: 'Auditoria e verificação',         valor: 100000, categoria: 'Conformidade' },
+  { id: 'lca_mrv',              nome: 'LCA / MRV anual',                valor: 35000,  categoria: 'Conformidade' },
+  { id: 'treinamento',          nome: 'Treinamento e outros fixos',      valor: 10000,  categoria: 'Conformidade' },
+  // Materiais
+  { id: 'bigbag_embalagem',     nome: 'Big bags e embalagem',           valor: 25000,  categoria: 'Materiais' },
+  { id: 'material_lab',         nome: 'Material de laboratório',         valor: 36000,  categoria: 'Materiais' },
+]
+
+const OPEX_TOTAL_DEFAULT = OPEX_DEFAULTS.reduce((s, i) => s + i.valor, 0) // ~1.734.700
+
 const DEFAULTS = {
   moeda_projeto: 'BRL', moeda_credito: 'USD',
   feedstock_t_ano: 5000, yield_pirolise: 0.28, fator_carbono: 2.5,
   preco_credito_usd: 120, fx_rate: 5.70, preco_biochar: 0,
   escalacao_carbono: 0, escalacao_fx: 0,
-  capex_total: 5500000, opex_anual: 1200000, escalacao_opex: 0, vida_util_anos: 20,
+  capex_total: 5500000, opex_anual: OPEX_TOTAL_DEFAULT,
+  opex_breakdown: OPEX_DEFAULTS.map(i => ({ ...i })),
+  escalacao_opex: 0, vida_util_anos: 20,
   wacc: 0.12, aliquota_efetiva_ir: 0.20, horizonte_anos: 20, ano_investimento: 2026,
 }
 
@@ -125,6 +152,132 @@ function KPICard({ label, value, color, sub }) {
   )
 }
 
+// ── OPEX Detalhado ────────────────────────────────────────────────────────────
+
+const CATEGORIA_COLORS = {
+  'Energia':      '#2563EB',
+  'Mão de Obra':  '#16A34A',
+  'Logística':    '#D97706',
+  'Manutenção':   '#DC2626',
+  'Conformidade': '#7C3AED',
+  'Materiais':    '#0891B2',
+  'Outros':       '#6B7280',
+}
+
+function OpexDetailForm({ breakdown, onChange, symbol }) {
+  const total = breakdown.reduce((s, i) => s + (parseFloat(i.valor) || 0), 0)
+
+  function updateItem(id, field, value) {
+    const updated = breakdown.map(item =>
+      item.id === id ? { ...item, [field]: field === 'valor' ? parseFloat(value) || 0 : value } : item
+    )
+    onChange(updated)
+  }
+
+  function removeItem(id) {
+    onChange(breakdown.filter(i => i.id !== id))
+  }
+
+  function addCustom() {
+    const newItem = {
+      id:        `custom_${Date.now()}`,
+      nome:      '',
+      valor:     0,
+      categoria: 'Outros',
+    }
+    onChange([...breakdown, newItem])
+  }
+
+  // Agrupa por categoria mantendo ordem de aparição
+  const categories = []
+  const seen = new Set()
+  breakdown.forEach(item => {
+    if (!seen.has(item.categoria)) {
+      seen.add(item.categoria)
+      categories.push(item.categoria)
+    }
+  })
+
+  return (
+    <div>
+      <div style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 10, lineHeight: 1.4 }}>
+        Valores de referência: Projeto Nova Esperança (biochar ~5.000 t/ano feedstock). Ajuste conforme seu projeto.
+      </div>
+
+      {categories.map(cat => {
+        const items = breakdown.filter(i => i.categoria === cat)
+        const catColor = CATEGORIA_COLORS[cat] || '#6B7280'
+        const catTotal = items.reduce((s, i) => s + (parseFloat(i.valor) || 0), 0)
+
+        return (
+          <div key={cat} style={{ marginBottom: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between',
+                          padding: '4px 8px', background: catColor + '15',
+                          borderLeft: `3px solid ${catColor}`, marginBottom: 4, borderRadius: '0 4px 4px 0' }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: catColor }}>{cat}</span>
+              <span style={{ fontSize: 11, color: catColor }}>
+                {symbol} {catTotal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+              </span>
+            </div>
+
+            {items.map(item => (
+              <div key={item.id} style={{ display: 'flex', gap: 6, alignItems: 'center',
+                                          marginBottom: 4, paddingLeft: 8 }}>
+                {/* Nome — editável apenas para customizados */}
+                {item.id.startsWith('custom_') ? (
+                  <input
+                    value={item.nome}
+                    onChange={e => updateItem(item.id, 'nome', e.target.value)}
+                    placeholder="Nome do custo"
+                    style={{ flex: 1, fontSize: 12, padding: '4px 8px',
+                             border: '1px solid var(--border)', borderRadius: 5 }}
+                  />
+                ) : (
+                  <span style={{ flex: 1, fontSize: 12, color: 'var(--text)' }}>{item.nome}</span>
+                )}
+                {/* Valor */}
+                <input
+                  type="number"
+                  value={item.valor}
+                  min={0}
+                  step={1000}
+                  onChange={e => updateItem(item.id, 'valor', e.target.value)}
+                  style={{ width: 110, fontSize: 12, padding: '4px 8px', textAlign: 'right',
+                           border: '1px solid var(--border)', borderRadius: 5 }}
+                />
+                {/* Remover (sempre disponível) */}
+                <button onClick={() => removeItem(item.id)}
+                  style={{ border: 'none', background: 'none', cursor: 'pointer',
+                           color: '#9CA3AF', fontSize: 15, lineHeight: 1, padding: '0 2px' }}>
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )
+      })}
+
+      {/* Adicionar linha */}
+      <button onClick={addCustom} style={{
+        width: '100%', padding: '6px 0', marginTop: 4, marginBottom: 12,
+        border: '1px dashed #9CA3AF', borderRadius: 6, background: 'transparent',
+        cursor: 'pointer', fontSize: 12, color: '#6B7280',
+      }}>
+        + Adicionar linha de custo
+      </button>
+
+      {/* Total */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '8px 12px', background: 'var(--navy-light)', borderRadius: 8 }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--navy)' }}>Total OPEX Anual</span>
+        <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--navy)' }}>
+          {symbol} {total.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+        </span>
+      </div>
+    </div>
+  )
+}
+
 // ── Componente principal ──────────────────────────────────────────────────────
 
 export default function ViabilidadeTab({ project }) {
@@ -148,6 +301,11 @@ export default function ViabilidadeTab({ project }) {
   function setField(name, value) {
     setForm(prev => ({ ...prev, [name]: value }))
     setConfirmedWarnings(prev => { const n = { ...prev }; delete n[name]; return n })
+  }
+
+  function setOpexBreakdown(breakdown) {
+    const total = breakdown.reduce((s, i) => s + (parseFloat(i.valor) || 0), 0)
+    setForm(prev => ({ ...prev, opex_breakdown: breakdown, opex_anual: total }))
   }
 
   function handleCurrencyChange(code) {
@@ -352,14 +510,23 @@ export default function ViabilidadeTab({ project }) {
                 step={100000} min={0}
                 value={form.capex_total} onChange={setField}
                 warnings={[]} confirmedWarnings={{}} onConfirmWarning={() => {}} />
-              <FieldRow name="opex_anual" label="OPEX anual" unit={`${moeda.symbol}/ano — custos operacionais`}
-                step={50000} min={0}
-                value={form.opex_anual} onChange={setField}
-                warnings={[]} confirmedWarnings={{}} onConfirmWarning={() => {}} />
               <FieldRow name="vida_util_anos" label="Vida útil (depreciação)" unit="anos"
                 step={1} min={1}
                 value={form.vida_util_anos} onChange={setField}
                 warnings={[]} confirmedWarnings={{}} onConfirmWarning={() => {}} />
+
+              {/* OPEX Detalhado */}
+              <div style={{ marginTop: 8, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>OPEX Detalhado</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-2)' }}>{moeda.symbol}/ano por categoria</span>
+                </div>
+                <OpexDetailForm
+                  breakdown={form.opex_breakdown?.length ? form.opex_breakdown : OPEX_DEFAULTS.map(i => ({ ...i }))}
+                  onChange={setOpexBreakdown}
+                  symbol={moeda.symbol}
+                />
+              </div>
             </div>
 
             {/* Bloco 4 */}
