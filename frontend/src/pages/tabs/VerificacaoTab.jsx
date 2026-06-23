@@ -76,7 +76,7 @@ function PriorityGroup({ icon, color, bg, label, items, defaultOpen = false }) {
                   )}
                   {item.upcoming_note && (
                     <div style={{ fontSize: 12, color: BLUE, fontStyle: 'italic' }}>
-                      ℹ {item.upcoming_note}
+                      ℹ Evidência operacional — preparar documentação antes da vistoria.
                     </div>
                   )}
                 </div>
@@ -140,7 +140,7 @@ function DeveloperView({ data }) {
       <PriorityGroup icon="🟡" color={AMBER} bg="#FFFBEB" label="Atenção — fortalecer evidências"
         items={attention} defaultOpen={true} />
       <PriorityGroup icon="🔵" color={BLUE} bg="#EFF6FF"
-        label="Checklist Pré-VVB — o que o verificador irá solicitar em operação"
+        label="Requisitos Operacionais — preparar evidências antes da vistoria"
         items={operational_upcoming} defaultOpen={false} />
     </div>
   )
@@ -163,12 +163,6 @@ function VVBModuleCard({ module }) {
           <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>{module.vvb_context}</div>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-          {module.operational_only_count > 0 && (
-            <span style={{ fontSize: 11, color: BLUE, background: '#EFF6FF',
-                           padding: '2px 8px', borderRadius: 10 }}>
-              {module.operational_only_count} op. only
-            </span>
-          )}
           <span style={{ color: '#6B7280', fontSize: 12 }}>{open ? '▲' : '▼'}</span>
         </div>
       </button>
@@ -217,7 +211,7 @@ function VVBModuleCard({ module }) {
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#6B7280',
                           textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
-              Requisitos Isometric — {module.req_count} total
+              Requisitos ({module.req_count})
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               {module.requirements.map(req => (
@@ -233,10 +227,7 @@ function VVBModuleCard({ module }) {
                   </a>
                   <span style={{ fontSize: 12, flex: 1 }}>{req.title}</span>
                   <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                    {req.is_operational_only && (
-                      <span style={{ fontSize: 10, color: BLUE, fontWeight: 700 }}>OP.ONLY</span>
-                    )}
-                    {req.dev_audit_status && <Badge status={req.dev_audit_status} />}
+                          {req.dev_audit_status && <Badge status={req.dev_audit_status} />}
                   </div>
                 </div>
               ))}
@@ -259,18 +250,14 @@ function VVBView({ data }) {
               Checklist Pré-VVB — {data.methodology}
             </div>
             <div style={{ fontSize: 13, color: '#6B7280', lineHeight: 1.5 }}>
-              Itens de inspeção presencial e documentos a preparar antes da vistoria do verificador independente.
-              Requisitos <b style={{ color: BLUE }}>OP.ONLY</b> são exigidos apenas em projetos operacionais.
+              Itens de inspeção presencial e documentos a preparar antes da vistoria.
+              Todos os {data.total_requirements} requisitos são aplicáveis — verificação pressupõe projeto operacional.
             </div>
           </div>
           <div style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 22, fontWeight: 800, color: NAVY }}>{data.total_requirements}</div>
               <div style={{ fontSize: 11, color: '#6B7280' }}>Requisitos</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 22, fontWeight: 800, color: BLUE }}>{data.operational_only_count}</div>
-              <div style={{ fontSize: 11, color: '#6B7280' }}>Op. only</div>
             </div>
           </div>
         </div>
