@@ -81,20 +81,47 @@ export default function FinancialLabTab({ project }) {
   const [base, setBase]         = useState(null)   // premissas salvas
   const [form, setForm]         = useState(null)   // premissas editáveis (sliders)
   const [resultado, setResultado] = useState(null)
-  const [loading, setLoading]   = useState(true)
+  const [loading, setLoading]       = useState(true)
   const [calculating, setCalculating] = useState(false)
   const debounceRef = useRef(null)
+  const [cenarios, setCenarios]     = useState([])
+  const [saveModal, setSaveModal]   = useState(false)
+  const [saveName, setSaveName]     = useState('')
+  const [savingCenario, setSavingCenario] = useState(false)
 
-  // Carrega viabilidade salva
+  // Carrega viabilidade + cenários salvos
   useEffect(() => {
-    axios.get(`${API}/api/projects/${project.id}/viabilidade`).then(r => {
-      if (r.data.premissas && r.data.resultado) {
-        setBase(r.data.premissas)
-        setForm(r.data.premissas)
-        setResultado(r.data.resultado)
+    Promise.all([
+      axios.get(`${API}/api/projects/${project.id}/viabilidade`),
+      axios.get(`${API}/api/projects/${project.id}/viabilidade/cenarios`).catch(() => ({ data: [] })),
+    ]).then(([v, c]) => {
+      if (v.data.premissas && v.data.resultado) {
+        setBase(v.data.premissas)
+        setForm(v.data.premissas)
+        setResultado(v.data.resultado)
       }
+      setCenarios(c.data || [])
     }).finally(() => setLoading(false))
   }, [project.id])
+
+  async function handleSaveCenario() {
+    if (!saveName.trim() || !form || !resultado) return
+    setSavingCenario(true)
+    try {
+      await axios.post(`${API}/api/projects/${project.id}/viabilidade/cenarios`, {
+        nome: saveName.trim(), premissas: form, resultado,
+      })
+      const r = await axios.get(`${API}/api/projects/${project.id}/viabilidade/cenarios`)
+      setCenarios(r.data || [])
+      setSaveModal(false); setSaveName('')
+    } catch { /* silent */ }
+    finally { setSavingCenario(false) }
+  }
+
+  async function handleDeleteCenario(nome) {
+    await axios.delete(`${API}/api/projects/${project.id}/viabilidade/cenarios/${encodeURIComponent(nome)}`)
+    setCenarios(prev => prev.filter(c => c.nome !== nome))
+  }
 
   // Recalcula com debounce quando form muda
   const recalculate = useCallback(async (premissas) => {
@@ -167,15 +194,23 @@ export default function FinancialLabTab({ project }) {
             Ajuste os parâmetros — os indicadores atualizam automaticamente
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           {calculating && <span style={{ fontSize: 12, color: AMBER }}>⟳ Calculando…</span>}
           <button className="btn btn-sm btn-outline"
             onClick={() => { setForm(base); recalculate(base) }}>
-            ↺ Restaurar base
+            ↺ Base
+          </button>
+          <button className="btn btn-sm btn-outline"
+            onClick={() => { setSaveName(''); setSaveModal(true) }}>
+            💾 Salvar cenário
+          </button>
+          <button className="btn btn-sm btn-outline"
+            onClick={() => window.open(`${API}/api/projects/${project.id}/viabilidade/memo`, '_blank')}>
+            📄 Memo PDF
           </button>
           <button className="btn btn-sm btn-outline"
             onClick={() => window.open(`${API}/api/projects/${project.id}/viabilidade/export`, '_blank')}>
-            ⬇ Exportar Excel
+            ⬇ Excel
           </button>
         </div>
       </div>
@@ -196,6 +231,12 @@ export default function FinancialLabTab({ project }) {
             <Slider label={`Preço biochar (${CURRENCY_SYMBOLS[cur] || cur}/t)`} name="preco_biochar"
               value={form.preco_biochar} min={0} max={3000} step={50}
               fmt={v => `${CURRENCY_SYMBOLS[cur] || cur}${v}`} onChange={setField} />
+            <Slider label="Delay emissão créditos" name="issuance_delay_months"
+              value={form.issuance_delay_months ?? 0} min={0} max={18} step={1}
+              fmt={v => v > 0 ? `${v} meses` : 'Sem delay'} onChange={setField} />
+            <Slider label="Buffer pool (retido)" name="buffer_pool_pct"
+              value={form.buffer_pool_pct ?? 0} min={0} max={0.10} step={0.005}
+              fmt={v => `${(v * 100).toFixed(1)}%`} onChange={setField} />
           </div>
 
           <div className="card" style={{ marginBottom: 12 }}>
@@ -210,6 +251,36 @@ export default function FinancialLabTab({ project }) {
             <Slider label="Fator carbono (tCO₂/t)" name="fator_carbono"
               value={form.fator_carbono} min={1.0} max={4.0} step={0.05}
               fmt={v => v?.toFixed(2) ?? '—'} onChange={setField} />
+          </div>
+
+          <div className="card" style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-2)', marginBottom: 12,
+                          textTransform: 'uppercase', letterSpacing: 1 }}>Ramp-up de Produção</div>
+            <Slider label="Capacidade Ano 1" name="rampup_ano1"
+              value={form.rampup_ano1 ?? 1} min={0.1} max={1} step={0.05}
+              fmt={v => `${(v * 100).toFixed(0)}%`} onChange={setField} />
+            <Slider label="Capacidade Ano 2" name="rampup_ano2"
+              value={form.rampup_ano2 ?? 1} min={0.1} max={1} step={0.05}
+              fmt={v => `${(v * 100).toFixed(0)}%`} onChange={setField} />
+            <Slider label="Capacidade Ano 3" name="rampup_ano3"
+              value={form.rampup_ano3 ?? 1} min={0.5} max={1} step={0.05}
+              fmt={v => `${(v * 100).toFixed(0)}%`} onChange={setField} />
+          </div>
+
+          <div className="card" style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-2)', marginBottom: 12,
+                          textTransform: 'uppercase', letterSpacing: 1 }}>Estrutura de Capital</div>
+            <Slider label="% CAPEX financiado (dívida)" name="financiamento_pct"
+              value={form.financiamento_pct ?? 0} min={0} max={0.80} step={0.05}
+              fmt={v => v > 0 ? `${(v * 100).toFixed(0)}%` : 'Sem dívida'} onChange={setField} />
+            {(form.financiamento_pct || 0) > 0 && <>
+              <Slider label="Taxa de juros" name="taxa_juros"
+                value={form.taxa_juros ?? 0.12} min={0.05} max={0.25} step={0.005}
+                fmt={v => `${(v * 100).toFixed(1)}% a.a.`} onChange={setField} />
+              <Slider label="Prazo do financiamento" name="prazo_financiamento"
+                value={form.prazo_financiamento ?? 10} min={3} max={20} step={1}
+                fmt={v => `${v} anos`} onChange={setField} />
+            </>}
           </div>
 
           <div className="card">
@@ -232,13 +303,41 @@ export default function FinancialLabTab({ project }) {
 
         {/* ── Painel de resultados ──────────────────────────────────────── */}
         <div>
+          {/* Modal salvar cenário */}
+          {saveModal && (
+            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 1000,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ background: 'white', borderRadius: 12, padding: 24, width: 360,
+                            boxShadow: '0 8px 32px rgba(0,0,0,.2)' }}>
+                <div style={{ fontSize: 16, fontWeight: 700, color: NAVY, marginBottom: 14 }}>
+                  💾 Salvar cenário
+                </div>
+                <input autoFocus value={saveName} onChange={e => setSaveName(e.target.value)}
+                  placeholder="Nome do cenário (ex: Otimista, Base…)"
+                  onKeyDown={e => e.key === 'Enter' && handleSaveCenario()}
+                  style={{ width: '100%', padding: '8px 12px', fontSize: 14, borderRadius: 7,
+                           border: '1px solid var(--border)', marginBottom: 14, boxSizing: 'border-box' }} />
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button className="btn btn-outline" style={{ flex: 1 }}
+                    onClick={() => setSaveModal(false)}>Cancelar</button>
+                  <button className="btn btn-primary" style={{ flex: 1 }}
+                    onClick={handleSaveCenario} disabled={savingCenario || !saveName.trim()}>
+                    {savingCenario ? '⟳' : 'Salvar'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* KPI row — financeiros */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 10 }}>
             {[
-              { label: 'TIR', value: irr != null ? `${irr.toFixed(1)}%` : '—', color: irrColor, sub: `WACC ${wacc_pct.toFixed(0)}%` },
+              { label: 'TIR Projeto', value: irr != null ? `${irr.toFixed(1)}%` : '—', color: irrColor, sub: `WACC ${wacc_pct.toFixed(0)}%` },
+              { label: 'TIR Equity', value: r.irr_equity != null ? `${r.irr_equity.toFixed(1)}%` : (form.financiamento_pct > 0 ? '—' : 'N/A'),
+                color: r.irr_equity != null ? (r.irr_equity >= wacc_pct ? GREEN : RED) : AMBER,
+                sub: form.financiamento_pct > 0 ? `${(form.financiamento_pct*100).toFixed(0)}% dívida` : 'Sem alavancagem' },
               { label: 'VPL', value: fmtMoeda(r.npv, cur), color: (r.npv || 0) >= 0 ? GREEN : RED },
-              { label: 'Payback', value: r.payback_year || 'N/A' },
-              { label: 'EBITDA Ano 1', value: fmtMoeda(r.ebitda_yr1, cur), sub: r.margem_ebitda_pct != null ? `${r.margem_ebitda_pct.toFixed(0)}% margem` : '' },
+              { label: 'Payback', value: r.payback_year || 'N/A', sub: fmtMoeda(r.ebitda_yr1, cur) + ' EBITDA yr1' },
             ].map(k => (
               <div key={k.label} style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px' }}>
                 <div style={{ fontSize: 20, fontWeight: 800, color: k.color || NAVY }}>{k.value}</div>
@@ -338,6 +437,67 @@ export default function FinancialLabTab({ project }) {
               </div>
             )
           })()}
+
+          {/* Cenários Comparativos */}
+          {cenarios.length > 0 && (
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
+                  Comparativo de Cenários ({cenarios.length})
+                </div>
+              </div>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                  <thead>
+                    <tr style={{ background: NAVY, color: 'white' }}>
+                      {['Cenário','TIR','TIR Equity','VPL','Payback','Preço $','OPEX','CAPEX',''].map(h => (
+                        <th key={h} style={{ padding: '6px 8px', textAlign: h === 'Cenário' ? 'left' : 'center',
+                                             fontWeight: 600, fontSize: 11 }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cenarios.map(c => {
+                      const cr = c.resultado || {}; const cp = c.premissas || {}
+                      const cirr = cr.irr; const ceq = cr.irr_equity
+                      const sym_c = CURRENCY_SYMBOLS[cp.moeda_projeto || 'BRL'] || cp.moeda_projeto || 'R$'
+                      const fmtC = (v) => {
+                        if (v == null) return '—'
+                        const abs = Math.abs(v)
+                        return `${v < 0 ? '-' : ''}${sym_c}${abs >= 1e6 ? (abs/1e6).toFixed(1)+'M' : abs >= 1000 ? (abs/1000).toFixed(0)+'k' : abs}`
+                      }
+                      return (
+                        <tr key={c.nome} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                          <td style={{ padding: '6px 8px', fontWeight: 600 }}>{c.nome}</td>
+                          <td style={{ padding: '6px 8px', textAlign: 'center', fontWeight: 700,
+                                       color: cirr != null ? (cirr >= wacc_pct ? GREEN : RED) : AMBER }}>
+                            {cirr != null ? `${cirr.toFixed(1)}%` : '—'}
+                          </td>
+                          <td style={{ padding: '6px 8px', textAlign: 'center',
+                                       color: ceq != null ? (ceq >= wacc_pct ? GREEN : RED) : '#9CA3AF' }}>
+                            {ceq != null ? `${ceq.toFixed(1)}%` : cp.financiamento_pct > 0 ? '—' : 'N/A'}
+                          </td>
+                          <td style={{ padding: '6px 8px', textAlign: 'center',
+                                       color: (cr.npv || 0) >= 0 ? GREEN : RED }}>
+                            {fmtC(cr.npv)}
+                          </td>
+                          <td style={{ padding: '6px 8px', textAlign: 'center' }}>{cr.payback_year || '—'}</td>
+                          <td style={{ padding: '6px 8px', textAlign: 'center' }}>${cp.preco_credito_usd || '—'}</td>
+                          <td style={{ padding: '6px 8px', textAlign: 'center' }}>{fmtC(cp.opex_anual)}</td>
+                          <td style={{ padding: '6px 8px', textAlign: 'center' }}>{fmtC(cp.capex_total)}</td>
+                          <td style={{ padding: '4px' }}>
+                            <button onClick={() => handleDeleteCenario(c.nome)}
+                              style={{ border: 'none', background: 'none', cursor: 'pointer',
+                                       color: '#9CA3AF', fontSize: 14, lineHeight: 1 }}>×</button>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {/* Tornado */}
           {(r.tornado || []).length > 0 && (

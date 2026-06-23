@@ -553,9 +553,11 @@ def _create_viabilidade_table():
                 premissas  JSONB,
                 resultado  JSONB,
                 fonte      TEXT,
+                cenarios   JSONB DEFAULT '[]',
                 updated_at TIMESTAMPTZ DEFAULT now()
             )
         """)
+        _db_execute("ALTER TABLE ca_viabilidade ADD COLUMN IF NOT EXISTS cenarios JSONB DEFAULT '[]'")
     except Exception:
         pass
 
@@ -599,6 +601,69 @@ async def extract_viabilidade(project_id: str, file: UploadFile = File(...)):
     from backend.viabilidade_engine import validate_premissas
     warnings = validate_premissas(extracted)
     return {"extracted": extracted, "warnings": warnings}
+
+@app.get("/api/projects/{project_id}/viabilidade/cenarios")
+def list_cenarios(project_id: str):
+    row = _db_fetchone("SELECT cenarios FROM ca_viabilidade WHERE project_id=%s", (project_id,))
+    raw = (row or {}).get("cenarios") or []
+    if isinstance(raw, str):
+        try: raw = json.loads(raw)
+        except: raw = []
+    return raw
+
+@app.post("/api/projects/{project_id}/viabilidade/cenarios")
+def save_cenario(project_id: str, body: dict):
+    row = _db_fetchone("SELECT cenarios FROM ca_viabilidade WHERE project_id=%s", (project_id,))
+    if not row:
+        raise HTTPException(404, "Calcule a viabilidade antes de salvar um cenário.")
+    raw = row.get("cenarios") or []
+    if isinstance(raw, str):
+        try: raw = json.loads(raw)
+        except: raw = []
+    cenarios = [c for c in raw if c.get("nome") != body.get("nome")]
+    cenarios.append({
+        "nome":      body.get("nome", "Cenário"),
+        "premissas": body.get("premissas", {}),
+        "resultado": body.get("resultado", {}),
+        "created_at": _now(),
+    })
+    _db_execute(
+        "UPDATE ca_viabilidade SET cenarios=%s WHERE project_id=%s",
+        (json.dumps(cenarios, default=str), project_id),
+    )
+    return {"ok": True, "total": len(cenarios)}
+
+@app.delete("/api/projects/{project_id}/viabilidade/cenarios/{nome}")
+def delete_cenario(project_id: str, nome: str):
+    row = _db_fetchone("SELECT cenarios FROM ca_viabilidade WHERE project_id=%s", (project_id,))
+    raw = (row or {}).get("cenarios") or []
+    if isinstance(raw, str):
+        try: raw = json.loads(raw)
+        except: raw = []
+    cenarios = [c for c in raw if c.get("nome") != nome]
+    _db_execute(
+        "UPDATE ca_viabilidade SET cenarios=%s WHERE project_id=%s",
+        (json.dumps(cenarios, default=str), project_id),
+    )
+    return {"ok": True}
+
+@app.get("/api/projects/{project_id}/viabilidade/memo")
+def download_memo(project_id: str):
+    row = _db_fetchone("SELECT * FROM ca_viabilidade WHERE project_id=%s", (project_id,))
+    if not row:
+        raise HTTPException(404, "Viabilidade não calculada para este projeto.")
+    premissas = row.get("premissas") or {}
+    resultado  = row.get("resultado") or {}
+    if isinstance(premissas, str): premissas = json.loads(premissas)
+    if isinstance(resultado, str):  resultado  = json.loads(resultado)
+    proj = _db_fetchone("SELECT name FROM ca_projects WHERE id=%s", (project_id,))
+    proj_name = (proj or {}).get("name", "Projeto")
+    from backend.viabilidade_service import generate_financial_memo_pdf
+    buf = generate_financial_memo_pdf(premissas, resultado, proj_name)
+    return StreamingResponse(
+        io.BytesIO(buf), media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="memo_{project_id[:8]}.pdf"'},
+    )
 
 @app.get("/api/projects/{project_id}/viabilidade/export")
 def export_viabilidade(project_id: str):

@@ -401,3 +401,306 @@ def generate_viabilidade_excel(premissas: dict, resultado: dict, project_name: s
     buf = io.BytesIO()
     wb.save(buf)
     return buf.getvalue()
+
+
+# ── Memo Financeiro PDF ───────────────────────────────────────────────────────
+
+def generate_financial_memo_pdf(premissas: dict, resultado: dict, project_name: str) -> bytes:
+    """
+    Memo financeiro executivo — 2 páginas, para apresentação a investidores.
+    Usa ReportLab com o mesmo design system dos outros PDFs do Co2mply.
+    """
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib.units import cm
+    from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
+    from reportlab.platypus import (
+        SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
+        HRFlowable, KeepTogether,
+    )
+    import os
+
+    NAVY   = "#1A3160"; NAVY_L = "#EEF2FA"
+    GREEN  = "#16A34A"; GREEN_B = "#F0FDF4"
+    AMBER  = "#B45309"; AMBER_B = "#FFFBEB"
+    RED    = "#DC2626"; RED_B   = "#FEF2F2"
+    GRAY   = "#6B7280"; BORDER  = "#E5E7EB"
+    TEXT   = "#111827"; TEXT2   = "#6B7280"
+    WHITE  = "#FFFFFF"
+
+    def _c(h): return colors.HexColor(h)
+    def _p(text, **kw):
+        base = dict(fontName="Helvetica", fontSize=9, leading=12, textColor=_c(TEXT))
+        base.update(kw)
+        return Paragraph(text, ParagraphStyle("s", **base))
+    def _s(n=0.3): return Spacer(1, n * cm)
+
+    PAGE_W, PAGE_H = A4
+    ML = 1.8 * cm; MR = 1.8 * cm; MT = 2.0 * cm; MB = 1.8 * cm
+    TW = PAGE_W - ML - MR
+    date_str = datetime.now().strftime("%d/%m/%Y")
+    moeda = premissas.get("moeda_projeto", "BRL")
+    sym   = {"BRL":"R$","USD":"$","EUR":"€","GBP":"£"}.get(moeda, moeda)
+
+    # ── Assets ──────────────────────────────────────────────────────────────────
+    _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    LOGO_PATH  = os.path.join(_ROOT, "assets", "logo_transparent.png")
+    LOGO_RATIO = 743 / 320
+
+    def _page_cb(canvas, doc):
+        canvas.saveState()
+        HDR_H = 1.5 * cm
+        canvas.setFillColor(_c("#F1F5F9"))
+        canvas.rect(0, PAGE_H - HDR_H, PAGE_W, HDR_H, fill=1, stroke=0)
+        canvas.setStrokeColor(_c(NAVY)); canvas.setLineWidth(1.2)
+        canvas.line(0, PAGE_H - HDR_H, PAGE_W, PAGE_H - HDR_H)
+        PAD = 0.15 * cm
+        LH = HDR_H - 2 * PAD; LW = LH * LOGO_RATIO
+        if os.path.exists(LOGO_PATH):
+            canvas.drawImage(LOGO_PATH, ML, PAGE_H - HDR_H + PAD,
+                             width=LW, height=LH, preserveAspectRatio=True, mask="auto")
+        canvas.setFillColor(_c(NAVY)); canvas.setFont("Helvetica-Bold", 8)
+        canvas.drawRightString(PAGE_W - MR, PAGE_H - HDR_H/2 + 0.1*cm, "Co2mply")
+        canvas.setFont("Helvetica", 7); canvas.setFillColor(_c(GRAY))
+        canvas.drawRightString(PAGE_W - MR, PAGE_H - HDR_H/2 - 0.22*cm, "by Astra Carbon")
+        # Footer
+        canvas.setStrokeColor(_c(BORDER)); canvas.setLineWidth(0.5)
+        canvas.line(ML, 1.4*cm, PAGE_W - MR, 1.4*cm)
+        canvas.setFillColor(_c(TEXT2)); canvas.setFont("Helvetica", 7)
+        canvas.drawString(ML, 0.8*cm, f"Memo Financeiro — {project_name} | CONFIDENCIAL")
+        canvas.drawRightString(PAGE_W - MR, 0.8*cm, f"Página {doc.page} | {date_str}")
+        canvas.restoreState()
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4,
+        leftMargin=ML, rightMargin=MR,
+        topMargin=MT + 1.6*cm, bottomMargin=MB + 1.0*cm,
+        title=f"Co2mply | Memo Financeiro — {project_name}",
+    )
+    story = []
+
+    # ── Título ───────────────────────────────────────────────────────────────────
+    story.append(_p("MEMO FINANCEIRO — ANÁLISE DE VIABILIDADE",
+                    fontName="Helvetica-Bold", fontSize=8, textColor=_c(TEXT2),
+                    letterSpacing=1.2))
+    story.append(_p(project_name,
+                    fontName="Helvetica-Bold", fontSize=22, leading=28, textColor=_c(NAVY)))
+    story.append(_p(f"Metodologia: {premissas.get('metodologia', 'Biochar CDR')}  ·  "
+                    f"Moeda: {moeda}  ·  Data: {date_str}",
+                    fontSize=9, textColor=_c(TEXT2)))
+    story.append(_s(0.3))
+    story.append(HRFlowable(width="100%", thickness=2.5, color=_c(NAVY)))
+    story.append(_s(0.5))
+
+    # ── KPI block ─────────────────────────────────────────────────────────────────
+    irr    = resultado.get("irr")
+    irr_eq = resultado.get("irr_equity")
+    npv    = resultado.get("npv")
+    pb     = resultado.get("payback_year")
+    wacc   = premissas.get("wacc", 0.12) * 100
+    fpc    = premissas.get("financiamento_pct", 0) or 0
+
+    def _kpi_color(val, wacc_pct):
+        if val is None: return GRAY
+        return GREEN if val >= wacc_pct else RED
+
+    kpi_cols = [
+        (f"{irr:.1f}%" if irr else "—", "TIR do Projeto",
+         _kpi_color(irr, wacc), f"WACC ref.: {wacc:.0f}%"),
+        (f"{irr_eq:.1f}%" if irr_eq else ("Sem alavancagem" if fpc == 0 else "—"),
+         "TIR do Equity",
+         _kpi_color(irr_eq, wacc) if irr_eq else GRAY,
+         f"{fpc*100:.0f}% dívida" if fpc > 0 else "Projeto 100% equity"),
+        (f"{sym} {npv/1e6:.1f}M" if npv else "—", "VPL",
+         GREEN if (npv or 0) >= 0 else RED, f"Taxa: {wacc:.0f}%"),
+        (str(pb) if pb else "Não atingido", "Payback",
+         GREEN if pb else AMBER, "Ano de retorno"),
+    ]
+
+    c_w = TW / len(kpi_cols)
+    kpi_tbl = Table(
+        [[_p(v, fontName="Helvetica-Bold", fontSize=20, leading=24, textColor=_c(col),
+              alignment=TA_CENTER) for v, _, col, _ in kpi_cols],
+         [_p(lbl, fontSize=8, textColor=_c(TEXT2), alignment=TA_CENTER)
+          for _, lbl, _, _ in kpi_cols],
+         [_p(sub, fontSize=7.5, textColor=_c(GRAY), alignment=TA_CENTER)
+          for _, _, _, sub in kpi_cols]],
+        colWidths=[c_w] * len(kpi_cols),
+        rowHeights=[1.2*cm, 0.55*cm, 0.45*cm],
+    )
+    kpi_tbl.setStyle(TableStyle([
+        ("BACKGROUND", (0,0),(-1,-1), _c(NAVY_L)),
+        ("ALIGN",  (0,0),(-1,-1), "CENTER"), ("VALIGN",(0,0),(-1,-1),"MIDDLE"),
+        ("TOPPADDING",(0,0),(-1,0),10), ("BOTTOMPADDING",(0,0),(-1,0),4),
+        ("TOPPADDING",(0,1),(-1,-1),3), ("BOTTOMPADDING",(0,1),(-1,-1),5),
+        ("LEFTPADDING",(0,0),(-1,-1),4), ("RIGHTPADDING",(0,0),(-1,-1),4),
+        ("LINEAFTER",(0,0),(2,-1),0.5,_c(BORDER)),
+        ("BOX",(0,0),(-1,-1),0.5,_c(BORDER)),
+    ]))
+    story.append(kpi_tbl)
+    story.append(_s(0.5))
+
+    # ── Premissas principais ──────────────────────────────────────────────────────
+    story.append(_p("Premissas Principais",
+                    fontName="Helvetica-Bold", fontSize=11, textColor=_c(NAVY)))
+    story.append(_s(0.2))
+
+    def prow(lbl, val):
+        return [_p(lbl, fontSize=9, textColor=_c(TEXT2)),
+                _p(str(val), fontName="Helvetica-Bold", fontSize=9, alignment=TA_RIGHT)]
+
+    prem_data = [
+        prow("Feedstock (t/ano)", f"{premissas.get('feedstock_t_ano',0):,.0f} t"),
+        prow("Yield pirólise", f"{premissas.get('yield_pirolise',0)*100:.0f}%"),
+        prow("Fator carbono (tCO₂/t biochar)", f"{premissas.get('fator_carbono',0):.2f}"),
+        prow("Preço do crédito", f"$ {premissas.get('preco_credito_usd',0):.0f} / tCO₂e"),
+        prow(f"Câmbio USD→{moeda}", f"{premissas.get('fx_rate',1):.2f}"),
+        prow(f"CAPEX total ({sym})", f"{sym} {premissas.get('capex_total',0):,.0f}"),
+        prow(f"OPEX anual ({sym})", f"{sym} {premissas.get('opex_anual',0):,.0f}"),
+        prow("WACC", f"{premissas.get('wacc',0.12)*100:.1f}%"),
+        prow("Alíquota efetiva IR", f"{premissas.get('aliquota_efetiva_ir',0.20)*100:.0f}%"),
+        prow("Buffer pool", f"{premissas.get('buffer_pool_pct',0)*100:.1f}%"),
+        prow("Delay emissão", f"{premissas.get('issuance_delay_months',0)} meses"),
+    ]
+
+    if fpc > 0:
+        prem_data += [
+            prow("Financiamento (% CAPEX)", f"{fpc*100:.0f}%"),
+            prow("Taxa de juros", f"{premissas.get('taxa_juros',0.12)*100:.1f}%"),
+            prow("Prazo financiamento", f"{premissas.get('prazo_financiamento',10)} anos"),
+        ]
+
+    # Split into 2 columns
+    half = len(prem_data) // 2 + len(prem_data) % 2
+    col1 = prem_data[:half]; col2 = prem_data[half:]
+    while len(col2) < len(col1): col2.append([_p(""), _p("")])
+
+    prem_merged = []
+    CW = TW / 2 - 0.3*cm
+    for r1, r2 in zip(col1, col2):
+        prem_merged.append(r1 + [_p("")] + r2)
+
+    prem_tbl = Table(prem_merged, colWidths=[CW*0.62, CW*0.38, 0.6*cm, CW*0.62, CW*0.38])
+    prem_tbl.setStyle(TableStyle([
+        ("BACKGROUND",(0,0),(1,-1),_c("#F9FAFB")),
+        ("BACKGROUND",(3,0),(4,-1),_c("#F9FAFB")),
+        ("LINEBELOW",(0,0),(1,-1),0.3,_c(BORDER)),
+        ("LINEBELOW",(3,0),(4,-1),0.3,_c(BORDER)),
+        ("TOPPADDING",(0,0),(-1,-1),4), ("BOTTOMPADDING",(0,0),(-1,-1),4),
+        ("LEFTPADDING",(0,0),(-1,-1),6), ("RIGHTPADDING",(0,0),(-1,-1),6),
+    ]))
+    story.append(prem_tbl)
+    story.append(_s(0.5))
+
+    # ── DRE Resumida ──────────────────────────────────────────────────────────────
+    story.append(HRFlowable(width="100%", thickness=0.5, color=_c(BORDER)))
+    story.append(_s(0.3))
+    story.append(_p("Demonstração de Resultados — Anos Selecionados",
+                    fontName="Helvetica-Bold", fontSize=11, textColor=_c(NAVY)))
+    story.append(_s(0.2))
+
+    from backend.viabilidade_service import _compute_dre_anual
+    dre = _compute_dre_anual(premissas)
+    sel_anos = [0, 1, 2, 4, 9, 19]  # índices 0-based → anos 1,2,3,5,10,20
+    sel = [dre[i] for i in sel_anos if i < len(dre)]
+
+    ano_hdrs = [""] + [str(d["ano"]) for d in sel]
+    rows_dre = [
+        ("Receita bruta",  [d["receita"] for d in sel],  GREEN),
+        ("(−) OPEX",       [-d["opex"]   for d in sel],  RED),
+        ("= EBITDA",       [d["ebitda"]  for d in sel],  NAVY),
+        ("(−) DA",         [-d["da"]     for d in sel],  GRAY),
+        ("= EBIT",         [d["ebit"]    for d in sel],  NAVY),
+        ("(−) Impostos",   [-d["trib"]   for d in sel],  GRAY),
+        ("= FCL",          [d["fcl"]     for d in sel],  NAVY),
+    ]
+
+    def _fval(v):
+        if v is None: return "—"
+        m = abs(v) / 1e6
+        return f"{'-' if v < 0 else ''}{sym}{m:.2f}M"
+
+    dre_data = [ano_hdrs]
+    for label, vals, col in rows_dre:
+        is_tot = label.startswith("=")
+        row = [_p(label, fontName="Helvetica-Bold" if is_tot else "Helvetica",
+                  fontSize=8, textColor=_c(NAVY if is_tot else TEXT2))]
+        for v in vals:
+            c_str = GREEN if v >= 0 else RED
+            row.append(_p(_fval(v), fontName="Helvetica-Bold" if is_tot else "Helvetica",
+                          fontSize=8, textColor=_c(c_str if is_tot else TEXT),
+                          alignment=TA_RIGHT))
+        dre_data.append(row)
+
+    ncols = len(sel) + 1
+    dre_cw = [3.0*cm] + [(TW - 3.0*cm) / len(sel)] * len(sel)
+    dre_tbl = Table(dre_data, colWidths=dre_cw)
+    dre_tbl.setStyle(TableStyle([
+        ("BACKGROUND",(0,0),(-1,0),_c("#374151")),
+        ("FONTCOLOR",(0,0),(-1,0),_c(WHITE)),
+        ("FONTNAME",(0,0),(-1,0),"Helvetica-Bold"),
+        ("FONTSIZE",(0,0),(-1,-1),8),
+        ("ALIGN",(1,0),(-1,-1),"RIGHT"),
+        ("TOPPADDING",(0,0),(-1,-1),4), ("BOTTOMPADDING",(0,0),(-1,-1),4),
+        ("LEFTPADDING",(0,0),(-1,-1),5), ("RIGHTPADDING",(0,0),(-1,-1),5),
+        ("LINEBELOW",(0,0),(-1,-1),0.3,_c(BORDER)),
+        ("BACKGROUND",(0,3),(0,3),_c(NAVY_L)),  # EBITDA
+        ("BACKGROUND",(0,5),(0,5),_c(NAVY_L)),  # EBIT
+        ("BACKGROUND",(0,7),(0,7),_c(NAVY_L)),  # FCL
+    ]))
+    story.append(dre_tbl)
+    story.append(_s(0.5))
+
+    # ── Sensibilidade compacta ────────────────────────────────────────────────────
+    story.append(HRFlowable(width="100%", thickness=0.5, color=_c(BORDER)))
+    story.append(_s(0.3))
+    story.append(_p("Análise de Sensibilidade — Preço do Crédito",
+                    fontName="Helvetica-Bold", fontSize=11, textColor=_c(NAVY)))
+    story.append(_s(0.2))
+
+    sensi = resultado.get("sensibilidade", [])
+    # Seleciona ~10 pontos espaçados
+    step = max(1, len(sensi) // 10)
+    sel_s = sensi[::step][:10]
+    if sel_s:
+        sens_hdr = [_p("USD/tCO₂", fontSize=8, fontName="Helvetica-Bold", alignment=TA_CENTER)] + \
+                   [_p(f"${s['preco_usd']}", fontSize=8, alignment=TA_CENTER) for s in sel_s]
+        wacc_pct = premissas.get("wacc", 0.12) * 100
+        irr_row  = [_p("TIR (%)", fontSize=8, fontName="Helvetica-Bold")] + \
+                   [_p(f"{s['irr']:.1f}%" if s['irr'] else "—", fontSize=8,
+                       fontName="Helvetica-Bold",
+                       textColor=_c(GREEN if (s['irr'] or 0) >= wacc_pct else RED),
+                       alignment=TA_CENTER) for s in sel_s]
+
+        cw_s = [2.5*cm] + [(TW - 2.5*cm) / len(sel_s)] * len(sel_s)
+        sens_tbl = Table([sens_hdr, irr_row], colWidths=cw_s)
+        sens_tbl.setStyle(TableStyle([
+            ("BACKGROUND",(0,0),(-1,0),_c("#374151")),
+            ("FONTCOLOR",(0,0),(-1,0),_c(WHITE)),
+            ("TOPPADDING",(0,0),(-1,-1),4), ("BOTTOMPADDING",(0,0),(-1,-1),5),
+            ("LEFTPADDING",(0,0),(-1,-1),4), ("RIGHTPADDING",(0,0),(-1,-1),4),
+            ("BACKGROUND",(0,1),(-1,1),_c(NAVY_L)),
+            ("BOX",(0,0),(-1,-1),0.5,_c(BORDER)),
+        ]))
+        story.append(sens_tbl)
+        story.append(_s(0.3))
+        story.append(_p(f"Verde = TIR ≥ WACC ({wacc_pct:.0f}%). Break-even: "
+                        f"${resultado.get('preco_breakeven_usd','—')}/tCO₂.",
+                        fontSize=8, textColor=_c(GRAY)))
+
+    # ── Disclaimer ───────────────────────────────────────────────────────────────
+    story.append(_s(0.5))
+    story.append(HRFlowable(width="100%", thickness=0.4, color=_c(BORDER)))
+    story.append(_s(0.2))
+    story.append(_p(
+        f"Este memo foi gerado pelo motor determinístico Co2mply para o projeto <b>{project_name}</b> "
+        f"em {date_str}. Os indicadores refletem as premissas informadas pelo proponente e não "
+        f"constituem rating, recomendação de investimento ou garantia de resultado. "
+        f"Co2mply by Astra Carbon · v1.0 · CONFIDENCIAL",
+        fontSize=7, textColor=_c(GRAY), leading=10,
+        fontName="Helvetica-Oblique",
+    ))
+
+    doc.build(story, onFirstPage=_page_cb, onLaterPages=_page_cb)
+    return buf.getvalue()

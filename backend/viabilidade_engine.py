@@ -122,9 +122,23 @@ class PremissasViabilidade:
 
     # Financeiro
     wacc:                float = 0.12
-    aliquota_efetiva_ir: float = 0.20   # fração (0.20 = 20%)
+    aliquota_efetiva_ir: float = 0.20
     horizonte_anos:      int   = 20
     ano_investimento:    int   = 2026
+
+    # Mercado de carbono
+    issuance_delay_months: int   = 0    # meses de atraso na emissão dos créditos
+    buffer_pool_pct:       float = 0.0  # % retido pelo buffer pool (ex: 0.02 = 2%)
+
+    # Ramp-up de produção (capacidade nos primeiros anos)
+    rampup_ano1: float = 1.0   # fração da capacidade plena no ano 1
+    rampup_ano2: float = 1.0
+    rampup_ano3: float = 1.0
+
+    # Estrutura de capital
+    financiamento_pct:   float = 0.0   # fração do CAPEX financiado com dívida
+    taxa_juros:          float = 0.12  # taxa de juros anual do financiamento
+    prazo_financiamento: int   = 10    # prazo em anos
 
 
 # ── Engine ────────────────────────────────────────────────────────────────────
@@ -150,25 +164,66 @@ def _safe_irr(cash_flows: list) -> Optional[float]:
     return r if isfinite(r) else None
 
 
+def _pmt(rate: float, nper: int, pv: float) -> float:
+    """Parcela fixa anual de amortização (anuidade)."""
+    if rate <= 0 or nper <= 0:
+        return pv / max(nper, 1)
+    return pv * rate * (1 + rate) ** nper / ((1 + rate) ** nper - 1)
+
+
 def _fcl(p: PremissasViabilidade, preco_override: Optional[float] = None) -> list:
-    preco = preco_override if preco_override is not None else p.preco_credito_usd
+    preco    = preco_override if preco_override is not None else p.preco_credito_usd
     biochar  = p.feedstock_t_ano * p.yield_pirolise
-    creditos = biochar * p.fator_carbono
+    # Buffer pool: reduz créditos líquidos
+    creditos = biochar * p.fator_carbono * (1.0 - p.buffer_pool_pct)
     da       = p.capex_total / max(p.vida_util_anos, 1)
     flows    = [-p.capex_total]
+
+    # Issuance delay
+    delay_full = p.issuance_delay_months // 12
+    delay_frac = (p.issuance_delay_months % 12) / 12.0
+
+    # Ramp-up por ano
+    rampup = {1: p.rampup_ano1, 2: p.rampup_ano2, 3: p.rampup_ano3}
 
     for ano in range(1, p.horizonte_anos + 1):
         ec = (1 + p.escalacao_carbono) ** (ano - 1)
         ef = (1 + p.escalacao_fx)      ** (ano - 1)
         eo = (1 + p.escalacao_opex)    ** (ano - 1)
-        rec   = creditos * preco * ec * p.fx_rate * ef + biochar * p.preco_biochar
-        opex  = p.opex_anual * eo
+
+        # Ramp-up (apenas receita; OPEX fixo é conservador)
+        cap = rampup.get(ano, 1.0)
+
+        # Receita de carbono com delay
+        if ano <= delay_full:
+            rec_carb = 0.0
+        elif ano == delay_full + 1 and delay_frac > 0:
+            rec_carb = creditos * preco * ec * p.fx_rate * ef * (1.0 - delay_frac)
+        else:
+            rec_carb = creditos * preco * ec * p.fx_rate * ef
+
+        rec    = rec_carb * cap + biochar * p.preco_biochar * cap
+        opex   = p.opex_anual * eo          # OPEX integral (custos fixos não reduzem)
         ebitda = rec - opex
         ebit   = ebitda - da
         trib   = max(ebit, 0.0) * p.aliquota_efetiva_ir
         flows.append(ebit - trib + da)
 
     return flows
+
+
+def _equity_irr(p: PremissasViabilidade, project_flows: list) -> Optional[float]:
+    """IRR do equity com alavancagem. None se sem financiamento."""
+    if p.financiamento_pct <= 0 or p.prazo_financiamento <= 0:
+        return None
+    debt   = p.capex_total * p.financiamento_pct
+    equity = p.capex_total * (1.0 - p.financiamento_pct)
+    pmt    = _pmt(p.taxa_juros, p.prazo_financiamento, debt)
+    eq_flows = [-equity]
+    for i, fcl in enumerate(project_flows[1:], start=1):
+        service = pmt if i <= p.prazo_financiamento else 0.0
+        eq_flows.append(fcl - service)
+    return _safe_irr(eq_flows)
 
 
 def _breakeven(p: PremissasViabilidade) -> Optional[float]:
@@ -305,6 +360,12 @@ def calcular_viabilidade(p: PremissasViabilidade) -> dict:
     trib_yr1 = round(max(ebit_yr1, 0) * p.aliquota_efetiva_ir, 0)
     ebit_yr1 = round(ebit_yr1, 0)
 
+    # Equity IRR
+    irr_equity = _equity_irr(p, flows)
+    debt_service = round(_pmt(p.taxa_juros, p.prazo_financiamento,
+                               p.capex_total * p.financiamento_pct), 0) \
+                   if p.financiamento_pct > 0 else 0.0
+
     # Tornado e Heatmap
     irr_pct = irr * 100 if irr is not None else None
     tornado = calcular_tornado(p, irr)
@@ -333,6 +394,12 @@ def calcular_viabilidade(p: PremissasViabilidade) -> dict:
         "sensibilidade":         sensibilidade,
         "tornado":               tornado,
         "heatmap":               heatmap,
+        "irr_equity":            round(irr_equity * 100, 2) if irr_equity is not None else None,
+        "financiamento_pct":     p.financiamento_pct,
+        "debt_service_anual":    debt_service,
+        "issuance_delay_months": p.issuance_delay_months,
+        "buffer_pool_pct":       p.buffer_pool_pct,
+        "rampup":                {1: p.rampup_ano1, 2: p.rampup_ano2, 3: p.rampup_ano3},
     }
 
 
