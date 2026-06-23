@@ -188,12 +188,12 @@ export default function FinancialLabTab({ project }) {
             <Slider label="Preço do crédito" name="preco_credito_usd"
               value={form.preco_credito_usd} min={30} max={260} step={5}
               fmt={v => `$ ${v}`} onChange={setField} />
-            <Slider label="Câmbio (BRL/USD)" name="fx_brl_usd"
-              value={form.fx_brl_usd} min={4.0} max={8.0} step={0.05}
-              fmt={v => v.toFixed(2)} onChange={setField} />
-            <Slider label="Preço biochar (BRL/t)" name="preco_biochar_brl"
-              value={form.preco_biochar_brl} min={0} max={3000} step={50}
-              fmt={v => `R$${v}`} onChange={setField} />
+            <Slider label={`Câmbio USD → ${cur}`} name="fx_rate"
+              value={form.fx_rate} min={0.5} max={10.0} step={0.05}
+              fmt={v => v?.toFixed(2) ?? '—'} onChange={setField} />
+            <Slider label={`Preço biochar (${CURRENCY_SYMBOLS[cur] || cur}/t)`} name="preco_biochar"
+              value={form.preco_biochar} min={0} max={3000} step={50}
+              fmt={v => `${CURRENCY_SYMBOLS[cur] || cur}${v}`} onChange={setField} />
           </div>
 
           <div className="card" style={{ marginBottom: 12 }}>
@@ -201,13 +201,13 @@ export default function FinancialLabTab({ project }) {
                           textTransform: 'uppercase', letterSpacing: 1 }}>Produção</div>
             <Slider label="Feedstock (t/ano)" name="feedstock_t_ano"
               value={form.feedstock_t_ano} min={100} max={50000} step={100}
-              fmt={v => `${v.toLocaleString('pt-BR')} t`} onChange={setField} />
+              fmt={v => v != null ? `${v.toLocaleString('pt-BR')} t` : '—'} onChange={setField} />
             <Slider label="Rendimento pirólise" name="yield_pirolise"
               value={form.yield_pirolise} min={0.10} max={0.50} step={0.01}
-              fmt={v => `${(v * 100).toFixed(0)}%`} onChange={setField} />
+              fmt={v => v != null ? `${(v * 100).toFixed(0)}%` : '—'} onChange={setField} />
             <Slider label="Fator carbono (tCO₂/t)" name="fator_carbono"
               value={form.fator_carbono} min={1.0} max={4.0} step={0.05}
-              fmt={v => v.toFixed(2)} onChange={setField} />
+              fmt={v => v?.toFixed(2) ?? '—'} onChange={setField} />
           </div>
 
           <div className="card">
@@ -221,10 +221,10 @@ export default function FinancialLabTab({ project }) {
               fmt={v => fmtMoeda(v, cur)} onChange={setField} />
             <Slider label="WACC" name="wacc"
               value={form.wacc} min={0.05} max={0.30} step={0.005}
-              fmt={v => `${(v * 100).toFixed(1)}%`} onChange={setField} />
+              fmt={v => v != null ? `${(v * 100).toFixed(1)}%` : '—'} onChange={setField} />
             <Slider label="Alíquota efetiva IR" name="aliquota_efetiva_ir"
               value={form.aliquota_efetiva_ir} min={0} max={0.45} step={0.01}
-              fmt={v => `${(v * 100).toFixed(0)}%`} onChange={setField} />
+              fmt={v => v != null ? `${(v * 100).toFixed(0)}%` : '—'} onChange={setField} />
           </div>
         </div>
 
