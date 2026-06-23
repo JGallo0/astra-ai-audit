@@ -688,6 +688,63 @@ def export_viabilidade(project_id: str):
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
+# ── Methodology Assessment (Fit Metodológico Multi-Metodologia) ───────────────
+
+@app.post("/api/projects/{project_id}/assessment")
+async def run_assessment(project_id: str, body: dict):
+    """
+    Avalia o projeto contra todas as metodologias disponíveis com ProjectProfile
+    padronizado e dimensões universais comparáveis.
+    Body: { "methodologies": ["isometric", "puro_earth"], "audit_mode": "development" }
+    """
+    p = _db_fetchone("SELECT * FROM ca_projects WHERE id=%s", (project_id,))
+    if not p:
+        raise HTTPException(404, "Projeto não encontrado")
+
+    methodologies = body.get("methodologies") or ["isometric", "puro_earth"]
+    audit_mode    = body.get("audit_mode", "development")
+    vs_id         = p.get("project_vector_store_id", "")
+
+    # Extrai texto do PDD via RAG
+    try:
+        tools = [{"type": "file_search", "vector_store_ids": [vs_id]}] if vs_id else []
+        rag = openai_client.responses.create(
+            model=OPENAI_MODEL,
+            input=(
+                "Extract the complete project description from this PDD including: "
+                "project name, country, feedstock type and origin, production process, "
+                "storage pathway, additionality evidence, carbon accounting approach, "
+                "permanence/durability, monitoring plan, environmental and social safeguards, "
+                "reactor design, biochar characterization, and any certifications mentioned."
+            ),
+            tools=tools,
+        )
+        pdd_text = rag.output_text or ""
+    except Exception as e:
+        pdd_text = f"[RAG falhou: {e}] Projeto: {p.get('name', '')}"
+
+    from backend.assessment_service import run_methodology_assessment
+    result = await run_methodology_assessment(
+        project_id=project_id,
+        pdd_text=pdd_text,
+        methodologies=methodologies,
+        openai_client=openai_client,
+        model=OPENAI_MODEL,
+        audit_mode=audit_mode,
+    )
+
+    # Salva no banco
+    _db_execute(
+        """INSERT INTO ca_audit_runs (id, project_id, methodology, modules, status, result, created_at, completed_at)
+           VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
+        (
+            __import__('uuid').uuid4().__str__(),
+            project_id, "assessment", json.dumps(methodologies), "completed",
+            json.dumps(result, default=str), _now(), _now(),
+        ),
+    )
+    return result
+
 # ── Verificação (V&V Support) ──────────────────────────────────────────────────
 
 @app.get("/api/projects/{project_id}/verificacao")

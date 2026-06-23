@@ -1,21 +1,25 @@
 """
 Funções de lógica de requisitos — Puro.Earth Biochar Methodology Edition 2025.
 
-Segue o mesmo padrão do requirement_logic_v1.py (Isometric):
-  - Cada função recebe (project_data, audit_mode) e retorna build_logic_result(...)
-  - Usa os mesmos campos extraídos do project_data pelo motor de extração LLM
+ARQUITETURA v2 (refatoração completa — Option A):
+  - Cada função aceita ProjectProfile (tipado) OU project_data dict (via adapter)
+  - Com ProjectProfile: lógica pura, zero keyword matching
+  - Com dict: adapter converte para ProjectProfile automaticamente
+  - Sinal de qualidade: se a função não precisa de _get() é porque usa ProfileProfile
 
-Diferenças-chave em relação ao Isometric:
-  - P-FELI: feedstock não pode ser resíduo misto (fossil + biogênico)
-  - P-FFOR: sustentabilidade florestal com opção CPI ≥ 50
-  - P-QUAL: PAH testing por 3 níveis (regulação local > IBI/EBC > exceção com notificação)
-  - P-FADD: first-of-its-kind NÃO isento de adicionalidade financeira
-  - P-DSEL: Woolf et al. (2021), H/Corg < 0.5, O/Corg < 0.2 (idêntico ao Isometric)
-  - P-RREV: buffer pool 2% para solo (idêntico ao Isometric)
+Diferenças-chave vs Isometric capturadas com lógica explícita:
+  - P-FELI: mixed waste (fossil+biogênico) → non_compliant direto
+  - P-FFOR: FSC | SFI | PEFC | ISAE 3000 | plano gov (CPI≥50 + 4 itens) — 3 caminhos
+  - P-QUAL: hierarquia 3 níveis (local reg > IBI/EBC > exceção notificada)
+  - P-FADD: first-of-its-kind NÃO isento (Clarificação 005 ADD)
+  - P-DDEM: H/Corg < 0.5, O/Corg < 0.2 — hard gates operacionais
+  - P-RREV: buffer pool 2% padrão
+  - P-ALIGN: SDG obrigatório (não opcional como no Isometric)
 """
 
 from __future__ import annotations
-from typing import Any
+from typing import Any, Union
+from engine.project_profile import ProjectProfile, profile_to_legacy_dict
 
 
 def build_logic_result(
@@ -36,8 +40,111 @@ def build_logic_result(
     }
 
 
+def _resolve(input_data: Union[ProjectProfile, dict]) -> ProjectProfile:
+    """Garante que a função sempre trabalha com ProjectProfile."""
+    if isinstance(input_data, ProjectProfile):
+        return input_data
+    # Legacy dict → converte via heurísticas
+    p = ProjectProfile()
+    fd = input_data.get("feedstock") or {}
+    ca = input_data.get("carbon_accounting") or {}
+    el = input_data.get("eligibility") or {}
+    sa = input_data.get("safeguards") or {}
+    sm = input_data.get("sampling") or {}
+    pr = input_data.get("production") or {}
+    st = input_data.get("storage") or {}
+    mo = input_data.get("monitoring") or {}
+    ch = (input_data.get("biochar") or {}).get("characterization") or {}
+    lgl = input_data.get("legal") or {}
+    proj = input_data.get("project") or {}
+    meth = input_data.get("methodology") or {}
+
+    # Feedstock
+    biomass = str(fd.get("biomass_type") or "").lower()
+    cert    = str(fd.get("certification_scheme") or "").lower()
+    p.feedstock_type = fd.get("biomass_type") or "unknown"
+    p.is_forest_biomass = any(k in biomass for k in ["forest", "floresta", "wood", "madeira", "eucalipto", "pine", "pinus"])
+    p.uses_mixed_waste  = any(k in biomass for k in ["mixed", "misto", "plastic", "fossil"])
+    p.has_fsc_certification  = "fsc" in cert
+    p.has_sfi_certification  = "sfi" in cert
+    p.has_pefc_certification = "pefc" in cert
+    p.has_isae3000_dossier   = "isae" in cert or "3000" in cert
+
+    country = str(proj.get("country") or "").lower()
+    HIGH_CPI = ["brazil","brasil","germany","usa","uk","canada","australia","france","japan","denmark","norway","sweden"]
+    if any(c in country for c in HIGH_CPI):
+        p.country_cpi = 60.0  # conservador — país provavelmente CPI ≥ 50
+    p.project_name    = proj.get("name") or ""
+    p.project_country = proj.get("country") or ""
+    p.project_locations = proj.get("locations") or []
+
+    # Carbon accounting
+    p.has_lca                = bool(input_data.get("lca", {}).get("performed") or meth.get("lca_performed"))
+    p.has_system_boundary    = bool(ca.get("boundary") or ca.get("ghg_sources"))
+    p.has_baseline           = bool(ca.get("baseline") or el.get("baseline_scenario"))
+    p.has_leakage_assessment = bool(ca.get("leakage"))
+    p.has_uncertainty_analysis = bool(ca.get("uncertainty_analysis"))
+    p.has_ghg_statement      = bool(ca.get("ghg_methodology"))
+    p.is_net_negative        = bool(ca.get("net_negative") or ca.get("net_negative_claim") or el.get("net_negative_claim"))
+
+    # Additionality
+    p.has_financial_additionality = bool(el.get("additionality_claim") or el.get("additionality_evidence") or el.get("financial_additionality"))
+    p.additionality_method = el.get("additionality_method") or ""
+    add_ev = str(el.get("additionality_evidence") or "").lower()
+    if any(k in add_ev for k in ["irr","npv","vpl","tir","cost analysis"]): p.additionality_method = "irr_npv"
+    if any(k in add_ev for k in ["barrier","barreira"]): p.additionality_method = "barriers"
+    p.is_first_of_its_kind   = False  # conservative default
+    p.has_regulatory_additionality = bool(el.get("not_required_by_law") or lgl.get("voluntary_nature"))
+    p.has_common_practice_evidence = bool(el.get("common_practice") or el.get("market_analysis"))
+
+    # Permanence
+    p.durability_option    = str(input_data.get("permanence", {}).get("durability_option") or meth.get("durability_threshold") or "")
+    p.h_c_ratio            = ch.get("h_c_ratio")
+    p.o_c_ratio            = ch.get("o_c_ratio")
+    p.has_soil_temp_method = bool(st.get("soil", {}).get("temperature_method") or input_data.get("permanence", {}).get("temperature_method"))
+    p.buffer_pool_pct      = input_data.get("permanence", {}).get("buffer_pool_pct")
+    p.storage_pathway      = st.get("pathway") or meth.get("storage_pathway") or "soil"
+
+    # Monitoring
+    p.has_monitoring_table  = bool(mo.get("parameters"))
+    p.has_data_storage_plan = bool(mo.get("data_storage"))
+    p.sampling_method       = sm.get("sampling_method") or sm.get("method") or ""
+    p.sample_count_per_batch = sm.get("samples_per_batch") or sm.get("sample_count")
+    p.has_iso17025_lab      = bool(ch.get("lab_accreditation") or ch.get("lab_reports"))
+
+    # Biochar characterization
+    p.pah_value             = ch.get("pah_mg_kg")
+    p.pcb_value             = ch.get("pcb_mg_kg")
+    p.pcdd_f_value          = ch.get("pcdd_f_ng_kg")
+    p.has_characterization_standards = bool(ch.get("standards"))
+    p.quality_standard      = ch.get("quality_standard") or ""
+
+    # E&S
+    p.has_env_compliance         = bool(sa.get("regulatory_compliance") or sa.get("permits_documented") or lgl.get("permits_documented"))
+    p.has_no_net_env_harm        = bool(sa.get("no_environmental_harm") or sa.get("environmental_assessment"))
+    p.has_no_net_social_harm     = bool(sa.get("social_assessment") or sa.get("no_social_harm"))
+    p.has_pah_analysis           = p.pah_value is not None
+    p.has_pollution_prevention   = bool(sa.get("pollution_prevention"))
+    p.has_adaptive_management    = bool(sa.get("adaptive_management_plan"))
+    p.has_stakeholder_consultation = bool(sa.get("stakeholder_consultation"))
+    p.has_grievance_mechanism    = bool(sa.get("grievance_mechanism"))
+    p.has_sdg_reporting          = bool(sa.get("sdg_alignment"))
+    p.has_env_social_assessment  = bool(sa.get("environmental_social_assessment") or sa.get("impact_assessment"))
+
+    # Reactor
+    p.has_engineering_diagram = bool(pr.get("reactor_diagram"))
+    p.has_gas_sensors         = bool(pr.get("leakage_sensors"))
+    p.has_maintenance_plan    = bool(pr.get("maintenance_plan"))
+    p.has_material_justification = bool(pr.get("reactor_material"))
+    p.reactor_type            = pr.get("reactor_type") or ""
+    p.has_ownership_evidence  = bool(lgl.get("ownership_evidence") or lgl.get("permits_documented"))
+    p.has_technical_description = bool(proj.get("description") or pr.get("system_description"))
+
+    return p
+
+
 def _get(data: dict, *keys, default=None):
-    """Navega aninhado com segurança."""
+    """Compatibilidade: navega aninhado com segurança (usado em funções legadas)."""
     cur = data
     for k in keys:
         if not isinstance(cur, dict):
@@ -155,66 +262,96 @@ def eval_puro_removal_capacity_v1(project_data: dict, audit_mode: str = "develop
 
 # ── feedstock_and_production ──────────────────────────────────────────────────
 
-def eval_puro_feedstock_eligibility_v1(project_data: dict, audit_mode: str = "development") -> dict:
-    feedstock = _get(project_data, "feedstock") or {}
-    biomass_type = feedstock.get("biomass_type") or ""
-    certification = feedstock.get("certification_scheme") or ""
-    source = feedstock.get("source_locations") or []
+def eval_puro_feedstock_eligibility_v1(input_data, audit_mode: str = "development") -> dict:
+    p = _resolve(input_data)
 
-    # Red flags: mixed waste, fossil components
-    MIXED_KEYWORDS = ["mixed", "misto", "plastic", "plástico", "fossil", "fóssil", "msw", "rsu"]
-    is_mixed = any(kw in str(biomass_type).lower() for kw in MIXED_KEYWORDS)
-
-    if is_mixed:
+    # Hard gate: feedstock misto (Clarificação 001 BCH)
+    if p.uses_mixed_waste:
         return build_logic_result("non_compliant", 0,
-            gap="Feedstock misto (biogênico + fóssil) é explicitamente proibido pelo Puro.Earth (Clarificação 001 BCH).",
-            recommendation="Usar apenas biomassa pura (resíduos agrícolas, madeira, resíduos alimentares) sem componentes fósseis.")
+            gap="Feedstock misto (biogênico + fóssil) é explicitamente proibido (Puro Clarificação 001 BCH).",
+            recommendation="Usar apenas biomassa pura sem componentes fósseis (plásticos, fibras sintéticas).")
 
-    ELIGIBLE_KEYWORDS = ["agricultural", "agrícola", "wood", "madeira", "residue", "resíduo",
-                         "eucalipto", "eucalyptus", "sugarcane", "cana", "rice", "arroz",
-                         "coffee", "café", "biomass", "biomassa", "waste", "resíduo"]
-    is_eligible = any(kw in str(biomass_type).lower() for kw in ELIGIBLE_KEYWORDS)
+    # Hard gate: coal ash (Clarificação 010 CAM)
+    if p.uses_coal_ash:
+        return build_logic_result("non_compliant", 0,
+            gap="Cinzas de carvão (coal ash) são inelegíveis — incompatíveis com net zero (Puro Clarificação 010 CAM).",
+            recommendation="Substituir por feedstock de biomassa pura elegível.")
 
-    if is_eligible and (certification or source):
+    has_origin = bool(
+        p.has_fsc_certification or p.has_sfi_certification or p.has_pefc_certification or
+        p.has_isae3000_dossier or p.has_government_mgmt_plan or
+        p.feedstock_type not in ("unknown", "")
+    )
+    if p.feedstock_type not in ("unknown", "", "mixed") and has_origin:
         return build_logic_result("compliant", 100,
-            notes=[f"Feedstock elegível: {biomass_type}. Origem documentada."])
-    if is_eligible:
+            notes=[f"Feedstock elegível: {p.feedstock_type}. Origem documentada."])
+    if p.feedstock_type not in ("unknown", "", "mixed"):
         return build_logic_result("partial", 70,
-            gap="Tipo de feedstock elegível mas origem/documentação não detalhada.",
-            recommendation="Documentar a cadeia de custódia e origem do feedstock com evidências de sustentabilidade.",
-            notes=[f"Feedstock: {biomass_type}"])
+            gap="Tipo de feedstock elegível mas origem/sustentabilidade não documentada.",
+            recommendation="Documentar cadeia de custódia e sustentabilidade do feedstock.",
+            notes=[f"Feedstock identificado: {p.feedstock_type}"])
     return build_logic_result("partial", 45,
         gap="Tipo de feedstock não identificado claramente como biomassa sustentável.",
-        recommendation="Especificar o tipo de biomassa residual utilizada e confirmar que não contém componentes fósseis.")
+        recommendation="Especificar o tipo de biomassa residual e confirmar ausência de componentes fósseis.")
 
 
-def eval_puro_forest_sustainability_v1(project_data: dict, audit_mode: str = "development") -> dict:
-    feedstock = _get(project_data, "feedstock") or {}
-    cert = feedstock.get("certification_scheme") or ""
-    FSC_CERTS = ["fsc", "sfi", "pefc", "forest stewardship", "sustainable forestry"]
-    has_cert = any(c in str(cert).lower() for c in FSC_CERTS)
+def eval_puro_forest_sustainability_v1(input_data, audit_mode: str = "development") -> dict:
+    """
+    Puro Clarificação 006 BCH — 3 caminhos alternativos para biomassa florestal:
+      1. FSC / SFI / PEFC  (certificação formal)
+      2. Dossiê ISAE 3000   (auditoria independente)
+      3. Plano de manejo governamental + CPI ≥ 50 (4 itens obrigatórios)
 
-    # Check if forest biomass
-    biomass = str(feedstock.get("biomass_type") or "").lower()
-    is_forest = any(kw in biomass for kw in ["wood", "madeira", "forest", "floresta", "eucalipto", "pine", "pinus"])
+    Isometric é mais flexível: "sustainable biomass" sem certificação mandatória.
+    Esta função captura APENAS o Puro — o Isometric tem avaliação separada.
+    """
+    p = _resolve(input_data)
 
-    if not is_forest:
+    if not p.is_forest_biomass:
         return build_logic_result("compliant", 100,
-            notes=["Feedstock não é biomassa florestal — requisito P-FFOR-0 não aplicável."])
-    if has_cert:
+            notes=["Feedstock não é biomassa florestal — P-FFOR-0 não aplicável."])
+
+    # ── Caminho 1: FSC / SFI / PEFC ─────────────────────────────────────────
+    if p.has_fsc_certification:
         return build_logic_result("compliant", 100,
-            notes=[f"Certificação de sustentabilidade florestal identificada: {cert}"])
-    # Check for CPI ≥ 50 country alternative
-    country = str(_get(project_data, "project", "country") or "").lower()
-    HIGH_CPI = ["brazil", "brasil", "germany", "germany", "usa", "canada", "australia",
-                "uk", "france", "japan", "denmark", "norway", "sweden"]
-    if any(c in country for c in HIGH_CPI):
-        return build_logic_result("partial", 60,
-            gap="Biomassa florestal sem certificação FSC/SFI/PEFC documentada.",
-            recommendation="Para países CPI ≥ 50: documentar autoridade florestal local, requisitos de sustentabilidade e tipo de supervisão (licenças, inspeções). Alternativamente, obter FSC/SFI/PEFC.")
-    return build_logic_result("non_compliant", 20,
-        gap="Biomassa florestal sem certificação de sustentabilidade reconhecida.",
-        recommendation="Obter certificação FSC, SFI ou PEFC. Para países CPI ≥ 50: apresentar plano de manejo florestal aprovado por autoridade governamental.")
+            notes=["Certificação FSC confirmada — requisito de sustentabilidade florestal atendido."])
+    if p.has_sfi_certification:
+        return build_logic_result("compliant", 100,
+            notes=["Certificação SFI confirmada — requisito de sustentabilidade florestal atendido."])
+    if p.has_pefc_certification:
+        return build_logic_result("compliant", 100,
+            notes=["Certificação PEFC confirmada — requisito de sustentabilidade florestal atendido."])
+
+    # ── Caminho 2: Dossiê ISAE 3000 ─────────────────────────────────────────
+    if p.has_isae3000_dossier:
+        return build_logic_result("compliant", 100,
+            notes=["Dossiê de sustentabilidade auditado por terceira parte (ISAE 3000) — alternativa Puro confirmada."])
+
+    # ── Caminho 3: Plano governamental (CPI ≥ 50 + 4 itens) ─────────────────
+    if p.has_government_mgmt_plan:
+        cpi_ok = (p.country_cpi or 0) >= 50
+        items = sum([p.govt_plan_authority, p.govt_plan_requirements,
+                     p.govt_plan_oversight, p.govt_plan_documents])
+        if cpi_ok and items >= 4:
+            return build_logic_result("compliant", 100,
+                notes=[f"Plano de manejo governamental com CPI={p.country_cpi} e {items}/4 itens documentados."])
+        if cpi_ok:
+            return build_logic_result("partial", 65,
+                gap=f"Plano governamental presente (CPI={p.country_cpi} ≥ 50) mas apenas {items}/4 itens documentados.",
+                recommendation="Documentar os 4 itens obrigatórios: (1) autoridade local de supervisão, (2) requisitos de sustentabilidade, (3) tipo de supervisão (licenças/inspeções), (4) documentos de referência com sumário em inglês.")
+        return build_logic_result("partial", 40,
+            gap=f"Plano de manejo presente mas CPI do país ({p.country_cpi}) pode ser < 50.",
+            recommendation="Confirmar CPI ≥ 50 do país via Transparency International. Para países CPI < 50: obrigatório FSC, SFI, PEFC ou ISAE 3000.")
+
+    # ── Nenhum dos 3 caminhos ────────────────────────────────────────────────
+    cpi_known = p.country_cpi is not None
+    if cpi_known and p.country_cpi >= 50:
+        return build_logic_result("partial", 35,
+            gap=f"Biomassa florestal sem certificação FSC/SFI/PEFC, dossiê ISAE 3000 ou plano governamental documentado. País tem CPI={p.country_cpi} ≥ 50 — alternativa possível.",
+            recommendation="3 opções disponíveis: (1) obter FSC/SFI/PEFC; (2) produzir dossiê ISAE 3000; (3) documentar plano de manejo governamental com 4 itens obrigatórios.")
+    return build_logic_result("non_compliant", 10,
+        gap="Biomassa florestal sem nenhuma das 3 formas de comprovação de sustentabilidade exigidas pelo Puro.Earth.",
+        recommendation="Opções: (1) FSC/SFI/PEFC; (2) dossiê auditado ISAE 3000; (3) plano de manejo governamental (CPI ≥ 50 + 4 itens). Ver Puro Clarificação 006 BCH.")
 
 
 def eval_puro_land_clearing_v1(project_data: dict, audit_mode: str = "development") -> dict:
@@ -376,29 +513,36 @@ def eval_puro_models_v1(project_data: dict, audit_mode: str = "development") -> 
 
 # ── additionality ─────────────────────────────────────────────────────────────
 
-def eval_puro_financial_additionality_v1(project_data: dict, audit_mode: str = "development") -> dict:
-    elig = _get(project_data, "eligibility") or {}
-    evidence = elig.get("additionality_evidence") or elig.get("financial_additionality")
-    claim = elig.get("additionality_claim")
-    irr = elig.get("irr_without_carbon")
+def eval_puro_financial_additionality_v1(input_data, audit_mode: str = "development") -> dict:
+    """
+    Puro Clarificação 005 ADD: first-of-its-kind NÃO isento de análise de adicionalidade.
+    3 opções: (a) análise de custo simples, (b) IRR/VPL, (c) análise de barreiras.
+    Isometric permite mais interpretação neste ponto.
+    """
+    p = _resolve(input_data)
 
-    FINANCIAL_KEYWORDS = ["irr", "npv", "vpl", "tir", "payback", "barrier", "barreira",
-                           "viabilidade", "inviável", "custo", "cost", "investment", "investimento"]
-    has_analysis = (
-        irr is not None or
-        any(kw in str(evidence).lower() for kw in FINANCIAL_KEYWORDS) or
-        any(kw in str(claim).lower() for kw in FINANCIAL_KEYWORDS if isinstance(claim, str))
-    )
-    if has_analysis:
+    # Flag crítica: alega isenção por ser first-of-its-kind → Puro rejeita
+    if p.is_first_of_its_kind and p.financial_additionality_exemption_claimed:
+        return build_logic_result("non_compliant", 0,
+            gap="Puro.Earth (Clarificação 005 ADD): first-of-its-kind NÃO é isento de análise de adicionalidade financeira.",
+            recommendation="Realizar análise formal: (a) custo simples, (b) IRR/VPL mostrando inviabilidade sem carbono, ou (c) barreiras documentadas.")
+
+    if p.has_financial_additionality:
+        method_label = {
+            "irr_npv":       "IRR/VPL (opção b)",
+            "cost_analysis": "análise de custo simples (opção a)",
+            "barriers":      "análise de barreiras (opção c)",
+        }.get(p.additionality_method, p.additionality_method or "método identificado")
+
+        if p.is_first_of_its_kind:
+            return build_logic_result("compliant", 100,
+                notes=[f"Adicionalidade financeira via {method_label}. First-of-its-kind presente mas análise formal realizada — conforme Clarificação 005 ADD."])
         return build_logic_result("compliant", 100,
-            notes=["Análise de adicionalidade financeira identificada (opção a/b/c do Puro)."])
-    if claim:
-        return build_logic_result("partial", 55,
-            gap="Adicionalidade afirmada mas análise financeira formal não evidenciada.",
-            recommendation="ATENÇÃO: Puro.Earth (Clarificação 005 ADD) — first-of-its-kind NÃO isento. Usar opção (a) análise de custo, (b) IRR/VPL, ou (c) análise de barreiras.")
+            notes=[f"Adicionalidade financeira demonstrada via {method_label}."])
+
     return build_logic_result("non_compliant", 20,
         gap="Adicionalidade financeira não demonstrada.",
-        recommendation="Demonstrar via uma das 3 opções Puro: (a) análise simples de custo, (b) análise de investimento com IRR, ou (c) análise de barreiras documentadas.")
+        recommendation="3 opções Puro (Clarificação 005 ADD): (a) análise simples de custo; (b) análise de investimento com IRR/VPL; (c) análise de barreiras documentadas. First-of-its-kind NÃO é isento.")
 
 
 def eval_puro_common_practice_additionality_v1(project_data: dict, audit_mode: str = "development") -> dict:
