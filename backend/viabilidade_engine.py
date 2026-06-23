@@ -6,6 +6,7 @@ Versão generalizada: feedstock como input direto (t/ano), multi-moeda.
 from __future__ import annotations
 import dataclasses
 from dataclasses import dataclass
+from dataclasses import replace as _dc_replace
 from math import isfinite
 from typing import Optional
 
@@ -187,6 +188,79 @@ def _breakeven(p: PremissasViabilidade) -> Optional[float]:
     return round((lo + hi) / 2, 1)
 
 
+# Parâmetros do Tornado — mesmos expostos nos sliders do Financial Lab
+_TORNADO_PARAMS = [
+    ("preco_credito_usd", "Preço carbono (USD)"),
+    ("fx_rate",           "Câmbio"),
+    ("feedstock_t_ano",   "Feedstock (t/ano)"),
+    ("yield_pirolise",    "Yield pirólise"),
+    ("fator_carbono",     "Fator carbono"),
+    ("capex_total",       "CAPEX total"),
+    ("opex_anual",        "OPEX anual"),
+    ("wacc",              "WACC"),
+    ("aliquota_efetiva_ir", "Alíquota IR"),
+]
+
+
+def _irr_for(p: PremissasViabilidade, **kwargs) -> Optional[float]:
+    p2 = _dc_replace(p, **kwargs)
+    return _safe_irr(_fcl(p2))
+
+
+def calcular_tornado(p: PremissasViabilidade, base_irr: Optional[float]) -> list:
+    """Tornado ±20% para cada parâmetro chave. Retorna lista ordenada por spread."""
+    base = base_irr or 0.0
+    rows = []
+    for field, label in _TORNADO_PARAMS:
+        val = getattr(p, field)
+        if not val:
+            continue
+        irr_neg = _irr_for(p, **{field: val * 0.80}) or 0.0
+        irr_pos = _irr_for(p, **{field: val * 1.20}) or 0.0
+        delta_neg = round((irr_neg - base) * 100, 2)
+        delta_pos = round((irr_pos - base) * 100, 2)
+        rows.append({
+            "param":     label,
+            "delta_neg": delta_neg,
+            "delta_pos": delta_pos,
+            "spread":    round(abs(delta_pos - delta_neg), 2),
+        })
+    rows.sort(key=lambda x: x["spread"], reverse=True)
+    return rows
+
+
+def calcular_heatmap(p: PremissasViabilidade) -> dict:
+    """
+    Heatmap TIR: eixo X = preço crédito (USD), eixo Y = FX (±30% do atual).
+    Retorna preços, fx_vals e matriz de IRR (%).
+    """
+    prices = list(range(40, 261, 20))                       # 12 valores
+    fx_base = p.fx_rate if p.fx_rate and p.fx_rate != 1.0 else None
+    if fx_base:
+        fx_vals = [round(fx_base * (0.70 + i * 0.10), 3) for i in range(7)]  # 70%→130%
+    else:
+        # Moeda = USD: FX fixo — heatmap só varia preço
+        fx_vals = [1.0]
+
+    matrix = []
+    for fx_v in fx_vals:
+        row = []
+        for pr in prices:
+            irr_v = _irr_for(p, preco_credito_usd=float(pr), fx_rate=float(fx_v))
+            row.append(round(irr_v * 100, 1) if irr_v is not None else None)
+        matrix.append(row)
+
+    return {
+        "prices":   prices,
+        "fx_vals":  [round(f, 2) for f in fx_vals],
+        "fx_label": f"FX USD→{p.moeda_projeto}",
+        "matrix":   matrix,
+        "wacc_pct": round(p.wacc * 100, 1),
+        "fx_base":  round(fx_base, 2) if fx_base else 1.0,
+        "price_base": p.preco_credito_usd,
+    }
+
+
 def calcular_viabilidade(p: PremissasViabilidade) -> dict:
     biochar  = p.feedstock_t_ano * p.yield_pirolise
     creditos = biochar * p.fator_carbono
@@ -226,14 +300,26 @@ def calcular_viabilidade(p: PremissasViabilidade) -> dict:
             "npv":  round(npv2, 0),
         })
 
+    # Waterfall ano 1
+    ebit_yr1 = ebitda_yr1 - da
+    trib_yr1 = round(max(ebit_yr1, 0) * p.aliquota_efetiva_ir, 0)
+    ebit_yr1 = round(ebit_yr1, 0)
+
+    # Tornado e Heatmap
+    irr_pct = irr * 100 if irr is not None else None
+    tornado = calcular_tornado(p, irr)
+    heatmap = calcular_heatmap(p)
+
     return {
         "moeda_projeto":         p.moeda_projeto,
         "biochar_t_ano":         round(biochar, 1),
         "creditos_tco2_ano":     round(creditos, 1),
-        "irr":                   round(irr * 100, 2) if irr is not None else None,
+        "irr":                   round(irr_pct, 2) if irr_pct is not None else None,
         "npv":                   round(npv, 0),
         "payback_year":          payback_year,
         "ebitda_yr1":            round(ebitda_yr1, 0),
+        "ebit_yr1":              ebit_yr1,
+        "trib_yr1":              trib_yr1,
         "receita_bruta_yr1":     round(rec_yr1, 0),
         "opex_yr1":              round(p.opex_anual, 0),
         "margem_ebitda_pct":     round(ebitda_yr1 / rec_yr1 * 100, 1) if rec_yr1 > 0 else None,
@@ -245,6 +331,8 @@ def calcular_viabilidade(p: PremissasViabilidade) -> dict:
         "fcl_acumulado":         acumulado,
         "anos":                  list(range(p.ano_investimento, p.ano_investimento + p.horizonte_anos + 1)),
         "sensibilidade":         sensibilidade,
+        "tornado":               tornado,
+        "heatmap":               heatmap,
     }
 
 

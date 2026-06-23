@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, useCallback, useRef } from 'react'
 import axios from 'axios'
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer, ReferenceLine, Cell,
+  Tooltip, Legend, ResponsiveContainer, ReferenceLine, Cell, ComposedChart,
 } from 'recharts'
 import { AppCtx } from '../../App'
 
@@ -230,16 +230,15 @@ export default function FinancialLabTab({ project }) {
 
         {/* ── Painel de resultados ──────────────────────────────────────── */}
         <div>
-          {/* KPI row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 16 }}>
+          {/* KPI row — financeiros */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 10 }}>
             {[
               { label: 'TIR', value: irr != null ? `${irr.toFixed(1)}%` : '—', color: irrColor, sub: `WACC ${wacc_pct.toFixed(0)}%` },
               { label: 'VPL', value: fmtMoeda(r.npv, cur), color: (r.npv || 0) >= 0 ? GREEN : RED },
               { label: 'Payback', value: r.payback_year || 'N/A' },
               { label: 'EBITDA Ano 1', value: fmtMoeda(r.ebitda_yr1, cur), sub: r.margem_ebitda_pct != null ? `${r.margem_ebitda_pct.toFixed(0)}% margem` : '' },
             ].map(k => (
-              <div key={k.label} style={{ background: 'white', border: '1px solid var(--border)',
-                                          borderRadius: 10, padding: '12px 14px' }}>
+              <div key={k.label} style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px' }}>
                 <div style={{ fontSize: 20, fontWeight: 800, color: k.color || NAVY }}>{k.value}</div>
                 <div style={{ fontSize: 11, color: 'var(--text-2)', marginTop: 2 }}>{k.label}</div>
                 {k.sub && <div style={{ fontSize: 10, color: 'var(--text-2)' }}>{k.sub}</div>}
@@ -247,67 +246,213 @@ export default function FinancialLabTab({ project }) {
             ))}
           </div>
 
+          {/* KPI row — operacionais */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 16 }}>
+            {[
+              { label: 'Biochar', value: r.biochar_t_ano != null ? `${r.biochar_t_ano.toLocaleString('pt-BR')} t/ano` : '—' },
+              { label: 'Créditos gerados', value: r.creditos_tco2_ano != null ? `${r.creditos_tco2_ano.toLocaleString('pt-BR')} tCO₂e` : '—' },
+              { label: 'Adicionalidade', value: r.adicionalidade_financeira ? '✓ Confirmada' : '✗ Não confirmada',
+                color: r.adicionalidade_financeira ? GREEN : RED,
+                sub: r.irr_sem_carbono != null ? `TIR s/carbono: ${r.irr_sem_carbono.toFixed(1)}%` : 'TIR s/carbono: inviável' },
+            ].map(k => (
+              <div key={k.label} style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px' }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: k.color || NAVY }}>{k.value}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-2)', marginTop: 2 }}>{k.label}</div>
+                {k.sub && <div style={{ fontSize: 10, color: 'var(--text-2)' }}>{k.sub}</div>}
+              </div>
+            ))}
+          </div>
+
+          {/* Tornado */}
+          {(r.tornado || []).length > 0 && (
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: NAVY, marginBottom: 4 }}>
+                Tornado de Sensibilidade — Impacto na TIR (±20%)
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 10 }}>
+                Variação de cada parâmetro em ±20% mantendo os demais fixos. Em pontos percentuais.
+              </div>
+              <ResponsiveContainer width="100%" height={Math.max(180, r.tornado.length * 34)}>
+                <BarChart
+                  data={[...r.tornado].reverse()}
+                  layout="vertical"
+                  margin={{ top: 4, right: 40, left: 120, bottom: 4 }}
+                  barCategoryGap="25%"
+                >
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#F0F0F0" />
+                  <XAxis type="number" tickFormatter={v => `${v > 0 ? '+' : ''}${v.toFixed(1)}pp`} tick={{ fontSize: 9 }} />
+                  <YAxis type="category" dataKey="param" tick={{ fontSize: 10 }} width={116} />
+                  <Tooltip formatter={(v, name) => [`${v > 0 ? '+' : ''}${v.toFixed(2)} pp`, name === 'delta_neg' ? '−20%' : '+20%']} />
+                  <ReferenceLine x={0} stroke="#374151" strokeWidth={1.5} />
+                  <Bar dataKey="delta_neg" name="−20%" fill={RED} opacity={0.85} radius={[0, 3, 3, 0]} />
+                  <Bar dataKey="delta_pos" name="+20%" fill="#2563EB" opacity={0.85} radius={[0, 3, 3, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Waterfall Ano 1 */}
+          {r.receita_bruta_yr1 != null && (
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: NAVY, marginBottom: 12 }}>
+                Waterfall Ano 1 — Da Receita ao FCL
+              </div>
+              {(() => {
+                const rec   = r.receita_bruta_yr1 || 0
+                const opex  = -(r.opex_yr1 || 0)
+                const ebitda = r.ebitda_yr1 || 0
+                const da    = -(r.da_anual || 0)
+                const ebit  = r.ebit_yr1 || 0
+                const trib  = -(r.trib_yr1 || 0)
+                const fcl1  = ebit + (r.da_anual || 0) + trib
+
+                // Waterfall via offset bars: invisible base + visible segment
+                const steps = [
+                  { name: 'Receita', base: 0,     value: rec,   total: false },
+                  { name: '−OPEX',   base: ebitda, value: opex,  total: false },
+                  { name: 'EBITDA',  base: 0,     value: ebitda,total: true  },
+                  { name: '−DA',     base: ebit,   value: da,    total: false },
+                  { name: 'EBIT',    base: 0,     value: ebit,  total: true  },
+                  { name: '−IR',     base: ebit + trib, value: trib, total: false },
+                  { name: '+DA',     base: ebit + trib, value: r.da_anual || 0, total: false },
+                  { name: 'FCL',     base: 0,     value: fcl1,  total: true  },
+                ]
+                const maxAbs = Math.max(...steps.map(s => Math.abs(s.value) + Math.abs(s.base)))
+
+                return (
+                  <ResponsiveContainer width="100%" height={220}>
+                    <ComposedChart data={steps} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
+                      <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                      <YAxis tickFormatter={v => fmtMoeda(v, cur)} tick={{ fontSize: 9 }} width={68} />
+                      <Tooltip formatter={(v, name) => [fmtMoeda(v, cur), name]} />
+                      <ReferenceLine y={0} stroke="#374151" strokeWidth={1} />
+                      {/* Invisible base bar */}
+                      <Bar dataKey="base" stackId="wf" fill="transparent" />
+                      {/* Visible value bar */}
+                      <Bar dataKey="value" stackId="wf" radius={[3, 3, 0, 0]}>
+                        {steps.map((s, i) => (
+                          <Cell key={i}
+                            fill={s.total ? NAVY : s.value >= 0 ? GREEN : RED}
+                            fillOpacity={s.total ? 1 : 0.85}
+                          />
+                        ))}
+                      </Bar>
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                )
+              })()}
+            </div>
+          )}
+
+          {/* Heat Map TIR */}
+          {r.heatmap && r.heatmap.matrix?.length > 1 && (
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: NAVY, marginBottom: 4 }}>
+                Heat Map TIR — Preço Carbono × {r.heatmap.fx_label}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 10 }}>
+                Verde = TIR ≥ WACC ({wacc_pct.toFixed(0)}%). ✕ = cenário atual.
+              </div>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ borderCollapse: 'collapse', fontSize: 11, width: '100%' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ padding: '4px 8px', background: '#F1F5F9', fontSize: 10, color: '#6B7280' }}>
+                        FX \ $
+                      </th>
+                      {r.heatmap.prices.map(p => (
+                        <th key={p} style={{ padding: '4px 6px', background: '#F1F5F9',
+                                             fontWeight: 600, textAlign: 'center', minWidth: 44,
+                                             fontSize: 10 }}>
+                          {p}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {r.heatmap.matrix.map((row, ri) => (
+                      <tr key={ri}>
+                        <td style={{ padding: '4px 8px', background: '#F1F5F9',
+                                     fontWeight: 600, fontSize: 10, whiteSpace: 'nowrap' }}>
+                          {r.heatmap.fx_vals[ri]}
+                        </td>
+                        {row.map((irr_v, ci) => {
+                          const isBase = Math.abs(r.heatmap.fx_vals[ri] - r.heatmap.fx_base) < 0.01 &&
+                                         r.heatmap.prices[ci] === r.heatmap.price_base
+                          const ok = irr_v != null && irr_v >= r.heatmap.wacc_pct
+                          const bg = irr_v == null ? '#F9FAFB'
+                            : ok ? `rgba(22,163,74,${Math.min(0.15 + (irr_v - r.heatmap.wacc_pct) * 0.02, 0.7)})`
+                            : `rgba(220,38,38,${Math.min(0.15 + (r.heatmap.wacc_pct - irr_v) * 0.02, 0.6)})`
+                          return (
+                            <td key={ci} style={{
+                              padding: '4px 2px', textAlign: 'center', background: bg,
+                              color: irr_v == null ? '#9CA3AF' : ok ? '#14532D' : '#7F1D1D',
+                              fontWeight: isBase ? 800 : 500,
+                              border: isBase ? `2px solid ${NAVY}` : '1px solid #F3F4F6',
+                            }}>
+                              {isBase ? '✕' : irr_v != null ? `${irr_v.toFixed(0)}%` : '—'}
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {/* FCL Chart */}
           <div className="card" style={{ marginBottom: 16 }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: NAVY, marginBottom: 12 }}>
-              Fluxo de Caixa Livre — 20 anos
+              Fluxo de Caixa Livre — {r.anos?.length - 1 || 20} anos
             </div>
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={200}>
               <BarChart data={fclData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
                 <XAxis dataKey="ano" tick={{ fontSize: 10 }} interval={3} />
-                <YAxis tickFormatter={v => fmtBRL(v)} tick={{ fontSize: 10 }} width={60} />
+                <YAxis tickFormatter={v => fmtMoeda(v, cur)} tick={{ fontSize: 9 }} width={64} />
                 <Tooltip content={<FCLTooltip />} />
                 <ReferenceLine y={0} stroke="#374151" strokeWidth={1.5} />
                 <Bar dataKey="fcl" name="FCL Anual" radius={[3, 3, 0, 0]}>
-                  {fclData.map((d, i) => (
-                    <Cell key={i} fill={d.fcl >= 0 ? GREEN : RED} />
-                  ))}
+                  {fclData.map((d, i) => <Cell key={i} fill={d.fcl >= 0 ? GREEN : RED} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          {/* FCL Acumulado */}
-          <div className="card" style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: NAVY, marginBottom: 12 }}>
-              FCL Acumulado — Payback
+          {/* FCL Acumulado + Sensibilidade lado a lado */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="card">
+              <div style={{ fontSize: 13, fontWeight: 700, color: NAVY, marginBottom: 10 }}>FCL Acumulado</div>
+              <ResponsiveContainer width="100%" height={160}>
+                <LineChart data={fclData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
+                  <XAxis dataKey="ano" tick={{ fontSize: 9 }} interval={3} />
+                  <YAxis tickFormatter={v => fmtMoeda(v, cur)} tick={{ fontSize: 9 }} width={60} />
+                  <Tooltip content={<FCLTooltip />} />
+                  <ReferenceLine y={0} stroke={AMBER} strokeWidth={2} strokeDasharray="6 3" />
+                  <Line dataKey="acum" name="FCL Acumulado" stroke={NAVY} strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
-            <ResponsiveContainer width="100%" height={180}>
-              <LineChart data={fclData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
-                <XAxis dataKey="ano" tick={{ fontSize: 10 }} interval={3} />
-                <YAxis tickFormatter={v => fmtBRL(v)} tick={{ fontSize: 10 }} width={60} />
-                <Tooltip content={<FCLTooltip />} />
-                <ReferenceLine y={0} stroke={AMBER} strokeWidth={2} strokeDasharray="6 3"
-                  label={{ value: 'Break-even', position: 'insideTopLeft', fontSize: 10, fill: AMBER }} />
-                <Line dataKey="acum" name="FCL Acumulado" stroke={NAVY} strokeWidth={2.5}
-                  dot={false} activeDot={{ r: 4 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Sensitivity */}
-          <div className="card">
-            <div style={{ fontSize: 13, fontWeight: 700, color: NAVY, marginBottom: 12 }}>
-              Sensibilidade TIR × Preço do Crédito
-            </div>
-            <ResponsiveContainer width="100%" height={160}>
-              <LineChart data={sensiData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
-                <XAxis dataKey="price" tick={{ fontSize: 10 }} interval={2} />
-                <YAxis tickFormatter={v => `${v?.toFixed(0)}%`} tick={{ fontSize: 10 }} width={42} />
-                <Tooltip formatter={(v) => [`${v?.toFixed(1)}%`, 'TIR']} />
-                <ReferenceLine y={wacc_pct} stroke={AMBER} strokeWidth={2} strokeDasharray="6 3"
-                  label={{ value: `WACC ${wacc_pct.toFixed(0)}%`, position: 'insideTopLeft', fontSize: 10, fill: AMBER }} />
-                <Line dataKey="irr" name="TIR" stroke={NAVY} strokeWidth={2.5}
-                  dot={false} activeDot={{ r: 4 }} />
-              </LineChart>
-            </ResponsiveContainer>
-            <div style={{ marginTop: 8, padding: '8px 12px', background: '#F0FDF4', borderRadius: 6,
-                          fontSize: 12, color: GREEN, fontWeight: 600 }}>
-              Break-even: {r.preco_breakeven_usd != null ? `$ ${r.preco_breakeven_usd} / tCO₂` : '—'} &nbsp;|&nbsp;
-              Adicionalidade: {r.adicionalidade_financeira ? '✓ Confirmada' : '✗ Não confirmada'}
+            <div className="card">
+              <div style={{ fontSize: 13, fontWeight: 700, color: NAVY, marginBottom: 10 }}>Sensibilidade TIR × Preço</div>
+              <ResponsiveContainer width="100%" height={160}>
+                <LineChart data={sensiData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
+                  <XAxis dataKey="price" tick={{ fontSize: 9 }} interval={2} />
+                  <YAxis tickFormatter={v => `${v?.toFixed(0)}%`} tick={{ fontSize: 9 }} width={36} />
+                  <Tooltip formatter={(v) => [`${v?.toFixed(1)}%`, 'TIR']} />
+                  <ReferenceLine y={wacc_pct} stroke={AMBER} strokeWidth={2} strokeDasharray="6 3"
+                    label={{ value: `WACC`, position: 'insideTopRight', fontSize: 9, fill: AMBER }} />
+                  <Line dataKey="irr" name="TIR" stroke={NAVY} strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
+                </LineChart>
+              </ResponsiveContainer>
+              <div style={{ marginTop: 6, fontSize: 11, color: GREEN, fontWeight: 600 }}>
+                Break-even: {r.preco_breakeven_usd != null ? `$ ${r.preco_breakeven_usd}/tCO₂` : '—'}
+              </div>
             </div>
           </div>
         </div>
