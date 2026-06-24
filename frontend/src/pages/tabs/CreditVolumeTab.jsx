@@ -250,7 +250,7 @@ export default function CreditVolumeTab({ project }) {
                           <td style={{ padding: '7px 12px', fontWeight: bold ? 700 : 400 }}>{label}</td>
                           {methods.map(m => {
                             const v = result.results[m]?.[key]
-                            const isZero = v === 0 || v === -0
+                            const isZero = v === 0 || Object.is(v, -0)
                             return (
                               <td key={m} style={{
                                 padding: '7px 12px', textAlign: 'right',

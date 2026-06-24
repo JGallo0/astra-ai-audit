@@ -849,9 +849,9 @@ def get_verificacao(project_id: str, role: str = Query("developer"), methodology
 
     if role == "vvb":
         reqs = _load_requirements(methodology)
-        return build_vvb_plan(reqs, audit_results)
+        return build_vvb_plan(reqs, audit_results, methodology=methodology)
     else:
-        return build_developer_plan(audit_results)
+        return build_developer_plan(audit_results, methodology=methodology)
 
 # ── Dashboard Stats ───────────────────────────────────────────────────────────
 
