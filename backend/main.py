@@ -741,6 +741,16 @@ async def run_assessment(project_id: str, body: dict):
     except Exception as e:
         pdd_text = f"[RAG falhou: {e}] Projeto: {p.get('name', '')}"
 
+    # Busca project_data do banco — usado para Isometric (extração nativa)
+    cached_pd = None
+    try:
+        pd_row = _db_fetchone("SELECT project_data FROM ca_projects WHERE id=%s", (project_id,))
+        raw = (pd_row or {}).get("project_data")
+        if raw:
+            cached_pd = json.loads(raw) if isinstance(raw, str) else raw
+    except Exception:
+        pass
+
     from backend.assessment_service import run_methodology_assessment
     result = await run_methodology_assessment(
         project_id=project_id,
@@ -749,6 +759,7 @@ async def run_assessment(project_id: str, body: dict):
         openai_client=openai_client,
         model=OPENAI_MODEL,
         audit_mode=audit_mode,
+        cached_project_data=cached_pd,
     )
 
     # Salva no banco

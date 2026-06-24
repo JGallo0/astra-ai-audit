@@ -270,6 +270,7 @@ async def run_methodology_assessment(
     openai_client: Any,
     model: str,
     audit_mode: str = "development",
+    cached_project_data: dict = None,
 ) -> dict:
     """
     Avalia o projeto contra todas as metodologias e retorna comparação.
@@ -302,7 +303,24 @@ async def run_methodology_assessment(
         if not reqs:
             continue
 
-        findings = run_engine_with_profile(profile, reqs, LOGIC_REGISTRY, audit_mode)
+        # Isometric: usa project_data do banco (extração nativa, melhor qualidade)
+        # Outros (Puro, Rainbow, etc.): usa ProjectProfile (extração booleana)
+        if method == "isometric" and cached_project_data:
+            try:
+                from engine.requirement_logic import run_engine, apply_inference_rules
+                pd = dict(cached_project_data)
+                pd.setdefault("methodology", {})["standard"] = "Isometric"
+                pd = apply_inference_rules(pd, methodology_key="isometric")
+                engine_out = run_engine(
+                    pd, reqs, audit_mode=audit_mode,
+                    profile=None, methodology_key="isometric",
+                )
+                findings = engine_out.get("results", engine_out) if isinstance(engine_out, dict) else engine_out
+            except Exception as e:
+                print(f"[assessment] Isometric cached fallback error: {e}")
+                findings = run_engine_with_profile(profile, reqs, LOGIC_REGISTRY, audit_mode)
+        else:
+            findings = run_engine_with_profile(profile, reqs, LOGIC_REGISTRY, audit_mode)
         dim_scores = compute_dimension_scores(findings, method)
 
         # ── Fix 1: Hard gate para P-FFOR-0 (sustentabilidade florestal) ───────
