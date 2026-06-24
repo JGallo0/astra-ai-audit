@@ -44,8 +44,16 @@ METHODOLOGY_PROBES = {
             "from financial additionality analysis?"
         ),
         "has_puro_sdg_template":  "Does the PDD use the Puro.earth SDG reporting template?",
+        "has_pyrolysis_gas_recovery": (
+            "Does the PDD describe that pyrolysis gases are recovered or combusted (e.g. via gas burner, "
+            "flare, or energy recovery system)? Answer FALSE if gases are vented without treatment."
+        ),
     },
     "isometric": {
+        "has_pyrolysis_gas_recovery": (
+            "Does the PDD describe that pyrolysis gases are recovered or combusted "
+            "(via gas burner, flare, or energy recovery)? FALSE if gases are vented."
+        ),
         "uses_lembrechts_database": (
             "Does the PDD specifically reference the Lembrechts et al. soil temperature database "
             "for permanence calculations?"
@@ -385,19 +393,86 @@ async def run_methodology_assessment(
             findings = run_engine_with_profile(profile, reqs, LOGIC_REGISTRY, audit_mode)
         dim_scores = compute_dimension_scores(findings, method)
 
-        # ── Hard gate P-FFOR-0: biomassa florestal sem certificação ────────────
-        # Gap ESTRUTURAL no Puro.Earth — sem FSC/ISAE3000/plano governamental,
-        # o projeto não pode ser registrado. Cap de 40% (não 60%) para refletir
-        # que Isometric é genuinamente mais adequado para esse perfil de projeto.
-        # O cap é intencialmente baixo: sem certificação florestal, Puro.Earth
-        # é a metodologia MENOS recomendável, não apenas "possível com gaps".
-        if method == "puro_earth" and profile.is_forest_biomass:
-            ffor = next((r for r in findings
-                         if r.get("requirement_id") == "P-FFOR-0"), None)
-            if ffor and ffor.get("status") not in ("compliant", "not_applicable"):
-                current = dim_scores.get("feedstock_eligibility")
-                if current is not None and current > 40:
-                    dim_scores["feedstock_eligibility"] = 40.0
+        # ══════════════════════════════════════════════════════════════════════
+        # HARD GATES — Critérios eliminatórios por metodologia
+        # Cada cap reflete o impacto real do gap na capacidade de certificação.
+        # ══════════════════════════════════════════════════════════════════════
+
+        def _cap(dim: str, max_val: float):
+            """Aplica cap em uma dimensão se o score atual for maior."""
+            cur = dim_scores.get(dim)
+            if cur is not None and cur > max_val:
+                dim_scores[dim] = max_val
+
+        # ── Critérios comuns a ambas as metodologias ──────────────────────────
+
+        # H/Corg ≥ 0,5 → permanência = 0% (projeto não pode ser certificado)
+        if profile.h_c_ratio is not None and profile.h_c_ratio >= 0.5:
+            _cap("permanence", 0.0)
+
+        # O/Corg ≥ 0,2 → permanência = 0% (eliminatório ambas)
+        if profile.o_c_ratio is not None and profile.o_c_ratio >= 0.2:
+            _cap("permanence", 0.0)
+
+        # PAH acima do limite WBC (~12 mg/kg) → ambiental = 0%
+        if profile.pah_value is not None and profile.pah_value > 12:
+            _cap("environmental_social", 0.0)
+
+        # PCB acima do limite (0,2 mg/kg) → ambiental = 0%
+        if profile.pcb_value is not None and profile.pcb_value > 0.2:
+            _cap("environmental_social", 0.0)
+
+        # PCDD/F acima do limite (20 ng/kg) → ambiental = 0%
+        if profile.pcdd_f_value is not None and profile.pcdd_f_value > 20:
+            _cap("environmental_social", 0.0)
+
+        # Gases de pirólise NÃO recuperados → monitoramento e feedstock penalizados
+        # (impacta net-negativity, que é hard gate em ambas metodologias)
+        if profile.has_gas_sensors is False and method in ("puro_earth", "isometric"):
+            # Se explicitamente ausente (não apenas desconhecido):
+            gas_req_id = "P-GSEN-0" if method == "puro_earth" else "R-SZK5-0"
+            gas_req = next((r for r in findings if r.get("requirement_id") == gas_req_id), None)
+            if gas_req and gas_req.get("status") == "non_compliant":
+                _cap("monitoring", 20.0)
+
+        # ── Critérios específicos Puro.Earth ──────────────────────────────────
+        if method == "puro_earth":
+
+            # 1. Biomassa florestal sem certificação (P-FFOR-0)
+            # Gap estrutural — projeto não pode ser registrado sem FSC/ISAE3000/plano gov.
+            if profile.is_forest_biomass:
+                ffor = next((r for r in findings if r.get("requirement_id") == "P-FFOR-0"), None)
+                if ffor and ffor.get("status") not in ("compliant", "not_applicable"):
+                    _cap("feedstock_eligibility", 40.0)
+
+            # 2. Feedstock misto (fossil+biogênico) → eliminatório absoluto (Clarificação 001 BCH)
+            if profile.uses_mixed_waste:
+                feli = next((r for r in findings if r.get("requirement_id") == "P-FELI-0"), None)
+                if feli and feli.get("status") == "non_compliant":
+                    _cap("feedstock_eligibility", 0.0)
+
+            # 3. Coal ash → eliminatório absoluto (Clarificação 010 CAM)
+            if profile.uses_coal_ash:
+                _cap("feedstock_eligibility", 0.0)
+
+            # 4. Gases de pirólise não recuperados/combustados → eliminatório Puro
+            # (Hard gate explícito na tabela de elegibilidade do VVB)
+            if not profile.has_pyrolysis_gas_recovery:
+                # Apenas penaliza se o processo foi descrito e gases ventiláveis identificados
+                gsen = next((r for r in findings if r.get("requirement_id") == "P-GSEN-0"), None)
+                if gsen and gsen.get("status") == "non_compliant":
+                    _cap("monitoring", 15.0)
+                    _cap("feedstock_eligibility", 30.0)
+
+            # 5. Alega isenção de adicionalidade por first-of-its-kind → Puro rejeita
+            # (Clarificação 005 ADD — fechado explicitamente)
+            if profile.financial_additionality_exemption_claimed and not profile.has_financial_additionality:
+                _cap("additionality", 20.0)
+
+            # 6. Sem LCA alguma → Puro exige LCA explícita e prescritiva (A1→B1)
+            # Isometric tolera GHG statement sem LCA formal
+            if not profile.has_lca:
+                _cap("carbon_accounting", 45.0)
 
         overall    = compute_weighted_score(dim_scores)
         grade      = _score_to_grade(overall)

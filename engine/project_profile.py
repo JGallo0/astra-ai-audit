@@ -142,6 +142,7 @@ class ProjectProfile:
     # ── Reator e documentação técnica ─────────────────────────────────────────
     has_engineering_diagram:   bool           = False
     has_gas_sensors:           bool           = False
+    has_pyrolysis_gas_recovery: bool          = False  # gases recuperados/combustados — hard gate Puro
     gas_sensor_method:         str            = ""
     # "reactor_spec" | "continuous_pressure" | "annual_test" | ""
     has_material_justification: bool          = False
