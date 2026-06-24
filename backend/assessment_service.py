@@ -100,7 +100,6 @@ METHODOLOGY_PROBES = {
         ),
     },
 }
-}
 
 
 def _make_ai_client(openai_client: Any, model: str):

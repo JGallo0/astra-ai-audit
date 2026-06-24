@@ -186,6 +186,74 @@ def delete_project(project_id: str):
     _db_execute("DELETE FROM ca_projects WHERE id = %s", (project_id,))
     return {"ok": True}
 
+
+# ── PIN — Project Idea Note (rota sem PDD) ────────────────────────────────────
+
+@app.post("/api/pin/audit")
+def pin_audit(body: dict):
+    """
+    Recebe campos do formulário PIN e retorna auditoria multi-metodologia
+    sem necessidade de PDD ou vector store.
+
+    Body: { form: {...campos do ProjectProfile...}, save: bool }
+    """
+    try:
+        from backend.pin_service import build_profile_from_form, run_pin_audit
+        import dataclasses
+
+        form_data = body.get("form", body)
+        save = body.get("save", False)
+
+        profile = build_profile_from_form(form_data)
+        audit   = run_pin_audit(profile)
+
+        project_id = None
+        if save and profile.project_name:
+            project_id = str(uuid.uuid4())
+            profile_dict = dataclasses.asdict(profile)
+            _db_execute(
+                """INSERT INTO ca_projects
+                   (id, name, source, project_data, created_at)
+                   VALUES (%s, %s, %s, %s, %s)""",
+                (project_id, profile.project_name, "form",
+                 json.dumps(profile_dict, default=str), _now()),
+            )
+            # Salva o audit run
+            run_id = str(uuid.uuid4())
+            _db_execute(
+                """INSERT INTO ca_audit_runs
+                   (id, project_id, methodology, modules, status, result, created_at, completed_at)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+                (run_id, project_id, "pin_multi", "[]", "completed",
+                 json.dumps(audit, default=str), _now(), _now()),
+            )
+
+        return {
+            "ok": True,
+            "project_id": project_id,
+            "profile":  dataclasses.asdict(profile),
+            **audit,
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(500, f"Erro no PIN audit: {e}")
+
+
+@app.get("/api/pin/{project_id}/result")
+def get_pin_result(project_id: str):
+    """Retorna o resultado do PIN audit salvo para um projeto."""
+    run = _db_fetchone(
+        "SELECT result FROM ca_audit_runs WHERE project_id=%s AND methodology='pin_multi' ORDER BY created_at DESC LIMIT 1",
+        (project_id,)
+    )
+    if not run:
+        raise HTTPException(404, "PIN audit não encontrado para este projeto.")
+    result = run.get("result") or {}
+    if isinstance(result, str):
+        result = json.loads(result)
+    return result
+
 @app.post("/api/projects/{project_id}/reset-cache")
 def reset_project_data_cache(project_id: str):
     """Invalida o cache de project_data — próxima auditoria fará nova extração LLM."""

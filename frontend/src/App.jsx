@@ -9,12 +9,19 @@ import AuditHistory from './pages/AuditHistory'
 import UserAccess from './pages/UserAccess'
 import Settings from './pages/Settings'
 import CreateProjectModal from './components/CreateProjectModal'
+import PinGeneratorPage from './pages/PinGeneratorPage'
 
 const API = import.meta.env.VITE_API_BASE || ''
 
 export const AppCtx = createContext({})
 
 const NAV = [
+  {
+    section: 'Início Rápido',
+    items: [
+      { label: 'Novo Projeto (PIN)', icon: '🚀', path: '/novo-projeto' },
+    ],
+  },
   {
     section: 'Análise',
     items: [
@@ -139,6 +146,7 @@ function AppShell() {
           <div className="page-wrap">
             <Routes>
               <Route path="/"                 element={<Dashboard />} />
+              <Route path="/novo-projeto"     element={<PinGeneratorPage />} />
               <Route path="/chat"             element={<ProjectDetail tab="chat" />} />
               <Route path="/validacao"        element={<ProjectDetail tab="validacao" />} />
               <Route path="/fit-metodologico" element={<ProjectDetail tab="fit-metodologico" />} />

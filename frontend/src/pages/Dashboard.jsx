@@ -207,9 +207,22 @@ export default function Dashboard() {
             </div>
             <div className="empty-state-sub">
               {portfolio.length === 0
-                ? 'Clique em "Novo projeto" na sidebar para começar.'
+                ? 'Adicione um projeto com PDD ou inicie uma análise preliminar.'
                 : 'Tente outro termo de busca.'}
             </div>
+            {portfolio.length === 0 && (
+              <div style={{ display: 'flex', gap: 12, marginTop: 20, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => navigate('/novo-projeto')}
+                  style={{
+                    padding: '10px 20px', background: '#1e40af', color: '#fff',
+                    border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 13,
+                    cursor: 'pointer',
+                  }}>
+                  🚀 Novo Projeto (sem PDD)
+                </button>
+              </div>
+            )}
           </div>
         </div>
       ) : (
