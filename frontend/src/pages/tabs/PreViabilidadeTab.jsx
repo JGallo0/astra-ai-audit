@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import axios from 'axios'
 import { AppCtx } from '../../App'
 
@@ -59,6 +59,14 @@ export default function FitMetodologicoTab({ project }) {
   const [loading, setLoading]   = useState(false)
   const [loadingStep, setLoadingStep] = useState('')
   const [error, setError]       = useState('')
+  const [marketData, setMarketData] = useState({})
+  const [openModules, setOpenModules] = useState({ mod3: false, mod4: false })
+
+  useEffect(() => {
+    axios.get(`${API}/api/methodologies/market-overview`)
+      .then(r => setMarketData(r.data))
+      .catch(() => {})
+  }, [API])
 
   function toggleMethod(key) {
     setSelectedMethods(prev =>
@@ -369,6 +377,180 @@ export default function FitMetodologicoTab({ project }) {
               </div>
             )
           })}
+          {/* Módulo 3 — Custos e Prazos */}
+          {Object.keys(marketData).length > 0 && (
+            <div className="card" style={{ marginBottom: 16 }}>
+              <button onClick={() => setOpenModules(p => ({ ...p, mod3: !p.mod3 }))}
+                style={{ width: '100%', display: 'flex', justifyContent: 'space-between',
+                         alignItems: 'center', background: 'none', border: 'none',
+                         cursor: 'pointer', padding: 0 }}>
+                <div className="card-title" style={{ marginBottom: 0 }}>
+                  Módulo 3 — Custos de Verificação e Prazos
+                </div>
+                <span style={{ color: NAVY, fontSize: 14 }}>{openModules.mod3 ? '▲' : '▼'}</span>
+              </button>
+              {openModules.mod3 && (
+                <div style={{ marginTop: 14, overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                    <thead>
+                      <tr style={{ background: NAVY, color: 'white' }}>
+                        {['Item', ...selectedMethods.map(m => (marketData[m]?.short || m))].map(h => (
+                          <th key={h} style={{ padding: '7px 10px', textAlign: h === 'Item' ? 'left' : 'center' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        { label: 'Taxa abertura conta', key: d => d?.costs?.registry?.account_opening_usd != null ? (d.costs.registry.account_opening_usd === 0 ? 'Grátis' : `US$ ${d.costs.registry.account_opening_usd.toLocaleString()}`) : d?.costs?.registry?.note || '—' },
+                        { label: 'Manutenção anual', key: d => { const r = d?.costs?.registry; if (!r) return '—'; if (r.annual_maintenance_usd === 0) return 'Grátis'; if (r.annual_maintenance_usd) return `US$ ${r.annual_maintenance_usd}/ano`; if (r.annual_maintenance_eur) return `€${r.annual_maintenance_eur.toLocaleString()}/ano`; return r.note || '—'; } },
+                        { label: 'Taxa por crédito', key: d => d?.costs?.issuance?.per_credit_usd != null ? `US$ ${d.costs.issuance.per_credit_usd}/crédito` : (d?.costs?.issuance?.per_credit_eur || d?.costs?.issuance?.note || '—') },
+                        { label: 'VVB — 1ª auditoria', key: d => d?.costs?.vvb?.initial_audit_range || d?.costs?.vvb?.initial_validation_range || '—' },
+                        { label: 'VVB — periódica', key: d => d?.costs?.vvb?.periodic_audit_range || d?.costs?.vvb?.annual_verification_range || '—' },
+                        { label: 'Custo total ano 1 (est.)', key: d => d?.costs?.total_first_year_estimate_usd || '—', bold: true },
+                        { label: 'Custo anual recorrente', key: d => d?.costs?.total_ongoing_per_year_usd || '—' },
+                        { label: 'Registro (meses)', key: d => d?.timelines?.registration_months || '—' },
+                        { label: '1ª emissão (meses)', key: d => d?.timelines?.first_issuance_months || '—', bold: true },
+                        { label: 'Prazo de emissão', key: d => d?.timelines?.issuance_deadline || '—' },
+                      ].map(({ label, key, bold }) => (
+                        <tr key={label} style={{ borderBottom: '1px solid #F3F4F6', background: bold ? '#EEF2FA' : 'white' }}>
+                          <td style={{ padding: '6px 10px', fontWeight: bold ? 700 : 400 }}>{label}</td>
+                          {selectedMethods.map(m => (
+                            <td key={m} style={{ padding: '6px 10px', textAlign: 'center',
+                                                  fontWeight: bold ? 700 : 400, fontSize: 11 }}>
+                              {key(marketData[m]) || '—'}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 8 }}>
+                    Fontes: Sylvera Methodology Assessment (Out 2025), Puro Platform Agreement 2025, Verra Fee Schedule 2024, Isometric Standard v1.5.
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Módulo 4 — Market Acceptance */}
+          {Object.keys(marketData).length > 0 && (
+            <div className="card" style={{ marginBottom: 16 }}>
+              <button onClick={() => setOpenModules(p => ({ ...p, mod4: !p.mod4 }))}
+                style={{ width: '100%', display: 'flex', justifyContent: 'space-between',
+                         alignItems: 'center', background: 'none', border: 'none',
+                         cursor: 'pointer', padding: 0 }}>
+                <div className="card-title" style={{ marginBottom: 0 }}>
+                  Módulo 4 — Aceitação de Mercado e Padrões
+                </div>
+                <span style={{ color: NAVY, fontSize: 14 }}>{openModules.mod4 ? '▲' : '▼'}</span>
+              </button>
+              {openModules.mod4 && (
+                <div style={{ marginTop: 14 }}>
+                  {/* Standards */}
+                  <div style={{ overflowX: 'auto', marginBottom: 14 }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                      <thead>
+                        <tr style={{ background: NAVY, color: 'white' }}>
+                          {['Padrão / Certificação', ...selectedMethods.map(m => marketData[m]?.short || m)].map(h => (
+                            <th key={h} style={{ padding: '7px 10px', textAlign: h.length < 20 ? 'center' : 'left' }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {['icroa', 'corsia', 'icvcm_ccp'].map(std => {
+                          const STD_LABELS = { icroa: 'ICROA', corsia: 'CORSIA', icvcm_ccp: 'ICVCM / CCP' }
+                          const STATUS_COLORS = { approved: GREEN, conditional: AMBER, pending: '#6366F1', not_eligible: RED, not_applicable: '#9CA3AF' }
+                          return (
+                            <tr key={std} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                              <td style={{ padding: '8px 10px', fontWeight: 600 }}>{STD_LABELS[std]}</td>
+                              {selectedMethods.map(m => {
+                                const s = marketData[m]?.market?.standards?.[std]
+                                const color = STATUS_COLORS[s?.status] || '#9CA3AF'
+                                return (
+                                  <td key={m} style={{ padding: '8px 10px', textAlign: 'center' }}>
+                                    <span style={{ fontSize: 11, fontWeight: 600, color,
+                                                   background: color + '18', padding: '2px 8px',
+                                                   borderRadius: 10, display: 'inline-block' }}>
+                                      {s?.label || '—'}
+                                    </span>
+                                    {s?.detail && <div style={{ fontSize: 10, color: '#6B7280', marginTop: 2 }}>{s.detail}</div>}
+                                  </td>
+                                )
+                              })}
+                            </tr>
+                          )
+                        })}
+                        {/* Price range */}
+                        <tr style={{ borderBottom: '1px solid #F3F4F6', background: '#EEF2FA' }}>
+                          <td style={{ padding: '8px 10px', fontWeight: 700 }}>Preço médio (USD/tCO₂)</td>
+                          {selectedMethods.map(m => (
+                            <td key={m} style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700, color: NAVY }}>
+                              {marketData[m]?.market?.price_range_usd
+                                ? `US$ ${marketData[m].market.price_range_usd}`
+                                : '—'}
+                            </td>
+                          ))}
+                        </tr>
+                        {/* Market share */}
+                        <tr style={{ borderBottom: '1px solid #F3F4F6' }}>
+                          <td style={{ padding: '8px 10px' }}>Market share (biochar)</td>
+                          {selectedMethods.map(m => (
+                            <td key={m} style={{ padding: '8px 10px', textAlign: 'center', fontSize: 11 }}>
+                              {marketData[m]?.market?.market_share || '—'}
+                            </td>
+                          ))}
+                        </tr>
+                        {/* Compliance markets */}
+                        <tr>
+                          <td style={{ padding: '8px 10px' }}>Mercados compliance</td>
+                          {selectedMethods.map(m => {
+                            const cms = marketData[m]?.market?.compliance_markets || []
+                            return (
+                              <td key={m} style={{ padding: '8px 10px', textAlign: 'center', fontSize: 11 }}>
+                                {cms.length === 0 ? <span style={{ color: '#9CA3AF' }}>Nenhum</span>
+                                  : cms.map(c => (
+                                    <span key={c.name} style={{ display: 'inline-block', margin: '1px 2px',
+                                      padding: '1px 6px', borderRadius: 8, background: '#F0FDF4',
+                                      color: GREEN, fontSize: 10, fontWeight: 600 }}>
+                                      {c.name}
+                                    </span>
+                                  ))}
+                              </td>
+                            )
+                          })}
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Strengths / Risks per method */}
+                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${selectedMethods.length}, 1fr)`, gap: 12 }}>
+                    {selectedMethods.map(m => {
+                      const md = marketData[m]?.market || {}
+                      return (
+                        <div key={m} style={{ background: '#F9FAFB', borderRadius: 8, padding: '10px 12px' }}>
+                          <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6, color: NAVY }}>
+                            {marketData[m]?.short || m}
+                          </div>
+                          {(md.strengths || []).map(s => (
+                            <div key={s} style={{ fontSize: 11, color: GREEN, marginBottom: 3 }}>✓ {s}</div>
+                          ))}
+                          {(md.risks || []).map(r => (
+                            <div key={r} style={{ fontSize: 11, color: RED, marginBottom: 3 }}>✗ {r}</div>
+                          ))}
+                          {md.price_note && (
+                            <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 6, lineHeight: 1.3 }}>
+                              {md.price_note}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </>
       )}
 

@@ -774,6 +774,23 @@ async def run_assessment(project_id: str, body: dict):
     )
     return result
 
+# ── Methodology Market Data (Modules 3 & 4) ───────────────────────────────────
+
+@app.get("/api/methodologies/market-overview")
+def get_market_overview():
+    """Retorna dados de custos, prazos e mercado para todas as metodologias."""
+    from engine.methodology_market_data import METHODOLOGY_MARKET_DATA
+    return METHODOLOGY_MARKET_DATA
+
+@app.get("/api/methodologies/{key}/market-data")
+def get_methodology_market_data(key: str):
+    """Retorna dados de mercado para uma metodologia específica."""
+    from engine.methodology_market_data import METHODOLOGY_MARKET_DATA
+    data = METHODOLOGY_MARKET_DATA.get(key)
+    if not data:
+        raise HTTPException(404, f"Dados não disponíveis para '{key}'")
+    return data
+
 # ── Credit Volume Estimation ──────────────────────────────────────────────────
 
 @app.post("/api/projects/{project_id}/credit-volume")
