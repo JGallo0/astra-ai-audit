@@ -54,6 +54,87 @@ METHODOLOGY_PROBES = {
             "Does the PDD include a justification for eligibility specifically under the Isometric "
             "Biochar Production and Storage Protocol?"
         ),
+        # Fix 2: perguntas Isometric-específicas que o profile genérico não capta bem
+        "has_system_boundary": (
+            "Does the PDD define the project's system boundary, including temporal scope, "
+            "geographic boundary, and GHG sources included/excluded?"
+        ),
+        "has_baseline": (
+            "Does the PDD describe a baseline scenario or counterfactual — what would happen "
+            "to the feedstock or the carbon if this project did not exist?"
+        ),
+        "has_leakage_assessment": (
+            "Does the PDD assess or mention leakage — GHG emissions outside the project boundary "
+            "caused by the project activities?"
+        ),
+        "has_lca": (
+            "Does the PDD include or reference a Life Cycle Assessment (LCA) covering feedstock, "
+            "production, and storage/application stages?"
+        ),
+        "has_uncertainty_analysis": (
+            "Does the PDD describe methods for uncertainty analysis or sensitivity analysis "
+            "of the GHG quantification?"
+        ),
+        "has_monitoring_table": (
+            "Does the PDD include a monitoring plan or table listing parameters to be monitored, "
+            "with frequency and responsible parties?"
+        ),
+        "has_data_storage_plan": (
+            "Does the PDD describe how monitoring data will be collected, stored, and retained?"
+        ),
+        "durability_option": (
+            "Does the PDD select a durability threshold for biochar permanence? "
+            "Answer '200_years', '1000_years', or '' if not stated."
+        ),
+        "has_soil_temp_method": (
+            "Does the PDD describe a method for measuring or obtaining mean annual soil temperature "
+            "at the biochar application site?"
+        ),
+        "has_reversal_risk_assessment": (
+            "Does the PDD include a reversal risk assessment or mention a buffer pool "
+            "for biochar permanence?"
+        ),
+        "has_stakeholder_consultation": (
+            "Does the PDD document a stakeholder consultation process, including who was consulted "
+            "and how their input was considered?"
+        ),
+        "has_grievance_mechanism": (
+            "Does the PDD describe a grievance mechanism for stakeholders to raise concerns?"
+        ),
+        "has_engineering_diagram": (
+            "Does the PDD include or reference an engineering design diagram of the pyrolysis reactor?"
+        ),
+        "has_gas_sensors": (
+            "Does the PDD describe sensors or methods to detect or quantify pyrolysis gas leakage?"
+        ),
+        "has_maintenance_plan": (
+            "Does the PDD include a reactor maintenance plan?"
+        ),
+        "has_iso17025_lab": (
+            "Does the PDD identify a laboratory with ISO 17025 accreditation for biochar analysis?"
+        ),
+        "sampling_method": (
+            "What sampling method does the PDD describe? "
+            "Answer 'method_a' (every batch), 'method_b' (1 per 10 batches), or '' if not stated."
+        ),
+        "has_financial_additionality": (
+            "Does the PDD demonstrate financial additionality — that the project would not be "
+            "economically viable without carbon revenue?"
+        ),
+        "has_regulatory_additionality": (
+            "Does the PDD confirm the project is not required by existing laws or regulations?"
+        ),
+        "has_no_net_env_harm": (
+            "Does the PDD demonstrate that the project causes no net environmental harm?"
+        ),
+        "has_pollution_prevention": (
+            "Does the PDD describe measures to prevent pollution from PAHs, heavy metals, "
+            "PCBs, or dioxins?"
+        ),
+        "has_adaptive_management": (
+            "Does the PDD include an adaptive management plan with conditions for pausing "
+            "or stopping the project?"
+        ),
     },
 }
 
@@ -223,6 +304,19 @@ async def run_methodology_assessment(
 
         findings = run_engine_with_profile(profile, reqs, LOGIC_REGISTRY, audit_mode)
         dim_scores = compute_dimension_scores(findings, method)
+
+        # ── Fix 1: Hard gate para P-FFOR-0 (sustentabilidade florestal) ───────
+        # Se o projeto tem biomassa florestal e nenhum dos 3 caminhos Puro está
+        # documentado, a dimensão feedstock não pode passar de 60%
+        # (o gap é estrutural, não pode ser diluído por outros requisitos)
+        if method == "puro_earth" and profile.is_forest_biomass:
+            ffor = next((r for r in findings
+                         if r.get("requirement_id") == "P-FFOR-0"), None)
+            if ffor and ffor.get("status") not in ("compliant", "not_applicable"):
+                current = dim_scores.get("feedstock_eligibility")
+                if current is not None and current > 60:
+                    dim_scores["feedstock_eligibility"] = 60.0
+
         overall    = compute_weighted_score(dim_scores)
         grade      = _score_to_grade(overall)
         gaps       = [f for f in findings if f.get("status") in
