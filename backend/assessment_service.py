@@ -139,6 +139,51 @@ METHODOLOGY_PROBES = {
 }
 
 
+def _make_ai_client(openai_client: Any, model: str):
+    """Cria um ai_client compatível com extract_project_data_from_contexts()."""
+    def ai_client(prompt: str) -> str:
+        resp = openai_client.responses.create(
+            model=model,
+            input=prompt,
+            temperature=0,
+        )
+        return getattr(resp, "output_text", "") or ""
+    return ai_client
+
+
+def _extract_isometric_project_data(
+    pdd_text: str,
+    openai_client: Any,
+    model: str,
+) -> dict:
+    """
+    Roda a extração Isometric completa (mapper + inference + build) a partir
+    do texto do PDD. Equivalente ao que o AuditEngine faz na auditoria regular.
+    Retorna project_data dict pronto para run_engine().
+    """
+    try:
+        from engine.document_mapper import extract_project_data_from_contexts
+        from engine.requirement_logic import apply_inference_rules
+
+        ai_client = _make_ai_client(openai_client, model)
+
+        mapped = extract_project_data_from_contexts(
+            ai_client=ai_client,
+            project_context=pdd_text,
+            methodology_context="",   # metodologia sem hits específicos
+            project_hits=[],
+            methodology_hits=[],
+        )
+        project_data = mapped.get("project_data", {}) if isinstance(mapped, dict) else {}
+        # Aplica regras de inferência Isometric
+        project_data = apply_inference_rules(project_data, methodology_key="isometric")
+        project_data.setdefault("methodology", {})["standard"] = "Isometric"
+        return project_data
+    except Exception as e:
+        print(f"[assessment] Isometric extraction error: {e}")
+        return {}
+
+
 async def run_probes(
     profile: ProjectProfile,
     methodology_key: str,
@@ -303,21 +348,38 @@ async def run_methodology_assessment(
         if not reqs:
             continue
 
-        # Isometric: usa project_data do banco (extração nativa, melhor qualidade)
-        # Outros (Puro, Rainbow, etc.): usa ProjectProfile (extração booleana)
-        if method == "isometric" and cached_project_data:
-            try:
-                from engine.requirement_logic import run_engine, apply_inference_rules
-                pd = dict(cached_project_data)
-                pd.setdefault("methodology", {})["standard"] = "Isometric"
-                pd = apply_inference_rules(pd, methodology_key="isometric")
-                engine_out = run_engine(
-                    pd, reqs, audit_mode=audit_mode,
-                    profile=None, methodology_key="isometric",
-                )
-                findings = engine_out.get("results", engine_out) if isinstance(engine_out, dict) else engine_out
-            except Exception as e:
-                print(f"[assessment] Isometric cached fallback error: {e}")
+        # Isometric: usa extração nativa (project_data do banco ou extração fresca).
+        # Garante que as funções Isometric recebam dados equivalentes à auditoria
+        # regular — sem dependência de validação prévia.
+        # Outros (Puro, etc.): usa ProjectProfile (extração booleana).
+        if method == "isometric":
+            isometric_pd = None
+
+            # Prioridade 1: project_data cacheado do banco (mais rápido)
+            if cached_project_data:
+                isometric_pd = cached_project_data
+
+            # Prioridade 2: extrair fresh a partir do PDD text
+            if not isometric_pd and pdd_text and len(pdd_text) > 100:
+                print(f"[assessment] Isometric: sem cache — extraindo project_data fresh...")
+                isometric_pd = _extract_isometric_project_data(pdd_text, openai_client, model)
+
+            if isometric_pd:
+                try:
+                    from engine.requirement_logic import run_engine, apply_inference_rules
+                    pd = dict(isometric_pd)
+                    pd.setdefault("methodology", {})["standard"] = "Isometric"
+                    pd = apply_inference_rules(pd, methodology_key="isometric")
+                    engine_out = run_engine(
+                        pd, reqs, audit_mode=audit_mode,
+                        profile=None, methodology_key="isometric",
+                    )
+                    findings = engine_out.get("results", engine_out) if isinstance(engine_out, dict) else engine_out
+                except Exception as e:
+                    print(f"[assessment] Isometric engine error: {e}")
+                    findings = run_engine_with_profile(profile, reqs, LOGIC_REGISTRY, audit_mode)
+            else:
+                # Fallback final: profile (piora qualidade mas não trava)
                 findings = run_engine_with_profile(profile, reqs, LOGIC_REGISTRY, audit_mode)
         else:
             findings = run_engine_with_profile(profile, reqs, LOGIC_REGISTRY, audit_mode)
