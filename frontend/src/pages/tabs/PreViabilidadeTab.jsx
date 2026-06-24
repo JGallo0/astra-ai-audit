@@ -56,8 +56,9 @@ export default function FitMetodologicoTab({ project }) {
   const [selectedMethods, setSelectedMethods] = useState(['isometric', 'puro_earth'])
   const [auditMode, setAuditMode] = useState('development')
   const [result, setResult]   = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
+  const [loading, setLoading]   = useState(false)
+  const [loadingStep, setLoadingStep] = useState('')
+  const [error, setError]       = useState('')
 
   function toggleMethod(key) {
     setSelectedMethods(prev =>
@@ -69,17 +70,34 @@ export default function FitMetodologicoTab({ project }) {
     if (selectedMethods.length < 1) {
       setError('Selecione ao menos uma metodologia.'); return
     }
-    setLoading(true); setError(''); setResult(null)
+    setLoading(true); setLoadingStep('Extraindo perfil do projeto…'); setError(''); setResult(null)
+
+    // Simula etapas visuais para dar feedback durante a espera
+    const steps = [
+      [1500,  'Extraindo perfil do projeto (ProjectProfile)…'],
+      [4000,  'Rodando extração Isometric nativa…'],
+      [12000, 'Avaliando requisitos Isometric…'],
+      [20000, 'Avaliando requisitos Puro.Earth…'],
+      [35000, 'Calculando scores por dimensão…'],
+      [50000, 'Gerando análise comparativa…'],
+    ]
+    const timers = steps.map(([delay, msg]) =>
+      setTimeout(() => setLoadingStep(msg), delay)
+    )
+
     try {
       const r = await axios.post(`${API}/api/projects/${project.id}/assessment`, {
         methodologies: selectedMethods,
         audit_mode: auditMode,
       }, { timeout: 180000 })
+      timers.forEach(clearTimeout)
       setResult(r.data)
     } catch (e) {
+      timers.forEach(clearTimeout)
       setError(e.response?.data?.detail || 'Erro ao executar assessment.')
     } finally {
       setLoading(false)
+      setLoadingStep('')
     }
   }
 
@@ -148,11 +166,29 @@ export default function FitMetodologicoTab({ project }) {
                         color: RED, borderRadius: 6, fontSize: 13 }}>{error}</div>
         )}
         {loading && (
-          <div style={{ marginTop: 12, fontSize: 12, color: 'var(--text-2)', lineHeight: 1.6 }}>
-            ⟳ Extraindo perfil do projeto (ProjectProfile)… depois avaliando cada metodologia…
-            Pode levar 30–60 segundos.
+          <div style={{
+            marginTop: 14, padding: '14px 18px',
+            background: '#EEF2FA', borderRadius: 10,
+            border: '1px solid #C7D4EF',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{
+                width: 20, height: 20, border: `3px solid #1A3160`,
+                borderTopColor: 'transparent', borderRadius: '50%',
+                animation: 'spin 0.8s linear infinite', flexShrink: 0,
+              }} />
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#1A3160' }}>
+                  {loadingStep || 'Iniciando assessment…'}
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-2)', marginTop: 2 }}>
+                  Pode levar até 60 segundos — a extração Isometric é a etapa mais longa
+                </div>
+              </div>
+            </div>
           </div>
         )}
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
 
       {result && !loading && (
