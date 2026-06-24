@@ -245,6 +245,51 @@ def calc_credit_volume(inputs: CreditVolumeInputs, methodology: str) -> dict:
     }
 
 
+def compare_with_conservative_scenario(inputs: CreditVolumeInputs) -> dict:
+    """
+    Compara cenário base vs. conservador (benchmarks Sylvera):
+      - Base: H/Corg do projeto, amortização de 20 anos
+      - Conservador: H/Corg=0.315 (benchmark industria madeira + alta tecnologia),
+        amortização de 10 anos
+    Quantifica risco de over-crediting se biochar não atingir qualidade esperada.
+    """
+    import dataclasses as _dc
+
+    base = compare_methodologies(inputs)
+
+    # Cenário conservador — Sylvera benchmark (pág. 12 do relatório)
+    h_c_conservative = 0.315   # benchmark wood-based feedstock, high-tech pyrolysis
+    conservative_inputs = _dc.replace(
+        inputs,
+        h_c_ratio=h_c_conservative,
+        project_life_years=10,       # amortização mais curta = maior E_infrastructure/ano
+    )
+    conservative = compare_methodologies(conservative_inputs)
+
+    # Calcula impacto
+    def _delta(base_r, cons_r, method):
+        b = base_r.get("results", {}).get(method, {}).get("net_co2_year", 0) or 0
+        c = cons_r.get("results", {}).get(method, {}).get("net_co2_year", 0) or 0
+        delta = c - b
+        pct = (delta / b * 100) if b else 0
+        return {"base": b, "conservative": c, "delta": round(delta, 0), "delta_pct": round(pct, 1)}
+
+    impact = {m: _delta(base, conservative, m) for m in inputs.methodologies}
+    avg_delta_pct = sum(v["delta_pct"] for v in impact.values()) / len(impact) if impact else 0
+
+    return {
+        "base":         base,
+        "conservative": conservative,
+        "conservative_assumptions": {
+            "h_c_ratio":           h_c_conservative,
+            "project_life_years":  10,
+            "note": "Benchmark Sylvera (Out 2025): wood-based feedstock, high-tech pyrolysis, 10yr amortization",
+        },
+        "impact": impact,
+        "avg_over_crediting_risk_pct": round(abs(avg_delta_pct), 1),
+    }
+
+
 def compare_methodologies(inputs: CreditVolumeInputs) -> dict:
     """
     Calcula e compara o volume de créditos para todas as metodologias configuradas.

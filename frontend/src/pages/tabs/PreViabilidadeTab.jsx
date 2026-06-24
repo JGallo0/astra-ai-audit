@@ -61,6 +61,7 @@ export default function FitMetodologicoTab({ project }) {
   const [error, setError]       = useState('')
   const [marketData, setMarketData] = useState({})
   const [openModules, setOpenModules] = useState({ mod3: false, mod4: false })
+  const [feedstockType, setFeedstockType] = useState('')
 
   useEffect(() => {
     axios.get(`${API}/api/methodologies/market-overview`)
@@ -263,6 +264,12 @@ export default function FitMetodologicoTab({ project }) {
                     <div style={{ fontSize: 16, fontWeight: 700, color: gradeColor }}>
                       {data.overall?.toFixed(0)}%
                     </div>
+                    {/* Credit volume estimado */}
+                    {result.credit_volume?.[key]?.net_co2_year && (
+                      <div style={{ fontSize: 11, color: '#6B7280', marginTop: 4 }}>
+                        ~{result.credit_volume[key].net_co2_year?.toLocaleString('pt-BR')} tCO₂/ano
+                      </div>
+                    )}
                     {isRec && (
                       <div style={{ fontSize: 10, color: NAVY, fontWeight: 700, marginTop: 2 }}>
                         ★ Recomendado
@@ -313,6 +320,156 @@ export default function FitMetodologicoTab({ project }) {
               )
             })}
           </div>
+
+          {/* RAG por parâmetro (estilo Sylvera) */}
+          {(() => {
+            const RAG_COLORS = { green: GREEN, amber: AMBER, red: RED, na: '#9CA3AF' }
+            const RAG_ICONS  = { green: '●', amber: '●', red: '●', na: '○' }
+            const RAG_LABELS = { green: 'Baixo risco', amber: 'Risco médio', red: 'Alto risco', na: 'N/A' }
+
+            // Coleta todos os pilares com dados RAG
+            const pillars = Object.keys(result.methodologies?.[methods[0]?.[0]]?.rag || {})
+            if (!pillars.length) return null
+
+            return (
+              <div className="card" style={{ marginBottom: 16 }}>
+                <div className="card-title" style={{ marginBottom: 4 }}>
+                  Avaliação por Parâmetro — RAG
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 14 }}>
+                  ● Verde = baixo risco &nbsp;|&nbsp; ● Âmbar = risco médio &nbsp;|&nbsp; ● Vermelho = alto risco &nbsp;|&nbsp; ○ N/A
+                </div>
+                {pillars.map(pillarKey => {
+                  const pillarLabel = result.methodologies[methods[0][0]]?.rag?.[pillarKey]?.label || pillarKey
+                  const allParams = result.methodologies[methods[0][0]]?.rag?.[pillarKey]?.parameters || []
+                  return (
+                    <div key={pillarKey} style={{ marginBottom: 14 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: NAVY,
+                                    borderBottom: `2px solid ${NAVY}`, paddingBottom: 4,
+                                    marginBottom: 8 }}>{pillarLabel}</div>
+                      {allParams.map(param => (
+                        <div key={param.id} style={{
+                          display: 'grid',
+                          gridTemplateColumns: `200px repeat(${methods.length}, 1fr)`,
+                          gap: 8, marginBottom: 5, alignItems: 'start',
+                        }}>
+                          <div>
+                            <div style={{ fontSize: 11, fontWeight: 600 }}>{param.name}</div>
+                            <div style={{ fontSize: 10, color: '#9CA3AF', lineHeight: 1.3 }}>{param.desc}</div>
+                          </div>
+                          {methods.map(([mKey]) => {
+                            const mParam = result.methodologies[mKey]?.rag?.[pillarKey]?.parameters?.find(p => p.id === param.id)
+                            const rag = mParam?.rag || 'na'
+                            const color = RAG_COLORS[rag]
+                            const note = mParam?.methodology_note
+                            return (
+                              <div key={mKey} style={{ textAlign: 'center' }}>
+                                <div style={{ color, fontWeight: 700, fontSize: 16 }}>
+                                  {RAG_ICONS[rag]}
+                                </div>
+                                <div style={{ fontSize: 9, color, fontWeight: 600 }}>
+                                  {RAG_LABELS[rag]}
+                                </div>
+                                {mParam?.score != null && (
+                                  <div style={{ fontSize: 9, color: '#9CA3AF' }}>{mParam.score}%</div>
+                                )}
+                                {note && (
+                                  <div style={{ fontSize: 9, color: '#6B7280', marginTop: 2,
+                                               lineHeight: 1.2, maxWidth: 120, margin: '2px auto 0' }}>
+                                    {note}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          })()}
+
+          {/* Feedstock Decision Tree */}
+          {(() => {
+            const FEEDSTOCK_OPTIONS = [
+              { value: '', label: '— Selecione o tipo de feedstock —' },
+              { value: 'agricultural_residue', label: 'Resíduo Agrícola (palha, bagaço, cascas)' },
+              { value: 'forest_biomass',       label: 'Biomassa Florestal (madeira, resíduos de serraria)' },
+              { value: 'urban_wood',           label: 'Madeira Urbana (resíduos de construção, poda)' },
+              { value: 'food_waste',           label: 'Resíduo Alimentar (bagaço de café, etc.)' },
+              { value: 'sewage_sludge',        label: 'Lodo de Esgoto / Resíduo Industrial' },
+              { value: 'mixed_waste',          label: 'Resíduo Misto (inclui componentes fósseis)' },
+            ]
+            const FEEDSTOCK_MAP = {
+              agricultural_residue: {
+                isometric:  { color: GREEN, label: 'Elegível', note: 'Documentar origem e sustentabilidade' },
+                puro_earth: { color: GREEN, label: 'Elegível', note: 'Documentar cadeia de custódia e origem sustentável' },
+              },
+              forest_biomass: {
+                isometric:  { color: GREEN, label: 'Elegível (flexível)', note: '"Sustainable biomass" — sem certificação formal obrigatória. Isometric avalia internamente.' },
+                puro_earth: { color: AMBER, label: 'Condicional ⚠️', note: 'Exige: FSC/SFI/PEFC  OU  Dossiê ISAE 3000  OU  Plano gov. (CPI ≥ 50). Brasil CPI=36 → apenas FSC ou ISAE 3000.' },
+              },
+              urban_wood: {
+                isometric:  { color: GREEN, label: 'Elegível', note: 'Verificar ausência de tratamentos químicos (tintas, vernizes, CCA)' },
+                puro_earth: { color: GREEN, label: 'Elegível', note: 'Documentar origem; verificar ausência de contaminantes' },
+              },
+              food_waste: {
+                isometric:  { color: GREEN, label: 'Elegível', note: 'Documentar origem e processo de coleta' },
+                puro_earth: { color: GREEN, label: 'Elegível', note: 'Documentar sustentabilidade do fornecimento' },
+              },
+              sewage_sludge: {
+                isometric:  { color: AMBER, label: 'Verificar caso a caso', note: 'Análise de metais pesados e PAH obrigatória; resultado determina elegibilidade' },
+                puro_earth: { color: AMBER, label: 'Verificar caso a caso', note: 'PAH/metais devem estar dentro dos limites IBI/EBC (ou regulação local); ISO 17025 exigido' },
+              },
+              mixed_waste: {
+                isometric:  { color: AMBER, label: 'Verificar — evitar fósseis', note: 'Avaliação caso a caso — sem mistura de componentes fósseis (plásticos, fibras sintéticas)' },
+                puro_earth: { color: RED,   label: 'INELEGÍVEL 🚫', note: 'BLOQUEADOR ABSOLUTO — Clar. 001 BCH proíbe qualquer mistura fossil+biogênico. Não há exceção.' },
+              },
+            }
+            const info = feedstockType ? FEEDSTOCK_MAP[feedstockType] : null
+            return (
+              <div className="card" style={{ marginBottom: 16 }}>
+                <div className="card-title" style={{ marginBottom: 10 }}>
+                  🌱 Elegibilidade do Feedstock por Metodologia
+                </div>
+                <select value={feedstockType} onChange={e => setFeedstockType(e.target.value)}
+                  style={{ width: '100%', padding: '8px 12px', fontSize: 13,
+                           border: '1px solid var(--border)', borderRadius: 6, marginBottom: 12 }}>
+                  {FEEDSTOCK_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+                {info && (
+                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${selectedMethods.length}, 1fr)`, gap: 12 }}>
+                    {selectedMethods.map(m => {
+                      const d = info[m]
+                      if (!d) return null
+                      return (
+                        <div key={m} style={{ padding: '12px 14px', borderRadius: 8,
+                                              border: `2px solid ${d.color}20`,
+                                              background: d.color + '10' }}>
+                          <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 4 }}>
+                            {METHOD_LABELS[m] || m}
+                          </div>
+                          <div style={{ fontWeight: 700, color: d.color, fontSize: 14, marginBottom: 6 }}>
+                            {d.label}
+                          </div>
+                          <div style={{ fontSize: 12, color: '#4B5563', lineHeight: 1.4 }}>
+                            {d.note}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+                {!feedstockType && (
+                  <div style={{ fontSize: 12, color: '#9CA3AF', textAlign: 'center', padding: '8px 0' }}>
+                    Selecione o tipo de feedstock para ver os requisitos por metodologia
+                  </div>
+                )}
+              </div>
+            )
+          })()}
 
           {/* Análise diferencial */}
           {(result.differential || []).length > 0 && (

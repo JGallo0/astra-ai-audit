@@ -501,18 +501,48 @@ async def run_methodology_assessment(
                       ("non_compliant", "partial", "future_evidence_required")]
         gaps.sort(key=lambda r: r.get("requirement_score") or 0)
 
+        # RAG por parâmetro (estilo Sylvera)
+        try:
+            from engine.rag_parameter_map import compute_rag_scores
+            rag_scores = compute_rag_scores(findings, method)
+        except Exception as e:
+            print(f"[rag] error: {e}")
+            rag_scores = {}
+
         method_results[method] = {
-            "overall":    overall,
-            "grade":      grade,
-            "dimensions": dim_scores,
-            "gaps":       gaps[:10],  # top 10 gaps
-            "findings":   findings,
-            "req_count":  len(reqs),
-            "compliant":  sum(1 for f in findings if f.get("status") == "compliant"),
+            "overall":       overall,
+            "grade":         grade,
+            "dimensions":    dim_scores,
+            "rag":           rag_scores,
+            "gaps":          gaps[:10],
+            "findings":      findings,
+            "req_count":     len(reqs),
+            "compliant":     sum(1 for f in findings if f.get("status") == "compliant"),
             "non_compliant": sum(1 for f in findings if f.get("status") == "non_compliant"),
         }
 
-    # 4. Recomendação
+    # 4. Credit volume estimado (integração Module 1 no assessment)
+    credit_volume_summary = {}
+    try:
+        from engine.credit_volume_engine import CreditVolumeInputs, compare_methodologies as _cv_compare
+        biochar_t = profile.feedstock_t_ano * max(profile.feedstock_yield or 0.28, 0.01) if hasattr(profile, 'feedstock_t_ano') and profile.feedstock_t_ano else 1000
+        cv_inputs = CreditVolumeInputs(
+            biochar_t_dry_year=biochar_t,
+            h_c_ratio=profile.h_c_ratio or 0.35,
+            mast_celsius=profile.country_cpi and 20.0 or 20.0,   # placeholder — Copernicus integrado
+            methodologies=[m for m in methodologies if m in ("isometric", "puro_earth", "verra_vcs")],
+        )
+        cv_result = _cv_compare(cv_inputs)
+        for m, r in cv_result.get("results", {}).items():
+            credit_volume_summary[m] = {
+                "net_co2_year":      r.get("net_co2_year"),
+                "corc_factor":       r.get("corc_factor"),
+                "permanence_factor": r.get("permanence_factor"),
+            }
+    except Exception as e:
+        print(f"[credit_volume] error in assessment: {e}")
+
+    # 5. Recomendação
     if not method_results:
         return {"profile": dataclasses.asdict(profile), "methodologies": {}, "recommendation": None}
 
@@ -521,8 +551,9 @@ async def run_methodology_assessment(
     differential = _build_differential(method_results)
 
     return {
-        "profile":      dataclasses.asdict(profile),
-        "methodologies": {
+        "profile":        dataclasses.asdict(profile),
+        "credit_volume":  credit_volume_summary,
+        "methodologies":  {
             k: {**v, "findings": v["findings"]}
             for k, v in method_results.items()
         },

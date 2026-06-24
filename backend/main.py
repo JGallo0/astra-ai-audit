@@ -827,6 +827,20 @@ def estimate_credit_volume(project_id: str, body: dict):
     except Exception as e:
         raise HTTPException(400, f"Erro no cálculo de volume de créditos: {e}")
 
+@app.post("/api/projects/{project_id}/credit-volume/scenarios")
+def estimate_credit_scenarios(project_id: str, body: dict):
+    """Base vs. cenário conservador (Sylvera benchmark)."""
+    try:
+        from engine.credit_volume_engine import CreditVolumeInputs, compare_with_conservative_scenario, inputs_from_viabilidade
+        if "premissas" in body:
+            inputs = inputs_from_viabilidade(body["premissas"])
+        else:
+            valid = {f.name for f in __import__('dataclasses').fields(CreditVolumeInputs)}
+            inputs = CreditVolumeInputs(**{k: v for k, v in body.items() if k in valid})
+        return compare_with_conservative_scenario(inputs)
+    except Exception as e:
+        raise HTTPException(400, f"Erro nos cenários: {e}")
+
 # ── Verificação (V&V Support) ──────────────────────────────────────────────────
 
 @app.get("/api/projects/{project_id}/verificacao")

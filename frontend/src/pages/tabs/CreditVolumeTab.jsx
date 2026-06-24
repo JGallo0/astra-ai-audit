@@ -64,9 +64,10 @@ export default function CreditVolumeTab({ project }) {
     project_life_years:     20,
   })
   const [methodologies, setMethodologies] = useState(['isometric', 'puro_earth', 'verra_vcs'])
-  const [result, setResult]   = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
+  const [result, setResult]     = useState(null)
+  const [scenarios, setScenarios] = useState(null)
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState('')
 
   // Tenta pré-carregar da Viabilidade
   useEffect(() => {
@@ -96,10 +97,12 @@ export default function CreditVolumeTab({ project }) {
   async function calculate() {
     setLoading(true); setError('')
     try {
-      const r = await axios.post(`${API}/api/projects/${project.id}/credit-volume`, {
-        ...inputs, methodologies,
-      })
-      setResult(r.data)
+      const [r, sc] = await Promise.allSettled([
+        axios.post(`${API}/api/projects/${project.id}/credit-volume`, { ...inputs, methodologies }),
+        axios.post(`${API}/api/projects/${project.id}/credit-volume/scenarios`, { ...inputs, methodologies }),
+      ])
+      if (r.status === 'fulfilled') setResult(r.value.data)
+      if (sc.status === 'fulfilled') setScenarios(sc.value.data)
     } catch (e) {
       setError(e.response?.data?.detail || 'Erro no cálculo.')
     } finally {
@@ -269,6 +272,51 @@ export default function CreditVolumeTab({ project }) {
                   </table>
                 </div>
               </div>
+
+              {/* Cenário Conservador */}
+              {scenarios && (
+                <div className="card" style={{ marginBottom: 16, borderLeft: `4px solid ${AMBER}` }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <div className="card-title" style={{ marginBottom: 0 }}>
+                      ⚠️ Análise de Risco — Cenário Conservador
+                    </div>
+                    <span style={{ fontSize: 11, color: AMBER, fontWeight: 700 }}>
+                      Risco de over-crediting: {scenarios.avg_over_crediting_risk_pct}%
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 10 }}>
+                    Conservador: H/Corg={scenarios.conservative_assumptions?.h_c_ratio} (benchmark wood-based, Sylvera 2025) · amortização {scenarios.conservative_assumptions?.project_life_years} anos
+                  </div>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                    <thead>
+                      <tr style={{ background: '#FFF7ED' }}>
+                        <th style={{ padding: '6px 10px', textAlign: 'left', color: AMBER }}>Metodologia</th>
+                        <th style={{ padding: '6px 10px', textAlign: 'right' }}>Base (tCO₂/ano)</th>
+                        <th style={{ padding: '6px 10px', textAlign: 'right' }}>Conservador</th>
+                        <th style={{ padding: '6px 10px', textAlign: 'right', color: RED }}>Δ / Risco</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(scenarios.impact || {}).map(([m, v]) => (
+                        <tr key={m} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                          <td style={{ padding: '6px 10px', fontWeight: 600, color: METHOD_COLORS[m] }}>
+                            {METHOD_LABELS[m] || m}
+                          </td>
+                          <td style={{ padding: '6px 10px', textAlign: 'right' }}>{v.base?.toLocaleString('pt-BR')}</td>
+                          <td style={{ padding: '6px 10px', textAlign: 'right' }}>{v.conservative?.toLocaleString('pt-BR')}</td>
+                          <td style={{ padding: '6px 10px', textAlign: 'right', color: RED, fontWeight: 700 }}>
+                            {v.delta?.toLocaleString('pt-BR')} ({v.delta_pct?.toFixed(1)}%)
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 8 }}>
+                    Fonte: benchmark Sylvera Biochar Methodology Assessment (Out 2025), pág. 12.
+                    Usado para estimar risco de over-crediting quando H/Corg real difere do projetado.
+                  </div>
+                </div>
+              )}
 
               {/* Comparativo */}
               <div className="card">
