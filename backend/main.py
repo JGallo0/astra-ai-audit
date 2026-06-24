@@ -432,6 +432,20 @@ def download_report(run_id: str, format: str = Query("json")):
     audit_mode  = result.get("audit_mode", "development")
     score_label = result.get("score_label", "")
 
+    # Detecta metodologia — do run (banco) ou dos IDs dos requisitos
+    methodology_key = run.get("methodology") or result.get("methodology_key", "")
+    if not methodology_key and results_list:
+        first_id = (results_list[0].get("requirement_id") or "")
+        methodology_key = "puro_earth" if first_id.startswith("P-") else "isometric"
+    _METHODOLOGY_LABELS = {
+        "isometric":  "Isometric Biochar v1.2",
+        "puro_earth": "Puro.Earth Biochar Edition 2025",
+        "rainbow":    "Rainbow Carbon",
+        "c_sink":     "Global C-SINK / CSI-EBI",
+        "verra_vcs":  "Verra VCS",
+    }
+    methodology_label = _METHODOLOGY_LABELS.get(methodology_key, "Isometric Biochar")
+
     if format == "json":
         content = json.dumps(result, ensure_ascii=False, indent=2).encode("utf-8")
         return StreamingResponse(
@@ -483,6 +497,7 @@ def download_report(run_id: str, format: str = Query("json")):
                     score_data={**score_data, "score_label": score_label},
                     audit_mode=audit_mode,
                     project_name=proj_name,
+                    methodology=methodology_label,
                     rating=rating_data,
                 )
                 return StreamingResponse(
@@ -508,6 +523,7 @@ def download_report(run_id: str, format: str = Query("json")):
                 score_data={**score_data, "score_label": score_label},
                 audit_mode=audit_mode,
                 project_name=proj_name,
+                methodology=methodology_label,
                 rating=rating_data,
             )
             return StreamingResponse(
@@ -536,6 +552,7 @@ def download_report(run_id: str, format: str = Query("json")):
             buf = generate_readiness_certificate_pdf(
                 rating=rating,
                 project_name=proj_name,
+                methodology=methodology_label,
             )
             return StreamingResponse(
                 io.BytesIO(buf), media_type="application/pdf",
