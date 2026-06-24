@@ -682,7 +682,7 @@ def classify_evidence_strength(field_scores):
     return "insufficient"
 
 
-def apply_inference_rules(project_data: dict) -> dict:
+def apply_inference_rules(project_data: dict, methodology_key: str = "isometric") -> dict:
     """
     Nível 2: preenche campos ausentes (None / []) com base em evidências
     relacionadas. Nunca sobrescreve valores já definidos (True/False explícito).
@@ -811,14 +811,60 @@ def apply_inference_rules(project_data: dict) -> dict:
             if proxies:
                 eligibility["additionality_evidence"] = proxies
 
+    # ── Regras Puro.Earth-específicas ─────────────────────────────────────────
+    if methodology_key == "puro_earth":
+        # Puro P-FFOR-0: ISAE 3000 como evidência de sustentabilidade florestal
+        if feedstock.get("certification_scheme"):
+            cert = str(feedstock["certification_scheme"]).lower()
+            if "isae" in cert or "3000" in cert:
+                feedstock["has_isae3000"] = True
+            if any(c in cert for c in ["fsc", "sfi", "pefc"]):
+                feedstock["has_formal_forest_cert"] = True
+
+        # Puro P-ALIGN-0: SDG obrigatório — inferir de safeguards se ausente
+        if not safeguards.get("sdg_alignment"):
+            if safeguards.get("co_benefits") or data.get("project", {}).get("sdg_goals"):
+                safeguards["sdg_alignment"] = True
+
+        # Puro P-FADD-0: adicionalidade financeira — alerta first-of-its-kind
+        proj_desc = str(data.get("project", {}).get("description") or "").lower()
+        if any(kw in proj_desc for kw in ["first-of-its-kind", "pioneer", "innovative", "inovador", "pioneiro"]):
+            eligibility.setdefault("first_of_its_kind_claim", True)
+
     return data
 
 
-def run_engine(project_data, requirements, audit_mode="development"):
+def run_engine(project_data, requirements, audit_mode="development", profile=None, methodology_key="isometric"):
     from scoring import calculate_compliance_score
 
-    # Nível 2: aplicar inferências antes de avaliar
-    project_data = apply_inference_rules(project_data)
+    # Quando profile está disponível, usa profile_to_legacy_dict como base
+    # para applies_if checks (garante que methodology.standard está preenchido)
+    if profile is not None:
+        try:
+            from engine.project_profile import profile_to_legacy_dict
+            base_dict = profile_to_legacy_dict(profile)
+            # Merge: base_dict como fundação, project_data sobrescreve onde existe
+            merged = {**base_dict}
+            for k, v in project_data.items():
+                if k != "_profile" and v:
+                    merged[k] = v
+            project_data = merged
+        except Exception as e:
+            print(f"[run_engine] profile_to_legacy_dict error: {e}")
+
+    # Garante que methodology.standard está definido para applies_if
+    if methodology_key:
+        METHOD_LABELS = {
+            "isometric":  "Isometric",
+            "puro_earth": "Puro.Earth",
+            "rainbow":    "Rainbow",
+            "c_sink":     "C-SINK",
+            "verra_vcs":  "Verra VCS",
+        }
+        project_data.setdefault("methodology", {})["standard"] = METHOD_LABELS.get(methodology_key, methodology_key)
+
+    # Nível 2: aplicar inferências antes de avaliar (methodology-aware)
+    project_data = apply_inference_rules(project_data, methodology_key=methodology_key)
 
     results = []
     cross_check_findings = run_core_cross_checks(project_data)
@@ -929,7 +975,9 @@ def run_engine(project_data, requirements, audit_mode="development"):
             })
             continue
 
-        # 3) Executa a lógica — tenta com audit_mode (v1), fallback sem (legacy)
+        # 3) Executa a lógica — sempre usa project_data (dict enriquecido do profile).
+        #    Funções com _resolve() convertem automaticamente.
+        #    Funções Puro que ainda usam _get() recebem o dict enriquecido diretamente.
         try:
             try:
                 logic_output = logic_fn(project_data, audit_mode=audit_mode)

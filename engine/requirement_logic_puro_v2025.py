@@ -63,12 +63,19 @@ def _resolve(input_data: Union[ProjectProfile, dict]) -> ProjectProfile:
     biomass = str(fd.get("biomass_type") or "").lower()
     cert    = str(fd.get("certification_scheme") or "").lower()
     p.feedstock_type = fd.get("biomass_type") or "unknown"
-    p.is_forest_biomass = any(k in biomass for k in ["forest", "floresta", "wood", "madeira", "eucalipto", "pine", "pinus"])
-    p.uses_mixed_waste  = any(k in biomass for k in ["mixed", "misto", "plastic", "fossil"])
+    # Lê campo booleano explícito primeiro (do profile_to_legacy_dict), depois heurística
+    p.is_forest_biomass = bool(fd.get("includes_forest_biomass")) or any(
+        k in biomass for k in ["forest", "floresta", "wood", "madeira", "eucalipto", "pine", "pinus"]
+    )
+    p.from_land_clearing = bool(fd.get("from_land_clearing"))
+    p.uses_mixed_waste   = bool(fd.get("uses_mixed_waste")) or any(
+        k in biomass for k in ["mixed", "misto", "plastic", "fossil"]
+    )
+    p.uses_coal_ash      = bool(fd.get("uses_coal_ash"))
     p.has_fsc_certification  = "fsc" in cert
     p.has_sfi_certification  = "sfi" in cert
     p.has_pefc_certification = "pefc" in cert
-    p.has_isae3000_dossier   = "isae" in cert or "3000" in cert
+    p.has_isae3000_dossier   = "isae" in cert or "3000" in cert or bool(fd.get("has_isae3000"))
 
     country = str(proj.get("country") or "").lower()
     HIGH_CPI = ["brazil","brasil","germany","usa","uk","canada","australia","france","japan","denmark","norway","sweden"]
@@ -93,7 +100,8 @@ def _resolve(input_data: Union[ProjectProfile, dict]) -> ProjectProfile:
     add_ev = str(el.get("additionality_evidence") or "").lower()
     if any(k in add_ev for k in ["irr","npv","vpl","tir","cost analysis"]): p.additionality_method = "irr_npv"
     if any(k in add_ev for k in ["barrier","barreira"]): p.additionality_method = "barriers"
-    p.is_first_of_its_kind   = False  # conservative default
+    p.is_first_of_its_kind   = bool(el.get("first_of_its_kind_claim") or el.get("is_first_of_its_kind"))
+    p.financial_additionality_exemption_claimed = bool(el.get("financial_additionality_exemption_claimed"))
     p.has_regulatory_additionality = bool(el.get("not_required_by_law") or lgl.get("voluntary_nature"))
     p.has_common_practice_evidence = bool(el.get("common_practice") or el.get("market_analysis"))
 

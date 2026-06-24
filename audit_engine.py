@@ -512,11 +512,73 @@ class AuditEngine:
             "ranked_methodology_sources": ranked_methodology,
         }
 
+    def _extract_project_profile(self, project_context: str, methodology_key: str):
+        """
+        Extrai ProjectProfile via perguntas booleanas estruturadas.
+        Retorna None se a extração falhar — fallback para project_data via _resolve().
+        """
+        try:
+            from engine.project_profile import PROFILE_QUESTIONS, parse_profile_response
+            import json
+
+            questions_json = json.dumps(
+                {k: v for k, v in PROFILE_QUESTIONS.items()},
+                ensure_ascii=False, indent=2
+            )
+            prompt = (
+                "Analyze this PDD and answer each question with TRUE, FALSE, a string, or a number.\n"
+                "Only mark TRUE if EXPLICITLY stated. When in doubt: FALSE.\n"
+                "Include a brief evidence quote for TRUE answers.\n\n"
+                f"PDD CONTENT:\n{project_context[:14000]}\n\n"
+                f"QUESTIONS:\n{questions_json}\n\n"
+                'Return valid JSON only: {"field_name": {"value": <bool|str|num|null>, "evidence": "quote"}, ...}'
+            )
+            raw_str = self._call_llm_json_extraction(prompt)
+            raw = json.loads(raw_str)
+            return parse_profile_response(raw)
+        except Exception as e:
+            print(f"[profile] extraction error: {e}")
+            return None
+
+    def _run_methodology_probes(self, profile, project_context: str, methodology_key: str):
+        """Executa perguntas específicas da metodologia e atualiza o profile."""
+        try:
+            from backend.assessment_service import METHODOLOGY_PROBES
+            import json, dataclasses
+
+            probes = METHODOLOGY_PROBES.get(methodology_key, {})
+            if not probes:
+                return profile
+
+            questions = "\n".join(f'"{k}": {q}' for k, q in probes.items())
+            prompt = (
+                "Answer these specific questions about the PDD.\n"
+                "Return only valid JSON. TRUE only if explicitly stated.\n\n"
+                f"PDD:\n{project_context[:8000]}\n\n"
+                f"QUESTIONS:\n{{{questions}}}\n\n"
+                'Format: {"field_name": {"value": bool, "evidence": "quote or empty"}}'
+            )
+            raw_str = self._call_llm_json_extraction(prompt)
+            raw = json.loads(raw_str)
+            valid = {f.name for f in dataclasses.fields(profile)}
+            for k, entry in raw.items():
+                if k in valid:
+                    val = entry.get("value") if isinstance(entry, dict) else entry
+                    if val is not None:
+                        try:
+                            setattr(profile, k, val)
+                        except Exception:
+                            pass
+        except Exception as e:
+            print(f"[probes] error: {e}")
+        return profile
+
     def run_structured_engine_audit(
         self,
         selected_modules: Optional[List[str]] = None,
         audit_mode: str = "development",
         cached_project_data: Optional[Dict[str, Any]] = None,
+        methodology_key: str = "isometric",
     ) -> Dict[str, Any]:
         if not self.requirements:
             raise ValueError("Nenhum requisito estruturado foi carregado para a metodologia selecionada.")
@@ -526,14 +588,28 @@ class AuditEngine:
             if not selected_modules or req.get("module") in selected_modules
         ]
 
+        profile = None  # ProjectProfile — extraído abaixo quando metodologia suporta
+
         if cached_project_data is not None:
-            # Cache hit: pula extração LLM, resultado 100% determinístico
+            # Cache hit: pula extração genérica, resultado 100% determinístico
             project_data = cached_project_data
             contexts = {
                 "queries": [], "project_context": "",
                 "methodology_context": "", "project_hits": [], "methodology_hits": [],
             }
             mapped = {"normalized_fields": [], "raw_extraction": {}}
+
+            # Restaura profile do cache se disponível
+            import dataclasses as _dc
+            profile_dict = project_data.get("_profile")
+            if profile_dict and isinstance(profile_dict, dict):
+                try:
+                    from engine.project_profile import ProjectProfile
+                    valid = {f.name for f in _dc.fields(ProjectProfile)}
+                    profile = ProjectProfile(**{k: v for k, v in profile_dict.items() if k in valid})
+                    print(f"[profile] restored from cache for {methodology_key}")
+                except Exception as e:
+                    print(f"[profile] cache restore error: {e}")
         else:
             # Cache miss: extrai project_data via LLM (temperature=0)
             contexts = self._build_structured_contexts()
@@ -546,10 +622,36 @@ class AuditEngine:
             )
             project_data = mapped["project_data"]
 
+            # ── Extração de ProjectProfile (methodology-aware) ────────────────
+            # Executada apenas quando a metodologia tem lógica baseada em profile
+            PROFILE_ENABLED_METHODOLOGIES = {"puro_earth", "isometric"}
+            if methodology_key in PROFILE_ENABLED_METHODOLOGIES and contexts.get("project_context"):
+                print(f"[profile] extracting for methodology={methodology_key}")
+                profile = self._extract_project_profile(
+                    contexts["project_context"], methodology_key
+                )
+                if profile is not None:
+                    # Probes específicos da metodologia
+                    profile = self._run_methodology_probes(
+                        profile, contexts["project_context"], methodology_key
+                    )
+                    # Persiste no project_data para cache futuro
+                    import dataclasses as _dc
+                    project_data["_profile"] = _dc.asdict(profile)
+                    print(f"[profile] extracted: is_forest={profile.is_forest_biomass}, "
+                          f"has_fsc={profile.has_fsc_certification}, "
+                          f"has_isae3000={profile.has_isae3000_dossier}, "
+                          f"first_of_its_kind={profile.is_first_of_its_kind}")
+
         # =========================================================
         # DEBUG 1 — OUTPUT DO RUN_ENGINE
         # =========================================================
-        engine_output = run_engine(project_data, filtered_requirements, audit_mode=audit_mode)
+        engine_output = run_engine(
+            project_data, filtered_requirements,
+            audit_mode=audit_mode,
+            profile=profile,
+            methodology_key=methodology_key,
+        )
 
         if not isinstance(engine_output, dict):
             raise TypeError(

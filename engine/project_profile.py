@@ -339,6 +339,11 @@ def profile_to_legacy_dict(p: ProjectProfile) -> dict:
             "biomass_type": p.feedstock_type,
             "certification_scheme": cert,
             "source_locations": p.project_locations,
+            # Campos para applies_if dos requisitos Puro
+            "includes_forest_biomass": p.is_forest_biomass,
+            "from_land_clearing":      p.from_land_clearing,
+            "uses_mixed_waste":        p.uses_mixed_waste,
+            "uses_coal_ash":           p.uses_coal_ash,
         },
         "biochar": {
             "characterization": {
@@ -367,11 +372,18 @@ def profile_to_legacy_dict(p: ProjectProfile) -> dict:
         "eligibility": {
             "additionality_claim": p.has_financial_additionality,
             "additionality_evidence": [p.additionality_method] if p.additionality_method else [],
+            "additionality_method": p.additionality_method,
             "financial_additionality": p.additionality_method if p.has_financial_additionality else None,
             "eligible_pathway": "biochar",
             "net_negative_claim": p.is_net_negative,
             "baseline_scenario": "documented" if p.has_baseline else None,
             "not_required_by_law": p.has_regulatory_additionality,
+            # Campos críticos para lógica Puro
+            "first_of_its_kind_claim":               p.is_first_of_its_kind,
+            "is_first_of_its_kind":                  p.is_first_of_its_kind,
+            "financial_additionality_exemption_claimed": p.financial_additionality_exemption_claimed,
+            "irr_without_carbon":                    p.irr_without_carbon,
+            "common_practice":                       "documented" if p.has_common_practice_evidence else None,
         },
         "permanence": {
             "durability_option": p.durability_option,

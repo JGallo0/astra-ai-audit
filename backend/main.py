@@ -262,6 +262,7 @@ def _run_audit(run_id: str, project: dict, req: AuditRequest):
             selected_modules=req.modules or None,
             audit_mode=req.audit_mode,
             cached_project_data=cached_project_data,
+            methodology_key=methodology_key,   # ← passa a metodologia para extração de profile
         )
 
         # Salva project_data no cache se foi uma extração nova
