@@ -79,8 +79,14 @@ def _load_requirements(methodology_key: str, engine_version: str = "v1") -> list
         from engine.requirement_logic_map_v1 import REQUIREMENT_LOGIC_MAP_V1
 
         from engine.requirement_logic_map_puro_v2025 import REQUIREMENT_LOGIC_MAP_PURO_V2025
+        from engine.requirement_logic_map_verra_v1 import REQUIREMENT_LOGIC_MAP_VERRA_V1
         if engine_version == "v1":
-            logic_map = REQUIREMENT_LOGIC_MAP_PURO_V2025 if methodology_key == "puro_earth" else REQUIREMENT_LOGIC_MAP_V1
+            if methodology_key == "puro_earth":
+                logic_map = REQUIREMENT_LOGIC_MAP_PURO_V2025
+            elif methodology_key == "verra_vcs":
+                logic_map = REQUIREMENT_LOGIC_MAP_VERRA_V1
+            else:
+                logic_map = REQUIREMENT_LOGIC_MAP_V1
         else:
             logic_map = REQUIREMENT_LOGIC_MAP
         raw = get_requirements_for_methodology(methodology_key, engine_version=engine_version)
@@ -88,7 +94,11 @@ def _load_requirements(methodology_key: str, engine_version: str = "v1") -> list
         for req in raw:
             r = dict(req)
             req_id = r.get("id") or r.get("requirement_id")
-            r["logic"] = logic_map.get(req_id)
+            # Prioridade: logic_map (ID → fn) > campo "logic" do requisito
+            mapped = logic_map.get(req_id)
+            if mapped is not None:
+                r["logic"] = mapped
+            # se não está no mapa, preserva o campo "logic" original do requisito
             requirements.append(r)
         return requirements
     except Exception as e:
@@ -183,6 +193,23 @@ def reset_project_data_cache(project_id: str):
         "UPDATE ca_projects SET project_data = NULL WHERE id = %s", (project_id,)
     )
     return {"ok": True, "message": "Cache invalidado. Próxima auditoria fará nova extração."}
+
+@app.delete("/api/projects/{project_id}/audit-runs")
+def delete_audit_runs(project_id: str, methodology: str = Query(None)):
+    """
+    Remove audit runs de um projeto para forçar nova execução.
+    Útil quando o engine foi atualizado e resultados cacheados estão obsoletos.
+    """
+    if methodology:
+        _db_execute(
+            "DELETE FROM ca_audit_runs WHERE project_id = %s AND methodology = %s",
+            (project_id, methodology),
+        )
+        msg = f"Audit runs de metodologia '{methodology}' removidos."
+    else:
+        _db_execute("DELETE FROM ca_audit_runs WHERE project_id = %s", (project_id,))
+        msg = "Todos os audit runs removidos."
+    return {"ok": True, "message": msg}
 
 @app.post("/api/projects/{project_id}/documents")
 async def upload_documents(project_id: str, files: List[UploadFile] = File(...)):
