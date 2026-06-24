@@ -47,35 +47,98 @@ def _round_grid(lat: float, lon: float) -> Tuple[float, float]:
 
 
 
-# Known project locations — fallback when GPS not in text
-# Format: (city_pattern, lat, lon)
+# Location lookup — cidades específicas de projetos biochar + centróides de países
+# Ordem: mais específico primeiro (cidades antes de países/regiões)
+# Format: (regex_pattern, lat, lon)
 _KNOWN_LOCATIONS = [
-    # Pacific Biochar
-    (r"scotia\s*,?\s*ca",          40.483, -124.102),
-    (r"humboldt\s*county",         40.700, -124.100),
-    # Brazil biochar hubs
-    (r"nova\s*espe[rn]an[çc]a",   -22.90,  -43.17),
-    (r"minas\s*gerais",            -18.50,  -44.00),
-    (r"s[ãa]o\s*paulo",           -23.55,  -46.63),
+
+    # ── Projetos Puro.Earth conhecidos ────────────────────────────────────────
+    (r"riberalta",                  -11.00,  -66.00),   # ExomadGreen — Bolivia
+    (r"capelinha",                  -17.69,  -42.52),   # Aperam Bioenergia — MG
+    (r"wakefield",                   43.60,  -70.66),   # Accend Wakefield — EUA
+    (r"georgiana|georgia.*usa|georgia.*united",  32.16, -82.90),
+
+    # ── Brasil — cidades e estados ────────────────────────────────────────────
+    (r"nova\s*espe[rn]an[çc]a",    -22.90,  -43.17),
+    (r"par[aá]\s*de\s*minas",      -19.87,  -44.61),
+    (r"capelinha",                  -17.69,  -42.52),
+    (r"minas\s*gerais|mg\b",        -18.50,  -44.00),
+    (r"s[ãa]o\s*paulo",            -23.55,  -46.63),
+    (r"mato\s*grosso",             -12.64,  -55.42),
+    (r"par[aá]\b",                  -3.79,  -52.48),
+    (r"bah[ií]a\b",               -12.96,  -38.51),
+    (r"goi[aá]s\b",               -15.83,  -49.84),
+    (r"rio\s*de\s*janeiro",        -22.91,  -43.17),
     (r"bras[ií]lia",               -15.78,  -47.93),
-    (r"par[aá]\s*de\s*minas",     -19.87,  -44.61),
-    # Europe
-    (r"denmark|danmark",            56.00,    10.00),
-    (r"netherlands|holland",        52.37,     4.89),
-    (r"germany|deutschland",        51.17,    10.45),
-    (r"sweden|sverige",             59.33,    18.07),
-    # US biochar hubs
-    (r"oregon",                    44.00,  -120.50),
-    (r"washington\s*state",        47.40,  -120.50),
-    (r"california",                36.78,  -119.42),
+    (r"\bbrazil\b|brasil\b",       -14.24,  -51.93),   # centróide BR
+
+    # ── América do Sul ────────────────────────────────────────────────────────
+    (r"\bbolivia\b",               -16.29,  -63.59),
+    (r"\bcolombia\b",                4.57,  -74.30),
+    (r"\bperu\b",                   -9.19,  -75.02),
+    (r"\bchile\b",                 -35.68,  -71.54),
+    (r"\bargentina\b",             -38.42,  -63.62),
+    (r"\becuador\b",                -1.83,  -78.18),
+    (r"\bvenezuela\b",               6.42,  -66.59),
+    (r"\bparaguay\b",              -23.44,  -58.44),
+    (r"\buruguay\b",               -32.52,  -55.77),
+
+    # ── América do Norte ──────────────────────────────────────────────────────
+    (r"humboldt\s*county|scotia\s*,?\s*ca",  40.60, -124.10),
+    (r"\boregon\b",                 44.00, -120.50),
+    (r"washington\s*state",         47.40, -120.50),
+    (r"\bcalifornia\b",             36.78, -119.42),
+    (r"british\s*columbia",         53.73, -127.65),
+    (r"\bcanada\b",                 56.13,  -106.35),
+    (r"\bmexico\b|méxico\b",        23.63,  -102.55),
+    (r"\busa\b|united\s*states|u\.s\.a",  37.09,  -95.71),
+
+    # ── Europa ────────────────────────────────────────────────────────────────
+    (r"\bfinland\b|finland",        64.00,   26.00),
+    (r"\bnorway\b|norge",           64.56,   17.89),
+    (r"\bsweden\b|sverige",         60.13,   18.64),
+    (r"\bdenmark\b|danmark",        56.00,   10.00),
+    (r"\bnetherlands\b|holland",    52.37,    4.89),
+    (r"\bgermany\b|deutschland",    51.17,   10.45),
+    (r"\baustria\b|österreich",     47.52,   14.55),
+    (r"\bswitzerland\b|schweiz",    46.82,    8.23),
+    (r"\bfrance\b|frankreich",      46.23,    2.21),
+    (r"\buk\b|united\s*kingdom|england|britain",  52.36,  -1.17),
+    (r"\bspain\b|españa",           40.46,   -3.75),
+    (r"\bportugal\b",               39.40,   -8.22),
+    (r"\bitaly\b|italia",           41.87,   12.57),
+    (r"\bpoland\b|polska",          51.92,   19.14),
+    (r"\bestonia\b",                58.60,   25.01),
+    (r"\blatvia\b",                 56.88,   24.60),
+
+    # ── África ────────────────────────────────────────────────────────────────
+    (r"\bghana\b",                   7.95,   -1.02),
+    (r"\bkenya\b",                  -0.02,   37.91),
+    (r"\btanzania\b",               -6.37,   34.89),
+    (r"\buganda\b",                  1.37,   32.29),
+    (r"\bnigeria\b",                 9.08,    8.68),
+    (r"\bsouth\s*africa\b",        -30.56,   22.94),
+
+    # ── Ásia / Pacífico ───────────────────────────────────────────────────────
+    (r"\bindia\b",                  20.59,   78.96),
+    (r"\bindonesia\b",              -0.79,  113.92),
+    (r"\bmalaysia\b",                4.21,  101.98),
+    (r"\bthailand\b",               15.87,  100.99),
+    (r"\bvietnam\b|viet\s*nam",     14.06,  108.28),
+    (r"\bchina\b",                  35.86,  104.20),
+    (r"\bjapan\b|japan",            36.20,  138.25),
+    (r"\baustralia\b",             -25.27,  133.78),
+    (r"\bnew\s*zealand\b",         -40.90,  174.89),
 ]
 
 
 def _parse_coordinates(locations: Any) -> Optional[Tuple[float, float]]:
     """
-    Extract (lat, lon) from project.locations in various formats:
-      - GPS decimal: "40.7128, -74.006"
-      - Known location names via lookup table
+    Extrai (lat, lon) de project.locations em múltiplos formatos:
+      1. Coordenadas GPS decimais explícitas: "40.7128, -74.006"
+      2. Coordenadas DMS: "11°01'S 66°04'W"
+      3. Nome de cidade/região/país — lookup em _KNOWN_LOCATIONS
+      4. Apenas país mencionado — centróide do país
     """
     if not locations:
         return None
@@ -85,15 +148,37 @@ def _parse_coordinates(locations: Any) -> Optional[Tuple[float, float]]:
     else:
         text = str(locations)
 
-    # 1. GPS decimal degrees pattern — 1+ decimal digit
+    text_lower = text.lower()
+
+    # 1. GPS decimal: "lat, lon" ou "lat lon"
     m = re.search(r"(-?\d{1,3}\.\d+)[,\s]+(-?\d{1,3}\.\d+)", text)
     if m:
         lat, lon = float(m.group(1)), float(m.group(2))
         if -90 <= lat <= 90 and -180 <= lon <= 180:
             return lat, lon
 
-    # 2. Known location name lookup (case-insensitive)
-    text_lower = text.lower()
+    # 2. DMS pattern: "11°01'00\"S 66°04'00\"W" ou "11° 1' S, 66° 4' W"
+    dms = re.search(
+        r"(\d{1,3})[°\s]+(\d{1,2})'?\s*(?:(\d{1,2})[\"\s]*)?\s*([NS])"
+        r"[,\s]+"
+        r"(\d{1,3})[°\s]+(\d{1,2})'?\s*(?:(\d{1,2})[\"\s]*)?\s*([EW])",
+        text, re.IGNORECASE
+    )
+    if dms:
+        lat_d, lat_m = int(dms.group(1)), int(dms.group(2))
+        lat_s = int(dms.group(3) or 0)
+        lat = lat_d + lat_m/60 + lat_s/3600
+        if dms.group(4).upper() == 'S':
+            lat = -lat
+        lon_d, lon_m = int(dms.group(5)), int(dms.group(6))
+        lon_s = int(dms.group(7) or 0)
+        lon = lon_d + lon_m/60 + lon_s/3600
+        if dms.group(8).upper() == 'W':
+            lon = -lon
+        if -90 <= lat <= 90 and -180 <= lon <= 180:
+            return lat, lon
+
+    # 3. Nome de cidade / região / país — lookup (mais específico primeiro)
     for pattern, lat, lon in _KNOWN_LOCATIONS:
         if re.search(pattern, text_lower):
             return lat, lon
