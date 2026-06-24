@@ -211,11 +211,12 @@ def pin_audit(body: dict):
         if save and profile.project_name:
             project_id = str(uuid.uuid4())
             profile_dict = dataclasses.asdict(profile)
+            profile_dict["_source"] = "form"   # marcador interno; sem coluna separada
             _db_execute(
                 """INSERT INTO ca_projects
-                   (id, name, source, project_data, created_at)
-                   VALUES (%s, %s, %s, %s, %s)""",
-                (project_id, profile.project_name, "form",
+                   (id, name, project_data, created_at)
+                   VALUES (%s, %s, %s, %s)""",
+                (project_id, profile.project_name,
                  json.dumps(profile_dict, default=str), _now()),
             )
             # Salva o audit run
