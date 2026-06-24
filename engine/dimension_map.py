@@ -170,10 +170,53 @@ PURO_DIMENSION_MAP = {
     "P-CLOS-0": "environmental_social",
 }
 
+# ── Mapeamento Verra VCS (V-XXXX → dimensão) ─────────────────────────────────
+
+VERRA_DIMENSION_MAP = {
+    # feedstock_eligibility
+    "V-APPL-0": "feedstock_eligibility",   # applicability / greenfield scope
+    "V-FEED-0": "feedstock_eligibility",   # feedstock waste biogenic, non-imported
+    "V-FCAT-0": "feedstock_eligibility",   # feedstock category (Table 1)
+    "V-TECH-0": "feedstock_eligibility",   # technology class (high/low)
+    "V-HCOR-0": "feedstock_eligibility",   # H:Corg ≤ 0.7 gate (soil)
+    "V-APPL-S": "feedstock_eligibility",   # application type eligibility
+
+    # carbon_accounting
+    "V-BASE-0": "carbon_accounting",       # baseline scenario (ERSS,y = 0)
+    "V-BFED-0": "carbon_accounting",       # baseline feedstock fate evidence
+    "V-CARB-0": "carbon_accounting",       # carbon content FCp,t,p
+    "V-PEPS-0": "carbon_accounting",       # process emissions
+    "V-LEAK-0": "carbon_accounting",       # leakage (transport threshold)
+    "V-APPL-E": "carbon_accounting",       # application stage emissions
+
+    # additionality
+    "V-REGS-0": "additionality",           # regulatory surplus (Step 1)
+    "V-PLST-0": "additionality",           # positive list (Step 2)
+    "V-VT08-0": "additionality",           # VT0008 investment analysis (Step 3)
+
+    # permanence
+    "V-PERM-0": "permanence",              # PRde,k by pyrolysis temperature
+    "V-TEMP-0": "permanence",              # temperature monitoring
+    "V-REVR-0": "permanence",              # reversal risk
+
+    # monitoring
+    "V-MASS-0": "monitoring",              # mass monitoring
+    "V-MONI-0": "monitoring",              # monitoring plan
+    "V-TRCK-0": "monitoring",              # chain of custody
+    "V-GEOG-0": "monitoring",              # geographic information
+    "V-DATA-0": "monitoring",              # data management
+
+    # environmental_social (biochar quality → environmental gate)
+    "V-QUAL-0": "environmental_social",    # IBI/EBC quality compliance
+    "V-CONT-0": "environmental_social",    # contaminants (PAH, heavy metals)
+    "V-MINE-0": "environmental_social",    # mineral additives ≤ 10%
+}
+
 # Registry por metodologia
 DIMENSION_MAPS = {
     "isometric":  ISOMETRIC_DIMENSION_MAP,
     "puro_earth": PURO_DIMENSION_MAP,
+    "verra_vcs":  VERRA_DIMENSION_MAP,
 }
 
 

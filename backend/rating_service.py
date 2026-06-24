@@ -165,6 +165,8 @@ def _detect_methodology(results: List[dict]) -> str:
         rid = r.get("requirement_id", "")
         if rid.startswith("P-"):
             return "puro_earth"
+        if rid.startswith("V-"):
+            return "verra_vcs"
     return "isometric"
 
 
@@ -215,6 +217,41 @@ def compute_readiness_rating(
                 overall_score = weighted
         except Exception as e:
             print(f"[rating] Puro dimension_map error: {e}")
+            dimensions = {k: {"label": k, "score": None, "weight": 0, "applicable_count": 0, "na_count": 0}
+                         for k in ["feedstock_eligibility", "carbon_accounting", "additionality",
+                                   "permanence", "monitoring", "environmental_social"]}
+
+    # ── Verra VCS: usa dimensões universais do dimension_map.py ──────────────────
+    elif methodology == "verra_vcs":
+        try:
+            from engine.dimension_map import (
+                compute_dimension_scores, compute_weighted_score,
+                UNIVERSAL_DIMENSIONS, VERRA_DIMENSION_MAP,
+            )
+            dim_scores = compute_dimension_scores(results, "verra_vcs")
+            dimensions = {}
+            for dim_key, cfg in UNIVERSAL_DIMENSIONS.items():
+                score = dim_scores.get(dim_key)
+                dim_req_ids = {k for k, v in VERRA_DIMENSION_MAP.items() if v == dim_key}
+                results_by_id = {r.get("requirement_id", ""): r for r in results}
+                na_count = sum(
+                    1 for rid in dim_req_ids
+                    if results_by_id.get(rid, {}).get("status") == "not_applicable"
+                )
+                dimensions[dim_key] = {
+                    "label":            cfg["label"],
+                    "score":            score,
+                    "weight":           cfg["weight"],
+                    "applicable_count": len([r for r in results
+                                            if VERRA_DIMENSION_MAP.get(r.get("requirement_id","")) == dim_key
+                                            and r.get("status") != "not_applicable"]),
+                    "na_count":         na_count,
+                }
+            weighted = compute_weighted_score(dim_scores)
+            if weighted > 0:
+                overall_score = weighted
+        except Exception as e:
+            print(f"[rating] Verra dimension_map error: {e}")
             dimensions = {k: {"label": k, "score": None, "weight": 0, "applicable_count": 0, "na_count": 0}
                          for k in ["feedstock_eligibility", "carbon_accounting", "additionality",
                                    "permanence", "monitoring", "environmental_social"]}

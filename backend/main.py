@@ -463,7 +463,12 @@ def download_report(run_id: str, format: str = Query("json")):
     methodology_key = run.get("methodology") or result.get("methodology_key", "")
     if not methodology_key and results_list:
         first_id = (results_list[0].get("requirement_id") or "")
-        methodology_key = "puro_earth" if first_id.startswith("P-") else "isometric"
+        if first_id.startswith("P-"):
+            methodology_key = "puro_earth"
+        elif first_id.startswith("V-"):
+            methodology_key = "verra_vcs"
+        else:
+            methodology_key = "isometric"
     _METHODOLOGY_LABELS = {
         "isometric":  "Isometric Biochar v1.2",
         "puro_earth": "Puro.Earth Biochar Edition 2025",
