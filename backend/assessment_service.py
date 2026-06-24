@@ -385,17 +385,19 @@ async def run_methodology_assessment(
             findings = run_engine_with_profile(profile, reqs, LOGIC_REGISTRY, audit_mode)
         dim_scores = compute_dimension_scores(findings, method)
 
-        # ── Fix 1: Hard gate para P-FFOR-0 (sustentabilidade florestal) ───────
-        # Se o projeto tem biomassa florestal e nenhum dos 3 caminhos Puro está
-        # documentado, a dimensão feedstock não pode passar de 60%
-        # (o gap é estrutural, não pode ser diluído por outros requisitos)
+        # ── Hard gate P-FFOR-0: biomassa florestal sem certificação ────────────
+        # Gap ESTRUTURAL no Puro.Earth — sem FSC/ISAE3000/plano governamental,
+        # o projeto não pode ser registrado. Cap de 40% (não 60%) para refletir
+        # que Isometric é genuinamente mais adequado para esse perfil de projeto.
+        # O cap é intencialmente baixo: sem certificação florestal, Puro.Earth
+        # é a metodologia MENOS recomendável, não apenas "possível com gaps".
         if method == "puro_earth" and profile.is_forest_biomass:
             ffor = next((r for r in findings
                          if r.get("requirement_id") == "P-FFOR-0"), None)
             if ffor and ffor.get("status") not in ("compliant", "not_applicable"):
                 current = dim_scores.get("feedstock_eligibility")
-                if current is not None and current > 60:
-                    dim_scores["feedstock_eligibility"] = 60.0
+                if current is not None and current > 40:
+                    dim_scores["feedstock_eligibility"] = 40.0
 
         overall    = compute_weighted_score(dim_scores)
         grade      = _score_to_grade(overall)
@@ -460,18 +462,27 @@ def _build_reasoning(
 
     reasons = []
 
-    # Feedstock-specific reasoning
+    # Feedstock-specific reasoning — biomassa florestal sem certificação
     if profile.is_forest_biomass:
-        iso_fd = (results.get("isometric", {}).get("dimensions") or {}).get("feedstock_eligibility")
-        puro_fd = (results.get("puro_earth", {}).get("dimensions") or {}).get("feedstock_eligibility")
-        if iso_fd and puro_fd and iso_fd > puro_fd:
-            has_cert = profile.has_fsc_certification or profile.has_sfi_certification or profile.has_pefc_certification
-            if not has_cert and not profile.has_isae3000_dossier:
-                reasons.append(
-                    "O projeto usa biomassa florestal sem certificação FSC/SFI/PEFC ou dossiê ISAE 3000. "
-                    "Isometric é mais flexível neste critério (sustainable biomass sem certificação formal obrigatória), "
-                    "enquanto Puro exige uma das 3 comprovações."
-                )
+        has_cert = (profile.has_fsc_certification or profile.has_sfi_certification
+                    or profile.has_pefc_certification or profile.has_isae3000_dossier)
+        if not has_cert:
+            puro_fd = (results.get("puro_earth", {}).get("dimensions") or {}).get("feedstock_eligibility")
+            # Razão principal — independente de qual metodologia ganhou
+            cpi_note = (
+                f" O Brasil tem CPI {profile.country_cpi:.0f} ≥ 50, então o caminho do plano governamental "
+                f"é teoricamente disponível — mas exige documentação formal dos 4 itens obrigatórios."
+                if profile.country_cpi and profile.country_cpi >= 50 else
+                " O país do projeto tem CPI < 50, excluindo também o caminho do plano governamental."
+            )
+            reasons.append(
+                "⚠️ Fator decisivo: o projeto usa biomassa florestal sem certificação FSC/SFI/PEFC "
+                "ou dossiê ISAE 3000. Para o Puro.Earth Edition 2025, isso é um gap estrutural — "
+                "o projeto não pode ser registrado sem uma dessas comprovações."
+                + cpi_note +
+                " Isometric avalia sustentabilidade de biomassa de forma mais flexível, "
+                "sem exigir certificação formal específica."
+            )
 
     # SDG reasoning
     if not profile.has_sdg_reporting:
