@@ -112,34 +112,35 @@ function Toggle({ name, value, onChange, label }) {
 }
 
 /**
- * KnownValueField — toggle "Tenho este dado" + campo de valor + exibição do default.
- * Padrão: sem dado → default conservador exibido; com dado → input numérico.
+ * KnownValueField — input sempre visível.
+ * Vazio → mostra default aplicado. Preenchido → mostra impacto calculado.
+ * Remove o toggle "Tenho este dado" que confundia o usuário.
  */
-function KnownValueField({ knownName, valueName, label, help, defaultText, unit, placeholder, form, set, type = "number" }) {
-  const isKnown = !!form[knownName];
+function KnownValueField({ valueName, label, help, defaultText, unit, placeholder, form, set, type = "number" }) {
+  const val = form[valueName];
+  const hasValue = val !== null && val !== undefined && val !== "";
   return (
     <div style={{ marginBottom: 18 }}>
-      <label style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 6, color: "#1e293b" }}>
+      <label style={{ display: "block", fontWeight: 600, fontSize: 13, marginBottom: 4, color: "#1e293b" }}>
         {label}
       </label>
-      {help && <p style={{ fontSize: 11, color: "#64748b", margin: "0 0 8px" }}>{help}</p>}
-      <Toggle name={knownName} value={isKnown} onChange={set} label="Tenho este dado" />
-      {isKnown ? (
-        <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 4 }}>
-          <input
-            style={{ ...inp, flex: 1 }}
-            type={type} value={form[valueName] ?? ""}
-            placeholder={placeholder}
-            onChange={e => set(valueName, e.target.value === "" ? null : Number(e.target.value))}
-          />
-          {unit && <span style={{ fontSize: 12, color: "#64748b", whiteSpace: "nowrap" }}>{unit}</span>}
-        </div>
-      ) : (
+      {help && <p style={{ fontSize: 11, color: "#64748b", margin: "0 0 6px" }}>{help}</p>}
+      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <input
+          style={{ ...inp, flex: 1 }}
+          type={type} value={val ?? ""}
+          placeholder={placeholder || `Opcional — sem valor: ${defaultText}`}
+          onChange={e => set(valueName, e.target.value === "" ? null : (type === "number" ? Number(e.target.value) : e.target.value))}
+        />
+        {unit && <span style={{ fontSize: 12, color: "#64748b", whiteSpace: "nowrap" }}>{unit}</span>}
+      </div>
+      {!hasValue && (
         <div style={{
-          padding: "8px 12px", background: "#f8fafc", border: "1px dashed #cbd5e1",
-          borderRadius: 6, fontSize: 12, color: "#64748b", marginTop: 4,
+          marginTop: 5, padding: "5px 10px", background: "#f8fafc",
+          border: "1px dashed #cbd5e1", borderRadius: 5,
+          fontSize: 11, color: "#64748b",
         }}>
-          📌 Default conservador: <strong style={{ color: "#475569" }}>{defaultText}</strong>
+          📌 Sem valor: <strong style={{ color: "#475569" }}>{defaultText}</strong>
         </div>
       )}
     </div>
@@ -178,14 +179,14 @@ function StepProjeto({ form, set, errors }) {
         </Field>
       </div>
       <KnownValueField
-        knownName="has_biochar_estimate" valueName="biochar_t_dry_year"
+        valueName="biochar_t_dry_year"
         label="Produção anual estimada de biochar"
         help="Toneladas de biochar seco por ano. Necessário para estimar volume de créditos."
-        defaultText="Escala de projeto indefinida — não penaliza a auditoria"
+        defaultText="Escala indefinida — não penaliza a auditoria"
         unit="t/ano" placeholder="Ex: 1000" form={form} set={set}
       />
       <KnownValueField
-        knownName="has_credits_estimate" valueName="estimated_credits_tco2"
+        valueName="estimated_credits_tco2"
         label="Créditos estimados"
         defaultText="Calculado pelo engine a partir dos dados técnicos"
         unit="tCO₂e/ano" placeholder="Ex: 750" form={form} set={set}
@@ -270,10 +271,10 @@ function StepProducao({ form, set }) {
   return (
     <>
       <KnownValueField
-        knownName="has_temp_measured" valueName="pyrolysis_temp_c"
+        valueName="pyrolysis_temp_c"
         label="Temperatura média de pirólise"
-        help="Driver primário de permanência na Verra VCS (Tabela 3 VM0044). Informativo para Isometric/Puro."
-        defaultText="PRde Verra = 0.56 (conservador). Não afeta permanência Iso/Puro diretamente."
+        help="Driver primário de permanência na Verra VCS (Tabela 3). Também informa Isometric/Puro via H/Corg esperado."
+        defaultText="PRde Verra = 0.56 (Tabela 3 VM0044, temperatura desconhecida)"
         unit="°C" placeholder="Ex: 600" form={form} set={set}
       />
       {prdeMsg && (
@@ -325,10 +326,10 @@ function StepBiochar({ form, set }) {
   return (
     <>
       <KnownValueField
-        knownName="has_hcorg_measured" valueName="h_c_ratio"
+        valueName="h_c_ratio"
         label="H/Corg — razão molar hidrogênio/carbono orgânico"
         help="Driver primário de permanência em Isometric e Puro.Earth (Woolf 2021). Gate binário na Verra (≤ 0.7 para solo)."
-        defaultText="0.35 (resíduo madeireiro típico, pirólise 500°C). Score de permanência conservador."
+        defaultText="0.35 (típico resíduo madeireiro, pirólise 500°C) — permanência conservadora"
         unit="adimensional" placeholder="Ex: 0.28" form={form} set={set}
       />
       {hcMsg && (
@@ -338,35 +339,35 @@ function StepBiochar({ form, set }) {
       )}
 
       <KnownValueField
-        knownName="has_ocorg_measured" valueName="o_c_ratio"
+        valueName="o_c_ratio"
         label="O/Corg — razão molar oxigênio/carbono orgânico"
         help="Deve ser < 0.2 em Isometric e Puro.Earth. Hard gate se ≥ 0.2."
-        defaultText="0.08 (pirólise > 450°C). Assumido dentro do limite."
+        defaultText="0.08 (pirólise > 450°C) — assumido dentro do limite"
         unit="adimensional" placeholder="Ex: 0.07" form={form} set={set}
       />
-      {form.has_ocorg_measured && form.o_c_ratio >= 0.2 && (
+      {form.o_c_ratio !== null && form.o_c_ratio >= 0.2 && (
         <div style={{ padding: "8px 12px", background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 6, fontSize: 12, color: "#b91c1c", marginTop: -8, marginBottom: 16 }}>
           ❌ O/Corg ≥ 0.2 → permanência zero em Isometric e Puro.Earth (hard gate)
         </div>
       )}
 
       <KnownValueField
-        knownName="has_pah_measured" valueName="pah_value"
+        valueName="pah_value"
         label="PAH — hidrocarbonetos aromáticos policíclicos"
         help="Limite WBC/Isometric: 12 mg/kg. Limite IBI Basic: 20 mg/kg. IBI Premium: 6 mg/kg."
-        defaultText="Conformidade não verificável — não penalizado, mas recomenda análise."
+        defaultText="Sem análise — conformidade não verificável (não penalizado)"
         unit="mg/kg" placeholder="Ex: 4.2" form={form} set={set}
       />
-      {form.has_pah_measured && form.pah_value > 12 && (
+      {form.pah_value !== null && form.pah_value > 12 && (
         <div style={{ padding: "8px 12px", background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 6, fontSize: 12, color: "#b91c1c", marginTop: -8, marginBottom: 16 }}>
           ❌ PAH {form.pah_value} mg/kg > 12 → ambiental zerado em Isometric e Puro.Earth
         </div>
       )}
 
       <KnownValueField
-        knownName="has_pcb_measured" valueName="pcb_value"
+        valueName="pcb_value"
         label="PCB — bifenilas policloradas"
-        defaultText="Conformidade não verificável — não penalizado."
+        defaultText="Sem análise — não penalizado"
         unit="mg/kg" placeholder="Ex: 0.05" form={form} set={set}
       />
 
@@ -394,10 +395,10 @@ function StepCarbono({ form, set }) {
         <Toggle name="has_lca" value={form.has_lca} onChange={set} label="LCA (Life Cycle Assessment) iniciada ou disponível?" />
         {form.has_lca ? (
           <KnownValueField
-            knownName="has_lca_intensity" valueName="lca_emission_factor_tco2_t"
+            valueName="lca_emission_factor_tco2_t"
             label="Intensidade de emissões do processo (LCA)"
             help="Total de emissões do ciclo de vida por tonelada de biochar produzido."
-            defaultText="0.28 tCO₂e/t (referência bibliográfica para resíduos agrícolas, pirólise média)"
+            defaultText="0.28 tCO₂e/t (referência bibliográfica resíduos agrícolas, pirólise média)"
             unit="tCO₂e/t biochar" placeholder="Ex: 0.18" form={form} set={set}
           />
         ) : (
@@ -425,7 +426,7 @@ function StepCarbono({ form, set }) {
       </Field>
 
       <KnownValueField
-        knownName="has_transport_known" valueName="transport_distance_km"
+        valueName="transport_distance_km"
         label="Distância de transporte (round-trip)"
         help="Feedstock → planta + planta → aplicação. Relevante para Verra: > 200km aciona CDM TOOL12."
         defaultText="≤ 200 km assumido → leakage de transporte = zero na Verra"
@@ -456,10 +457,10 @@ function StepAdicionalidade({ form, set }) {
 
       {form.additionality_method === "irr_npv" && (
         <KnownValueField
-          knownName="has_irr_calculated" valueName="irr_without_carbon"
+          valueName="irr_without_carbon"
           label="TIR do projeto sem receita de carbono"
           help="Se TIR < custo de capital setorial → adicionalidade financeira demonstrada."
-          defaultText="Não calculada — adicionalidade financeira não verificável"
+          defaultText="Não calculada — adicionalidade financeira não verificável pelo engine"
           unit="%" placeholder="Ex: 8.5" form={form} set={set}
         />
       )}
@@ -502,9 +503,9 @@ function StepMonitoramento({ form, set }) {
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 12 }}>
         <KnownValueField
-          knownName="has_retention_defined" valueName="data_retention_years"
+          valueName="data_retention_years"
           label="Período de retenção de dados"
-          defaultText="Não definido (Verra exige ≥ 2 anos pós-crédito)"
+          defaultText="Não definido — Verra exige ≥ 2 anos pós-crédito"
           unit="anos" placeholder="Ex: 3" form={form} set={set}
         />
         <Field label="Método de amostragem do biochar">
@@ -535,7 +536,7 @@ function StepSocial({ form, set }) {
 
       {form.has_adaptive_management && (
         <KnownValueField
-          knownName="has_triggers_count" valueName="adaptive_management_triggers"
+          valueName="adaptive_management_triggers"
           label="Número de gatilhos de gestão adaptativa documentados"
           help="Puro.Earth exige ≥ 4 gatilhos explícitos."
           defaultText="Não definido — Puro.Earth: parcial se < 4"
@@ -710,8 +711,7 @@ function ResultsView({ result, onReset, projectId }) {
 const EMPTY = {
   // Projeto
   project_name: "", project_country: "brazil", storage_pathway: "soil",
-  has_biochar_estimate: false, biochar_t_dry_year: null,
-  has_credits_estimate: false, estimated_credits_tco2: null,
+  biochar_t_dry_year: null, estimated_credits_tco2: null,
   // Feedstock
   feedstock_type: "", is_forest_biomass: false, is_purpose_grown: false,
   feedstock_imported: false, uses_mixed_waste: false, uses_coal_ash: false,
@@ -719,43 +719,36 @@ const EMPTY = {
   has_fsc_certification: false, has_pefc_certification: false,
   has_isae3000_dossier: false, has_government_mgmt_plan: false,
   // Produção
-  has_temp_measured: false, pyrolysis_temp_c: null,
-  verra_tech_class: "", has_continuous_temp_monitoring: false,
-  has_pyrolysis_gas_recovery: false, has_engineering_diagram: false,
-  has_maintenance_plan: false, is_greenfield_facility: true, reactor_type: "",
+  pyrolysis_temp_c: null, verra_tech_class: "",
+  has_continuous_temp_monitoring: false, has_pyrolysis_gas_recovery: false,
+  has_engineering_diagram: false, has_maintenance_plan: false,
+  is_greenfield_facility: true, reactor_type: "",
   // Biochar
-  has_hcorg_measured: false, h_c_ratio: null,
-  has_ocorg_measured: false, o_c_ratio: null,
-  has_pah_measured: false, pah_value: null,
-  has_pcb_measured: false, pcb_value: null,
+  h_c_ratio: null, o_c_ratio: null, pah_value: null, pcb_value: null,
   quality_standard: "not_stated", has_iso17025_lab: false, heavy_metals_documented: false,
   // Carbono
-  has_lca: false, has_lca_intensity: false, lca_emission_factor_tco2_t: null,
+  has_lca: false, lca_emission_factor_tco2_t: null,
   has_system_boundary: false, has_baseline: false, has_baseline_fate_evidence: false,
   has_leakage_assessment: false, has_uncertainty_analysis: false,
   durability_option: "not_stated", has_soil_temp_method: false,
-  has_reversal_risk_assessment: false,
-  has_transport_known: false, transport_distance_km: null,
+  has_reversal_risk_assessment: false, transport_distance_km: null,
   // Adicionalidade
   has_financial_additionality: false, additionality_method: "none",
-  has_irr_calculated: false, irr_without_carbon: null,
-  vt0008_path: "not_stated",
+  irr_without_carbon: null, vt0008_path: "not_stated",
   has_regulatory_additionality: false, is_first_of_its_kind: false,
   has_common_practice_evidence: false,
   // Monitoramento
   has_monitoring_table: false, has_data_storage_plan: false,
   has_continuous_weighing: false, has_fc_lab_analysis: false,
   has_chain_of_custody: false, has_application_coordinates: false,
-  has_offsite_backup: false,
-  has_retention_defined: false, data_retention_years: null,
+  has_offsite_backup: false, data_retention_years: null,
   sampling_method: "not_described",
   // Social
   has_env_compliance: false, has_no_net_env_harm: false,
   has_no_net_social_harm: false, has_stakeholder_consultation: false,
   has_grievance_mechanism: false, has_sdg_reporting: false,
   has_adaptive_management: false, has_pollution_prevention: false,
-  has_triggers_count: false, adaptive_management_triggers: 0,
-  has_puro_sdg_template: false,
+  adaptive_management_triggers: 0, has_puro_sdg_template: false,
   // Aplicação
   soil_application: true,
 };
