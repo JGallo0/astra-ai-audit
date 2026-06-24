@@ -541,19 +541,16 @@ export default function ValidationTab() {
           {/* ── Configurar ── */}
           {tab === 'run' && (
             <div className="card">
-              <div className="card-title">Modo de auditoria</div>
-              <div className="flex gap-2" style={{ marginBottom:20 }}>
-                {[
-                  { key:'development',  label:'Desenvolvimento', desc:'Lacunas de evidência futura marcadas como parciais' },
-                  { key:'operational',  label:'Operacional',     desc:'Avaliação estrita — evidência deve estar presente' },
-                ].map(m => (
-                  <button key={m.key}
-                    className={`btn ${auditMode === m.key ? 'btn-primary' : 'btn-ghost'}`}
-                    onClick={() => setAuditMode(m.key)}
-                    title={m.desc}>
-                    {m.label}
-                  </button>
-                ))}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                <span style={{
+                  padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                  background: '#EFF6FF', color: 'var(--navy)', border: '1px solid #C7D4EF',
+                }}>
+                  🔧 Modo Desenvolvimento (PDD)
+                </span>
+                <span style={{ fontSize: 11, color: 'var(--text-2)' }}>
+                  Lacunas de evidência operacional marcadas como futuras, não penalizadas
+                </span>
               </div>
 
               <div className="card-title" style={{ marginBottom:8 }}>Módulos de análise</div>
