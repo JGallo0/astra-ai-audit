@@ -29,6 +29,94 @@ from methodology_requirements import get_requirements_for_methodology
 # ── Probes metodológicos ──────────────────────────────────────────────────────
 
 METHODOLOGY_PROBES = {
+    "verra_vcs": {
+        "pyrolysis_temp_c": (
+            "What is the average pyrolysis temperature (°C)? "
+            "This determines the permanence factor (PRde,k) per VM0044 Table 3. Return number or null."
+        ),
+        "verra_tech_class": (
+            "Is this a high-tech facility (automated continuous temperature monitoring) "
+            "or low-tech (artisanal kilns, no automation)? Answer 'high', 'low', or 'not_stated'."
+        ),
+        "has_continuous_temp_monitoring": (
+            "Does the PDD describe continuous electronic temperature monitoring of the pyrolysis process "
+            "(thermocouple or thermoresistor with recordable signal)?"
+        ),
+        "has_gas_recovery": (
+            "Does the PDD describe recovery or combustion of pyrolysis gases "
+            "(gas burner, flare, CHP)? Required for PEP=0 classification."
+        ),
+        "is_purpose_grown": (
+            "Is the feedstock purpose-grown (cultivated specifically for this project, not a waste/residue)? "
+            "TRUE only if clearly stated. Purpose-grown biomass is NOT eligible under VM0044."
+        ),
+        "feedstock_imported": (
+            "Is the feedstock imported from another country? "
+            "Imported feedstock is NOT eligible under VM0044 AC 4c."
+        ),
+        "verra_feedstock_category": (
+            "Which VM0044 Table 1 category applies? "
+            "(agricultural_residue | food_processing | forestry_wood | recycling_economy | "
+            "aquaculture | animal_manure | hcfa | not_stated)"
+        ),
+        "hcfa_fraction": (
+            "If high-carbon fly ash (HCFA) is part of the feedstock, "
+            "what fraction of total annual throughput? (number 0-1 or null). "
+            "VM0044 Table 1 limits HCFA to ≤ 5%."
+        ),
+        "has_baseline_fate_evidence": (
+            "Does the PDD provide evidence of what would happen to the feedstock without the project "
+            "(e.g., left to decay, burned without energy use)? Required by AC 4b."
+        ),
+        "baseline_evidence_type": (
+            "What type of evidence is provided for feedstock baseline fate? "
+            "(govt_records | disposal_records | literature | survey | peer_reviewed | not_stated)"
+        ),
+        "vt0008_path": (
+            "Which additionality path is followed per VT0008? "
+            "(investment_comparison | benchmark | not_stated)"
+        ),
+        "is_greenfield_facility": (
+            "Is this a new (greenfield) biochar production facility? "
+            "VM0044 AC 1-3 requires new installations, not retrofit of existing ones."
+        ),
+        "soil_application": (
+            "Is the biochar primarily applied to soil? "
+            "FALSE if applied to construction, water filtration, or other non-soil uses."
+        ),
+        "used_as_fuel": (
+            "Is the biochar used as a fuel or burned for energy? "
+            "This would make it ineligible under VM0044 AC 13."
+        ),
+        "has_continuous_weighing": (
+            "Does the PDD describe a continuous weighing system for biochar production, "
+            "recorded monthly and adjusted for moisture content?"
+        ),
+        "has_fc_lab_analysis": (
+            "Is organic carbon content (FCp) determined by annual laboratory analysis "
+            "per IBI Biochar Testing Guidelines or EBC Production Guidelines?"
+        ),
+        "transport_distance_km": (
+            "What is the total transport distance (feedstock to plant + plant to application), "
+            "round trip in km? Distances > 200km require CDM TOOL12 for leakage."
+        ),
+        "has_chain_of_custody": (
+            "Does the PDD describe a chain of custody tracking system from feedstock sourcing "
+            "to biochar application? Required by VM0044 Section 9.3."
+        ),
+        "has_application_coordinates": (
+            "Does the PDD provide geodetic coordinates for the biochar application sites? "
+            "Required to prevent double counting (VM0044 Section 9.3)."
+        ),
+        "has_offsite_backup": (
+            "Does the monitoring plan describe an offsite electronic backup for all logged data? "
+            "Required by VM0044 Section 9.3."
+        ),
+        "data_retention_years": (
+            "How many years of data retention are specified? "
+            "VM0044 requires at least 2 years after the end of the crediting period."
+        ),
+    },
     "puro_earth": {
         "has_isae3000_dossier": (
             "Does the PDD reference an ISAE 3000 third-party audited dossier "
@@ -455,6 +543,45 @@ async def run_methodology_assessment(
             gas_req = next((r for r in findings if r.get("requirement_id") == gas_req_id), None)
             if gas_req and gas_req.get("status") == "non_compliant":
                 _cap("monitoring", 20.0)
+
+        # ── Critérios específicos Verra VM0044 ───────────────────────────────
+        if method == "verra_vcs":
+
+            # 1. Feedstock purpose-grown → eliminatório absoluto (AC 4a)
+            if profile.is_purpose_grown:
+                _cap("feedstock_eligibility", 0.0)
+
+            # 2. Feedstock importado → eliminatório absoluto (AC 4c)
+            if profile.feedstock_imported:
+                _cap("feedstock_eligibility", 0.0)
+
+            # 3. Biochar usado como combustível → eliminatório absoluto (AC 13)
+            if profile.used_as_fuel:
+                _cap("feedstock_eligibility", 0.0)
+                _cap("permanence", 0.0)
+
+            # 4. H/Corg > 0.7 em aplicação solo → inelegível (AC 10)
+            if (profile.h_c_ratio is not None and profile.h_c_ratio > 0.7
+                    and profile.soil_application):
+                _cap("feedstock_eligibility", 30.0)
+                _cap("permanence", 40.0)
+
+            # 5. HCFA > 5% → eliminatório da categoria (Tabela 1)
+            if profile.hcfa_fraction is not None and profile.hcfa_fraction > 0.05:
+                _cap("feedstock_eligibility", 20.0)
+
+            # 6. Temperatura < 350°C → biochar não elegível (AC 5)
+            if (profile.pyrolysis_temp_c is not None
+                    and profile.pyrolysis_temp_c < 350):
+                _cap("permanence", 0.0)
+                _cap("carbon_accounting", 30.0)
+
+            # 7. Sem monitoramento de temperatura → PRde default 0.56
+            # (penalidade de permanência, não eliminatório)
+            if not profile.has_continuous_temp_monitoring:
+                cur_perm = dim_scores.get("permanence", 100)
+                if cur_perm is not None and cur_perm > 65:
+                    dim_scores["permanence"] = 65.0  # reflete PRde 0.56 vs 0.89
 
         # ── Critérios específicos Puro.Earth ──────────────────────────────────
         if method == "puro_earth":

@@ -34,6 +34,42 @@ LOGIC_REGISTRY_PURO_V2025 = {
     for fn_name in REQUIREMENT_LOGIC_MAP_PURO_V2025.values()
     if fn_name in globals()
 }
+
+from engine.requirement_logic_verra_v1 import (
+    eval_verra_applicability_v1,
+    eval_verra_feedstock_eligibility_v1,
+    eval_verra_feedstock_category_v1,
+    eval_verra_technology_class_v1,
+    eval_verra_hcorg_gate_v1,
+    eval_verra_application_type_v1,
+    eval_verra_regulatory_surplus_v1,
+    eval_verra_positive_list_v1,
+    eval_verra_vt0008_investment_v1,
+    eval_verra_baseline_v1,
+    eval_verra_baseline_feedstock_v1,
+    eval_verra_permanence_v1,
+    eval_verra_temperature_monitoring_v1,
+    eval_verra_carbon_content_v1,
+    eval_verra_mass_monitoring_v1,
+    eval_verra_process_emissions_v1,
+    eval_verra_leakage_v1,
+    eval_verra_application_emissions_v1,
+    eval_verra_biochar_quality_v1,
+    eval_verra_contaminants_v1,
+    eval_verra_mineral_additives_v1,
+    eval_verra_monitoring_plan_v1,
+    eval_verra_chain_of_custody_v1,
+    eval_verra_geographic_info_v1,
+    eval_verra_data_management_v1,
+    eval_verra_reversal_risk_v1,
+)
+from engine.requirement_logic_map_verra_v1 import REQUIREMENT_LOGIC_MAP_VERRA_V1
+
+LOGIC_REGISTRY_VERRA_V1 = {
+    fn_name: globals()[fn_name]
+    for fn_name in REQUIREMENT_LOGIC_MAP_VERRA_V1.values()
+    if fn_name in globals()
+}
 from engine.requirement_logic import (
     adaptive_management_plan,
     biochar_characterization_approach,
@@ -171,5 +207,7 @@ LOGIC_REGISTRY = {
     **LOGIC_REGISTRY_V1,
     # engine v1 — Puro.Earth (P-XXXX protocol-native)
     **LOGIC_REGISTRY_PURO_V2025,
+    # engine v1 — Verra VCS VM0044 (V-XXXX protocol-native)
+    **LOGIC_REGISTRY_VERRA_V1,
 }
 

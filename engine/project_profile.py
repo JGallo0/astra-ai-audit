@@ -159,6 +159,62 @@ class ProjectProfile:
     has_puro_project_description_template: bool = False
     issuance_delay_expected_months: Optional[int] = None  # ≤ 18 para Puro
 
+    # ── Verra VM0044 ──────────────────────────────────────────────────────────
+    # Tecnologia e permanência (driver primário na Verra: temperatura, não H/Corg)
+    pyrolysis_temp_c:           Optional[float]= None   # °C — determina PRde,k (Tabela 3)
+    verra_tech_class:           str            = ""     # "high" | "low" | ""
+    has_continuous_temp_monitoring: bool       = False  # sensor contínuo obrigatório high-tech
+    has_temp_calibration_plan:  bool           = False
+    has_gas_recovery:           bool           = False  # recuperação gás → PEP = 0
+
+    # Feedstock Verra-específico
+    is_purpose_grown:           bool           = False  # proibido (AC 4a)
+    feedstock_imported:         bool           = False  # proibido (AC 4c)
+    verra_feedstock_category:   str            = ""     # Tabela 1: agricultural_residue | food_processing |
+                                                        # forestry_wood | recycling_economy |
+                                                        # aquaculture | animal_manure | hcfa
+    hcfa_fraction:              Optional[float]= None   # fração HCFA — máx 5%
+    mineral_additive_fraction:  Optional[float]= None   # aditivos minerais — máx 10%
+
+    # Baseline e destino do feedstock
+    has_baseline_fate_evidence: bool           = False  # evidência AC 4b (decomposição ou queima)
+    baseline_evidence_type:     str            = ""     # "govt_records" | "disposal_records" |
+                                                        # "literature" | "survey" | "peer_reviewed"
+
+    # Additionality Verra (VT0008)
+    vt0008_path:                str            = ""     # "investment_comparison" | "benchmark"
+    is_greenfield_facility:     bool           = True   # AC 1-3: instalação nova
+
+    # Aplicação e via de uso
+    soil_application:           bool           = True   # aplicação em solo
+    used_as_fuel:               bool           = False  # proibido (AC 13)
+    used_as_reducing_agent:     bool           = False  # proibido (AC 14)
+    non_soil_carbon_loss_pct:   Optional[float]= None   # % C perdido em app não-solo — máx 50%
+
+    # Monitoramento Verra
+    has_continuous_weighing:    bool           = False  # Mt,k,p,y contínuo
+    has_scale_calibration_plan: bool           = False
+    has_invoice_cross_check:    bool           = False  # cross-check com NF
+    has_fc_lab_analysis:        bool           = False  # FCp,t,p lab anual
+    uses_fc_default_table4:     bool           = False  # usa default da Tabela 4
+    methane_emission_factor:    Optional[float]= None   # Fe tCH4/t — default 0.049
+    has_energy_lca:             bool           = False  # PED + PEC quantificados
+    transport_distance_km:      Optional[float]= None   # km round-trip feedstock+biochar
+
+    # Rastreabilidade
+    has_chain_of_custody:       bool           = False  # tracking completo
+    tracking_tool:              str            = ""     # "qr_code" | "gps" | "mobile_app" |
+                                                        # "blockchain" | "nft" | "records"
+    has_application_coordinates: bool          = False  # coordenadas geodésicas (Seção 9.3)
+    has_additional_geographic_info: bool       = False
+
+    # Gestão de dados
+    has_offsite_backup:         bool           = False  # backup eletrônico offsite
+    data_retention_years:       Optional[int]  = None   # mínimo 2 anos pós-crédito
+
+    # Risco de reversão
+    has_reversal_risk_assessment_verra: bool   = False  # Seção 8.4
+
 
 # ── Extração via LLM ──────────────────────────────────────────────────────────
 
@@ -244,6 +300,55 @@ PROFILE_QUESTIONS = {
     "grievance_res_days":        "What is the resolution deadline for grievances in days? (integer or null)",
     "has_sdg_reporting":         "Does the PDD include SDG (Sustainable Development Goals) reporting or alignment documentation?",
     "has_closure_plan":          "Does the PDD describe project closure conditions and a closure plan?",
+
+    # ── Verra VM0044 — extração específica ───────────────────────────────────
+    # Tecnologia e permanência
+    "pyrolysis_temp_c":           "What is the average pyrolysis temperature in Celsius? (number or null)",
+    "verra_tech_class":           "Is the facility classified as high-tech (automated temperature control) or low-tech (artisanal/simple kilns)? (high | low | not_stated)",
+    "has_continuous_temp_monitoring": "Is there continuous temperature monitoring of the pyrolysis process with a recordable electronic signal?",
+    "has_temp_calibration_plan":  "Is there a calibration plan for temperature sensors?",
+    "has_gas_recovery":           "Is pyrolysis gas recovered (combusted or captured for energy)? TRUE only if explicitly documented.",
+
+    # Feedstock Verra
+    "is_purpose_grown":           "Is the feedstock purpose-grown biomass (cultivated specifically for this project, not waste)? TRUE only if clearly stated.",
+    "feedstock_imported":         "Is the feedstock imported from another country? TRUE only if explicitly stated.",
+    "verra_feedstock_category":   "Which Verra VM0044 Table 1 category does the feedstock belong to? (agricultural_residue | food_processing | forestry_wood | recycling_economy | aquaculture | animal_manure | hcfa | not_stated)",
+    "hcfa_fraction":              "If high-carbon fly ash (HCFA) is used, what fraction of total feedstock does it represent? (number 0-1 or null)",
+    "mineral_additive_fraction":  "What fraction of the biochar mix consists of mineral additives (lime, rock minerals, ash)? (number 0-1 or null)",
+
+    # Baseline e destino do feedstock
+    "has_baseline_fate_evidence": "Does the PDD provide evidence of what would happen to the feedstock without the project (decay or combustion)?",
+    "baseline_evidence_type":     "What type of evidence is provided for the feedstock baseline fate? (govt_records | disposal_records | literature | survey | peer_reviewed | not_stated)",
+
+    # Additionality Verra
+    "vt0008_path":                "Which VT0008 path is used for additionality? (investment_comparison | benchmark | not_stated)",
+    "is_greenfield_facility":     "Is this a new (greenfield) biochar production facility, not a retrofit of an existing operation? TRUE if new installation.",
+
+    # Aplicação
+    "soil_application":           "Is biochar applied to soil (as opposed to non-soil applications like construction or water filtration)?",
+    "used_as_fuel":               "Is biochar used as a fuel or burned for energy? TRUE only if explicitly described.",
+    "used_as_reducing_agent":     "Is biochar used as a reducing agent in steel production or similar? TRUE only if explicitly described.",
+    "non_soil_carbon_loss_pct":   "For non-soil applications: what percentage of carbon is lost during use? (number 0-100 or null)",
+
+    # Monitoramento Verra
+    "has_continuous_weighing":    "Is there a continuous weighing system for biochar production (scales adjusted for moisture)?",
+    "has_scale_calibration_plan": "Is there a calibration plan for weighing scales?",
+    "has_invoice_cross_check":    "Does the monitoring plan include cross-checking biochar mass with sales receipts or invoices?",
+    "has_fc_lab_analysis":        "Is organic carbon content (FCp) determined by laboratory analysis per IBI or EBC guidelines?",
+    "uses_fc_default_table4":     "Does the project use default carbon fraction values from VM0044 Table 4 (instead of lab analysis)?",
+    "methane_emission_factor":    "For low-tech facilities: what is the measured methane emission factor Fe (tCH4/tonne biochar)? (number or null; default is 0.049)",
+    "has_energy_lca":             "Does the PDD quantify energy-related emissions from pre-treatment (PED) and auxiliary energy (PEC) using CDM TOOL03 and TOOL05?",
+    "transport_distance_km":      "What is the total round-trip transport distance for feedstock and biochar (km)? (number or null)",
+
+    # Rastreabilidade
+    "has_chain_of_custody":       "Does the PDD describe a chain of custody tracking system from feedstock sourcing to biochar application?",
+    "tracking_tool":              "What tracking tool is described? (qr_code | gps | mobile_app | blockchain | nft | records | not_stated)",
+    "has_application_coordinates":"Does the PDD provide geodetic coordinates for the biochar application sites?",
+    "has_additional_geographic_info": "Does the PDD provide additional geographic information about application sites to enable VVB sampling?",
+
+    # Gestão de dados
+    "has_offsite_backup":         "Does the monitoring plan describe an offsite electronic backup for all logged data?",
+    "data_retention_years":       "How many years of data retention are specified? (integer or null; minimum required is 2 years after crediting period)",
 
     # Reator
     "has_engineering_diagram":   "Does the PDD include an engineering design diagram of the pyrolysis reactor?",

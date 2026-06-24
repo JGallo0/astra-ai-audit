@@ -135,19 +135,29 @@ def permanence_factor_200yr(
     return max(0.0, min(1.0, f))
 
 
-def permanence_factor_verra(pyrolysis_temp_celsius: float) -> float:
+def permanence_factor_verra(pyrolysis_temp_celsius: float | None) -> float:
     """
-    Fator de permanência Verra VM0044 — baseado em temperatura de pirólise.
-    Verra usa lookup table simplificada (não Woolf).
+    Fator de permanência Verra VM0044 — Tabela 3 (fonte: VM0044 v1.2, p.450-461).
+
+    PRde,k por temperatura de pirólise:
+      > 600°C          → 0.89   (high temperature pyrolysis and gasification)
+      450 – 600°C      → 0.80   (medium temperature pyrolysis)
+      350 – 450°C      → 0.65   (low temperature pyrolysis)
+      < 350°C ou None  → 0.56   (default para temperatura desconhecida / low-tech)
+
+    DIFERENÇA ESTRUTURAL vs. Isometric/Puro:
+      - Aqui a temperatura de PROCESSO é o driver (não H/Corg do produto)
+      - H/Corg é apenas gate binário de elegibilidade em solo (≤ 0.7)
     """
-    if pyrolysis_temp_celsius >= 700:
-        return 0.92
-    elif pyrolysis_temp_celsius >= 600:
+    if pyrolysis_temp_celsius is None:
+        return 0.56   # default low-tech — temperatura desconhecida
+    if pyrolysis_temp_celsius > 600:
         return 0.89
-    elif pyrolysis_temp_celsius >= 450:
+    if pyrolysis_temp_celsius >= 450:
         return 0.80
-    else:
-        return 0.70
+    if pyrolysis_temp_celsius >= 350:
+        return 0.65
+    return 0.56       # abaixo de 350°C — inelegível, mas retorna mínimo para cálculo
 
 
 def get_permanence_factor(inputs: CreditVolumeInputs, methodology: str) -> float:
