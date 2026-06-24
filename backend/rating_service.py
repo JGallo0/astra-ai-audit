@@ -1,8 +1,8 @@
 """
 CO2mply — Project Readiness Score
 
-Phase 1: PDD audit-based rating (48 Isometric requirements)
-Future phases: Financial Model, LCA, dMRV plan
+Methodology-aware: detecta automaticamente R-XXXX (Isometric) vs P-XXXX (Puro)
+e usa o mapa de dimensões correto.
 
 Rating scale: A+ / A / B+ / B / C
 """
@@ -159,6 +159,15 @@ def _dimension_score(dim_reqs: set, results_by_id: Dict[str, dict]) -> Dict[str,
 
 # ── Main entry point ──────────────────────────────────────────────────────────
 
+def _detect_methodology(results: List[dict]) -> str:
+    """Detecta a metodologia pelos IDs dos requisitos."""
+    for r in results:
+        rid = r.get("requirement_id", "")
+        if rid.startswith("P-"):
+            return "puro_earth"
+    return "isometric"
+
+
 def compute_readiness_rating(
     results: List[dict],
     overall_score: float,
@@ -166,41 +175,68 @@ def compute_readiness_rating(
 ) -> Dict[str, Any]:
     """
     Compute the Project Readiness Score from audit results.
-
-    Returns:
-        {
-            "grade": "A",
-            "label": "Sólido",
-            "description": "...",
-            "overall_score": 87.2,
-            "dimensions": {
-                "carbon": {"label": "Carbon Accounting", "score": 82.0, ...},
-                ...
-            },
-            "audit_mode": "development",
-            "phase": "PDD Audit",
-        }
+    Detecta automaticamente a metodologia pelos IDs dos requisitos
+    e usa o mapa de dimensões correto (Isometric ou universal Puro).
     """
-    # Build lookup by requirement_id
-    results_by_id: Dict[str, dict] = {
-        r.get("requirement_id", ""): r
-        for r in results
-        if r.get("requirement_id")
-    }
+    methodology = _detect_methodology(results)
 
-    # Compute each dimension
-    dimensions = {}
-    for dim_key, dim_cfg in DIMENSION_MAP.items():
-        dim_result = _dimension_score(dim_cfg["requirements"], results_by_id)
-        dimensions[dim_key] = {
-            "label":            dim_cfg["label"],
-            "score":            dim_result["score"],
-            "weight":           dim_cfg["weight"],
-            "applicable_count": dim_result["applicable_count"],
-            "na_count":         dim_result["na_count"],
+    # ── Puro.Earth: usa dimensões universais do dimension_map.py ──────────────
+    if methodology == "puro_earth":
+        try:
+            from engine.dimension_map import (
+                compute_dimension_scores, compute_weighted_score,
+                UNIVERSAL_DIMENSIONS,
+            )
+            dim_scores = compute_dimension_scores(results, "puro_earth")
+            # Reconstrói no formato esperado pelo frontend
+            dimensions = {}
+            for dim_key, cfg in UNIVERSAL_DIMENSIONS.items():
+                score = dim_scores.get(dim_key)
+                # Conta N/A para esta dimensão
+                from engine.dimension_map import PURO_DIMENSION_MAP
+                dim_req_ids = {k for k, v in PURO_DIMENSION_MAP.items() if v == dim_key}
+                results_by_id = {r.get("requirement_id", ""): r for r in results}
+                na_count = sum(
+                    1 for rid in dim_req_ids
+                    if results_by_id.get(rid, {}).get("status") == "not_applicable"
+                )
+                dimensions[dim_key] = {
+                    "label":            cfg["label"],
+                    "score":            score,
+                    "weight":           cfg["weight"],
+                    "applicable_count": len([r for r in results
+                                            if PURO_DIMENSION_MAP.get(r.get("requirement_id","")) == dim_key
+                                            and r.get("status") != "not_applicable"]),
+                    "na_count":         na_count,
+                }
+            # Recalcula overall com pesos universais
+            weighted = compute_weighted_score(dim_scores)
+            if weighted > 0:
+                overall_score = weighted
+        except Exception as e:
+            print(f"[rating] Puro dimension_map error: {e}")
+            dimensions = {k: {"label": k, "score": None, "weight": 0, "applicable_count": 0, "na_count": 0}
+                         for k in ["feedstock_eligibility", "carbon_accounting", "additionality",
+                                   "permanence", "monitoring", "environmental_social"]}
+
+    # ── Isometric: usa o mapa original hardcoded ───────────────────────────────
+    else:
+        results_by_id: Dict[str, dict] = {
+            r.get("requirement_id", ""): r
+            for r in results
+            if r.get("requirement_id")
         }
+        dimensions = {}
+        for dim_key, dim_cfg in DIMENSION_MAP.items():
+            dim_result = _dimension_score(dim_cfg["requirements"], results_by_id)
+            dimensions[dim_key] = {
+                "label":            dim_cfg["label"],
+                "score":            dim_result["score"],
+                "weight":           dim_cfg["weight"],
+                "applicable_count": dim_result["applicable_count"],
+                "na_count":         dim_result["na_count"],
+            }
 
-    # Letter grade from overall score
     grade_info = _letter_grade(overall_score)
 
     return {
@@ -211,5 +247,6 @@ def compute_readiness_rating(
         "dimensions":    dimensions,
         "audit_mode":    audit_mode,
         "phase":         "PDD Audit",
+        "methodology":   methodology,
         "version":       "1.0",
     }

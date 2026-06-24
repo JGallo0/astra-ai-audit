@@ -1084,9 +1084,18 @@ def run_engine(project_data, requirements, audit_mode="development", profile=Non
         _gap_gen, _rec_gen = build_gap_and_recommendation(
             status, missing_fields, failed_fields,
         )
-        # Preferir gap/recommendation da função de lógica (v1) se presentes
-        gap = logic_output.get("_gap_override") or _gap_gen if isinstance(logic_output, dict) else _gap_gen
-        recommendation = logic_output.get("_recommendation_override") or _rec_gen if isinstance(logic_output, dict) else _rec_gen
+        # Preferir gap/recommendation da função de lógica (v1) se presentes.
+        # Ordem de prioridade: _gap_override → gap → _gap_gen (genérico)
+        if isinstance(logic_output, dict):
+            _v1_gap = (logic_output.get("_gap_override") or
+                       logic_output.get("gap") or "").strip()
+            _v1_rec = (logic_output.get("_recommendation_override") or
+                       logic_output.get("recommendation") or "").strip()
+            gap            = _v1_gap if _v1_gap else _gap_gen
+            recommendation = _v1_rec if _v1_rec else _rec_gen
+        else:
+            gap            = _gap_gen
+            recommendation = _rec_gen
 
         # 7) Monta saída estruturada
         results.append({
