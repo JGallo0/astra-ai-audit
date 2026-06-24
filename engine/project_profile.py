@@ -165,7 +165,7 @@ class ProjectProfile:
     verra_tech_class:           str            = ""     # "high" | "low" | ""
     has_continuous_temp_monitoring: bool       = False  # sensor contínuo obrigatório high-tech
     has_temp_calibration_plan:  bool           = False
-    has_gas_recovery:           bool           = False  # recuperação gás → PEP = 0
+    # has_gas_recovery é alias de has_pyrolysis_gas_recovery — usar o canônico
 
     # Feedstock Verra-específico
     is_purpose_grown:           bool           = False  # proibido (AC 4a)
@@ -307,7 +307,7 @@ PROFILE_QUESTIONS = {
     "verra_tech_class":           "Is the facility classified as high-tech (automated temperature control) or low-tech (artisanal/simple kilns)? (high | low | not_stated)",
     "has_continuous_temp_monitoring": "Is there continuous temperature monitoring of the pyrolysis process with a recordable electronic signal?",
     "has_temp_calibration_plan":  "Is there a calibration plan for temperature sensors?",
-    "has_gas_recovery":           "Is pyrolysis gas recovered (combusted or captured for energy)? TRUE only if explicitly documented.",
+    "has_pyrolysis_gas_recovery": "Are pyrolysis gases recovered or combusted (gas burner, flare, CHP, energy recovery system)? Applies to all standards — Puro.Earth hard gate, Verra PEP=0 classification, Isometric net-negativity. Answer FALSE if gases are vented untreated.",
 
     # Feedstock Verra
     "is_purpose_grown":           "Is the feedstock purpose-grown biomass (cultivated specifically for this project, not waste)? TRUE only if clearly stated.",

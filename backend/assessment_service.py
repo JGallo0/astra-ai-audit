@@ -29,209 +29,77 @@ from methodology_requirements import get_requirements_for_methodology
 # ── Probes metodológicos ──────────────────────────────────────────────────────
 
 METHODOLOGY_PROBES = {
+    # ── Princípio: apenas perguntas GENUINAMENTE específicas do padrão ──────────
+    # Fatos universais do projeto (temperatura de pirólise, H/Corg, feedstock,
+    # monitoramento, etc.) já estão em PROFILE_QUESTIONS e são extraídos uma vez
+    # para todas as metodologias. Aqui ficam apenas perguntas que:
+    #   (a) exigem contexto do padrão para ser respondidas corretamente, OU
+    #   (b) verificam cumprimento de requisito único daquele padrão.
+
     "verra_vcs": {
-        "pyrolysis_temp_c": (
-            "What is the average pyrolysis temperature (°C)? "
-            "This determines the permanence factor (PRde,k) per VM0044 Table 3. Return number or null."
-        ),
-        "verra_tech_class": (
-            "Is this a high-tech facility (automated continuous temperature monitoring) "
-            "or low-tech (artisanal kilns, no automation)? Answer 'high', 'low', or 'not_stated'."
-        ),
-        "has_continuous_temp_monitoring": (
-            "Does the PDD describe continuous electronic temperature monitoring of the pyrolysis process "
-            "(thermocouple or thermoresistor with recordable signal)?"
-        ),
-        "has_gas_recovery": (
-            "Does the PDD describe recovery or combustion of pyrolysis gases "
-            "(gas burner, flare, CHP)? Required for PEP=0 classification."
-        ),
-        "is_purpose_grown": (
-            "Is the feedstock purpose-grown (cultivated specifically for this project, not a waste/residue)? "
-            "TRUE only if clearly stated. Purpose-grown biomass is NOT eligible under VM0044."
-        ),
-        "feedstock_imported": (
-            "Is the feedstock imported from another country? "
-            "Imported feedstock is NOT eligible under VM0044 AC 4c."
-        ),
-        "verra_feedstock_category": (
-            "Which VM0044 Table 1 category applies? "
-            "(agricultural_residue | food_processing | forestry_wood | recycling_economy | "
-            "aquaculture | animal_manure | hcfa | not_stated)"
-        ),
-        "hcfa_fraction": (
-            "If high-carbon fly ash (HCFA) is part of the feedstock, "
-            "what fraction of total annual throughput? (number 0-1 or null). "
-            "VM0044 Table 1 limits HCFA to ≤ 5%."
-        ),
-        "has_baseline_fate_evidence": (
-            "Does the PDD provide evidence of what would happen to the feedstock without the project "
-            "(e.g., left to decay, burned without energy use)? Required by AC 4b."
-        ),
-        "baseline_evidence_type": (
-            "What type of evidence is provided for feedstock baseline fate? "
-            "(govt_records | disposal_records | literature | survey | peer_reviewed | not_stated)"
-        ),
+        # Caminho de adicionalidade — específico VCS (VT0008 não existe em Iso/Puro)
         "vt0008_path": (
-            "Which additionality path is followed per VT0008? "
-            "(investment_comparison | benchmark | not_stated)"
+            "Which VCS VT0008 additionality path is used? "
+            "(investment_comparison | benchmark | not_stated). "
+            "This is a VCS-specific requirement; other standards use different tools."
         ),
+        # Categoria Tabela 1 VM0044 — codificação específica Verra
+        "verra_feedstock_category": (
+            "Which VM0044 Table 1 category applies to this feedstock? "
+            "(agricultural_residue | food_processing | forestry_wood | recycling_economy | "
+            "aquaculture | animal_manure | hcfa | not_stated). "
+            "This categorization is specific to Verra VM0044."
+        ),
+        # Greenfield — AC 1-3 é uma condição específica do VM0044
         "is_greenfield_facility": (
-            "Is this a new (greenfield) biochar production facility? "
-            "VM0044 AC 1-3 requires new installations, not retrofit of existing ones."
-        ),
-        "soil_application": (
-            "Is the biochar primarily applied to soil? "
-            "FALSE if applied to construction, water filtration, or other non-soil uses."
-        ),
-        "used_as_fuel": (
-            "Is the biochar used as a fuel or burned for energy? "
-            "This would make it ineligible under VM0044 AC 13."
-        ),
-        "has_continuous_weighing": (
-            "Does the PDD describe a continuous weighing system for biochar production, "
-            "recorded monthly and adjusted for moisture content?"
-        ),
-        "has_fc_lab_analysis": (
-            "Is organic carbon content (FCp) determined by annual laboratory analysis "
-            "per IBI Biochar Testing Guidelines or EBC Production Guidelines?"
-        ),
-        "transport_distance_km": (
-            "What is the total transport distance (feedstock to plant + plant to application), "
-            "round trip in km? Distances > 200km require CDM TOOL12 for leakage."
-        ),
-        "has_chain_of_custody": (
-            "Does the PDD describe a chain of custody tracking system from feedstock sourcing "
-            "to biochar application? Required by VM0044 Section 9.3."
-        ),
-        "has_application_coordinates": (
-            "Does the PDD provide geodetic coordinates for the biochar application sites? "
-            "Required to prevent double counting (VM0044 Section 9.3)."
-        ),
-        "has_offsite_backup": (
-            "Does the monitoring plan describe an offsite electronic backup for all logged data? "
-            "Required by VM0044 Section 9.3."
-        ),
-        "data_retention_years": (
-            "How many years of data retention are specified? "
-            "VM0044 requires at least 2 years after the end of the crediting period."
+            "Is this a new (greenfield) biochar production facility, not a retrofit of an "
+            "existing operation? This is required by VM0044 AC 1-3."
         ),
     },
+
     "puro_earth": {
-        "has_isae3000_dossier": (
-            "Does the PDD reference an ISAE 3000 third-party audited dossier "
-            "for forest biomass sustainability? Answer TRUE only if explicitly mentioned."
+        # Template SDG — exclusivo Puro.Earth (não existe em ISO/Verra)
+        "has_puro_sdg_template": (
+            "Does the PDD use the Puro.earth SDG reporting template specifically?"
         ),
-        "govt_plan_authority":    "Does the PDD identify a local government authority overseeing forest management?",
-        "govt_plan_requirements": "Does the PDD describe the local sustainability requirements in essence?",
-        "govt_plan_oversight":    "Does the PDD document the type of oversight (logging notices, approvals, inspections)?",
-        "govt_plan_documents":    "Does the PDD list supporting documents with English summaries?",
-        "uses_coal_ash":          "Does the PDD mention coal ash or coal combustion by-products as feedstock?",
+        # Isenção de adicionalidade — fechada pela Clar. 005 ADD (único na Puro)
         "financial_additionality_exemption_claimed": (
             "Does the PDD claim that being 'first-of-its-kind' exempts the project "
-            "from financial additionality analysis?"
+            "from financial additionality analysis? This exemption path is explicitly "
+            "closed by Puro.Earth Clarification 005 ADD."
         ),
-        "has_puro_sdg_template":  "Does the PDD use the Puro.earth SDG reporting template?",
-        "has_pyrolysis_gas_recovery": (
-            "Does the PDD describe that pyrolysis gases are recovered or combusted (e.g. via gas burner, "
-            "flare, or energy recovery system)? Answer FALSE if gases are vented without treatment."
+        # Plano de manejo governamental — 4 sub-itens do Clar. 006 BCH (único Puro)
+        "govt_plan_authority": (
+            "Does the PDD identify a local government authority overseeing forest management? "
+            "(Required for Puro.Earth government management plan path — Clarification 006 BCH)"
+        ),
+        "govt_plan_requirements": (
+            "Does the PDD describe the local sustainability requirements in essence? "
+            "(Required for Puro.Earth government management plan path)"
+        ),
+        "govt_plan_oversight": (
+            "Does the PDD document the type of oversight (logging notices, approvals, inspections)? "
+            "(Required for Puro.Earth government management plan path)"
+        ),
+        "govt_plan_documents": (
+            "Does the PDD list supporting documents with English summaries? "
+            "(Required for Puro.Earth government management plan path)"
         ),
     },
+
     "isometric": {
-        "has_pyrolysis_gas_recovery": (
-            "Does the PDD describe that pyrolysis gases are recovered or combusted "
-            "(via gas burner, flare, or energy recovery)? FALSE if gases are vented."
-        ),
-        "uses_lembrechts_database": (
-            "Does the PDD specifically reference the Lembrechts et al. soil temperature database "
-            "for permanence calculations?"
-        ),
+        # Protocolo específico Isometric — justificativa de elegibilidade
         "has_isometric_protocol_justification": (
-            "Does the PDD include a justification for eligibility specifically under the Isometric "
-            "Biochar Production and Storage Protocol?"
+            "Does the PDD include a justification for eligibility specifically under the "
+            "Isometric Biochar Production and Storage Protocol?"
         ),
-        # Fix 2: perguntas Isometric-específicas que o profile genérico não capta bem
-        "has_system_boundary": (
-            "Does the PDD define the project's system boundary, including temporal scope, "
-            "geographic boundary, and GHG sources included/excluded?"
-        ),
-        "has_baseline": (
-            "Does the PDD describe a baseline scenario or counterfactual — what would happen "
-            "to the feedstock or the carbon if this project did not exist?"
-        ),
-        "has_leakage_assessment": (
-            "Does the PDD assess or mention leakage — GHG emissions outside the project boundary "
-            "caused by the project activities?"
-        ),
-        "has_lca": (
-            "Does the PDD include or reference a Life Cycle Assessment (LCA) covering feedstock, "
-            "production, and storage/application stages?"
-        ),
-        "has_uncertainty_analysis": (
-            "Does the PDD describe methods for uncertainty analysis or sensitivity analysis "
-            "of the GHG quantification?"
-        ),
-        "has_monitoring_table": (
-            "Does the PDD include a monitoring plan or table listing parameters to be monitored, "
-            "with frequency and responsible parties?"
-        ),
-        "has_data_storage_plan": (
-            "Does the PDD describe how monitoring data will be collected, stored, and retained?"
-        ),
-        "durability_option": (
-            "Does the PDD select a durability threshold for biochar permanence? "
-            "Answer '200_years', '1000_years', or '' if not stated."
-        ),
-        "has_soil_temp_method": (
-            "Does the PDD describe a method for measuring or obtaining mean annual soil temperature "
-            "at the biochar application site?"
-        ),
-        "has_reversal_risk_assessment": (
-            "Does the PDD include a reversal risk assessment or mention a buffer pool "
-            "for biochar permanence?"
-        ),
-        "has_stakeholder_consultation": (
-            "Does the PDD document a stakeholder consultation process, including who was consulted "
-            "and how their input was considered?"
-        ),
-        "has_grievance_mechanism": (
-            "Does the PDD describe a grievance mechanism for stakeholders to raise concerns?"
-        ),
-        "has_engineering_diagram": (
-            "Does the PDD include or reference an engineering design diagram of the pyrolysis reactor?"
-        ),
-        "has_gas_sensors": (
-            "Does the PDD describe sensors or methods to detect or quantify pyrolysis gas leakage?"
-        ),
-        "has_maintenance_plan": (
-            "Does the PDD include a reactor maintenance plan?"
-        ),
-        "has_iso17025_lab": (
-            "Does the PDD identify a laboratory with ISO 17025 accreditation for biochar analysis?"
-        ),
-        "sampling_method": (
-            "What sampling method does the PDD describe? "
-            "Answer 'method_a' (every batch), 'method_b' (1 per 10 batches), or '' if not stated."
-        ),
-        "has_financial_additionality": (
-            "Does the PDD demonstrate financial additionality — that the project would not be "
-            "economically viable without carbon revenue?"
-        ),
-        "has_regulatory_additionality": (
-            "Does the PDD confirm the project is not required by existing laws or regulations?"
-        ),
-        "has_no_net_env_harm": (
-            "Does the PDD demonstrate that the project causes no net environmental harm?"
-        ),
-        "has_pollution_prevention": (
-            "Does the PDD describe measures to prevent pollution from PAHs, heavy metals, "
-            "PCBs, or dioxins?"
-        ),
-        "has_adaptive_management": (
-            "Does the PDD include an adaptive management plan with conditions for pausing "
-            "or stopping the project?"
+        # Base de dados Lembrechts — referência específica Isometric para permanência
+        "uses_lembrechts_database": (
+            "Does the PDD specifically reference the Lembrechts et al. global soil temperature "
+            "database for mean annual soil temperature used in permanence calculations?"
         ),
     },
+}
 }
 
 
