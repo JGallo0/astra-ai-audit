@@ -78,9 +78,14 @@ def _resolve(input_data: Union[ProjectProfile, dict]) -> ProjectProfile:
     p.has_isae3000_dossier   = "isae" in cert or "3000" in cert or bool(fd.get("has_isae3000"))
 
     country = str(proj.get("country") or "").lower()
-    HIGH_CPI = ["brazil","brasil","germany","usa","uk","canada","australia","france","japan","denmark","norway","sweden"]
-    if any(c in country for c in HIGH_CPI):
-        p.country_cpi = 60.0  # conservador — país provavelmente CPI ≥ 50
+    # Usa CPI real da tabela — não heurística hardcoded
+    try:
+        from engine.country_cpi import get_cpi
+        cpi_val = get_cpi(country)
+        if cpi_val is not None:
+            p.country_cpi = float(cpi_val)
+    except Exception:
+        pass  # Sem CPI → None (conservador: plano governamental não qualifica)
     p.project_name    = proj.get("name") or ""
     p.project_country = proj.get("country") or ""
     p.project_locations = proj.get("locations") or []

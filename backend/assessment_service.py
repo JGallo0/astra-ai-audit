@@ -349,6 +349,27 @@ async def run_methodology_assessment(
     for method in methodologies:
         profile = await run_probes(profile, method, pdd_text, openai_client, model)
 
+    # Resolve country_cpi com CPI real (substitui qualquer valor heurístico)
+    if profile.project_country:
+        try:
+            from engine.country_cpi import get_cpi
+            real_cpi = get_cpi(profile.project_country)
+            if real_cpi is not None:
+                profile.country_cpi = float(real_cpi)
+        except Exception:
+            pass
+    # Se país não identificado mas localização tem nome de país, tenta inferir
+    if profile.country_cpi is None and profile.project_locations:
+        try:
+            from engine.country_cpi import get_cpi
+            for loc in profile.project_locations:
+                cpi = get_cpi(str(loc))
+                if cpi is not None:
+                    profile.country_cpi = float(cpi)
+                    break
+        except Exception:
+            pass
+
     # 3. Executa engine para cada metodologia
     method_results = {}
     for method in methodologies:

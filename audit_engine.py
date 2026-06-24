@@ -638,9 +638,23 @@ class AuditEngine:
                     # Persiste no project_data para cache futuro
                     import dataclasses as _dc
                     project_data["_profile"] = _dc.asdict(profile)
+                    # Resolve CPI real (substitui heurística hardcoded)
+                    try:
+                        from engine.country_cpi import get_cpi
+                        real_cpi = get_cpi(profile.project_country or "")
+                        if real_cpi is None:
+                            for loc in (profile.project_locations or []):
+                                real_cpi = get_cpi(str(loc))
+                                if real_cpi is not None:
+                                    break
+                        if real_cpi is not None:
+                            profile.country_cpi = float(real_cpi)
+                    except Exception:
+                        pass
                     print(f"[profile] extracted: is_forest={profile.is_forest_biomass}, "
                           f"has_fsc={profile.has_fsc_certification}, "
                           f"has_isae3000={profile.has_isae3000_dossier}, "
+                          f"country_cpi={profile.country_cpi}, "
                           f"first_of_its_kind={profile.is_first_of_its_kind}")
 
         # =========================================================
