@@ -7,12 +7,14 @@ import PreViabilidadeTab from './tabs/PreViabilidadeTab'
 import ViabilidadeTab from './tabs/ViabilidadeTab'
 import FinancialLabTab from './tabs/FinancialLabTab'
 import VerificacaoTab from './tabs/VerificacaoTab'
+import CreditVolumeTab from './tabs/CreditVolumeTab'
 import StubTab from './tabs/StubTab'
 
 const TAB_MAP = {
   'chat':              { label: 'Chat Técnico',       component: ChatTab },
   'validacao':         { label: 'Validação',           component: ValidationTab },
   'fit-metodologico':  { label: 'Fit Metodológico',   component: PreViabilidadeTab },
+  'credit-volume':     { label: 'Volume de Créditos', component: CreditVolumeTab },
   'viabilidade':       { label: 'Viabilidade',        component: ViabilidadeTab },
   'financial-lab':     { label: 'Financial Lab',      component: FinancialLabTab },
   'data-room':         { label: 'Data Room',          component: DataRoomTab },

@@ -774,6 +774,42 @@ async def run_assessment(project_id: str, body: dict):
     )
     return result
 
+# ── Credit Volume Estimation ──────────────────────────────────────────────────
+
+@app.post("/api/projects/{project_id}/credit-volume")
+def estimate_credit_volume(project_id: str, body: dict):
+    """
+    Estima volume de créditos de carbono por metodologia (Module 1 — Sylvera approach).
+    Body: CreditVolumeInputs como dict, mais campo 'climate_data' opcional do Copernicus.
+    """
+    try:
+        from engine.credit_volume_engine import CreditVolumeInputs, compare_methodologies, inputs_from_viabilidade
+
+        # Tenta usar project_data ou viabilidade para preencher defaults
+        climate = body.pop("climate_data", None)
+
+        # Se vier de viabilidade (premissas), constrói automaticamente
+        if "premissas" in body:
+            premissas = body["premissas"]
+            inputs = inputs_from_viabilidade(premissas, climate)
+            # Sobrescreve com campos explícitos do body se fornecidos
+            for field in ["h_c_ratio", "o_c_ratio", "carbon_fraction", "mast_celsius",
+                           "pyrolysis_temp_celsius", "transport_km_feedstock",
+                           "transport_km_biochar", "methodologies"]:
+                if field in body:
+                    setattr(inputs, field, body[field])
+        else:
+            # Constrói direto dos inputs
+            valid = {f.name for f in __import__('dataclasses').fields(CreditVolumeInputs)}
+            kwargs = {k: v for k, v in body.items() if k in valid}
+            inputs = CreditVolumeInputs(**kwargs)
+
+        result = compare_methodologies(inputs)
+        return result
+
+    except Exception as e:
+        raise HTTPException(400, f"Erro no cálculo de volume de créditos: {e}")
+
 # ── Verificação (V&V Support) ──────────────────────────────────────────────────
 
 @app.get("/api/projects/{project_id}/verificacao")
