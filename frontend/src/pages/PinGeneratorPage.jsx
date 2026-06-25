@@ -434,112 +434,7 @@ function StepProducao({ form, set }) {
           ❌ Queima aberta é explicitamente proibida em Puro.Earth (Clar. 004 BCH) e não atinge temperatura mínima para créditos em Isometric e Verra.
         </div>
       )}
-
-      <ReactorManufacturerField form={form} set={set} />
     </>
-  );
-}
-
-// Dados de fabricantes — usados para inferência e exibição
-const MANUFACTURERS = {
-  // Alta tecnologia
-  pyreg:          { label: "Pyreg (DE)",          tech: "high", temp: 650, gas: true,  cap: "100–600 kg/h feedstock",  note: "Contínuo, certificado CE, CHP opcional" },
-  spanner:        { label: "Spanner Re² (DE)",     tech: "high", temp: 680, gas: true,  cap: "150–750 kg/h feedstock",  note: "CHP integrado, gás de pirólise para eletricidade" },
-  biogreen:       { label: "Biogreen/ETIA (FR)",   tech: "high", temp: 750, gas: true,  cap: "50–2000 kg/h",            note: "Contínuo, alta temperatura, escalonável" },
-  black_bear:     { label: "Black Bear Carbon (NL)",tech: "high", temp: 700, gas: true,  cap: "500–5000 t/ano",          note: "Industrial, carbono de alta qualidade" },
-  carbonova:      { label: "Carbonova (CA)",        tech: "high", temp: 600, gas: true,  cap: "1–5 t/h feedstock",       note: "Contínuo, modular" },
-  char_tech:      { label: "Char Technologies (CA)",tech: "high", temp: 700, gas: true,  cap: "1–10 t/h feedstock",      note: "High-Temperature Pyrolysis, syngas" },
-  terra_humana:   { label: "Terra Humana / Carbon Terra (DE)", tech: "high", temp: 550, gas: false, cap: "100–500 t/ano", note: "Batch, certificado EBC" },
-  agreengate:     { label: "AgreenGate (FR)",       tech: "high", temp: 600, gas: true,  cap: "varies",                  note: "Modular, continental" },
-  // Baixa / média tecnologia
-  kon_tiki:       { label: "Kon-Tiki (CH/global)",  tech: "low",  temp: 450, gas: false, cap: "50–200 kg/batch",         note: "Cone kiln aberto ou fechado, amplamente usado em projetos comunitários" },
-  re_biochar:     { label: "Re-Char / Liberator (US)", tech: "low", temp: 400, gas: false, cap: "20–100 kg/batch",       note: "Drum kiln portátil" },
-  tlud_generic:   { label: "TLUD artesanal",         tech: "low",  temp: 500, gas: false, cap: "5–50 kg/batch",          note: "Design aberto, variável" },
-};
-
-function ReactorManufacturerField({ form, set }) {
-  const mfr = form.reactor_manufacturer;
-  const isOther = mfr === "other";
-  const mfrData = mfr && mfr !== "other" ? MANUFACTURERS[mfr] : null;
-
-  const handleMfr = (val) => {
-    set("reactor_manufacturer", val);
-    const d = MANUFACTURERS[val];
-    if (!d) return;
-    // Infere campos se ainda não preenchidos pelo usuário
-    if (!form.verra_tech_class) set("verra_tech_class", d.tech);
-    if (!form.pyrolysis_temp_c) set("pyrolysis_temp_c", d.temp);
-    if (d.gas && !form.has_pyrolysis_gas_recovery) set("has_pyrolysis_gas_recovery", true);
-    if (d.tech === "high" && !form.has_continuous_temp_monitoring) set("has_continuous_temp_monitoring", true);
-  };
-
-  const groups = [
-    {
-      label: "Alta tecnologia (industrial / contínuo)",
-      options: ["pyreg","spanner","biogreen","black_bear","carbonova","char_tech","terra_humana","agreengate"],
-    },
-    {
-      label: "Baixa / média tecnologia",
-      options: ["kon_tiki","re_biochar","tlud_generic"],
-    },
-  ];
-
-  return (
-    <div style={{ marginTop: 16 }}>
-      <Field label="Fabricante do reator" help="Selecione para preencher automaticamente temperatura típica, classe tecnológica e recuperação de gás.">
-        <select
-          style={inp}
-          value={mfr ?? ""}
-          onChange={e => handleMfr(e.target.value)}>
-          <option value="">— Selecione ou deixe em branco —</option>
-          {groups.map(g => (
-            <optgroup key={g.label} label={g.label}>
-              {g.options.map(k => (
-                <option key={k} value={k}>{MANUFACTURERS[k].label}</option>
-              ))}
-            </optgroup>
-          ))}
-          <option value="other">Outro (digitar)</option>
-        </select>
-      </Field>
-
-      {isOther && (
-        <Field label="Fabricante / modelo (texto livre)">
-          <TextInput name="reactor_manufacturer_custom" value={form.reactor_manufacturer_custom}
-            onChange={set} placeholder="Ex: PyroLiquid Brasil, modelo PL-500" />
-        </Field>
-      )}
-
-      {mfrData && (
-        <div style={{
-          padding: "10px 14px", background: "#f8fafc", borderRadius: 6,
-          border: "1px solid #e2e8f0", fontSize: 12, color: "#475569", marginTop: -8,
-        }}>
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-            <span>🌡️ Temp. típica: <strong>{mfrData.temp}°C</strong></span>
-            <span>⚙️ Classe: <strong>{mfrData.tech === "high" ? "Alta tecnologia" : "Baixa tecnologia"}</strong></span>
-            <span>📦 Capacidade: <strong>{mfrData.cap}</strong></span>
-            {mfrData.gas && <span>🔥 <strong>Recuperação de gás</strong></span>}
-          </div>
-          <div style={{ marginTop: 4, color: "#64748b" }}>{mfrData.note}</div>
-        </div>
-      )}
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 12 }}>
-        <KnownValueField
-          valueName="reactor_capacity_t_day"
-          label="Capacidade de alimentação"
-          defaultText="Não informada"
-          unit="t feedstock/dia" placeholder="Ex: 2.5" form={form} set={set}
-        />
-        <KnownValueField
-          valueName="reactor_output_t_day"
-          label="Capacidade de saída de biochar"
-          defaultText="Não informada"
-          unit="t biochar/dia" placeholder="Ex: 0.7" form={form} set={set}
-        />
-      </div>
-    </div>
   );
 }
 
@@ -956,8 +851,6 @@ const EMPTY = {
   has_continuous_temp_monitoring: false, has_pyrolysis_gas_recovery: false,
   has_engineering_diagram: false, has_maintenance_plan: false,
   is_greenfield_facility: true, reactor_type: "",
-  reactor_manufacturer: "", reactor_manufacturer_custom: "",
-  reactor_capacity_t_day: null, reactor_output_t_day: null,
   // Biochar
   h_c_ratio: null, o_c_ratio: null, pah_value: null, pcb_value: null,
   quality_standard: "not_stated", has_iso17025_lab: false, heavy_metals_documented: false,
