@@ -693,7 +693,16 @@ function validateStep(step, form) {
 function ResultsView({ result, onReset, projectId }) {
   const { results, recommendation, reasoning } = result;
   const [chosen, setChosen] = useState(recommendation);
-  const methods = Object.entries(results).sort((a, b) => b[1].overall - a[1].overall);
+  // Ordena por composite score (se disponível) — reflete análise multi-dimensional Sylvera
+  // Recomendada sempre aparece primeiro independente do compliance score
+  const methods = Object.entries(results).sort((a, b) => {
+    const aIsRec = a[0] === recommendation ? 1 : 0;
+    const bIsRec = b[0] === recommendation ? 1 : 0;
+    if (aIsRec !== bIsRec) return bIsRec - aIsRec; // recomendada primeiro
+    const aComp = a[1].composite_score ?? a[1].overall;
+    const bComp = b[1].composite_score ?? b[1].overall;
+    return bComp - aComp;
+  });
 
   return (
     <div style={{ maxWidth: 920, margin: "0 auto", padding: "0 24px 60px" }}>
@@ -719,17 +728,23 @@ function ResultsView({ result, onReset, projectId }) {
         </p>
       </div>
 
-      {/* Cards de metodologia */}
+      {/* Cards de metodologia — ordenados por composite score; recomendada sempre primeiro */}
+      <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 10 }}>
+        Score composto = 40% volume de créditos + 35% integridade metodológica (Sylvera) + 25% compliance.
+        O score de compliance (%) reflete documentação atual, não o fit real.
+      </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14, marginBottom: 28 }}>
         {methods.map(([method, data]) => {
           const isChosen = method === chosen;
           const isRec = method === recommendation;
+          const composite = data.composite_score;
+          const cv = data.credit_volume || {};
           return (
             <div key={method} onClick={() => setChosen(method)} style={{
               background: "#fff", borderRadius: 12, padding: "18px 18px 14px",
-              border: `2px solid ${isChosen ? METHOD_COLOR[method] : "#e2e8f0"}`,
+              border: `2px solid ${isChosen ? METHOD_COLOR[method] : isRec ? METHOD_COLOR[method] + "88" : "#e2e8f0"}`,
               cursor: "pointer", position: "relative",
-              boxShadow: isChosen ? `0 0 0 4px ${METHOD_COLOR[method]}22` : "none",
+              boxShadow: isRec ? `0 2px 12px ${METHOD_COLOR[method]}33` : isChosen ? `0 0 0 4px ${METHOD_COLOR[method]}22` : "none",
               transition: "all .15s",
             }}>
               {isRec && (
@@ -739,16 +754,48 @@ function ResultsView({ result, onReset, projectId }) {
                   borderRadius: 10, textTransform: "uppercase",
                 }}>Recomendada</span>
               )}
-              <div style={{ fontWeight: 700, fontSize: 13, color: METHOD_COLOR[method], marginBottom: 4 }}>
+              <div style={{ fontWeight: 700, fontSize: 13, color: METHOD_COLOR[method], marginBottom: 6 }}>
                 {data.label}
               </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 12 }}>
-                <span style={{ fontSize: 32, fontWeight: 900, color: GRADE_COLOR[data.grade] }}>{data.grade}</span>
-                <span style={{ fontSize: 18, fontWeight: 700, color: "#475569" }}>{data.overall}%</span>
+
+              {/* Score composto — o número que importa */}
+              {composite != null && (
+                <div style={{ marginBottom: 8 }}>
+                  <div style={{ fontSize: 10, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                    Score composto (fit real)
+                  </div>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                    <span style={{ fontSize: 28, fontWeight: 900, color: composite >= 60 ? "#16a34a" : composite >= 40 ? "#ca8a04" : "#dc2626" }}>
+                      {Math.round(composite)}
+                    </span>
+                    <span style={{ fontSize: 12, color: "#94a3b8" }}>/100</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Créditos estimados */}
+              {cv.net_tco2_per_t != null && (
+                <div style={{ padding: "6px 10px", background: "#f8fafc", borderRadius: 6, marginBottom: 8, fontSize: 12 }}>
+                  <span style={{ color: "#64748b" }}>Net: </span>
+                  <span style={{ fontWeight: 700, color: "#1e293b" }}>{cv.net_tco2_per_t} tCO₂/t</span>
+                  {cv.permanence_factor && (
+                    <span style={{ color: "#94a3b8", marginLeft: 8 }}>f={cv.permanence_factor}</span>
+                  )}
+                </div>
+              )}
+
+              {/* Compliance score — contexto secundário */}
+              <div style={{ fontSize: 10, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 3 }}>
+                Compliance (documentação atual)
               </div>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
+                <span style={{ fontSize: 18, fontWeight: 700, color: GRADE_COLOR[data.grade] }}>{data.grade}</span>
+                <span style={{ fontSize: 14, color: "#475569" }}>{data.overall}%</span>
+              </div>
+
               {Object.entries(data.dimensions || {}).map(([dim, score]) => (
                 <div key={dim} style={{ marginBottom: 4 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#64748b", marginBottom: 2 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#64748b", marginBottom: 1 }}>
                     <span>{DIM_LABEL[dim] || dim}</span>
                     <span style={{ fontWeight: 600 }}>{score !== null ? `${Math.round(score)}%` : "—"}</span>
                   </div>
@@ -761,7 +808,7 @@ function ResultsView({ result, onReset, projectId }) {
                   </div>
                 </div>
               ))}
-              <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 8 }}>
+              <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 6 }}>
                 {data.compliant}/{data.total} requisitos conformes
               </div>
             </div>
