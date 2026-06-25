@@ -185,12 +185,28 @@ function StepProjeto({ form, set, errors }) {
         defaultText="Escala indefinida — não penaliza a auditoria"
         unit="t/ano" placeholder="Ex: 1000" form={form} set={set}
       />
-      <KnownValueField
-        valueName="estimated_credits_tco2"
-        label="Créditos estimados"
-        defaultText="Calculado pelo engine a partir dos dados técnicos"
-        unit="tCO₂e/ano" placeholder="Ex: 750" form={form} set={set}
-      />
+
+      <Field label="Mercado-alvo dos créditos"
+        help="Influencia a recomendação de metodologia (Módulo 4 — Market Acceptance). Cada padrão tem endossos diferentes em ICROA, CORSIA e mercados específicos.">
+        <SelectInput name="buyer_market" value={form.buyer_market} onChange={set} options={[
+          { value: "any",                   label: "Sem preferência específica (análise balanceada)" },
+          { value: "premium_cdr",           label: "CDR Premium — compradores focados em alto rigor científico" },
+          { value: "icroa_marketplace",     label: "ICROA marketplace — endosso pleno obrigatório" },
+          { value: "corsia_aviation",       label: "CORSIA / Aviação — offset regulatório de aviação" },
+          { value: "voluntary_mass",        label: "Mercado voluntário em escala — volume e liquidez" },
+          { value: "european_institutional",label: "Compradores europeus / institucionais" },
+        ]} />
+      </Field>
+      {form.buyer_market === "corsia_aviation" && (
+        <div style={{ padding: "8px 12px", background: "#eff6ff", borderRadius: 6, border: "1px solid #bfdbfe", fontSize: 12, color: "#1e40af", marginTop: -8 }}>
+          ℹ️ CORSIA: apenas Verra VCS está aprovada. Isometric é condicional (Fase 1 excluída). Puro.Earth não se candidatou.
+        </div>
+      )}
+      {form.buyer_market === "icroa_marketplace" && (
+        <div style={{ padding: "8px 12px", background: "#eff6ff", borderRadius: 6, border: "1px solid #bfdbfe", fontSize: 12, color: "#1e40af", marginTop: -8 }}>
+          ℹ️ ICROA: Puro.Earth e Verra são fully endorsed. Isometric é condicional — risco para compradores ICROA-mandatórios.
+        </div>
+      )}
     </>
   );
 }
@@ -879,6 +895,7 @@ const EMPTY = {
   // Projeto
   project_name: "", project_country: "brazil", storage_pathway: "soil",
   biochar_t_dry_year: null, estimated_credits_tco2: null,
+  buyer_market: "any",
   // Feedstock
   feedstock_type: "", is_forest_biomass: false, is_purpose_grown: false,
   feedstock_imported: false, uses_mixed_waste: false, uses_coal_ash: false,

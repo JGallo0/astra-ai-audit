@@ -215,7 +215,8 @@ def run_pin_audit(
     # Pesos: 40% volume + 35% integridade + 25% compliance
     # Verra perde em integridade (RED em carbon accounting) apesar de
     # ter mais créditos que Puro — consistente com avaliação Sylvera.
-    composite = _calc_composite_score(method_results, credit_volume)
+    buyer_market = getattr(profile, "buyer_market", "any") or "any"
+    composite = _calc_composite_score(method_results, credit_volume, buyer_market)
 
     if composite:
         best = max(composite, key=lambda m: composite[m])
@@ -318,43 +319,106 @@ for _m in _INTEGRITY_SCORES:
 _MAX_INTEGRITY = max(d["total"] for d in _INTEGRITY_SCORES.values())  # 18 (Puro)
 
 
-def _calc_composite_score(method_results: dict, credit_volume: dict) -> dict:
-    """
-    Score composto alinhado à abordagem Sylvera:
-      40% volume de créditos (tCO2/t biochar líquido — quem gera mais)
-      35% integridade metodológica (RAG Sylvera — quem tem maior rigor)
-      25% compliance readiness (score atual do engine — quem é mais fácil de registrar)
+# ── Módulo 4: Market Acceptance — baseado no Sylvera Assessment (Out 2025) ──────
+# Scores por metodologia e mercado-alvo (0-100).
+# Fonte: Sylvera Module 4 — ICROA, CORSIA, ICVCM/CCP, market share, buyer profile.
+_MARKET_SCORES = {
+    # Premium CDR / compradores focados em ciência, alto rigor, disposto a pagar prêmio
+    "premium_cdr": {
+        "isometric":  100,  # LCA mandatória, Certify platform, 200/1000yr durability
+        "puro_earth":  75,  # LCA mandatória, ICROA full, rigoroso — segunda opção premium
+        "verra_vcs":   35,  # LCA não obrigatória, RED carbon accounting — menor rigor
+    },
+    # ICROA marketplace — compradores que exigem endosso ICROA pleno
+    "icroa_marketplace": {
+        "isometric":   60,  # ICROA condicional (ainda em processo) — risco para comprador
+        "puro_earth":  100, # ICROA fully endorsed ✅
+        "verra_vcs":    90, # ICROA fully endorsed ✅
+    },
+    # CORSIA / aviação — offset de emissões de aviação
+    "corsia_aviation": {
+        "isometric":   30,  # CORSIA condicional — não elegível para Fase 1
+        "puro_earth":   20, # Não se candidatou ao CORSIA
+        "verra_vcs":   100, # CORSIA approved ✅ (VM0044 com processo de Material Change pendente)
+    },
+    # Mercado voluntário em escala / compradores corporativos, preço competitivo
+    "voluntary_mass": {
+        "isometric":   50,  # Mercado menor, custo de verificação menos transparente
+        "puro_earth":  65,  # Bom track record Europa; MyPuro marketplace integrado
+        "verra_vcs":   100, # Maior volume, maior liquidez, mais compradores
+    },
+    # Compradores europeus / institucionais — regulação EU, rastreabilidade
+    "european_institutional": {
+        "isometric":   65,  # Emergente na Europa; CCP-eligible
+        "puro_earth":  100, # Fundado na Europa (Finlândia); ICROA; EBC compliance
+        "verra_vcs":   70,  # Presença global; ICVCM CCP aprovado
+    },
+    # Sem preferência específica de mercado
+    "any": {
+        "isometric":   70,
+        "puro_earth":  75,
+        "verra_vcs":   75,
+    },
+}
 
-    Justificativa dos pesos:
-      Volume e integridade são os drivers primários de valor para compradores premium.
-      Compliance readiness é secundário — reflete estado atual de documentação, não fit.
+_MARKET_LABELS = {
+    "premium_cdr":           "CDR Premium (alto rigor científico)",
+    "icroa_marketplace":     "ICROA marketplace (endosso pleno obrigatório)",
+    "corsia_aviation":       "CORSIA / Aviação (offset regulatório)",
+    "voluntary_mass":        "Mercado voluntário em escala (volume/liquidez)",
+    "european_institutional":"Compradores europeus / institucionais",
+    "any":                   "Sem preferência específica",
+}
+
+
+def _calc_composite_score(method_results: dict, credit_volume: dict,
+                           buyer_market: str = "any") -> dict:
+    """
+    Score composto com 4 módulos — alinhado ao Sylvera Methodology Assessment:
+
+      30% volume de créditos  — permanência absoluta (f200 ou PRde × 100)
+                                 Usa valor absoluto, não normalizado no conjunto,
+                                 para que Iso não domine apenas por ser o mais alto.
+      30% integridade          — RAG Sylvera (carbon accounting, permanência, etc.)
+      25% aceitação de mercado — ICROA, CORSIA, perfil de compradores
+      15% compliance readiness — documentação atual (menor peso: mede estado atual)
+
+    Pesos deliberados:
+      - Volume absoluto evita que Isometric ganhe automaticamente por ter f200 marginalmente maior
+      - Mercado como componente próprio (Module 4 Sylvera) permite que Puro ganhe
+        quando o comprador exige ICROA full ou contexto europeu
     """
     if not method_results:
         return {}
 
-    # Normaliza volume de créditos (0-100)
-    nets = {m: credit_volume.get(m, {}).get("net_tco2_per_t", 0) for m in method_results}
-    max_net = max(nets.values()) if nets.values() else 1
-    min_net = min(nets.values()) if nets.values() else 0
-    spread  = max_net - min_net or 1
+    # 1. Volume — fator de permanência absoluto convertido para 0-100
+    #    Iso f200=0.90 → 90pts | Puro f200=0.81 → 81pts | Verra PRde=0.80 → 80pts
+    #    Diferenças reais refletidas, sem distorção de normalização relativa
+    vol_score = {
+        m: (credit_volume.get(m, {}).get("permanence_factor", 0.56) * 100)
+        for m in method_results
+    }
 
-    vol_norm  = {m: (v - min_net) / spread * 100 for m, v in nets.items()}
-
-    # Integridade (0-100)
-    integ_norm = {
+    # 2. Integridade metodológica (0-100)
+    integ_score = {
         m: (_INTEGRITY_SCORES.get(m, {}).get("total", 10) / _MAX_INTEGRITY * 100)
         for m in method_results
     }
 
-    # Compliance (já em 0-100)
+    # 3. Aceitação de mercado (0-100)
+    market_target = _MARKET_SCORES.get(buyer_market, _MARKET_SCORES["any"])
+    market_score = {m: market_target.get(m, 50) for m in method_results}
+
+    # 4. Compliance readiness (0-100)
     compl = {m: method_results[m]["overall"] for m in method_results}
 
     composite = {}
     for m in method_results:
         composite[m] = (
-            0.40 * vol_norm.get(m, 0) +
-            0.35 * integ_norm.get(m, 0) +
-            0.25 * compl.get(m, 0)
+            0.30 * vol_score.get(m, 0) +
+            0.30 * integ_score.get(m, 0) +
+            0.25 * market_score.get(m, 0) +
+            0.15 * compl.get(m, 0)
         )
     return composite
 
@@ -464,10 +528,12 @@ def _build_reasoning(best: str, results: dict, profile: ProjectProfile,
 
     # ── 4. Score composto (transparência) ─────────────────────────────────
     composite_best = results.get(best, {}).get("composite_score")
+    buyer_market = getattr(profile, "buyer_market", "any") or "any"
+    market_label = _MARKET_LABELS.get(buyer_market, buyer_market)
     if composite_best:
         lines.append(
             f"Score composto ({label}): {composite_best:.0f}/100 "
-            f"(40% volume créditos + 35% integridade Sylvera + 25% compliance)."
+            f"(30% volume + 30% integridade + 25% mercado [{market_label}] + 15% compliance)."
         )
 
     return " ".join(lines)

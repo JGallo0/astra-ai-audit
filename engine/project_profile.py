@@ -34,6 +34,7 @@ class ProjectProfile:
     has_technical_description: bool           = False
     estimated_credits_tco2:    Optional[float]= None
     biochar_t_dry_year:        Optional[float]= None   # produção anual de biochar (base seca) — para credit volume
+    buyer_market:              str            = "any"  # mercado-alvo: premium_cdr | icroa_marketplace | corsia_aviation | voluntary_mass | european_institutional | any
 
     # ── Feedstock ─────────────────────────────────────────────────────────────
     feedstock_type:            str            = "unknown"
