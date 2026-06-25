@@ -554,10 +554,6 @@ function StepCarbono({ form, set }) {
         defaultText="≤ 200 km assumido → leakage de transporte = zero na Verra"
         unit="km" placeholder="Ex: 80" form={form} set={set}
       />
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 16px", marginTop: 8 }}>
-        <Toggle name="has_soil_temp_method" value={form.has_soil_temp_method} onChange={set} label="Método de temperatura do solo definido?" />
-      </div>
     </>
   );
 }
@@ -855,7 +851,7 @@ const EMPTY = {
   has_lca: false, lca_emission_factor_tco2_t: null,
   has_system_boundary: false, has_baseline: false, has_baseline_fate_evidence: false,
   has_leakage_assessment: false, has_uncertainty_analysis: false,
-  durability_option: "not_stated", has_soil_temp_method: false,
+  durability_option: "not_stated",
   has_reversal_risk_assessment: false, transport_distance_km: null,
   // Adicionalidade
   has_financial_additionality: false, additionality_method: "none",
