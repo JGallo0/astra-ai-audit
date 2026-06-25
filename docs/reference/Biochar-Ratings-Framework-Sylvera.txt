@@ -1,0 +1,486 @@
+Incentivizing investment in real climate action
+Our Carbon Credit 
+Ratings Framework for 
+Biochar Projects
+Published February 2025
+Introduction
+Sylvera Ratings are the most reliable and trustworthy in the market. 
+Sylvera has developed a rigorous boom-up approach in order to produce the 
+most accurate ratings and analyses for projects in the carbon markets.  
+What sets Sylvera apart
+●
+Project-type-speciﬁc frameworks: We build rigorous frameworks and 
+production systems for every project category to accurately test project 
+design, carbon accounting, and climate impact claims. 
+Sylvera’s frameworks are peer-reviewed by a commiee of experts and 
+carbon market stakeholders – including project developers & registries – to 
+ensure scientiﬁc consensus. We have published this document so buyers 
+understand how we developed our unique, nuanced framework, and we 
+have included some examples of  exactly what we test and how we do it. 
+Read our white paper for more information.
+●
+Unparalleled depth & accuracy: We extract, clean, and organize data from 
+project design documentation (PDD) and every monitoring report. Then we 
+meticulously build carbon, strength of baseline and ﬁnancial additionality 
+models from the ground up to validate emissions reductions or removals 
+claims and evaluate project economics. 
+Our project assessments are the most comprehensive in the market, 
+providing granular analysis of core project characteristics, insightful data 
+visualizations, and interactive maps.
+●
+Independent Data Validation: Our expert analysts leverage advanced 
+machine learning (ML) technology, veriﬁed, independent data, and 
+proprietary ﬁeld data to test the accuracy of credit issuances and claims.
+The comparison of independent data speciﬁc to each project against the 
+data reported in the project’s documentation is the cornerstone of high 
+quality due diligence.
+Key terms and concepts 
+3
+Biochar
+Biochar is a stable organic carbon compound formed through pyrolysis.
+Biochar Decay Rate
+Decay rate refers to the speed at which biochar’s stored carbon is released back into the atmosphere due to 
+environmental and external factors such as soil conditions and temperature, application methods, and 
+natural risks.
+Biochar Stability Rate
+Stability rate measures the longevity of biochar’s carbon storage, indicating how eectively it resists 
+degradation and remains sequestered over time, typically for periods exceeding 100 years.
+Carbon credit
+A tradable unit representing one metric ton of carbon dioxide (CO2), or an equivalent amount of another 
+greenhouse gas (GHG), avoided or removed from Earth’s atmosphere.
+Greenhouse Gas (GHG) 
+Emissions
+Refers to the release of gases into the atmosphere that trap heat and contribute to climate change.
+Hydrogen to Carbon 
+Ratio (H/C)
+The hydrogen to carbon ratio correlates with the stability of biochar. 
+Internal Rate of Return 
+(IRR)
+Internal Rate of Return used for investment analysis to estimate the return on an investment.
+Life Cycle Assessment 
+(LCA)
+This refers to the analysis conducted to estimate the amount of emissions associated with the sourcing of 
+biomass, the creation of biochar and its deployment.
+Over-crediting risk
+This refers to the risk that the project has issued credits in excess of what is justiﬁable against the business 
+as usual scenario.
+Oxygen to Carbon 
+Ratio (O/C)
+The oxygen to carbon ratio correlates with the stability of biochar. 
+Permanence 
+Adjustment Factor
+This refers to the percentage of carbon that will stay secure in the biochar for the next 100 years. 
+Project emissions
+Emissions associated with ongoing operations of the carbon credit project.
+Pyrolysis
+Pyrolysis is the heating/burning of an element in an oxygen-absent, controlled environment.
+Vintage
+This refers to the year, or timeframe, associated with an issued carbon credit.
+The state of Biochar
+4
+The challenge 
+The solution
+To overcome the challenge of data transparency and scale the biochar market, the following data points are needed to 
+ensure trust in biochar credits:
+1.
+Investment Analysis Parameters: Disclosing ﬁnancial parameters allows the market to assess whether carbon 
+ﬁnance is necessary for the project to be economic. Without this data, the ﬁnancial additionality is uncertain.
+2.
+Biochar Carbon Content: The amount of carbon present in the biochar created is the foundation of the net 
+carbon sequestration calculations.
+3.
+Permanence Adjustment Factor: The permanence adjustment factor used for decay of biochar is necessary to 
+verify the emissions calculations and the amount of carbon secured in the biochar over the next 100 years.
+4.
+H/C Ratio: The ratio of hydrogen to organic carbon, based on lab analysis, is a key factor in the quantiﬁcation of  
+the volume of credits issued and the stability of carbon sequestered. 
+5.
+Feedstock: Disclosing the feedstock type, sourcing principles and feedstock counterfactual related to the 
+project is important in understanding impacts associated with feedstocks, and this can have a big impact on 
+the net removal calculation.
+6.
+LCA Emissions: Life cycle assessments (LCA) demonstrate whether emissions associated with the creation 
+and deployment of biochar have been accounted for in full. Emissions at each stage of the life cycle should be 
+made available to determine any risk of over-crediting.
+7.
+Geographic Coordinates: Project developers should disclose the location and geographic coordinates of the 
+end-use applications of biochar to enable eective monitoring and evaluation of reversal risks and decay rates.
+Biochar is an essential technology to help scale the engineered Carbon Dioxide Removal (CDR) market and meet the 
+growing demand for carbon removal credits. The majority of delivered CDR credits, ones which are validated and issued, 
+are from biochar projects. This means that biochar credits are some of the only technology CDR credits companies can 
+purchase and retire to compensate for their emissions.
+Biochar developers and registries are nascent and ultimately have yet to face the same scrutiny as other sectors of the 
+market. For biochar projects there is a notable deﬁciency of data available around key project performance parameters. 
+The rush to procure biochar credits is understandable, but without transparency and deep due diligence the credits 
+represent a material risk in your carbon credit portfolio.
+With the right data disclosures and collaboration with developers, we can provide the deep project-level insights needed 
+to inform buyers’ investment due diligence and help bring these technologies to scale faster. If you’re a project 
+developer interested in having Sylvera rate your project to help prove impact and optimize investment, reach out to our 
+team. 
+What is a Biochar project? 
+5
+Biochar projects produce removals credits that aim to maximize the production of biochar predominantly through 
+pyrolysis. Not all carbon is converted to biochar during the pyrolysis process; bio-gas and syngas are also produced. The 
+biochar produced is abundant in carbon, stable and has numerous applications. The stability of the biochar is based on 
+the temperature at which it was created and the resulting H/C and O/C ratio.
+The input to the process is primarily plant and animal biomass. The biomass can be sourced locally from the surrounding 
+forests or agricultural lands and may come from many sources, for example a forest management company with wood 
+chips or a farmer with grass and crop residue. The sourced biomass has a direct impact on the quality of the biochar 
+created. This input has to be dried and prepared for the pyrolysis plant.
+The pyrolysis plant heats up the biomass in the absence of oxygen at high temperatures (up to 800C). The process 
+creates other co-products such as bio-oil, syngas and excess thermal energy, which can be sold for additional revenue 
+streams. Alternative revenue streams, in addition to those derived from the sale of carbon credits, have meaningful 
+implications for the additionality of biochar projects as these revenue streams impact the extent to which carbon 
+ﬁnance is required for these projects to be economic. 
+Trees, crops and biomass 
+capture CO2 by using 
+100% sunlight energy
+Wood chips, nutshells and 
+other bio materials contain 
+CO2 but as they decompose 
+they release it back into the 
+atmosphere.
+Biochar projects  break this 
+cycle by taking this material and 
+converting it into 
+biochar-ensuring that the CO2 
+stays trapped for 100+ years.
+Byproduct 
+The pyrolysis process produces 
+byproducts including bio-oil, 
+syngas and heat
+Biochar
+The biochar is used for soil, water 
+ﬁltration,and biomaterials so that it 
+won’t be burned or put back into the 
+atmosphere.
+Biochar is predominantly used for soil application. Research has shown the addition of biochar can increase soil fertility 
+and protect soil from natural risks such as ﬂooding and erosion. 
+The carbon content of biochar slightly decreases over the time depending on its decay rate, the soil type and the 
+temperature of the soil where the biochar is located. The rate of decomposition can increase based on the temperature 
+of the soil. If the biochar is exposed to high temperatures for a long period of time, then it will decompose faster. In this 
+case, there could be a potential risk of over-crediting of carbon credits if the high temperature is not accounted for 
+appropriately by the project.
+Biochar alternative use cases
+Water filters & wastewater 
+treatment
+Building materials
+Renewable heat
+Added to soil 
+(fertilizer, compost additive)
+Animal farming 
+(feed, slurry treatment)
+Fabric additive in textiles
+Our top level Sylvera Ratings (AAA, AA, A, BBB, BB, B, C, D) reﬂect whether each credit associated with the project is 
+likely to remove 1 metric ton of CO2e emissions.
+This rating is derived from a combination of scores that assess the carbon performance, additionality and permanence 
+of the project. The scores in these three core pillars are combined in a series of matrices to ensure that 
+underperformance in one key area does not get overshadowed by high performance in others. 
+Co-beneﬁts are also assessed but they do not feed into the Sylvera Rating, as they do not have a direct bearing on the 
+climate impact of carbon credits. Including them in the Sylvera Rating could lead to a high co-beneﬁts score obscuring 
+poor performance on carbon removal. Aspects of the project relating to co-beneﬁts that could materially impact the 
+project’s ability to deliver it’s stated climate beneﬁt are, however, reﬂected in the Sylvera Rating.
+Carbon Score
+Additionality Score
+Permanence Score
+Co-benefits Score
+Sylvera’s Carbon Score veriﬁes 
+whether the project has 
+delivered on its carbon claims. 
+This is done by assessing four 
+sub-components: the gross 
+removals achieved by the 
+biochar, the project’s LCA 
+emissions, leakage caused by 
+the project, and the feedstock 
+counterfactual, as well as 
+assessing the quality of the 
+project’s own LCA, and the 
+quality of the data used by the 
+project.
+Sylvera’s Additionality Score 
+assesses the likelihood  the 
+project activities would have 
+been implemented in absence 
+of the carbon revenues. It also 
+assess the potential impact of 
+policies and regulations as 
+well as the risk of double 
+accounting.
+Sylvera’s Permanence Score 
+assesses the risk that the 
+removals will later be reversed 
+and released back into the 
+atmosphere. This is mainly 
+based on the risk of biochar 
+end-use, driven by its end use 
+type, i.e., soil or non-soil 
+applications, biochar durability 
+and external factors such as 
+natural risks, biochar 
+application method etc., as 
+well as anthropogenic risks.
+Sylvera’s Co-beneﬁts Score 
+assesses the scope and 
+relative impact of project 
+activities on local 
+biodiversity and 
+communities—which are 
+linked to UN Sustainable 
+Development Goals (SDGs).
+A reminder of our scoring pillars
+6
+Sylvera Rating
+Carbon Score
+Additionality
+Permanence
+Co-benefits
+Accurate carbon accounting underpins the validity of a project’s issuance and material under or over reporting of 
+emissions will impact the number of credits that have been issued. If Sylvera-detected project carbon is signiﬁcantly 
+lower than the project’s reported ﬁgures, reported carbon removal amounts are likely inaccurate and there is a higher risk 
+of overissuance.
+Why does it matter? 
+How do we calculate the Carbon Score?
+Carbon Score 
+Sylvera’s Carbon Score veriﬁes whether a project is accurately reporting on the carbon removals achieved by the activity.
+What is it? 
+Note: The Carbon Score must be considered alongside the Additionality  and Permanence Scores. 
+7
+Gross Removal Quantification
+Sylvera replicates the project’s Gross Removal Quantiﬁcation by using the Biochar Decay Rate model. This model 
+calculates a Permanence Adjustment Factor that reﬂects biochar decay over 100 years based on key factors such as soil 
+temperature, biochar characteristics (including H/C ratio), and local conditions. The analysis ensures alignment with 
+Sylvera’s ensemble of independent third-party models, providing an accurate assessment of gross removals.
+Gross Removal = 𝑄𝑏𝑖𝑜𝑐ℎ𝑎𝑟 × 𝐶𝑜𝑟𝑔 × 𝐹𝑝 𝑇𝐻,𝑇𝑠 × 44/12
+Where:
+𝑄𝑏𝑖𝑜𝑐ℎ𝑎𝑟 is the amount of biochar produced over the reporting period. 
+𝐶(𝑜𝑟𝑔) is the organic carbon content of the biochar produced. 
+𝐹𝑝 𝑇𝐻,𝑇𝑠 is the permanence factor of biochar organic carbon over a given time horizon 𝑇𝐻 in a given soil at 
+temperature 𝑇𝑆. 
+𝐹𝑝 𝑇𝐻,𝑇𝑠 = 𝑐 + 𝑚 × 𝐻/𝐶𝑜𝑟𝑔
+Where:
+c & m are constants used in the calculation of 𝐹𝑝 𝑇𝐻,𝑇𝑠
+H/Corg is the  molar ratio of hydrogen mass divided by organic carbon mass of the biochar
+44/12 is the value used to convert mass of carbon to mass of carbon dioxide emissions
+The Gross Removal Quantiﬁcation is based on a Woolf et al. (2021) approach. It is important to use this approach to 
+assess gross removals, as the quantity of removals remaining after 100 years will be lower at higher application 
+temperatures. Therefore, by assessing the temperature at application, Sylvera can assess the size of removals that 
+will be remaining.
+Leakage 
+Quantification
+Biochar Project 
+Carbon 
+Calculation
+Gross Removal Quantification
+(Biochar Organic Carbon Content * 
+Permanence Adjustment Factor)
+GHG Emission 
+Quantification
+Feedstock Counterfactual 
+Removals
+FRAMEWORK
+To evaluate net carbon removals, Sylvera has developed an in-house Life Cycle Assessment (LCA) model, focusing on key 
+emission sources including feedstock cultivation and transport, energy consumption, and construction. This proprietary 
+LCA model identiﬁes discrepancies between project reported emissions and Sylvera’s calculations, assessing whether 
+project-reported net removal values are robust and consistent. Sylvera’s LCA model has been peer-reviewed by UCL 
+Consultants, and uses the most up-to-date emission factors available from ecoinvent, as well as UK Government and 
+other academic sources. 
+Emission calculations are performed by taking activity data, matching this to an emission factor, and multiplying these 
+together to give an output in CO2 equivalent (CO2e):
+Activity data * Emission Factor = kgCO2e
+Therefore, by performing these calculations across important emissions sources, Sylvera can assess whether the project 
+is likely to be accurately reporting its GHG emissions.
+Carbon Score continued 
+8
+GHG Emission Quantification
+Feedstock Counterfactual Quantification
+Sylvera assesses the counterfactual scenario for feedstock use, determining whether the feedstock would have resulted 
+in removals under a baseline scenario. By examining the type and alternative fate of feedstocks, Sylvera assesses 
+whether the project has appropriately set their baseline value. In cases of uncertainty, conservative deductions are 
+applied to ensure integrity in removal estimates.
+Leakage Quantification
+Sylvera evaluates the risk of leakage by analyzing the sourcing and usage of feedstocks, as well as potential indirect 
+impacts such as land use changes or replacement emissions. The assessment ensures that leakage risk is investigated 
+for removal claims. Where data is insuicient, Sylvera applies conservative deductions to uphold rigorous and 
+transparent carbon accounting.
+Initial situation
+iLUC
+Grazing
+Grazing
+Crop
+Forest
+Initial situation
+Replacement 
+Residues 
+remain
+Additional 
+fertilisers
+Figure 1.  Examples of indirect Land Use Change (iLUC) and Replacement Emissions
+FRAMEWORK
+1000 kWh 
+of purchased electricity
+0.27522 
+kgCO2e/kWh
+275.22 kg CO2e
+Electricity 
+example: 
+Sylvera’s additionality score assesses whether (1) a project would or wouldn’t have been implemented in the absence of 
+revenue generated through the sale of carbon credits, (2) the project is not mandatory/strongly supported by policies 
+and regulations and (3) the project is not presenting double accounting risk with other VCM activities.
+Additionality underpins the validity of credits issued by a project. If the project is not additional, then one credit 
+purchased does not equate to one metric ton of carbon avoided and therefore yields no climate beneﬁt above the 
+business-as-usual (BAU) scenario.
+A project would score high in additionality if Sylvera’s ﬁnancial analysis proves the need for carbon ﬁnance to make the 
+project economic. 
+This is not a binary test and the degree of additionality depends on the carbon price required to make it economic. On the 
+other hand, a project would score low in additionality if the revenues from biochar and any possible co-products (bio-oil, 
+energy) are enough alone to make the project economically viable.
+Why does it matter? 
+Additionality Score 
+9
+What is it? 
+Financial Additionality
+The assessment of ﬁnancial additionality involves determining whether the economic viability of the project relies on 
+oset revenues. Sylvera examines if the carbon credits revenue bridges the economic viability gap of the project through 
+sensitivity analysis. Biochar projects that generate additional revenue streams by selling biochar or co-products to third 
+parties, Sylvera assesses whether the project would still be economically viable without oset revenues. If a project is 
+economically feasible without carbon credits, the credits are considered non-additional. This ensures that carbon 
+ﬁnance is allocated only to projects that require it to proceed.
+Biochar projects can have more than one revenue stream. The biochar itself can be sold for anywhere between USD 
+$300/tonne and $1000/tonne  based on the quality of the biochar and other transaction parameters. Furthermore, 
+pyrolysis also creates thermal energy that can be sold along with any bio-oils produced during the process. These 
+products can create signiﬁcant revenues for the project crossing the hurdle rate required to make the project economic. 
+If these revenues are not enough, carbon ﬁnance might be required to bridge this gap. However, reliance on high carbon 
+credit prices can make the likelihood of achieving an IRR above the hurdle rate more diicult and unlikely. 
+A high quality project demonstrates the need for carbon ﬁnance to make the IRR of the project breach the hurdle rate 
+with low carbon prices. Furthermore, the project should take into account any emissions associated with production of 
+biochar and other products (bio-oil and energy) made possible through carbon ﬁnance.
+How does Sylvera assess additionality?
+Policy & Regulatory Landscape
+Sylvera considers the policy and regulatory context to assess additionality. Projects are evaluated to conﬁrm they are not 
+mandated by law or regulation and to identify whether subsidies or government funding diminish their additionality. By 
+integrating any provided subsidies or ﬁnancial incentives into our economic analysis, Sylvera ensures that carbon credits 
+are issued only where they play a critical role in making the project viable. This safeguards the integrity of credits in 
+regions with supportive policy landscapes.
+Double Accounting
+To address the risk of double accounting, research are performed to ensure that carbon credits are not claimed by 
+multiple stakeholders. In biochar projects, this involves verifying that the producer and end user of the biochar do not 
+both claim the same carbon beneﬁt. Clear documentation of credit allocation is required to establish ownership and avoid 
+duplication. This approach safeguards the integrity and credibility of the issued credits.
+FRAMEWORK
+Permanence refers to the risk that the sequestered carbon will later be reversed and released back into the atmosphere. 
+The input of climatic variables, record of past events, project speciﬁc conditions and mitigative activities are used to 
+inform the permanence risk scoring. Permanence is conceptualized as a scale that distinguishes the relative degree of 
+non-permanence (or reversal) risk between projects. 
+Biochar credits credits have a low permanence risk given the overall high stability of biochar. The only case where 
+biochar stability is uncertain is where there is a high likelihood and high severity of ﬁre events, however in comparison to 
+nature-based projects, there is signiﬁcantly less risk of reversal. 
+The permanence of the carbon in the biochar is based on a variety of factors such as the random reﬂectance, the 
+pyrolysis temperature and the H/C ratio. The biochar can also degrade based on the temperature of the soil where it is 
+applied. The projects need to assess its biochar carbon storage to have permanence of at least for the next 100 years. 
+The soil type, location, and climatic conditions of a project signiﬁcantly inﬂuence the long-term eiciency of biochar 
+carbon sequestration. For instance, biochar decays faster in tropical climates like Brazil due to higher soil temperatures 
+compared to cooler regions like Finland. Soil mineral content also plays a crucial role; soils with high mineral and water 
+content, such as clay, enhance biochar permanence by supporting carbon mineralization and storage. 
+The end use and application of biochar must be traceable and monitored to quantify reversal risk. In soil applications, risk 
+of reversal can be driven by ﬁre or erosion from ﬂooding  or storm events.
+For non-soil applications, the permanence is evaluated from its application  lifespan across various use cases, such as 
+biochar application in construction materials, water ﬁltration systems, and energy applications. This involves examining 
+how these dierent applications inﬂuence the durability and eectiveness of biochar in retaining carbon. 
+Permanence Score 
+10
+How do we calculate the permanence score?
+The permanence score is derived from a comprehensive analysis of observational and modeled data, adhering to 
+recognized methodologies and the latest scientiﬁc advancements. The permanence of biochar is signiﬁcantly 
+inﬂuenced by its end-use, whether applied in soil or non-soil environments. Sylvera’s assessment evaluates biochar 
+stability and decay rate in its speciﬁc application while also identifying anthropogenic risks associated with its use.
+Decay rate
+Hydrogen to Carbon (H/C) ratio
+measure of elemental composition, where a 
+lower ratio indicates more stable, aromatic 
+carbon. 
+Stability rate
+Random Reﬂectance
+measures the amount of light reﬂected from 
+biochar, indicating its level of carbonization 
+Pyrolysis temperature
+reﬂects the temperature at which biochar 
+is produced.
+Natural risks
+Events such as ﬁre, ﬂood, drought can have a 
+direct negative impact on the decay rate o
+Soil type and temperature
+Soil with high mineral and water content may 
+have higher permanence as it can mineralise 
+and store carbon. In contrast, higher soil 
+temperature leads to faster decay.
+Soil application method
+Dierent application methods such as 
+subsurface soil application, blending with 
+manure or fertilizer etc. will contribute to 
+dierent levels of permanence.
+What is it? 
+FRAMEWORK
+11
+What data do we use in the Permanence Score?
+Permanence Score continued 
+We assess biochar’s permanence from their H/C ratio in dierent soil temperatures, using the analysis done by Woolf 
+et. al, (2021). This analysis calculates the fraction of biochar carbon remaining in soil after 100 years (Fperm) in 
+dierent soil temperatures. As seen in ﬁgure below, the higher the soil temperature, the steeper its decay line across 
+the H/C ratio. Sylvera assesses the project’s  H/C ratio in combination with its soil temperature to determine its Fperm.
+A component of the Stability Rate: the H/C ratio assessment
+We leverage a third party date from Copernicus Climate Change Service (C3S) (2022) for our soil temperature 
+assessment as seen in ﬁgure 3 below. This is to ensure that the soil temperature of biochar’s application location 
+claimed by the project is in line with latest veriﬁed and established soil temperature data.
+A component of the Decay Rate: the soil temperature
+T=0C
+T=40C
+Source: Sylvera’s analysis from Woolf et al., 2021
+H/C Ratio
+Fraction of biochar carbon remaining in soil 
+after 100 years (Fperm)
+Figure 2. Fraction of biochar carbon (100 years) as a function of H/C ratio and soil temperature
+Figure 3. Example of soil temperature map for United States of America
+FRAMEWORK
+Co-Benefits Score 
+12
+FRAMEWORK
+Sylvera’s co-beneﬁts rating examines whether the project is implementing activities to support local biodiversity and 
+communities, as well as the scale and likely impact of these activities.
+Sylvera measures the impact biochar project activities have on biodiversity. We leverage data provided by project 
+developers, IUCN data, and IBAT data. 
+When assessing community impact, we utilize data disclosed by project developers and the Sustainable Development 
+Goals (SDG) to triangulate a project’s community impact.
+How do we assess the co-benefits of biochar credits?
+BIODIVERSITY
+We independently identify which UN SDGs the project is contributing towards by assessing the activities implemented 
+by the project. We determine the relative impact of activities on local communities by scaling the SDG impact against 
+country-level performance, the size of the population aected, and the carbon removals achieved by the project.
+Sustainable Development Goals
+COMMUNITIES
+We assess whether the facility  is located in a conservation area. There are no threats associated such as pollutant 
+treatment with the application of biochar in soil or non-soil applications.
+Threats & Safeguards
+We assess the extent to which the project has contributed to biodiversity loss.
+Biodiversity Protection
+An example of a biochar projects contribution to biodiversity and community:
+Improve soil 
+fertility and 
+higher crop 
+yield
+Local 
+employment 
+opportunities
+Reduce 
+environmental 
+impact of cities
+Reduce 
+environmental 
+degradation
+To ensure the project aligns with social safeguard principles, we conduct a thorough evaluation of potential risks, 
+including inadequate worker safety, insuicient community engagement, or inequitable beneﬁt-sharing. As part of our 
+assessment, we carefully analyze stakeholder engagement processes and worker safety practices to measure their 
+impact on local communities. These evaluations are integral to understanding and mitigating social risks while 
+fostering positive outcomes for all stakeholders involved.
+Social Safeguards
+What is it? 

@@ -1,0 +1,505 @@
+ 
+Engineered Carbon 
+Removals 
+methodology 
+ 
+BeZero Carbon Ratings 
+​
+ 
+ 
+ 
+ 
+Contents 
+Glossary​
+4 
+Introduction​
+6 
+What is the Engineered Carbon Removals sector group?​
+6 
+Market context​
+7 
+BeZero Carbon Rating analytical framework and​
+process for Engineered Carbon Removals​
+11 
+Holistic assessment​
+11 
+Sector and country analysis​
+11 
+Standards and methodology screening​
+11 
+Project- and vintage-specific analysis​
+12 
+Carbon efficacy assessment​
+14 
+Additionality​
+14 
+Activity analysis​
+15 
+Common practice​
+15 
+Alternatives to the proposed project​
+15 
+Financial analysis​
+16 
+Investment analysis​
+16 
+Carbon revenues​
+17 
+Barrier analysis​
+18 
+Technological maturity​
+19 
+Benefit-sharing​
+20 
+Legal and policy​
+20 
+Land and carbon rights​
+20 
+Policy support​
+20 
+Regulatory surplus​
+20 
+Government effectiveness​
+21 
+National climate and green investment landscape​
+21 
+Major policies​
+21 
+Nationally Determined Contribution​
+22 
+National classification​
+23 
+Carbon Accounting​
+24 
+Direct accounting​
+24 
+Baseline scenario​
+24 
+Validity of zero baseline claims​
+24 
+Alternative feedstock scenarios​
+25 
+Project scenario​
+25 
+Project emissions​
+25 
+Measurement and monitoring practices​
+25 
+Life cycle emissions​
+27 
+GHG conversions​
+28 
+Methodological uncertainty​
+28 
+Carbon accounting uncertainty​
+29 
+Safeguards​
+30 
+Leakage accounting​
+30 
+​
+​
+ENGINEERED CARBON REMOVALS METHODOLOGY​
+2 
+ 
+ 
+Activity displacement​
+30 
+Market leakage​
+31 
+Positive leakage​
+31 
+Ecological Leakage​
+32 
+Permanence​
+34 
+Anthropogenic risks​
+34 
+Carbon rights​
+35 
+Technical risks​
+35 
+Commitment period​
+35 
+Durability​
+35 
+Other risks​
+37 
+Natural risks​
+37 
+Risk mitigation instruments​
+38 
+Stakeholder engagement​
+38 
+Risk buffer and mitigation​
+38 
+Impact of co-benefits and SDGs on carbon efficacy​
+39 
+Co-benefits and carbon efficacy​
+39 
+Sustainable Development Goals​
+39 
+Interaction of carbon efficacy and co-benefits within Engineered Carbon Removals​
+40 
+Appendix I: Analytical independence​
+41 
+Appendix II: Risk factor definitions and analytical framework matrix​
+42 
+Appendix III: Sources as of January 2025​
+43 
+Third-party datasets​
+43 
+Literature sources​
+43 
+Sample of literature sources​
+44 
+Appendix IV: Additional reading​
+46 
+Appendix V: Sustainable Development Goals​
+46 
+Updates and reviews​
+47 
+ 
+​
+​
+ENGINEERED CARBON REMOVALS METHODOLOGY​
+3 
+ 
+ 
+Glossary 
+Baseline: A baseline is the volume of emissions that are assumed to occur in the absence of any 
+project intervention. 
+BeZero Carbon ex ante Rating: A BeZero Carbon ex ante Rating represents BeZero Carbon’s opinion 
+on the likelihood of the carbon credit achieving a tonne of CO₂e avoided or removed. It is an opinion on 
+the greenhouse gas efficacy of an ex ante credit (pre-issuance). 
+BeZero Carbon Rating (BCR): The BeZero Carbon Rating is a hybrid analytical framework that fuses 
+financial, scientific, and policy-based analysis. It provides an opinion on the likelihood that a given 
+credit achieves a tonne of CO₂e avoided or removed. 
+Biochar: Projects that produce biochar via pyrolysis, the partial combustion of sustainable biomass, 
+with CO₂ subsequently stored in soil or non-soil applications. 
+Bioenergy With Carbon Capture & Storage (BECCS): Projects that produce bioenergy from the 
+combustion of sustainable biomass and geologically store the emitted CO₂. 
+Carbon capture, utilisation and storage (CCUS): Projects that capture CO₂ from a point emission 
+source (e.g. fossil fuel energy production) and store it geologically (CCS), or use the CO₂ in the 
+production of products (e.g. fuels, chemicals, concrete) (CCU/CCUS). 
+Carbon dioxide removal (CDR): See Engineered Carbon Removals 
+Carbon finance: Financial resources allocated to carbon project activities that reduce or avoid 
+greenhouse gas emissions. It is an additional source of revenue that seeks to make such activities 
+more financially viable. 
+Closed-loop system: Projects that involve a high degree of technical control or containment. 
+Commitment period: The duration of time over which a project plans its sequestration activities to be 
+maintained.  
+Direct Air Capture With Carbon Storage (DACCS): Projects that use technology to remove CO₂ 
+from the atmosphere and store it geologically. 
+Durability: Durability refers to the robustness of carbon storage. Durability is used interchangeably 
+with permanence to define this storage component. BeZero defines durability in our Durability 
+Assessment. 
+Durability Assessment: The 2023 BeZero Carbon Durability Assessment evaluates the relative 
+durability of seven carbon removal storage methods, assessing their physical storage, risk of reversal, 
+and scientific certainty. 
+Engineered Carbon Removals: Engineered technical solutions that enhance or facilitate the removal 
+of greenhouse gases from the atmosphere. One of six sector groups in the BeZero Sector 
+Classification. 
+Enhanced Weathering: Projects that accelerate the natural process of rock weathering, which stores 
+atmospheric CO₂ in carbonate minerals 
+Ex ante credits: Carbon credits that are not yet issued, i.e. pre-issuance.  
+Ex post credits: Carbon credits that have been issued, i.e. post-issuance.  
+Greenfield site: Land that is being considered for development that has not previously been built on. 
+Greenhouse gas removals (GGR): See Engineered Carbon Removals 
+​
+​
+ENGINEERED CARBON REMOVALS METHODOLOGY​
+4 
+ 
+ 
+Methodology: A framework that sets out a process and parameters for quantifying the carbon 
+benefits of a project. Methodologies enable project developers to quantify baselines, assess key 
+aspects like additionality, and define necessary monitoring practices to ensure the greenhouse gas 
+emission reductions are verifiable, additional, and quantified.  
+Nature-Based Solutions (NBS): Nature-Based Solutions projects aim to achieve emission removals or 
+avoidance in the natural environment, these include forestry, soil carbon, and blue carbon. 
+Open-loop system: Projects that involve processes outside technical control or containment. 
+Project area: The geographical boundaries within which project activities take place. 
+Pyrolysis: A combustion process that occurs at high temperatures and in the absence of oxygen, 
+which thermochemically converts organic materials into a solid residue with higher carbon content 
+and liquid or gas products mainly containing hydrocarbon components. Used in biochar and bio-oil 
+methods. 
+Rating Committee: A group of members with extensive experience within and across all sectors who 
+discuss and debate the assignment of ratings. The Rating Committee oversees the analytical process 
+and ensures consistency in the application of rating criteria, methodologies, and comparability of 
+ratings across sectors and countries. 
+Scalability Assessment: The 2023 BeZero Carbon Scalability Assessment is a first-of-its-kind 
+assessment that evaluates the relative scalability of five Engineered Carbon Removals. The 
+framework compares these methods against eight barriers to scalability (Energy, Land, Finance, 
+Policy, Resources, Localised Impacts, Ancillary Value Chains, and Monitoring, Reporting & 
+Verification). 
+Stakeholders: Individuals, and/or groups of people who may be affected by the implementation and 
+activities of a project. 
+Standards bodies: Organisations that develop and revise methodologies to determine the 
+greenhouse gas benefits of various types of carbon projects, and inform when and how many credits 
+projects can issue.  
+Vintage: The vintage year refers to the period of time when the emission reduction or removal 
+associated with a credit occurred.  
+Voluntary carbon market (VCM): Carbon markets that exist outside of the regulation and 
+frameworks of international agreements, and are fuelled by commitments of individuals, as well as 
+private and public organisations to reduce GHG emissions through the trading of carbon credits. 
+ 
+​
+​
+ENGINEERED CARBON REMOVALS METHODOLOGY​
+5 
+ 
+ 
+Introduction 
+BeZero Carbon is a global ratings agency for the voluntary carbon market. Our ratings are a publicly 
+available, risk-based framework for assessing carbon efficacy. We rate qualifying carbon credits in all 
+sectors.  
+We take a research-first mindset, fusing traditional capital markets research practices with expertise 
+in environmental sciences and technology. We think creatively about climate problems and build 
+solutions the whole market can use. 
+We have developed extensive analytical frameworks to rate carbon credits on their likelihood of 
+delivering on their promised carbon emissions avoidance or removal. These analytical frameworks are 
+deeply sector-nuanced and bring to the fore our extensive experience in rating hundreds of projects 
+across dozens of sub-sectors. 
+Our ratings team is made up of over 70 analysts who create the models and perform the analysis for 
+every rating. They combine expertise in climatic and Earth sciences, in disciplines from remote 
+sensing, forest ecology, ecosystem disturbance, peatlands, and blue carbon through to statistics, 
+machine learning, artificial intelligence, sell-side financial research, industrial engineering, and public 
+policy. They hold over 20 PhDs, have published over 200 academic papers, and have been cited over 
+10,000 times in peer-reviewed scientific academic literature.   
+The market’s number-one risk metric, our ratings are available on our website and dozens of 
+marketplaces, alongside extensive analysis and research on our BeZero Carbon Markets platform. 
+What is the Engineered Carbon Removals sector group? 
+BeZero Carbon's Engineered Carbon Removals methodology is a tool for users of the BeZero Carbon 
+Rating to better understand our multifaceted approach to ratings in this sector group. We present 
+select case studies to showcase the various parameters through which we assess risk to the carbon 
+quality of credits and show how the sector group relates to our overarching ratings methodology. 
+Engineered Carbon Removals projects issue removal credits by implementing technical solutions that 
+enhance or facilitate the removal of greenhouse gases from the atmosphere. These projects store 
+atmospheric carbon in new carbon sinks via biological or geochemical processes. In the BeZero Sector 
+Classification system, Engineered Carbon Removals is one of six sector groups and contains four 
+sectors and eight sub-sectors. 
+​
+​
+ENGINEERED CARBON REMOVALS METHODOLOGY​
+6 
+ 
+ 
+ 
+Figure 1. The Engineered Carbon Removals sector group within BeZero’s sector classification system. 
+BeZero has several Insights specific to this sector group, designed to better understand and inform on 
+this nascent and largely future-facing sector. This includes the Scalability Assessment for Carbon 
+Removal, which assesses the barriers to scalability of five methods under a first-of-its-kind 
+assessment framework. As well, the Durability Assessment for Carbon Removal, which assesses the 
+durability of seven carbon storage methods, a characteristic that sets this sector group apart from the 
+rest of the VCM. 
+This methodology will provide an initial overview of the rating approach for the Engineered Carbon 
+Removals sector group, using mostly top-down examples. 
+ 
+Market context  
+The Engineered Carbon Removals sector group is nascent. As presented in Figure 2, the majority of 
+annual carbon removal is achieved through nature-based removal methods such as Afforestation, 
+Reforestation, and Restoration (ARR), with Engineered Carbon Removals accounting for just 0.06% of 
+total annual removal. In achieving global climate targets, this sector group will likely scale in its 
+issuance and delivery. 
+ 
+ 
+ 
+​
+​
+ENGINEERED CARBON REMOVALS METHODOLOGY​
+7 
+ 
+ 
+ 
+Figure 2a 
+ 
+Figure 2b 
+ 
+Figure 2. Figure 2a shows estimated annual carbon removal in GtCO2 from 2023. The majority of 
+carbon removal is currently met through nature-based solutions (blue) with only 0.06% met by 
+engineered carbon removal methods (orange). Figure 2b shows the estimated annual removal by 
+engineered carbon removal method in GtCO2 in 2023. Source: State of CDR 2nd edition, 2024. 
+As of January 2025, approximately 12.5 million credits have been transacted within this sector group. 
+Of this, 550 thousand credits are considered delivered, ex post credits - approximately 4.4%. At 95.6%, 
+the majority of transactions in this sector are for ex ante credits, those that are purchased 
+pre-issuance.  According to CDR.fyi, 1.2 million tonnes of biochar have been sold, compared to 7.5 
+million tonnes for BECCS and 2.1 million tonnes for the more costly DAC. From the  ex post credits sold 
+and issued, 85% are attributed to biochar projects.  
+​
+​
+ENGINEERED CARBON REMOVALS METHODOLOGY​
+8 
+ 
+ 
+ 
+Figure 3. Volume and composition of purchased versus delivered carbon removal credits. Both sales 
+and deliveries have grown considerably in 2024, +73% and +107% respectively. Data source: CDR.fyi. 
+As of January 2025, BeZero Carbon has rated 5 ex post Engineered Carbon Removals projects, and 
+more ex ante projects as most market activity is happening pre-issuance. For projects to qualify for a 
+BeZero Carbon Rating, they must meet our primary qualifying criteria. 
+Comparatively, in the wider VCM, approximately 2 billion credits have been issued, of which 283 
+million credits have been issued in 2024 alone. The total issuance by engineered carbon removal 
+sector group represents less than 1% of total VCM issuance by volume.  
+There are 34 methodologies for the Engineered Carbon Removals sector group, as of January 2025. 
+Isometric  has the greatest number of methodologies by any standard body, 8 methodologies. 
+Puro.earth has supplied the most  credits, with the most frequently used methodology being its 
+biochar methodology with 52 projects.  
+ 
+​
+​
+ENGINEERED CARBON REMOVALS METHODOLOGY​
+9 
+ 
+ 
+Table 1. Standards bodies with applicable methodologies for Engineered Carbon Removals projects, 
+as of January 2025. Some standards bodies cover avoidance and removal in one methodology.  
+Standards bodies 
+ Number of CDR methodologies (of which 
+cover both avoidance and removal) 
+Carbon Standards International 
+3 
+Isometric 
+8 
+Puro.earth 
+5 
+Riverse Carbon 
+2 
+Verified Carbon Standard (VCS) 
+3 (2) 
+Gold Standard 
+2 (1) 
+American Carbon Registry 
+1 (1) 
+Running Tide (ceased operations) 
+2 
+Open Natural Carbon Removal Accounting (ONCRA) 
+2 
+Project-specific 
+ 6 
+Total 
+34 (4) 
+The Engineered Carbon Removals sector is financially distinct compared to other sectors in the VCM. 
+These nascent technologies have higher costs attributed to being early-stage. Subsequently, credit 
+pricing is currently orders of magnitude greater than alternative sectors of the VCM - as 
+demonstrated in Figure 4.  
+ 
+Figure 4. The Engineered Carbon Removal sector (orange) has a much higher credit price than other 
+sectors in the voluntary carbon market (blue). Data from 2021 to today finds that credit prices in this 
+sector are orders of magnitude greater than the rest of the VCM. Source: cdr.fyi, 2025; BeZero Carbon 
+analysis, 2024. 
+ 
+​
+​
+ENGINEERED CARBON REMOVALS METHODOLOGY​
+10 
+ 
+ 
+BeZero Carbon Rating analytical framework and​
+process for Engineered Carbon Removals 
+We have designed an approach to assessing the carbon efficacy risk for issued carbon credits. This 
+framework is applicable to any project type in any sector accredited by any standards body, and 
+leverages a blend of qualitative and quantitative factors; financial, environmental, and policy 
+assessment techniques; and primary and secondary data sources. 
+Our BeZero Carbon Rating Methodology details our risk based assessment for understanding and 
+interrogating carbon credit performance of any type, in any sector and country.  
+This document provides an extension to our overarching rating methodology. It presents BeZero’s 
+detailed analytical framework and process for Engineered Carbon Removals projects. Using select 
+case studies, it showcases the various parameters through which we assess risk to the carbon quality 
+of these credits, and how this sub-sector relates back to our overarching ratings methodology. 
+Holistic assessment  
+The assessment of a carbon credit’s efficacy includes a detailed, project-specific, bottom-up, and 
+top-down analysis, to provide a comprehensive assessment of risk. Further details on the risk factor 
+definitions, the rating process, and the overall risk assessment can be found in our BeZero Carbon 
+Rating Methodology. For pre-issuance ratings please consult the BeZero Carbon Ex ante Rating 
+Methodology. 
+Important elements of the BeZero Carbon rating process that are applicable to all project types are 
+described in detail in these documents (but not repeated in this document). These include:  
+●​ The steps in the rating process 
+●​ The project governance assessment 
+●​ Project boundary auditing 
+●​ Assessing the risks of double counting 
+●​ The integrity of reported issuance 
+●​ Assessing rating eligibility (whether projects meet our three primary qualifying criteria)  
+●​ The rating assignment process  
+●​ The role of the BeZero Carbon Rating Committee 
+●​ Ongoing monitoring and ‘rating watch’ process 
+ 
+Sector and country analysis 
+Our assessments are based on all available project documentation in combination with our in-house 
+models, frameworks, and databases. These include geospatial and Earth observation evidence and 
+techniques where relevant, and a curated database from peer-reviewed literature, industry research, 
+and third-party datasets totalling more than 12,000 sources as of January 2025. 
+Standards and methodology screening 
+Our analytical approach evaluates the rules of each standards body and each methodology on an 
+individual basis. This screening includes an assessment of methodology development and 
+consultation (for an overview of why this is important, see our Insight on carbon market 
+methodologies). Further to this, we consider all deviations from methodologies. For Engineered 
+Carbon Removals, this may include minimum requirements for the maintenance and calibration of 
+monitoring equipment, deductions due to possible project emissions or embodied emissions, and 
+various crediting lifetimes. 
+​
+​
+ENGINEERED CARBON REMOVALS METHODOLOGY​
+11 
+ 
+ 
+We also assess the renewal of project baselines to estimate the effectiveness and integrity of 
+Engineered Carbon Removals projects where relevant. While some methodologies require projects to 
+renew baselines at various defined intervals, this may not be adhered to, or the intervals may not be 
+frequent enough to capture factors that can affect the baseline’s validity. 
+As outlined in the Introduction, there are 34 verified methodologies for the Engineered Carbon 
+Removals sector. There are large variations between projects that could use the same methodology, 
+and some sub-sectors are yet to have an applicable methodology available in the market. Further, 
+some methodologies for a sub-sector are not applicable to specific projects or regional elements.  
+As the sector group develops and more projects apply these methodologies in practice, the 
+methodological uncertainties may likely decrease. However, in its nascent state, there are inherent 
+uncertainties surrounding methodologies that inform our analysis. 
+Under the top-down analytical lens of evaluating risks associated with methodologies and whether 
+projects conform to them, we present key parameters in the assessment of Engineered Carbon 
+Removals and the methodologies available to date in Table 2. 
+Table 2. Key parameters of methodology screening for Engineered Carbon Removals. 
+Top-down 
+parameter 
+Additionality 
+Carbon accounting 
+Permanence 
+Methodology 
+Assessment of additionality  Baseline assumptions  
+Commitment periods 
+Financial analysis 
+Monitoring practices 
+Use of buffer allocations 
+Sources of project or life cycle 
+emissions 
+ 
+Ex ante versus ex post issuance 
+ 
+Feedstock sourcing 
+ 
+Approach to leakage discounts  
+ 
+Monitoring of registry operations and credit tracking also form part of our analytical process. We 
+screen registry and standards body rules and processes, and take account of any strengths or 
+weaknesses in our assessment of relevant risk factors. 
+Project- and vintage-specific analysis 
+Our bottom-up assessment considers all publicly-available project documentation and data, including 
+that provided by the standards body, registry, or project developer, and any information from 
+third-party sources, and data sourced using our internal models, notably including proprietary 
+geospatial and Earth observation evidence and techniques where relevant. 
+Vintage-level assessments are made on two fronts: 
+1. Project reporting and crediting: Our analysis ensures that, across each ratable vintage for a 
+project, we identify whether projects correctly issued credits towards the market and buffer 
+pool and that where credits are transferred, vintage labelling correctly maps onto cancellation 
+certificates. 
+2. Risk factor assessments: For each of our carbon efficacy risk factors, our analysis spans 
+each ratable vintage of a project. This allows us to incorporate changes in project boundaries, 
+baselines, issuance and buffer contributions over time. It also enables a dynamic process for 
+assessing the role of policy, changes in the investment landscape for removals, and other 
+exogenous factors that can influence broader trends in the Engineered Carbon Removals 
+sector. 
+​
+​
+ENGINEERED CARBON REMOVALS METHODOLOGY​
+12 
+ 

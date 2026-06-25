@@ -1,0 +1,2436 @@
+{
+  "project_data": {
+    "biochar": {
+      "characterization": {
+        "h_c_ratio": null,
+        "o_c_ratio": null,
+        "pollutants": {
+          "PAHs": null,
+          "PCBs": null,
+          "furans": null,
+          "dioxins": null,
+          "heavy_metals": null
+        },
+        "lab_reports": true,
+        "carbon_content": null,
+        "sampling_method": null,
+        "measurement_values": {},
+        "sampling_frequency": null,
+        "contaminant_testing": null,
+        "approach_description": null,
+        "ongoing_monitoring_plan": null,
+        "chemical_analysis_performed": true,
+        "contaminant_testing_frequency": null,
+        "required_measurements_complete": null
+      }
+    },
+    "product": {
+      "certification_scheme": "Biomass Exemption Note: Pacific’s Humboldt project has been temporarily granted permission to use the Biomass..."
+    },
+    "project": {
+      "name": "Pacific Biochar Project design document Humboldt Sawmill Company (HSC)",
+      "country": "United States",
+      "locations": [
+        "Scotia, CA"
+      ],
+      "description": "Pacific Biochar specializes in the production and distribution of high-quality biochar products designed to sequester carbon while enhancing agricultural and industrial productivity. Pacific Biochar utilizes existing biomass power plant infrastructure to produce biochar, enabling rapid scaling potential with low capital investments.",
+      "methodology": null,
+      "crediting_standard": null,
+      "ownership_evidence": [
+        "Pacific Biochar Project design document Humboldt Sawmill Company (HSC)",
+        "Isometric Letter attesting to sustainability Pacific Humboldt feedstocks"
+      ],
+      "project_boundary_defined": true
+    },
+    "storage": {
+      "storage_module": null,
+      "storage_location": null,
+      "loss_accounting_method": null,
+      "storage_monitoring_plan": false,
+      "storage_environment_stable": null
+    },
+    "sampling": {
+      "sampling_plan_defined": true
+    },
+    "emissions": {
+      "testing_frequency": "annual",
+      "stack_monitoring_method": "periodic_stack_emissions_testing",
+      "emissions_sources_identified": true
+    },
+    "feedstock": {
+      "biomass_type": "Forestry residues and downstream processing residues (primarily sawmill residue not fit for use in building materials)",
+      "source_locations": [],
+      "certification_scheme": "FSC",
+      "moisture_measurement": true,
+      "pre_project_biomass_use": "Combusted as fuel for energy generation",
+      "feedstock_accounting_module_compliance": true
+    },
+    "management": {
+      "monitoring_triggers": true,
+      "emergency_response_plan": true,
+      "adaptive_management_plan": true,
+      "information_sharing_plan": true,
+      "pause_or_stop_conditions": true
+    },
+    "production": {
+      "production_rate": null,
+      "maintenance_plan": true,
+      "process_parameters": {},
+      "system_description": "The biochar production is integrated into an existing biomass cogeneration facility, which generates renewable biomass energy while minimizing waste.",
+      "pyrolysis_technology": "pyrolysis-based biochar production system",
+      "reactor_design_diagram": true,
+      "engineering_design_diagram": true,
+      "end_material_process_description": true
+    },
+    "safeguards": {
+      "mitigation_plan": false,
+      "permits_documented": true,
+      "social_risk_assessment": false,
+      "adaptive_management_plan": false,
+      "stakeholder_input_process": false,
+      "environmental_risk_assessment": true
+    },
+    "eligibility": {
+      "durability_years": 200,
+      "eligible_pathway": null,
+      "permanence_claim": true,
+      "net_negative_claim": true,
+      "additionality_claim": true,
+      "additionality_evidence": []
+    },
+    "methodology": {
+      "pathway": "biochar",
+      "standard": "Isometric",
+      "storage_pathway": "soil",
+      "durability_option": "200"
+    },
+    "traceability": {
+      "chain_of_custody_diagram": false
+    },
+    "ghg_accounting": {
+      "net_cdr": null,
+      "co2_stored": null,
+      "co2_removed": null,
+      "baseline_defined": true,
+      "leakage_emissions": null,
+      "operations_emissions": null,
+      "end_of_life_emissions": null,
+      "system_boundary_defined": true,
+      "counterfactual_emissions": null
+    },
+    "quantification": {
+      "input_variables": true,
+      "input_uncertainties": true,
+      "crediting_activity_boundaries": true
+    },
+    "emissions_testing": {
+      "gaseous_route": null,
+      "regular_testing": false,
+      "leakage_monitoring": false,
+      "measurement_option": null,
+      "continuous_measurement": false
+    },
+    "monitoring_reporting": {
+      "monitoring_plan": false,
+      "data_sharing_plan": false,
+      "uncertainty_method": "Conservative values for all measured parameters and laboratory analysis; +20% value changes applied to all sources of emissions to test sensitivity.",
+      "verification_ready": false,
+      "vvb_requirements_addressed": false
+    }
+  },
+  "results": [
+    {
+      "requirement_id": "R-NK7R-0",
+      "requirement_name": "Protocol eligibility justification",
+      "title": "Protocol eligibility justification",
+      "module": "project_data",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [],
+      "logic_key": "eval_protocol_eligibility_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "production.system_description",
+          "weight": 60,
+          "score": 60,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "eligibility.eligible_pathway",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: project_data | Requirement ID: R-NK7R-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-NK7R-0",
+      "requirement_text": "Projects must provide a brief explanation for why they are eligible under the selected protocol.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-M858-0",
+      "requirement_name": "Legal ownership over removal rights",
+      "title": "Legal ownership over removal rights",
+      "module": "project_data",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [],
+      "logic_key": "eval_project_ownership_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "project.ownership_evidence",
+          "weight": 70,
+          "score": 70,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "project.name",
+          "weight": 30,
+          "score": 30,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: project_data | Requirement ID: R-M858-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-M858-0",
+      "requirement_text": "Projects must provide reasoning and evidence for legal ownership over the rights to all removals that will be claimed.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-7X0X-0",
+      "requirement_name": "Technical description of carbon removal activity",
+      "title": "Technical description of carbon removal activity",
+      "module": "project_data",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [],
+      "logic_key": "eval_technical_description_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "production.system_description",
+          "weight": 60,
+          "score": 60,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "production.pyrolysis_technology",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: project_data | Requirement ID: R-7X0X-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-7X0X-0",
+      "requirement_text": "Projects must provide a brief technical description of the carbon removal Project activity in accessible language, including information on facilities and equipment.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-F6R7-0",
+      "requirement_name": "Complete list of project participants",
+      "title": "Complete list of project participants",
+      "module": "project_data",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "[Protocolo] Isometric Standard v1.7, R-F6R7-0 — todos os 7 campos obrigatórios por organização."
+      ],
+      "logic_key": "eval_project_participants_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "project.name",
+          "weight": 30,
+          "score": 30,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "project.ownership_evidence",
+          "weight": 70,
+          "score": 70,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: project_data | Requirement ID: R-F6R7-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-F6R7-0",
+      "requirement_text": "Projects must provide a complete list of organizations participating in the project including name, role, registration number, address, contact person, email and phone.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-A5B6-0",
+      "requirement_name": "Project address and/or geo-coordinates",
+      "title": "Project address and/or geo-coordinates",
+      "module": "project_data",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [],
+      "logic_key": "eval_project_locations_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "project.country",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "project.locations",
+          "weight": 60,
+          "score": 60,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: project_data | Requirement ID: R-A5B6-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-A5B6-0",
+      "requirement_text": "Projects must submit at least one address and/or specific geo-coordinates for the project.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-XT6V-0",
+      "requirement_name": "Net carbon removal capacity estimate",
+      "title": "Net carbon removal capacity estimate",
+      "module": "project_data",
+      "status": "partial",
+      "risk": "medium",
+      "confidence": 0.2,
+      "missing_fields": [
+        "ghg_accounting.net_cdr"
+      ],
+      "failed_fields": [],
+      "notes": [
+        "Estimativa numérica de remoção líquida (tCO2e) não fornecida.",
+        "[Protocolo] Isometric Standard v1.7, R-XT6V-0 — estimativa em tCO2e para o período de crédito completo."
+      ],
+      "logic_key": "eval_removal_capacity_v1",
+      "fields_evaluated": [],
+      "requirement_score": 45,
+      "requirement_score_normalized": 40.0,
+      "priority_score": 60.0,
+      "field_scores": [
+        {
+          "path": "ghg_accounting.net_cdr",
+          "weight": 60,
+          "score": 0,
+          "status": "missing",
+          "notes": [
+            "Estimativa numérica de remoção líquida (tCO2e) não fornecida."
+          ]
+        },
+        {
+          "path": "ghg_accounting.system_boundary_defined",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "weak",
+      "evidence_strength": "insufficient",
+      "cross_checks": [],
+      "project_evidence": "Missing fields:\n- ghg_accounting.net_cdr",
+      "methodology_basis": "Module: project_data | Requirement ID: R-XT6V-0",
+      "gap": "Partial evidence available; some required elements are incomplete.",
+      "recommendation": "Provide missing documentation and strengthen evidence for identified gaps.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-XT6V-0",
+      "requirement_text": "Projects must provide an estimate of the net carbon removal capacity for the duration of the project crediting period (metric tonnes).",
+      "audit_mode": "development",
+      "score": 45
+    },
+    {
+      "requirement_id": "R-VHWJ-0",
+      "requirement_name": "Temporal and geographic project boundary defined",
+      "title": "Temporal and geographic project boundary defined",
+      "module": "protocol_and_monitoring_data",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.3333,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [],
+      "logic_key": "eval_system_boundary_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "ghg_accounting.system_boundary_defined",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "quantification.crediting_activity_boundaries",
+          "weight": 30,
+          "score": 30,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "ghg_accounting.baseline_defined",
+          "weight": 20,
+          "score": 20,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-VHWJ-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-VHWJ-0",
+      "requirement_text": "Projects must define the temporal and geographic project boundary.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-2VKW-0",
+      "requirement_name": "System boundary with GHG sources defined",
+      "title": "System boundary with GHG sources defined",
+      "module": "protocol_and_monitoring_data",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.3333,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [],
+      "logic_key": "eval_system_boundary_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "ghg_accounting.system_boundary_defined",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "quantification.crediting_activity_boundaries",
+          "weight": 30,
+          "score": 30,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "ghg_accounting.baseline_defined",
+          "weight": 20,
+          "score": 20,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-2VKW-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-2VKW-0",
+      "requirement_text": "Projects must define their system boundary and outline all GHGs considered across all sources, sinks and reservoirs (SSRs).",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-TGBM-0",
+      "requirement_name": "GHG statement approach and calculation methodology",
+      "title": "GHG statement approach and calculation methodology",
+      "module": "protocol_and_monitoring_data",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.3333,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [],
+      "logic_key": "eval_system_boundary_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "ghg_accounting.system_boundary_defined",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "quantification.crediting_activity_boundaries",
+          "weight": 30,
+          "score": 30,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "ghg_accounting.baseline_defined",
+          "weight": 20,
+          "score": 20,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-TGBM-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-TGBM-0",
+      "requirement_text": "Projects must provide a detailed description of the GHG statement approach and methodology in relation to calculations.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-PGFH-0",
+      "requirement_name": "Baseline scenario reasoned and evidenced",
+      "title": "Baseline scenario reasoned and evidenced",
+      "module": "protocol_and_monitoring_data",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [],
+      "logic_key": "eval_baseline_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "ghg_accounting.baseline_defined",
+          "weight": 60,
+          "score": 60,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "feedstock.pre_project_biomass_use",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-PGFH-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-PGFH-0",
+      "requirement_text": "Projects must reason and evidence the baseline scenario of their activities having not taken place. Projects will only be credited for removals above this counterfactual baseline.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-HF2G-0",
+      "requirement_name": "Leakage assessment provided",
+      "title": "Leakage assessment provided",
+      "module": "protocol_and_monitoring_data",
+      "status": "partial",
+      "risk": "medium",
+      "confidence": 0.2,
+      "missing_fields": [
+        "ghg_accounting.leakage_emissions"
+      ],
+      "failed_fields": [],
+      "notes": [
+        "Avaliação de leakage não realizada ou não quantificada.",
+        "[Protocolo] Isometric Standard v1.7, R-HF2G-0 — leakage quantificado e deduzido das remoções"
+      ],
+      "logic_key": "eval_leakage_v1",
+      "fields_evaluated": [],
+      "requirement_score": 45,
+      "requirement_score_normalized": 40.0,
+      "priority_score": 60.0,
+      "field_scores": [
+        {
+          "path": "ghg_accounting.system_boundary_defined",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "ghg_accounting.leakage_emissions",
+          "weight": 60,
+          "score": 0,
+          "status": "missing",
+          "notes": [
+            "Avaliação de leakage não realizada ou não quantificada."
+          ]
+        }
+      ],
+      "requirement_rating": "weak",
+      "evidence_strength": "insufficient",
+      "cross_checks": [],
+      "project_evidence": "Missing fields:\n- ghg_accounting.leakage_emissions",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-HF2G-0",
+      "gap": "Partial evidence available; some required elements are incomplete.",
+      "recommendation": "Provide missing documentation and strengthen evidence for identified gaps.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-HF2G-0",
+      "requirement_text": "Projects must evaluate leakage by providing a robust assessment of potential increases in GHG emissions outside the system boundary as a result of the project activity.",
+      "audit_mode": "development",
+      "score": 45
+    },
+    {
+      "requirement_id": "R-53Y5-0",
+      "requirement_name": "Financial additionality demonstrated",
+      "title": "Financial additionality demonstrated",
+      "module": "protocol_and_monitoring_data",
+      "status": "partial",
+      "risk": "medium",
+      "confidence": 0.3,
+      "missing_fields": [
+        "eligibility.additionality_evidence"
+      ],
+      "failed_fields": [],
+      "notes": [
+        "Evidência de adicionalidade financeira (revenue principal OU análise IRR) não fornecida."
+      ],
+      "logic_key": "eval_financial_additionality_v1",
+      "fields_evaluated": [],
+      "requirement_score": 60.0,
+      "requirement_score_normalized": 60.0,
+      "priority_score": 52.0,
+      "field_scores": [
+        {
+          "path": "eligibility.additionality_claim",
+          "weight": 60,
+          "score": 60,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "eligibility.additionality_evidence",
+          "weight": 40,
+          "score": 0,
+          "status": "missing",
+          "notes": [
+            "Evidência de adicionalidade financeira (revenue principal OU análise IRR) não fornecida."
+          ]
+        }
+      ],
+      "requirement_rating": "moderate",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "Missing fields:\n- eligibility.additionality_evidence",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-53Y5-0",
+      "gap": "Partial evidence available; some required elements are incomplete.",
+      "recommendation": "Provide missing documentation and strengthen evidence for identified gaps.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-53Y5-0",
+      "requirement_text": "Projects must demonstrate financial additionality by evidencing removals are the main purpose and only source of revenue; OR demonstrating economic barriers would prevent project implementation without carbon finance.",
+      "audit_mode": "development",
+      "score": 60.0
+    },
+    {
+      "requirement_id": "R-RRST-0",
+      "requirement_name": "Common practice additionality demonstrated",
+      "title": "Common practice additionality demonstrated",
+      "module": "protocol_and_monitoring_data",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 1.0,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "[Protocolo] Isometric Standard v1.7, R-RRST-0 — common practice additionality",
+        "Biochar geralmente abaixo de TRL 8/9 — adicionalidade de prática comum tipicamente automática."
+      ],
+      "logic_key": "eval_common_practice_additionality_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "eligibility.additionality_claim",
+          "weight": 100,
+          "score": 100,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "strong",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-RRST-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-RRST-0",
+      "requirement_text": "Projects must demonstrate that activities similar to the proposed project are not common practice.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-CDNF-0",
+      "requirement_name": "Environmental additionality (net negative impact) demonstrated",
+      "title": "Environmental additionality (net negative impact) demonstrated",
+      "module": "protocol_and_monitoring_data",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 1.0,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "Impacto climático líquido negativo declarado."
+      ],
+      "logic_key": "eval_environmental_additionality_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "eligibility.net_negative_claim",
+          "weight": 100,
+          "score": 100,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "strong",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-CDNF-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-CDNF-0",
+      "requirement_text": "Projects must demonstrate environmental additionality by evidencing the climate impact of the project is net negative after subtracting counterfactual CO2 removal and all project GHG emissions including leakage.",
+      "audit_mode": "development",
+      "score": 100
+    },
+    {
+      "requirement_id": "R-983D-0",
+      "requirement_name": "Regulatory additionality demonstrated",
+      "title": "Regulatory additionality demonstrated",
+      "module": "protocol_and_monitoring_data",
+      "status": "partial",
+      "risk": "medium",
+      "confidence": 0.2,
+      "missing_fields": [
+        "legal.applicable_environmental_requirements"
+      ],
+      "failed_fields": [],
+      "notes": [
+        "Requisitos regulatórios aplicáveis não identificados — adicionalidade regulatória não avaliável.",
+        "[Protocolo] Isometric Standard v1.7, R-983D-0 — regulatory additionality"
+      ],
+      "logic_key": "eval_regulatory_additionality_v1",
+      "fields_evaluated": [],
+      "requirement_score": 45,
+      "requirement_score_normalized": 40.0,
+      "priority_score": 60.0,
+      "field_scores": [
+        {
+          "path": "legal.applicable_environmental_requirements",
+          "weight": 60,
+          "score": 0,
+          "status": "missing",
+          "notes": [
+            "Requisitos regulatórios aplicáveis não identificados — adicionalidade regulatória não avaliável."
+          ]
+        },
+        {
+          "path": "safeguards.permits_documented",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "weak",
+      "evidence_strength": "insufficient",
+      "cross_checks": [],
+      "project_evidence": "Missing fields:\n- legal.applicable_environmental_requirements",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-983D-0",
+      "gap": "Partial evidence available; some required elements are incomplete.",
+      "recommendation": "Provide missing documentation and strengthen evidence for identified gaps.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-983D-0",
+      "requirement_text": "Projects must demonstrate regulatory additionality by evidencing that the project is not required by existing laws, regulations, policies, or other binding obligations.",
+      "audit_mode": "development",
+      "score": 45
+    },
+    {
+      "requirement_id": "R-KQCS-0",
+      "requirement_name": "Regulatory compliance method asserted",
+      "title": "Regulatory compliance method asserted",
+      "module": "protocol_and_monitoring_data",
+      "status": "partial",
+      "risk": "high",
+      "confidence": 0.0,
+      "missing_fields": [
+        "legal.applicable_environmental_requirements"
+      ],
+      "failed_fields": [],
+      "notes": [
+        "Conformidade com requisitos legais ambientais não evidenciada.",
+        "Projeto em desenvolvimento: lacuna documental a complementar."
+      ],
+      "logic_key": "eval_regulatory_compliance_v1",
+      "fields_evaluated": [],
+      "requirement_score": 45,
+      "requirement_score_normalized": 0.0,
+      "priority_score": 94.0,
+      "field_scores": [
+        {
+          "path": "legal.applicable_environmental_requirements",
+          "weight": 100,
+          "score": 0,
+          "status": "missing",
+          "notes": [
+            "Conformidade com requisitos legais ambientais não evidenciada."
+          ]
+        }
+      ],
+      "requirement_rating": "weak",
+      "evidence_strength": "insufficient",
+      "cross_checks": [],
+      "project_evidence": "Missing fields:\n- legal.applicable_environmental_requirements",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-KQCS-0",
+      "gap": "Core requirement not met or insufficiently evidenced.",
+      "recommendation": "Establish missing core elements required for compliance.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-KQCS-0",
+      "requirement_text": "Projects must assert the method(s) for compliance with regulations for all jurisdictions to which the project is beholden.",
+      "audit_mode": "development",
+      "score": 45
+    },
+    {
+      "requirement_id": "R-7C8E-0",
+      "requirement_name": "Durability threshold selected from protocol",
+      "title": "Durability threshold selected from protocol",
+      "module": "protocol_and_monitoring_data",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "[Protocolo] Isometric Standard v1.7 — R-7C8E-0; Biochar Storage in Soil Environments v1.2 Section 5.1",
+        "Opção selecionada no PDD: 200 anos.",
+        "H/Corg e laudos laboratoriais serão avaliados em modo Operacional (R-VGXA-0)."
+      ],
+      "logic_key": "eval_durability_selection_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "methodology.durability_option",
+          "weight": 60,
+          "score": 60,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "eligibility.permanence_claim",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-7C8E-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-7C8E-0",
+      "requirement_text": "Projects must select from the durability threshold(s) defined in the protocol or module to be the project durability threshold.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-1T2Y-0",
+      "requirement_name": "Durability in excess of threshold demonstrated",
+      "title": "Durability in excess of threshold demonstrated",
+      "module": "protocol_and_monitoring_data",
+      "status": "not_applicable",
+      "risk": "none",
+      "confidence": 1.0,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "Requisito aplicável apenas em projetos operacionais.",
+        "Em fase de desenvolvimento/PDD, a evidência operacional ainda não existe — não penaliza o score."
+      ],
+      "logic_key": "eval_durability_selection_v1",
+      "fields_evaluated": [],
+      "requirement_score": null,
+      "requirement_score_normalized": 0.0,
+      "priority_score": 0.0,
+      "field_scores": [],
+      "requirement_rating": null,
+      "evidence_strength": "none",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-1T2Y-0",
+      "gap": "",
+      "recommendation": "Providencie esta evidência quando o projeto estiver operacional.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-1T2Y-0",
+      "requirement_text": "Projects must demonstrate a durability in excess of the designated project durability threshold.",
+      "audit_mode": "development",
+      "score": null
+    },
+    {
+      "requirement_id": "R-F5RZ-0",
+      "requirement_name": "Annual average soil temperature method provided (200-year option)",
+      "title": "Annual average soil temperature method provided (200-year option)",
+      "module": "protocol_and_monitoring_data",
+      "status": "not_applicable",
+      "risk": "none",
+      "confidence": 1.0,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "Requisito aplicável apenas em projetos operacionais.",
+        "Em fase de desenvolvimento/PDD, a evidência operacional ainda não existe — não penaliza o score."
+      ],
+      "logic_key": "eval_durability_soil_temp_v1",
+      "fields_evaluated": [],
+      "requirement_score": null,
+      "requirement_score_normalized": 0.0,
+      "priority_score": 0.0,
+      "field_scores": [],
+      "requirement_rating": null,
+      "evidence_strength": "none",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-F5RZ-0",
+      "gap": "",
+      "recommendation": "Providencie esta evidência quando o projeto estiver operacional.",
+      "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-F5RZ-0",
+      "requirement_text": "If projects are targeting 200-year durability, details on the method or approach used for annual average soil temperature calculation must be provided.",
+      "audit_mode": "development",
+      "score": null
+    },
+    {
+      "requirement_id": "R-V143-0",
+      "requirement_name": "Reversal risk assessment completed",
+      "title": "Reversal risk assessment completed",
+      "module": "protocol_and_monitoring_data",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "[Protocolo] Isometric Biochar Storage in Soil Environments v1.2, Section 7.1 — buffer pool 2%",
+        "Biochar em solo: classificado como Very Low Risk → buffer pool = 2% dos créditos emitidos."
+      ],
+      "logic_key": "eval_reversals_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "management.adaptive_management_plan",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "management.pause_or_stop_conditions",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-V143-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-V143-0",
+      "requirement_text": "Projects must complete the protocol or module specific risk assessment to support the risk of reversal and buffer pool size.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-2AVD-0",
+      "requirement_name": "Sensitivity analysis conducted",
+      "title": "Sensitivity analysis conducted",
+      "module": "protocol_and_monitoring_data",
+      "status": "partial",
+      "risk": "medium",
+      "confidence": 0.2667,
+      "missing_fields": [
+        "quantification.storage_emissions_accounted"
+      ],
+      "failed_fields": [],
+      "notes": [
+        "Emissões de armazenamento não contabilizadas."
+      ],
+      "logic_key": "eval_uncertainty_analysis_v1",
+      "fields_evaluated": [],
+      "requirement_score": 80.0,
+      "requirement_score_normalized": 80.0,
+      "priority_score": 44.0,
+      "field_scores": [
+        {
+          "path": "quantification.input_variables",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "quantification.input_uncertainties",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "quantification.storage_emissions_accounted",
+          "weight": 20,
+          "score": 0,
+          "status": "missing",
+          "notes": [
+            "Emissões de armazenamento não contabilizadas."
+          ]
+        }
+      ],
+      "requirement_rating": "good",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "Missing fields:\n- quantification.storage_emissions_accounted",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-2AVD-0",
+      "gap": "Partial evidence available; some required elements are incomplete.",
+      "recommendation": "Provide missing documentation and strengthen evidence for identified gaps.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-2AVD-0",
+      "requirement_text": "Projects must conduct a sensitivity analysis that demonstrates the impact of each input parameter's uncertainty on the final net CO₂e uncertainty.",
+      "audit_mode": "development",
+      "score": 80.0
+    },
+    {
+      "requirement_id": "R-K6MA-0",
+      "requirement_name": "Uncertainty treatment method specified",
+      "title": "Uncertainty treatment method specified",
+      "module": "protocol_and_monitoring_data",
+      "status": "partial",
+      "risk": "medium",
+      "confidence": 0.2667,
+      "missing_fields": [
+        "quantification.storage_emissions_accounted"
+      ],
+      "failed_fields": [],
+      "notes": [
+        "Emissões de armazenamento não contabilizadas."
+      ],
+      "logic_key": "eval_uncertainty_analysis_v1",
+      "fields_evaluated": [],
+      "requirement_score": 80.0,
+      "requirement_score_normalized": 80.0,
+      "priority_score": 44.0,
+      "field_scores": [
+        {
+          "path": "quantification.input_variables",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "quantification.input_uncertainties",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "quantification.storage_emissions_accounted",
+          "weight": 20,
+          "score": 0,
+          "status": "missing",
+          "notes": [
+            "Emissões de armazenamento não contabilizadas."
+          ]
+        }
+      ],
+      "requirement_rating": "good",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "Missing fields:\n- quantification.storage_emissions_accounted",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-K6MA-0",
+      "gap": "Partial evidence available; some required elements are incomplete.",
+      "recommendation": "Provide missing documentation and strengthen evidence for identified gaps.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-K6MA-0",
+      "requirement_text": "Projects must specify whether they used conservative estimates, variance propagation and/or Monte Carlo simulations in consideration of uncertainty.",
+      "audit_mode": "development",
+      "score": 80.0
+    },
+    {
+      "requirement_id": "R-Z106-0",
+      "requirement_name": "Uncertainty analysis detailed and justified",
+      "title": "Uncertainty analysis detailed and justified",
+      "module": "protocol_and_monitoring_data",
+      "status": "partial",
+      "risk": "medium",
+      "confidence": 0.2667,
+      "missing_fields": [
+        "quantification.storage_emissions_accounted"
+      ],
+      "failed_fields": [],
+      "notes": [
+        "Emissões de armazenamento não contabilizadas."
+      ],
+      "logic_key": "eval_uncertainty_analysis_v1",
+      "fields_evaluated": [],
+      "requirement_score": 80.0,
+      "requirement_score_normalized": 80.0,
+      "priority_score": 44.0,
+      "field_scores": [
+        {
+          "path": "quantification.input_variables",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "quantification.input_uncertainties",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "quantification.storage_emissions_accounted",
+          "weight": 20,
+          "score": 0,
+          "status": "missing",
+          "notes": [
+            "Emissões de armazenamento não contabilizadas."
+          ]
+        }
+      ],
+      "requirement_rating": "good",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "Missing fields:\n- quantification.storage_emissions_accounted",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-Z106-0",
+      "gap": "Partial evidence available; some required elements are incomplete.",
+      "recommendation": "Provide missing documentation and strengthen evidence for identified gaps.",
+      "source_url": "https://registry.isometric.com/PROTOCOL/biochar/1.1?requirement=protocol:biochar:1.1:requirement:R-Z106-0",
+      "requirement_text": "Projects must detail and justify their uncertainty analysis and any uncertainty adjustments applied in instances of high uncertainty.",
+      "audit_mode": "development",
+      "score": 80.0
+    },
+    {
+      "requirement_id": "R-NZQ2-0",
+      "requirement_name": "Models described and justified",
+      "title": "Models described and justified",
+      "module": "protocol_and_monitoring_data",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "[Protocolo] Isometric Standard v1.7, R-NZQ2-0 — modelos com fonte peer-reviewed, parâmetros e validação",
+        "Desenvolvimento: verificar se o PDD referencia o modelo Fdurable do Isometric.",
+        "Equação Fdurable,200 = min(0.95, 1-[c+(a+b·ln(Tsoil))·H/Corg]) — parâmetros a/b/c fornecidos pelo Isometric.",
+        "H/Corg e temperatura do solo serão avaliados em modo Operacional."
+      ],
+      "logic_key": "eval_proxies_models_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "methodology.standard",
+          "weight": 60,
+          "score": 60,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "methodology.durability_option",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-NZQ2-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-NZQ2-0",
+      "requirement_text": "Projects must describe and justify any models used for quantification, monitoring, and meeting specified protocol requirements.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-GYA1-0",
+      "requirement_name": "Data collection and storage approach described",
+      "title": "Data collection and storage approach described",
+      "module": "protocol_and_monitoring_data",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "[Protocolo] Isometric Standard v1.7, R-GYA1-0 — retenção mínima de 5 anos, backup, responsáveis"
+      ],
+      "logic_key": "eval_data_collection_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "management.information_sharing_plan",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "management.monitoring_triggers",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: protocol_and_monitoring_data | Requirement ID: R-GYA1-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-GYA1-0",
+      "requirement_text": "Projects must describe the data collection and storage approach including how data is transmitted, collected and stored, the length of time for which records are archived, backup procedures and the person(s) responsible.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-9MJQ-0",
+      "requirement_name": "Environmental regulatory compliance outlined",
+      "title": "Environmental regulatory compliance outlined",
+      "module": "environmental_and_social_impact",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [],
+      "logic_key": "eval_environmental_social_impact_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "management.adaptive_management_plan",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "safeguards.environmental_risk_assessment",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: environmental_and_social_impact | Requirement ID: R-9MJQ-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-9MJQ-0",
+      "requirement_text": "Projects must outline and detail compliance with applicable environmental national and local laws and regulations.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-X9EC-0",
+      "requirement_name": "Environmental and social impact assessment",
+      "title": "Environmental and social impact assessment",
+      "module": "environmental_and_social_impact",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [],
+      "logic_key": "eval_environmental_social_impact_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "management.adaptive_management_plan",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "safeguards.environmental_risk_assessment",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: environmental_and_social_impact | Requirement ID: R-X9EC-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-X9EC-0",
+      "requirement_text": "Projects must provide an overall assessment for the potential material environmental and social impacts, both within and beyond its boundary.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-4K5P-0",
+      "requirement_name": "No net environmental harm demonstrated",
+      "title": "No net environmental harm demonstrated",
+      "module": "environmental_and_social_impact",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [],
+      "logic_key": "eval_environmental_social_impact_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "management.adaptive_management_plan",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "safeguards.environmental_risk_assessment",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: environmental_and_social_impact | Requirement ID: R-4K5P-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-4K5P-0",
+      "requirement_text": "Projects must demonstrate that it creates no net environmental harm through an environmental impact assessment including resource efficiency, pollution prevention and biodiversity conservation.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-R81B-0",
+      "requirement_name": "No net social harm demonstrated",
+      "title": "No net social harm demonstrated",
+      "module": "environmental_and_social_impact",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [],
+      "logic_key": "eval_environmental_social_impact_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "management.adaptive_management_plan",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "safeguards.environmental_risk_assessment",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: environmental_and_social_impact | Requirement ID: R-R81B-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-R81B-0",
+      "requirement_text": "Projects must demonstrate that it creates no net social harm by evaluating potential negative social risks from the project's implementation.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-5KQC-0",
+      "requirement_name": "Agricultural productivity and soil quality monitoring documented",
+      "title": "Agricultural productivity and soil quality monitoring documented",
+      "module": "environmental_and_social_impact",
+      "status": "not_applicable",
+      "risk": "none",
+      "confidence": 1.0,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "Requisito aplicável apenas em projetos operacionais.",
+        "Em fase de desenvolvimento/PDD, a evidência operacional ainda não existe — não penaliza o score."
+      ],
+      "logic_key": "eval_environmental_social_impact_v1",
+      "fields_evaluated": [],
+      "requirement_score": null,
+      "requirement_score_normalized": 0.0,
+      "priority_score": 0.0,
+      "field_scores": [],
+      "requirement_rating": null,
+      "evidence_strength": "none",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: environmental_and_social_impact | Requirement ID: R-5KQC-0",
+      "gap": "",
+      "recommendation": "Providencie esta evidência quando o projeto estiver operacional.",
+      "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-5KQC-0",
+      "requirement_text": "Projects must document how agricultural productivity and soil quality will be monitored, including which characteristics will be tested and the frequency of testing.",
+      "audit_mode": "development",
+      "score": null
+    },
+    {
+      "requirement_id": "R-BWX0-0",
+      "requirement_name": "Alignment with relevant SDGs demonstrated",
+      "title": "Alignment with relevant SDGs demonstrated",
+      "module": "environmental_and_social_impact",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "[Protocolo] Isometric Standard v1.7, R-BWX0-0 — ODS relevantes: ODS 13 (Ação Climática), ODS 2 (Fome Zero), ODS 15 (Vida Terrestre)."
+      ],
+      "logic_key": "eval_sustainable_development_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "management.adaptive_management_plan",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "safeguards.stakeholder_input_process",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: environmental_and_social_impact | Requirement ID: R-BWX0-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-BWX0-0",
+      "requirement_text": "Projects must demonstrate how their carbon removal activities are consistent with relevant SDGs.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-6VFZ-0",
+      "requirement_name": "Project closure conditions and plan described",
+      "title": "Project closure conditions and plan described",
+      "module": "environmental_and_social_impact",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "[Protocolo] Isometric Standard v1.7, R-6VFZ-0 — condições de encerramento e ações pós-cessação."
+      ],
+      "logic_key": "eval_project_closure_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "management.pause_or_stop_conditions",
+          "weight": 60,
+          "score": 60,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "management.adaptive_management_plan",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: environmental_and_social_impact | Requirement ID: R-6VFZ-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-6VFZ-0",
+      "requirement_text": "Projects must describe the conditions under which the project will be considered closed, and describe the project closure plan.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-BC4H-0",
+      "requirement_name": "Adaptive management plan: information sharing, emergency response, pause/stop conditions",
+      "title": "Adaptive management plan: information sharing, emergency response, pause/stop conditions",
+      "module": "environmental_and_social_impact",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.25,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "[Protocolo] Isometric Biochar Production and Storage v1.2, Section 19.2 (R-BC4H-0)",
+        "Os 4 gatilhos obrigatórios de pausa/stop: (1) falha de instrumentos, (2) poluentes > threshold, (3) não conformidade regulatória, (4) risco à saúde."
+      ],
+      "logic_key": "eval_adaptive_management_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "management.adaptive_management_plan",
+          "weight": 35,
+          "score": 35,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "management.emergency_response_plan",
+          "weight": 25,
+          "score": 25,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "management.pause_or_stop_conditions",
+          "weight": 25,
+          "score": 25,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "management.information_sharing_plan",
+          "weight": 15,
+          "score": 15,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: environmental_and_social_impact | Requirement ID: R-BC4H-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/PROTOCOL/biochar/1.1?requirement=protocol:biochar:1.1:requirement:R-BC4H-0",
+      "requirement_text": "Projects must include a plan for information sharing, emergency response and conditions for stopping or pausing a deployment.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-MY64-0",
+      "requirement_name": "Pollution prevention: PAHs, heavy metals, PCBs/Dioxins",
+      "title": "Pollution prevention: PAHs, heavy metals, PCBs/Dioxins",
+      "module": "environmental_and_social_impact",
+      "status": "partial",
+      "risk": "medium",
+      "confidence": 0.1,
+      "missing_fields": [
+        "biochar.characterization.pollutants.PCBs",
+        "biochar.characterization.pollutants.dioxins"
+      ],
+      "failed_fields": [
+        "safeguards.mitigation_plan"
+      ],
+      "notes": [
+        "Plano de mitigação de poluentes não documentado.",
+        "Concentração de PCBs não declarada.",
+        "Concentração de PCDD/F não declarada.",
+        "[Protocolo] Isometric Biochar Production and Storage v1.2, Sections 6-7; World Biochar Certificate limits"
+      ],
+      "logic_key": "eval_pollution_prevention_v1",
+      "fields_evaluated": [],
+      "requirement_score": 45,
+      "requirement_score_normalized": 40.0,
+      "priority_score": 60.0,
+      "field_scores": [
+        {
+          "path": "safeguards.environmental_risk_assessment",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "safeguards.mitigation_plan",
+          "weight": 30,
+          "score": 0,
+          "status": "fail",
+          "notes": [
+            "Plano de mitigação de poluentes não documentado."
+          ]
+        },
+        {
+          "path": "biochar.characterization.pollutants.PCBs",
+          "weight": 15,
+          "score": 0,
+          "status": "missing",
+          "notes": [
+            "Concentração de PCBs não declarada."
+          ]
+        },
+        {
+          "path": "biochar.characterization.pollutants.dioxins",
+          "weight": 15,
+          "score": 0,
+          "status": "missing",
+          "notes": [
+            "Concentração de PCDD/F não declarada."
+          ]
+        }
+      ],
+      "requirement_rating": "weak",
+      "evidence_strength": "insufficient",
+      "cross_checks": [],
+      "project_evidence": "Missing fields:\n- biochar.characterization.pollutants.PCBs\n- biochar.characterization.pollutants.dioxins\nFailed checks:\n- safeguards.mitigation_plan",
+      "methodology_basis": "Module: environmental_and_social_impact | Requirement ID: R-MY64-0",
+      "gap": "Partial evidence available; some required elements are incomplete.",
+      "recommendation": "Provide missing documentation and strengthen evidence for identified gaps.",
+      "source_url": "https://registry.isometric.com/PROTOCOL/biochar/1.1?requirement=protocol:biochar:1.1:requirement:R-MY64-0",
+      "requirement_text": "Projects must describe and provide evidence for pollution prevention against PAHs, heavy metals and any other pollutants identified.",
+      "audit_mode": "development",
+      "score": 45
+    },
+    {
+      "requirement_id": "R-M760-0",
+      "requirement_name": "Baseline soil samples collected prior to biochar spreading",
+      "title": "Baseline soil samples collected prior to biochar spreading",
+      "module": "environmental_and_social_impact",
+      "status": "not_applicable",
+      "risk": "none",
+      "confidence": 1.0,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "Requisito aplicável apenas em projetos operacionais.",
+        "Em fase de desenvolvimento/PDD, a evidência operacional ainda não existe — não penaliza o score."
+      ],
+      "logic_key": "eval_site_selection_v1",
+      "fields_evaluated": [],
+      "requirement_score": null,
+      "requirement_score_normalized": 0.0,
+      "priority_score": 0.0,
+      "field_scores": [],
+      "requirement_rating": null,
+      "evidence_strength": "none",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: environmental_and_social_impact | Requirement ID: R-M760-0",
+      "gap": "",
+      "recommendation": "Providencie esta evidência quando o projeto estiver operacional.",
+      "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-M760-0",
+      "requirement_text": "Projects should collect and detail baseline soil samples prior to spreading biochar, including soil pH, moisture, bulk density, soil type, nutrient availability and SOC.",
+      "audit_mode": "development",
+      "score": null
+    },
+    {
+      "requirement_id": "R-1YC3-0",
+      "requirement_name": "Co-benefits related to soil health reported (optional)",
+      "title": "Co-benefits related to soil health reported (optional)",
+      "module": "environmental_and_social_impact",
+      "status": "not_applicable",
+      "risk": "none",
+      "confidence": 1.0,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "Requisito aplicável apenas em projetos operacionais.",
+        "Em fase de desenvolvimento/PDD, a evidência operacional ainda não existe — não penaliza o score."
+      ],
+      "logic_key": "eval_co_benefits_v1",
+      "fields_evaluated": [],
+      "requirement_score": null,
+      "requirement_score_normalized": 0.0,
+      "priority_score": 0.0,
+      "field_scores": [],
+      "requirement_rating": null,
+      "evidence_strength": "none",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: environmental_and_social_impact | Requirement ID: R-1YC3-0",
+      "gap": "",
+      "recommendation": "Providencie esta evidência quando o projeto estiver operacional.",
+      "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-1YC3-0",
+      "requirement_text": "Projects may choose to report any co-benefits related to soil health and quality that are a result of their activity.",
+      "audit_mode": "development",
+      "score": null
+    },
+    {
+      "requirement_id": "R-ZHRN-0",
+      "requirement_name": "Stakeholder consultation documented",
+      "title": "Stakeholder consultation documented",
+      "module": "stakeholder_input_process",
+      "status": "partial",
+      "risk": "medium",
+      "confidence": 0.2,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "Processo de consulta a stakeholders não documentado (convites, comentários recebidos, ações tomadas).",
+        "[Protocolo] Isometric Standard v1.7, R-ZHRN-0/R-E579-0 — consulta iterativa, acessível, transparente",
+        "Prazos obrigatórios: reconhecimento de reclamações ≤ 14 dias; resolução ou escalação ≤ 60 dias."
+      ],
+      "logic_key": "eval_stakeholder_consultation_v1",
+      "fields_evaluated": [],
+      "requirement_score": 45,
+      "requirement_score_normalized": 40.0,
+      "priority_score": 60.0,
+      "field_scores": [
+        {
+          "path": "safeguards.stakeholder_input_process",
+          "weight": 60,
+          "score": 0,
+          "status": "fail",
+          "notes": [
+            "Processo de consulta a stakeholders não documentado (convites, comentários recebidos, ações tomadas)."
+          ]
+        },
+        {
+          "path": "management.information_sharing_plan",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "weak",
+      "evidence_strength": "insufficient",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: stakeholder_input_process | Requirement ID: R-ZHRN-0",
+      "gap": "Partial evidence available; some required elements are incomplete.",
+      "recommendation": "Strengthen consistency and completeness of existing evidence.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-ZHRN-0",
+      "requirement_text": "Projects must provide a description and documentation of how comments by local stakeholders have been invited and compiled, a summary of comments received, and how due account was taken.",
+      "audit_mode": "development",
+      "score": 45
+    },
+    {
+      "requirement_id": "R-E579-0",
+      "requirement_name": "Grievance mechanism outlined",
+      "title": "Grievance mechanism outlined",
+      "module": "stakeholder_input_process",
+      "status": "partial",
+      "risk": "medium",
+      "confidence": 0.2,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "Processo de consulta a stakeholders não documentado (convites, comentários recebidos, ações tomadas).",
+        "[Protocolo] Isometric Standard v1.7, R-ZHRN-0/R-E579-0 — consulta iterativa, acessível, transparente",
+        "Prazos obrigatórios: reconhecimento de reclamações ≤ 14 dias; resolução ou escalação ≤ 60 dias."
+      ],
+      "logic_key": "eval_stakeholder_consultation_v1",
+      "fields_evaluated": [],
+      "requirement_score": 45,
+      "requirement_score_normalized": 40.0,
+      "priority_score": 60.0,
+      "field_scores": [
+        {
+          "path": "safeguards.stakeholder_input_process",
+          "weight": 60,
+          "score": 0,
+          "status": "fail",
+          "notes": [
+            "Processo de consulta a stakeholders não documentado (convites, comentários recebidos, ações tomadas)."
+          ]
+        },
+        {
+          "path": "management.information_sharing_plan",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "weak",
+      "evidence_strength": "insufficient",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: stakeholder_input_process | Requirement ID: R-E579-0",
+      "gap": "Partial evidence available; some required elements are incomplete.",
+      "recommendation": "Strengthen consistency and completeness of existing evidence.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-E579-0",
+      "requirement_text": "Projects must outline the mechanism for stakeholders to voice, process and resolve grievances. Acknowledgement ≤ 14 days; resolution ≤ 60 days.",
+      "audit_mode": "development",
+      "score": 45
+    },
+    {
+      "requirement_id": "R-ENZR-0",
+      "requirement_name": "Monitoring parameter table provided",
+      "title": "Monitoring parameter table provided",
+      "module": "appendix",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.5,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "[Protocolo] Isometric Standard v1.7, R-ENZR-0 — tabela de parâmetros monitorados (fonte, frequência, QA/QC)",
+        "Tabela deve cobrir: parâmetro, fonte de dados, frequência de medição, procedimentos QA/QC e evidências planejadas."
+      ],
+      "logic_key": "eval_monitoring_requirements_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "management.monitoring_triggers",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "emissions.stack_monitoring_method",
+          "weight": 50,
+          "score": 50,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: appendix | Requirement ID: R-ENZR-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/standard/1.7?requirement=standard:standard:1.7:requirement:R-ENZR-0",
+      "requirement_text": "Projects must create a table that outlines all monitored parameters in their selected protocol and modules, including data source, measurement frequency, QA/QC procedures and evidence provisions.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-6AQG-0",
+      "requirement_name": "Engineering design diagram of pyrolysis reactor",
+      "title": "Engineering design diagram of pyrolysis reactor",
+      "module": "appendix",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.25,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "[Protocolo] Isometric Biochar Production and Storage v1.2, Reactor Design Requirements",
+        "Desenvolvimento: diagrama e plano de manutenção obrigatórios no PDD."
+      ],
+      "logic_key": "eval_reactor_design_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "production.reactor_design_diagram",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "production.maintenance_plan",
+          "weight": 30,
+          "score": 30,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "production.end_material_process_description",
+          "weight": 20,
+          "score": 20,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "production.system_description",
+          "weight": 10,
+          "score": 10,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: appendix | Requirement ID: R-6AQG-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/PROTOCOL/biochar/1.1?requirement=protocol:biochar:1.1:requirement:R-6AQG-0",
+      "requirement_text": "Projects must describe and provide an engineering design diagram of the chemical reactor used to achieve pyrolysis, including dimensions, inflow/outflow locations, sensor positioning, and internal equipment.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-SZK5-0",
+      "requirement_name": "Pyrolysis gas leakage sensors described",
+      "title": "Pyrolysis gas leakage sensors described",
+      "module": "appendix",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.25,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "[Protocolo] Isometric Biochar Production and Storage v1.2, Reactor Design Requirements",
+        "Desenvolvimento: diagrama e plano de manutenção obrigatórios no PDD."
+      ],
+      "logic_key": "eval_reactor_design_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "production.reactor_design_diagram",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "production.maintenance_plan",
+          "weight": 30,
+          "score": 30,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "production.end_material_process_description",
+          "weight": 20,
+          "score": 20,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "production.system_description",
+          "weight": 10,
+          "score": 10,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: appendix | Requirement ID: R-SZK5-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/PROTOCOL/biochar/1.1?requirement=protocol:biochar:1.1:requirement:R-SZK5-0",
+      "requirement_text": "Projects must describe and evidence the sensors used to quantify any loss of pyrolysis gasses during operation of the reactor to leakage.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-DMET-0",
+      "requirement_name": "Reactor material selection justified",
+      "title": "Reactor material selection justified",
+      "module": "appendix",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.25,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "[Protocolo] Isometric Biochar Production and Storage v1.2, Reactor Design Requirements",
+        "Desenvolvimento: diagrama e plano de manutenção obrigatórios no PDD."
+      ],
+      "logic_key": "eval_reactor_design_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "production.reactor_design_diagram",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "production.maintenance_plan",
+          "weight": 30,
+          "score": 30,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "production.end_material_process_description",
+          "weight": 20,
+          "score": 20,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "production.system_description",
+          "weight": 10,
+          "score": 10,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: appendix | Requirement ID: R-DMET-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/PROTOCOL/biochar/1.1?requirement=protocol:biochar:1.1:requirement:R-DMET-0",
+      "requirement_text": "Projects must describe the selection of materials for each component of the reactor, including suitable justification from the perspectives of thermal and mechanical resilience.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-19AF-0",
+      "requirement_name": "Reactor maintenance plan evidenced",
+      "title": "Reactor maintenance plan evidenced",
+      "module": "appendix",
+      "status": "compliant",
+      "risk": "low",
+      "confidence": 0.25,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "[Protocolo] Isometric Biochar Production and Storage v1.2, Reactor Design Requirements",
+        "Desenvolvimento: diagrama e plano de manutenção obrigatórios no PDD."
+      ],
+      "logic_key": "eval_reactor_design_v1",
+      "fields_evaluated": [],
+      "requirement_score": 100.0,
+      "requirement_score_normalized": 100.0,
+      "priority_score": 6.0,
+      "field_scores": [
+        {
+          "path": "production.reactor_design_diagram",
+          "weight": 40,
+          "score": 40,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "production.maintenance_plan",
+          "weight": 30,
+          "score": 30,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "production.end_material_process_description",
+          "weight": 20,
+          "score": 20,
+          "status": "pass",
+          "notes": []
+        },
+        {
+          "path": "production.system_description",
+          "weight": 10,
+          "score": 10,
+          "status": "pass",
+          "notes": []
+        }
+      ],
+      "requirement_rating": "strong",
+      "evidence_strength": "weak",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: appendix | Requirement ID: R-19AF-0",
+      "gap": "",
+      "recommendation": "Maintain current evidence and proceed to validation readiness.",
+      "source_url": "https://registry.isometric.com/PROTOCOL/biochar/1.1?requirement=protocol:biochar:1.1:requirement:R-19AF-0",
+      "requirement_text": "Projects must describe and evidence an appropriate reactor maintenance plan including monitoring and mitigation for mechanical and thermal degradation.",
+      "audit_mode": "development",
+      "score": 100.0
+    },
+    {
+      "requirement_id": "R-S8K1-1",
+      "requirement_name": "Sampling procedure described and justified",
+      "title": "Sampling procedure described and justified",
+      "module": "appendix",
+      "status": "not_applicable",
+      "risk": "none",
+      "confidence": 1.0,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "Requisito aplicável apenas em projetos operacionais.",
+        "Em fase de desenvolvimento/PDD, a evidência operacional ainda não existe — não penaliza o score."
+      ],
+      "logic_key": "eval_sampling_procedure_v1",
+      "fields_evaluated": [],
+      "requirement_score": null,
+      "requirement_score_normalized": 0.0,
+      "priority_score": 0.0,
+      "field_scores": [],
+      "requirement_rating": null,
+      "evidence_strength": "none",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: appendix | Requirement ID: R-S8K1-1",
+      "gap": "",
+      "recommendation": "Providencie esta evidência quando o projeto estiver operacional.",
+      "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-S8K1-1",
+      "requirement_text": "Projects must describe and justify the sampling procedure, including the number and frequency of sampling and analysis.",
+      "audit_mode": "development",
+      "score": null
+    },
+    {
+      "requirement_id": "R-CXEP-0",
+      "requirement_name": "Biochar characterization standards listed",
+      "title": "Biochar characterization standards listed",
+      "module": "appendix",
+      "status": "not_applicable",
+      "risk": "none",
+      "confidence": 1.0,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "Requisito aplicável apenas em projetos operacionais.",
+        "Em fase de desenvolvimento/PDD, a evidência operacional ainda não existe — não penaliza o score."
+      ],
+      "logic_key": "eval_biochar_char_standards_v1",
+      "fields_evaluated": [],
+      "requirement_score": null,
+      "requirement_score_normalized": 0.0,
+      "priority_score": 0.0,
+      "field_scores": [],
+      "requirement_rating": null,
+      "evidence_strength": "none",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: appendix | Requirement ID: R-CXEP-0",
+      "gap": "",
+      "recommendation": "Providencie esta evidência quando o projeto estiver operacional.",
+      "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-CXEP-0",
+      "requirement_text": "Projects must provide a detailed bulleted list of the relevant standards utilized in the biochar characterization.",
+      "audit_mode": "development",
+      "score": null
+    },
+    {
+      "requirement_id": "R-7W1N-0",
+      "requirement_name": "Biochar physical properties measured",
+      "title": "Biochar physical properties measured",
+      "module": "appendix",
+      "status": "not_applicable",
+      "risk": "none",
+      "confidence": 1.0,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "Requisito aplicável apenas em projetos operacionais.",
+        "Em fase de desenvolvimento/PDD, a evidência operacional ainda não existe — não penaliza o score."
+      ],
+      "logic_key": "eval_biochar_physical_properties_v1",
+      "fields_evaluated": [],
+      "requirement_score": null,
+      "requirement_score_normalized": 0.0,
+      "priority_score": 0.0,
+      "field_scores": [],
+      "requirement_rating": null,
+      "evidence_strength": "none",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: appendix | Requirement ID: R-7W1N-0",
+      "gap": "",
+      "recommendation": "Providencie esta evidência quando o projeto estiver operacional.",
+      "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-7W1N-0",
+      "requirement_text": "Projects should provide the details of any measurements of biochar physical properties that have been taken.",
+      "audit_mode": "development",
+      "score": null
+    },
+    {
+      "requirement_id": "R-VGXA-0",
+      "requirement_name": "Biochar chemical properties measured",
+      "title": "Biochar chemical properties measured",
+      "module": "appendix",
+      "status": "not_applicable",
+      "risk": "none",
+      "confidence": 1.0,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "Requisito aplicável apenas em projetos operacionais.",
+        "Em fase de desenvolvimento/PDD, a evidência operacional ainda não existe — não penaliza o score."
+      ],
+      "logic_key": "eval_biochar_chemical_properties_v1",
+      "fields_evaluated": [],
+      "requirement_score": null,
+      "requirement_score_normalized": 0.0,
+      "priority_score": 0.0,
+      "field_scores": [],
+      "requirement_rating": null,
+      "evidence_strength": "none",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: appendix | Requirement ID: R-VGXA-0",
+      "gap": "",
+      "recommendation": "Providencie esta evidência quando o projeto estiver operacional.",
+      "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-VGXA-0",
+      "requirement_text": "Projects should provide the details of any measurements of biochar chemical properties that have been taken.",
+      "audit_mode": "development",
+      "score": null
+    },
+    {
+      "requirement_id": "R-2TMM-0",
+      "requirement_name": "Analytical laboratory identified and qualified",
+      "title": "Analytical laboratory identified and qualified",
+      "module": "appendix",
+      "status": "not_applicable",
+      "risk": "none",
+      "confidence": 1.0,
+      "missing_fields": [],
+      "failed_fields": [],
+      "notes": [
+        "Requisito aplicável apenas em projetos operacionais.",
+        "Em fase de desenvolvimento/PDD, a evidência operacional ainda não existe — não penaliza o score."
+      ],
+      "logic_key": "eval_biochar_laboratory_v1",
+      "fields_evaluated": [],
+      "requirement_score": null,
+      "requirement_score_normalized": 0.0,
+      "priority_score": 0.0,
+      "field_scores": [],
+      "requirement_rating": null,
+      "evidence_strength": "none",
+      "cross_checks": [],
+      "project_evidence": "",
+      "methodology_basis": "Module: appendix | Requirement ID: R-2TMM-0",
+      "gap": "",
+      "recommendation": "Providencie esta evidência quando o projeto estiver operacional.",
+      "source_url": "https://registry.isometric.com/MODULE/biochar-storage-agricultural-soils/1.1?requirement=module:biochar-storage-agricultural-soils:1.1:requirement:R-2TMM-0",
+      "requirement_text": "Projects must report the analytical laboratory/laboratories utilized for the biochar characterization.",
+      "audit_mode": "development",
+      "score": null
+    }
+  ],
+  "score_data": {
+    "score": 87.24,
+    "applicable_requirements": 38,
+    "compliant": 27,
+    "partial": 11,
+    "future_evidence_required": 0,
+    "non_compliant": 0,
+    "not_applicable": 10,
+    "error": 0
+  },
+  "score_label": "Good",
+  "audit_mode": "development",
+  "selected_modules": [],
+  "module_summary": {
+    "project_data": {
+      "count": 6,
+      "compliant": 5,
+      "partial": 1,
+      "non_compliant": 0,
+      "error": 0,
+      "priority_sum": 90.0,
+      "priority_avg": 15.0
+    },
+    "protocol_and_monitoring_data": {
+      "count": 19,
+      "compliant": 10,
+      "partial": 6,
+      "non_compliant": 1,
+      "error": 0,
+      "priority_sum": 458.0,
+      "not_applicable": 2,
+      "priority_avg": 24.11
+    },
+    "environmental_and_social_impact": {
+      "count": 11,
+      "compliant": 7,
+      "partial": 1,
+      "non_compliant": 0,
+      "error": 0,
+      "priority_sum": 102.0,
+      "not_applicable": 3,
+      "priority_avg": 9.27
+    },
+    "stakeholder_input_process": {
+      "count": 2,
+      "compliant": 0,
+      "partial": 2,
+      "non_compliant": 0,
+      "error": 0,
+      "priority_sum": 120.0,
+      "priority_avg": 60.0
+    },
+    "appendix": {
+      "count": 10,
+      "compliant": 5,
+      "partial": 0,
+      "non_compliant": 0,
+      "error": 0,
+      "priority_sum": 30.0,
+      "not_applicable": 5,
+      "priority_avg": 3.0
+    }
+  },
+  "top_risks": [
+    "R-KQCS-0 — Regulatory compliance method asserted | Gap: Core requirement not met or insufficiently evidenced. | Action: Establish missing core elements required for compliance.",
+    "R-XT6V-0 — Net carbon removal capacity estimate | Gap: Partial evidence available; some required elements are incomplete. | Action: Provide missing documentation and strengthen evidence for identified gaps.",
+    "R-HF2G-0 — Leakage assessment provided | Gap: Partial evidence available; some required elements are incomplete. | Action: Provide missing documentation and strengthen evidence for identified gaps.",
+    "R-983D-0 — Regulatory additionality demonstrated | Gap: Partial evidence available; some required elements are incomplete. | Action: Provide missing documentation and strengthen evidence for identified gaps.",
+    "R-MY64-0 — Pollution prevention: PAHs, heavy metals, PCBs/Dioxins | Gap: Partial evidence available; some required elements are incomplete. | Action: Provide missing documentation and strengthen evidence for identified gaps."
+  ],
+  "queries": [],
+  "normalized_fields": [],
+  "cache_hit": true
+}
