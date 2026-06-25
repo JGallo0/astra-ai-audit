@@ -312,7 +312,7 @@ function StepFeedstock({ form, set, errors }) {
         <Toggle name="is_purpose_grown"   value={form.is_purpose_grown}   onChange={set} label="Cultivado para este fim (não é resíduo)?" />
         <Toggle name="feedstock_imported" value={form.feedstock_imported} onChange={set} label="Importado de outro país?" />
         <Toggle name="uses_mixed_waste"   value={form.uses_mixed_waste}   onChange={set} label="Contém materiais fósseis (plásticos, sintéticos)?" />
-        <Toggle name="uses_coal_ash"      value={form.uses_coal_ash}      onChange={set} label="Inclui cinzas de carvão (coal ash)?" />
+        <Toggle name="uses_coal_ash"      value={form.uses_coal_ash}      onChange={set} label="Usa cinza de carvão fóssil como insumo ou aditivo?" />
         <Toggle name="from_land_clearing" value={form.from_land_clearing} onChange={set} label="Proveniente de desmatamento / limpeza de terra?" />
       </div>
 
@@ -329,7 +329,7 @@ function StepFeedstock({ form, set, errors }) {
       )}
       {form.uses_coal_ash && (
         <div style={{ marginTop: 8, padding: "10px 14px", background: "#fef2f2", borderRadius: 6, border: "1px solid #fca5a5", fontSize: 12, color: "#b91c1c" }}>
-          ❌ Coal ash elimina Puro.Earth (Clarificação 010 CAM — hard gate absoluto).
+          ❌ Cinza de carvão fóssil como insumo elimina Puro.Earth (Clar. 010 CAM). Nota: cinzas naturais do biochar (fração mineral da biomassa) são normais e não estão relacionadas a este critério.
         </div>
       )}
     </>

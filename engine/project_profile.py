@@ -234,7 +234,7 @@ PROFILE_QUESTIONS = {
     "feedstock_type":            "What type of feedstock/biomass is used? (agricultural_residue | forest_biomass | urban_wood | food_waste | sewage_sludge | mixed | other)",
     "is_forest_biomass":         "Is the feedstock sourced from forests or forestry operations?",
     "uses_mixed_waste":          "Does the feedstock include any mixture of fossil-derived materials (plastics, synthetic fibers) with biomass?",
-    "uses_coal_ash":             "Does the feedstock include coal ash or any by-product of coal combustion?",
+    "uses_coal_ash":             "Does the project use coal fly ash (from fossil coal combustion) as a feedstock input or additive to the pyrolysis process? Answer FALSE if the question is about the natural mineral ash content within the biochar itself — that is expected and not relevant here.",
 
     # Sustentabilidade florestal
     "has_fsc_certification":     "Is there an active FSC (Forest Stewardship Council) Forest Management Certification? Answer TRUE only if explicitly stated with a certificate.",
