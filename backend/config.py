@@ -29,7 +29,7 @@ METHODOLOGY_REGISTRY = {
         "label": "Isometric Biochar",
         "version": "v1.5.1",
         "vector_store_id": VECTOR_STORE_ID_ISOMETRIC,
-        "requirements_module": "requirements.isometric.biochar.v1_2",
+        "requirements_module": "methodology_requirements.isometric_biochar_v1",
     },
     "verra_vcs": {
         "label": "Verra VCS",
