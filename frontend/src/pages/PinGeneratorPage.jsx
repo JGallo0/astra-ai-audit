@@ -523,15 +523,7 @@ function StepCarbono({ form, set }) {
     <>
       <div style={{ marginBottom: 20 }}>
         <Toggle name="has_lca" value={form.has_lca} onChange={set} label="LCA (Life Cycle Assessment) iniciada ou disponível?" />
-        {form.has_lca ? (
-          <KnownValueField
-            valueName="lca_emission_factor_tco2_t"
-            label="Intensidade de emissões do processo (LCA)"
-            help="Total de emissões do ciclo de vida por tonelada de biochar produzido."
-            defaultText="0.28 tCO₂e/t (referência bibliográfica resíduos agrícolas, pirólise média)"
-            unit="tCO₂e/t biochar" placeholder="Ex: 0.18" form={form} set={set}
-          />
-        ) : (
+        {!form.has_lca && (
           <div style={{ padding: "8px 12px", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 6, fontSize: 12, color: "#92400e", marginLeft: 50 }}>
             ⚠️ Sem LCA: Puro.Earth penalizada (cap 45% em Contabilidade de Carbono). Isometric e Verra aceitam LCA futura.
           </div>
