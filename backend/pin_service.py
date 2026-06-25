@@ -39,6 +39,22 @@ def _score_to_grade(score: float) -> str:
     return "C"
 
 
+# Defaults conservadores de H/Corg por tipo de feedstock
+# Usados quando o usuário não informou o valor laboratorial.
+# Fonte: Woolf et al. 2021, literatura de biochar por tipo de biomassa.
+_HC_DEFAULTS = {
+    "forest_biomass":      0.35,  # madeira, < carbonização a 500°C
+    "urban_wood":          0.35,
+    "agricultural_residue":0.40,  # palha, casca — maior teor de cinzas
+    "food_waste":          0.45,
+    "animal_manure":       0.50,  # limite próximo ao hard gate — conservador
+    "sewage_sludge":       0.50,
+    "mixed":               0.42,
+    "other":               0.40,
+}
+_MAST_DEFAULT = 20.0  # °C — média global; Copernicus preencheria com coord. reais
+
+
 def build_profile_from_form(form: dict) -> ProjectProfile:
     """
     Constrói ProjectProfile diretamente dos campos do formulário.
@@ -53,9 +69,30 @@ def build_profile_from_form(form: dict) -> ProjectProfile:
     if profile.project_country and profile.country_cpi is None:
         profile.country_cpi = get_cpi(profile.project_country)
 
-    # Inferências simples
-    if profile.is_forest_biomass and profile.feedstock_type == "unknown":
+    # Inferência: is_forest_biomass → feedstock_type
+    if profile.is_forest_biomass and profile.feedstock_type in ("unknown", ""):
         profile.feedstock_type = "forest_biomass"
+
+    # Defaults conservadores para campos que afetam permanência em Isometric/Puro.
+    # Sem H/Corg, Isometric não consegue calcular f200 → permanência = 0%,
+    # criando comparação injusta com Verra (que usa temperatura com default 0.56).
+    if profile.h_c_ratio is None:
+        profile.h_c_ratio = _HC_DEFAULTS.get(profile.feedstock_type, 0.40)
+
+    # MAST default: 20°C (média global conservadora).
+    # Em produção, Copernicus API preenche com valor real via lat/lon do projeto.
+    if profile.mast_celsius is None:
+        profile.mast_celsius = _MAST_DEFAULT
+
+    # Isometric exige durability_option explícita — "not_stated" zera R-7C8E-0.
+    # 200 anos é o padrão universal para créditos de remoção permanente.
+    if not profile.durability_option or profile.durability_option == "not_stated":
+        profile.durability_option = "200_years"
+
+    # Isometric lê soil_temp_method como string — sem ela, R-F5RZ-0 não pontua
+    # mesmo com MAST numérico disponível.
+    if not profile.soil_temp_method and profile.mast_celsius is not None:
+        profile.soil_temp_method = "other"   # indica que há um método, mesmo que genérico
 
     return profile
 
@@ -83,6 +120,7 @@ def run_pin_audit(
             continue
 
         findings = run_engine_with_profile(profile, reqs, LOGIC_REGISTRY, "development")
+
         dim_scores = compute_dimension_scores(findings, method)
 
         # ── Hard gates (mesmo critério do assessment_service) ───────────────
@@ -184,15 +222,27 @@ def _build_reasoning(best: str, results: dict, profile: ProjectProfile) -> str:
 
     lines = [f"**{label}** apresenta a maior aderência ao perfil do projeto ({score:.0f}%)."]
 
-    # Feedstock
-    if profile.is_forest_biomass and not any([
+    iso_score  = results.get("isometric", {}).get("overall", 0)
+    puro_score = results.get("puro_earth", {}).get("overall", 0)
+    has_no_cert = not any([
         profile.has_fsc_certification, profile.has_pefc_certification,
         profile.has_sfi_certification, profile.has_isae3000_dossier,
-    ]):
+    ])
+
+    # Certificação florestal: ordem de flexibilidade correta
+    # Isometric (mais flexível) > Verra (PEFC/FSC/CDM def.) > Puro.Earth (mais restritiva)
+    if profile.is_forest_biomass and has_no_cert:
         lines.append(
-            "Biomassa florestal sem certificação favorece Isometric (critérios mais flexíveis) "
-            "em relação à Puro.Earth (exige FSC/ISAE3000)."
+            "Para biomassa florestal sem certificação, a ordem de flexibilidade é: "
+            "Isometric (não exige certificação, apenas LCA e counterfactual de resíduo) > "
+            "Verra (aceita PEFC, FSC ou definição CDM de biomassa renovável) > "
+            "Puro.Earth (exige FSC/ISAE3000 — plano governamental inválido no Brasil, CPI=36)."
         )
+        if iso_score < puro_score or iso_score < results.get("verra_vcs", {}).get("overall", 0):
+            lines.append(
+                "Nota: a vantagem do Isometric em feedstock pode não se refletir no score total "
+                "se dados técnicos de permanência (H/Corg medido, temperatura do solo) não foram informados."
+            )
 
     if profile.uses_mixed_waste:
         lines.append("Feedstock misto torna Puro.Earth inelegível — eliminatório absoluto (Clarificação 001).")
@@ -200,17 +250,24 @@ def _build_reasoning(best: str, results: dict, profile: ProjectProfile) -> str:
     if profile.uses_coal_ash:
         lines.append("Coal ash torna Puro.Earth inelegível — eliminatório absoluto (Clarificação 010).")
 
-    # Permanência Verra vs H/Corg
-    if profile.pyrolysis_temp_c is not None and profile.pyrolysis_temp_c > 600:
-        prd = 0.89
+    # Permanência: explica o default aplicado
+    hc = profile.h_c_ratio
+    default_hc = _HC_DEFAULTS.get(profile.feedstock_type, 0.40)
+    if hc is not None and abs(hc - default_hc) < 0.01:
+        # H/Corg era None → usamos default
         lines.append(
-            f"Temperatura de pirólise {profile.pyrolysis_temp_c:.0f}°C → PRde={prd} na Verra "
-            f"(equivalente a f₂₀₀ alto na Isometric/Puro)."
+            f"H/Corg não informado: default conservador {hc:.2f} aplicado "
+            f"(típico para {profile.feedstock_type or 'este tipo de feedstock'}). "
+            "Informe o valor laboratorial para resultados mais precisos."
         )
-    elif profile.h_c_ratio is not None and profile.h_c_ratio < 0.3:
+    elif hc is not None and hc < 0.3:
         lines.append(
-            f"H/Corg={profile.h_c_ratio:.2f} favorece permanência alta na Isometric e Puro.Earth "
-            f"(modelo Woolf 2021)."
+            f"H/Corg={hc:.2f} → permanência alta em Isometric e Puro.Earth (Woolf 2021)."
+        )
+
+    if profile.pyrolysis_temp_c is not None and profile.pyrolysis_temp_c > 600:
+        lines.append(
+            f"Temperatura de pirólise {profile.pyrolysis_temp_c:.0f}°C → PRde=0.89 na Verra (máxima permanência)."
         )
 
     # CPI e caminho florestal Puro

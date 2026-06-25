@@ -94,6 +94,7 @@ class ProjectProfile:
     o_c_ratio:                 Optional[float]= None
     has_soil_temp_method:      bool           = False
     soil_temp_method:          str            = ""
+    mast_celsius:              Optional[float]= None   # temperatura média anual do solo (°C); default 20°C usado no PIN
     # "direct_measurement" | "lembrechts_database" | "other" | ""
     has_reversal_risk_assessment: bool        = False
     buffer_pool_pct:           Optional[float]= None
@@ -518,7 +519,7 @@ def profile_to_legacy_dict(p: ProjectProfile) -> dict:
         "storage": {
             "pathway": p.storage_pathway,
             "soil": {
-                "annual_avg_temp_celsius": None,
+                "annual_avg_temp_celsius": p.mast_celsius,  # None → engine usa fallback
                 "temperature_method": p.soil_temp_method,
                 "deployment_methods": [p.storage_pathway] if p.storage_pathway else [],
             },
