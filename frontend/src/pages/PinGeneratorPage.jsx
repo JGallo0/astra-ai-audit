@@ -372,9 +372,8 @@ function StepProducao({ form, set }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 16px" }}>
         <Toggle name="has_continuous_temp_monitoring" value={form.has_continuous_temp_monitoring} onChange={set} label="Monitoramento contínuo de temperatura?" />
         <Toggle name="has_pyrolysis_gas_recovery"     value={form.has_pyrolysis_gas_recovery}     onChange={set} label="Gases de pirólise recuperados/combustados?" />
-        <Toggle name="has_engineering_diagram"        value={form.has_engineering_diagram}        onChange={set} label="Diagrama de engenharia do reator?" />
-        <Toggle name="has_maintenance_plan"           value={form.has_maintenance_plan}           onChange={set} label="Plano de manutenção do reator?" />
-        <Toggle name="is_greenfield_facility"         value={form.is_greenfield_facility}         onChange={set} label="Instalação nova (greenfield)?" />
+        <Toggle name="has_engineering_diagram" value={form.has_engineering_diagram} onChange={set} label="Diagrama de engenharia do reator?" />
+        <Toggle name="has_maintenance_plan"   value={form.has_maintenance_plan}   onChange={set} label="Plano de manutenção do reator?" />
       </div>
 
       {!form.has_pyrolysis_gas_recovery && (
