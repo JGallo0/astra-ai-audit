@@ -361,76 +361,92 @@ function StepProducao({ form, set }) {
         </div>
       )}
 
-      <Field label="Classe tecnológica da instalação">
-        <SelectInput name="verra_tech_class" value={form.verra_tech_class} onChange={set} options={[
-          { value: "high", label: "Alta tecnologia (controle automatizado, sensores contínuos)" },
-          { value: "low",  label: "Baixa tecnologia (fornos simples, sem automação)" },
-          { value: "",     label: "Não sei / não definido" },
-        ]} />
-      </Field>
+      {/* Mapeamento estático de tipos por classe */}
+      {(() => {
+        const REACTOR_TECH = {
+          retort_kiln: "high", tlud_gasifier: "high", flash_carbonization: "high",
+          rotary_kiln: "high", integrated_chp: "high",
+          drum_kiln: "low", pit_kiln: "low", open_burning: "low",
+        };
+        const REACTOR_TEMP = {
+          flash_carbonization: 700, integrated_chp: 650, tlud_gasifier: 550,
+          retort_kiln: 500, rotary_kiln: 500, drum_kiln: 400, pit_kiln: 350, open_burning: 300,
+        };
+        const ALL_REACTORS = [
+          { value: "retort_kiln",         label: "Kiln retorta (pirólise fechada, ~500°C)",              tech: "high" },
+          { value: "tlud_gasifier",        label: "TLUD / Gasificador (alta eficiência, ~550°C)",         tech: "high" },
+          { value: "flash_carbonization",  label: "Flash carbonization (>700°C, alta permanência)",        tech: "high" },
+          { value: "rotary_kiln",          label: "Kiln rotativo (industrial, ~500°C)",                   tech: "high" },
+          { value: "integrated_chp",       label: "Sistema integrado pirólise + CHP (>650°C, rec. gás)",  tech: "high" },
+          { value: "drum_kiln",            label: "Forno de tambor / drum kiln (~400°C)",                 tech: "low"  },
+          { value: "pit_kiln",             label: "Forno de cova / pit kiln (artesanal, ~350°C)",         tech: "low"  },
+          { value: "open_burning",         label: "Queima aberta (proibido em Puro.Earth)",               tech: "low"  },
+          { value: "other",                label: "Outro / não definido",                                 tech: null   },
+        ];
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 16px" }}>
+        const techClass = form.verra_tech_class;
+        const reactorOptions = ALL_REACTORS.filter(r => !techClass || r.tech === techClass || r.tech === null);
+
+        const handleTechClass = (val) => {
+          set("verra_tech_class", val);
+          // Se o tipo de reator atual não é compatível com a nova classe, limpa
+          const currentTech = REACTOR_TECH[form.reactor_type];
+          if (form.reactor_type && currentTech && currentTech !== val) {
+            set("reactor_type", "");
+          }
+        };
+
+        const handleReactorType = (val) => {
+          set("reactor_type", val);
+          const tech = REACTOR_TECH[val];
+          const temp = REACTOR_TEMP[val];
+          if (tech && !form.verra_tech_class) set("verra_tech_class", tech);
+          if (temp && !form.pyrolysis_temp_c)  set("pyrolysis_temp_c", temp);
+        };
+
+        return (
+          <>
+            <Field label="Classe tecnológica da instalação"
+              help="Filtra os tipos de reator disponíveis abaixo.">
+              <SelectInput name="verra_tech_class" value={techClass} onChange={handleTechClass} options={[
+                { value: "high", label: "Alta tecnologia (controle automatizado, sensores contínuos)" },
+                { value: "low",  label: "Baixa tecnologia (fornos simples, sem automação)" },
+                { value: "",     label: "Não sei / não definido" },
+              ]} />
+            </Field>
+
+            <Field label="Tipo de reator / forno"
+              help={techClass
+                ? `Mostrando apenas tipos compatíveis com ${techClass === "high" ? "alta" : "baixa"} tecnologia.`
+                : "Selecione a classe tecnológica acima para filtrar as opções."}>
+              <SelectInput
+                name="reactor_type"
+                value={form.reactor_type}
+                onChange={handleReactorType}
+                options={reactorOptions}
+              />
+            </Field>
+
+            {form.reactor_type === "open_burning" && (
+              <div style={{ padding: "8px 12px", background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 6, fontSize: 12, color: "#b91c1c", marginTop: -8 }}>
+                ❌ Queima aberta é proibida em Puro.Earth (Clar. 004 BCH) e não atinge temperatura mínima para créditos.
+              </div>
+            )}
+          </>
+        );
+      })()}
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 16px", marginTop: 8 }}>
         <Toggle name="has_continuous_temp_monitoring" value={form.has_continuous_temp_monitoring} onChange={set} label="Monitoramento contínuo de temperatura?" />
         <Toggle name="has_pyrolysis_gas_recovery"     value={form.has_pyrolysis_gas_recovery}     onChange={set} label="Gases de pirólise recuperados/combustados?" />
-        <Toggle name="has_engineering_diagram" value={form.has_engineering_diagram} onChange={set} label="Diagrama de engenharia do reator?" />
-        <Toggle name="has_maintenance_plan"   value={form.has_maintenance_plan}   onChange={set} label="Plano de manutenção do reator?" />
+        <Toggle name="has_engineering_diagram"        value={form.has_engineering_diagram}        onChange={set} label="Diagrama de engenharia do reator?" />
+        <Toggle name="has_maintenance_plan"           value={form.has_maintenance_plan}           onChange={set} label="Plano de manutenção do reator?" />
       </div>
 
       {!form.has_pyrolysis_gas_recovery && (
         <div style={{ padding: "8px 12px", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 6, fontSize: 12, color: "#92400e", marginTop: 4 }}>
           ⚠️ Sem recuperação de gás: hard gate em Puro.Earth. Penalidade em Isometric (net-negativity).
           Na Verra: PEP,p,y calculado via Fe default = 0.049 tCH₄/t biochar.
-        </div>
-      )}
-
-      <Field label="Tipo de reator"
-        help="Determina automaticamente a classe tecnológica e o potencial de temperatura, se não informados acima.">
-        <SelectInput name="reactor_type" value={form.reactor_type} onChange={val => {
-          set("reactor_type", val);
-          // Infere classe tecnológica se ainda não definida
-          const techMap = {
-            "retort_kiln":        "high",
-            "tlud_gasifier":      "high",
-            "flash_carbonization":"high",
-            "rotary_kiln":        "high",
-            "integrated_chp":     "high",
-            "drum_kiln":          "low",
-            "pit_kiln":           "low",
-            "open_burning":       "low",
-          };
-          // Infere temperatura mínima esperada por tipo
-          const tempHintMap = {
-            "flash_carbonization": 700,
-            "integrated_chp":      650,
-            "tlud_gasifier":       550,
-            "retort_kiln":         500,
-            "rotary_kiln":         500,
-            "drum_kiln":           400,
-            "pit_kiln":            350,
-            "open_burning":        300,
-          };
-          if (!form.verra_tech_class && techMap[val]) {
-            set("verra_tech_class", techMap[val]);
-          }
-          if (!form.pyrolysis_temp_c && tempHintMap[val]) {
-            set("pyrolysis_temp_c", tempHintMap[val]);
-          }
-        }} options={[
-          { value: "retort_kiln",        label: "Kiln retorta (pirólise fechada, ~500°C)" },
-          { value: "tlud_gasifier",      label: "TLUD / Gasificador (alta eficiência, ~550°C)" },
-          { value: "flash_carbonization",label: "Flash carbonization (>700°C, alta permanência)" },
-          { value: "rotary_kiln",        label: "Kiln rotativo (industrial, ~500°C)" },
-          { value: "integrated_chp",     label: "Sistema integrado pirólise + CHP (>650°C, recuperação de gás)" },
-          { value: "drum_kiln",          label: "Forno de tambor / drum kiln (low-tech, ~400°C)" },
-          { value: "pit_kiln",           label: "Forno de cova / pit kiln (artesanal, ~350°C)" },
-          { value: "open_burning",       label: "Queima aberta (proibido em Puro.Earth)" },
-          { value: "other",              label: "Outro / não definido" },
-        ]} />
-      </Field>
-
-      {form.reactor_type === "open_burning" && (
-        <div style={{ padding: "8px 12px", background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 6, fontSize: 12, color: "#b91c1c", marginTop: -8 }}>
-          ❌ Queima aberta é explicitamente proibida em Puro.Earth (Clar. 004 BCH) e não atinge temperatura mínima para créditos em Isometric e Verra.
         </div>
       )}
     </>
