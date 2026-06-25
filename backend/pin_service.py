@@ -253,11 +253,17 @@ def _build_reasoning(best: str, results: dict, profile: ProjectProfile) -> str:
     # Permanência: explica o default aplicado
     hc = profile.h_c_ratio
     default_hc = _HC_DEFAULTS.get(profile.feedstock_type, 0.40)
+    FEEDSTOCK_LABELS = {
+        "forest_biomass": "biomassa florestal", "agricultural_residue": "resíduo agrícola",
+        "urban_wood": "madeira urbana", "food_waste": "resíduo alimentar",
+        "sewage_sludge": "biossólido", "animal_manure": "esterco animal",
+        "mixed": "feedstock misto", "other": "este tipo de feedstock",
+    }
     if hc is not None and abs(hc - default_hc) < 0.01:
-        # H/Corg era None → usamos default
+        ft_label = FEEDSTOCK_LABELS.get(profile.feedstock_type, "este tipo de feedstock")
         lines.append(
             f"H/Corg não informado: default conservador {hc:.2f} aplicado "
-            f"(típico para {profile.feedstock_type or 'este tipo de feedstock'}). "
+            f"(típico para {ft_label}). "
             "Informe o valor laboratorial para resultados mais precisos."
         )
     elif hc is not None and hc < 0.3:

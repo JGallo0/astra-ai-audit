@@ -497,6 +497,9 @@ def profile_to_legacy_dict(p: ProjectProfile) -> dict:
             "financial_additionality": p.additionality_method if p.has_financial_additionality else None,
             "eligible_pathway": "biochar",
             "net_negative_claim": p.is_net_negative,
+            # permanence_claim: True quando durabilidade está selecionada (R-7C8E-0 Isometric)
+            "permanence_claim": bool(p.durability_option and p.durability_option != "not_stated"),
+            "durability_years": 200 if p.durability_option == "200_years" else (1000 if p.durability_option == "1000_years" else None),
             "baseline_scenario": "documented" if p.has_baseline else None,
             "not_required_by_law": p.has_regulatory_additionality,
             # Campos críticos para lógica Puro
@@ -608,12 +611,13 @@ def profile_to_legacy_dict(p: ProjectProfile) -> dict:
             "residue_volume_increased":  p.residue_volume_increased,
         },
         "methodology": {
-            "storage_pathway":   p.storage_pathway,
+            "storage_pathway":    p.storage_pathway,
             "durability_threshold": p.durability_option,
-            "lca_performed":     p.has_lca,
-            "ghg_approach":      "documented" if (p.has_ghg_statement or p.has_lca) else None,
-            "protocol":          "Puro.Earth" if p.has_puro_sdg_template else "Isometric",
-            "standard":          "Puro.Earth" if p.has_puro_sdg_template else "Isometric",
+            "durability_option":  p.durability_option,   # alias — lido por eval_durability_selection_v1
+            "lca_performed":      p.has_lca,
+            "ghg_approach":       "documented" if (p.has_ghg_statement or p.has_lca) else None,
+            "protocol":           "Puro.Earth" if p.has_puro_sdg_template else "Isometric",
+            "standard":           "Puro.Earth" if p.has_puro_sdg_template else "Isometric",
         },
     }
 
