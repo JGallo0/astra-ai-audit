@@ -781,12 +781,14 @@ function ResultsView({ result, onReset, projectId }) {
               padding: "10px 14px", marginBottom: 8, borderLeft: "3px solid #f59e0b",
             }}>
               <div style={{ fontWeight: 600, fontSize: 12, color: "#0f172a", marginBottom: 3 }}>
-                {gap.requirement_name || gap.title}
+                {gap.title || gap.requirement_name}
               </div>
-              <div style={{ fontSize: 12, color: "#64748b", marginBottom: 3 }}>{gap.gap || "—"}</div>
-              {gap.recommendation && (
+              <div style={{ fontSize: 12, color: "#64748b", marginBottom: 3 }}>
+                {gap._gap_override || gap.gap || "—"}
+              </div>
+              {(gap._recommendation_override || gap.recommendation) && (
                 <div style={{ fontSize: 11, color: "#0369a1", fontStyle: "italic" }}>
-                  → {gap.recommendation}
+                  → {gap._recommendation_override || gap.recommendation}
                 </div>
               )}
             </div>

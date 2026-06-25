@@ -259,6 +259,10 @@ def run_engine_with_profile(
                     "recommendation": "",
                 }
 
+        # Normaliza campos gap/recommendation: _gap_override → gap
+        gap_text = (result.get("_gap_override") or result.get("gap") or "").strip()
+        rec_text = (result.get("_recommendation_override") or result.get("recommendation") or "").strip()
+
         results.append({
             "requirement_id": req_id,
             "title":          title,
@@ -266,6 +270,8 @@ def run_engine_with_profile(
             "source_url":     req.get("source_url", ""),
             "requirement_text": req.get("requirement_text", ""),
             **result,
+            "gap":            gap_text,
+            "recommendation": rec_text,
         })
 
     return results
