@@ -200,12 +200,34 @@ def run_pin_audit(
             "total":      len(findings),
         }
 
-    # ── Recomendação ────────────────────────────────────────────────────────
-    if method_results:
+    # ── Volume de créditos calculado ────────────────────────────────────────
+    credit_volume = _calc_credit_volume(profile, list(method_results.keys()))
+    for method, cv in credit_volume.items():
+        if method in method_results:
+            method_results[method]["credit_volume"] = cv
+
+    # ── Score composto: créditos + integridade metodológica + compliance ────
+    # Baseado na abordagem Sylvera (Biochar Methodology Comparison Assessment, Out 2025):
+    #   Módulo 1 — Volume de créditos (quem gera mais com ESTE H/Corg?)
+    #   Módulo 2 — Integridade metodológica (RAG: carbon accounting, permanência)
+    #   Compliance readiness — documentação atual do projeto
+    #
+    # Pesos: 40% volume + 35% integridade + 25% compliance
+    # Verra perde em integridade (RED em carbon accounting) apesar de
+    # ter mais créditos que Puro — consistente com avaliação Sylvera.
+    composite = _calc_composite_score(method_results, credit_volume)
+
+    if composite:
+        best = max(composite, key=lambda m: composite[m])
+        for m, s in composite.items():
+            if m in method_results:
+                method_results[m]["composite_score"] = round(s, 1)
+    elif method_results:
         best = max(method_results, key=lambda m: method_results[m]["overall"])
-        reasoning = _build_reasoning(best, method_results, profile)
     else:
-        best, reasoning = "isometric", "Sem dados suficientes para recomendação."
+        best = "isometric"
+
+    reasoning = _build_reasoning(best, method_results, profile, credit_volume)
 
     return {
         "results":        method_results,
@@ -214,96 +236,238 @@ def run_pin_audit(
     }
 
 
-def _build_reasoning(best: str, results: dict, profile: ProjectProfile) -> str:
-    """Raciocínio determinístico da recomendação de metodologia."""
+def _calc_credit_volume(profile: ProjectProfile, methodologies: list) -> dict:
+    """
+    Calcula volume de créditos por metodologia a partir dos dados do perfil.
+    Retorna tCO2/t biochar (fator CORC) para comparação independente de escala.
+    Usa credit_volume_engine.py — mesma lógica do Sylvera Module 1.
+    """
+    try:
+        from engine.credit_volume_engine import (
+            CreditVolumeInputs, get_permanence_factor,
+            calc_lca_emissions, BUFFER_POOL_PCT, CO2_C_RATIO,
+        )
+        # Fração de carbono típica por feedstock (base seca)
+        _CF = {
+            "forest_biomass": 0.77, "urban_wood": 0.77,
+            "agricultural_residue": 0.65, "food_waste": 0.52,
+            "animal_manure": 0.38, "sewage_sludge": 0.35,
+            "mixed": 0.58, "other": 0.60,
+        }
+        carbon_fraction = _CF.get(profile.feedstock_type or "other", 0.60)
+
+        inputs = CreditVolumeInputs(
+            biochar_t_dry_year = profile.biochar_t_dry_year or 1000.0,
+            carbon_fraction    = carbon_fraction,
+            h_c_ratio          = profile.h_c_ratio or 0.40,
+            mast_celsius       = profile.mast_celsius or _MAST_DEFAULT,
+            pyrolysis_temp_celsius = profile.pyrolysis_temp_c or 500.0,
+            methodologies      = methodologies,
+        )
+
+        result = {}
+        for method in methodologies:
+            perm = get_permanence_factor(inputs, method)
+            gross_per_t = carbon_fraction * CO2_C_RATIO * perm
+            emissions   = calc_lca_emissions(inputs, method)
+            emit_per_t  = sum(emissions.values()) / inputs.biochar_t_dry_year
+            buffer_pct  = BUFFER_POOL_PCT.get(method, 0.02)
+            buffer_per_t = gross_per_t * buffer_pct
+            net_per_t   = gross_per_t - emit_per_t - buffer_per_t
+            result[method] = {
+                "permanence_factor": round(perm, 3),
+                "gross_tco2_per_t":  round(gross_per_t, 3),
+                "net_tco2_per_t":    round(net_per_t, 3),
+                "carbon_fraction":   round(carbon_fraction, 2),
+            }
+        return result
+    except Exception as e:
+        print(f"[credit_volume] erro: {e}")
+        return {}
+
+
+# Scores de integridade metodológica — baseados no Sylvera Methodology Assessment (Out 2025)
+# Verde=5, Âmbar=3, Vermelho=1. Fonte: tabela RAG por pilar (pág. Module 2).
+_INTEGRITY_SCORES = {
+    "isometric": {
+        "carbon_accounting": 5,  # 🟢 Obrigatório LCA ISO, GHG statement, Certify platform
+        "additionality":     3,  # 🟡 TRL 6-7 gap; sem preferência de fator de emissão
+        "permanence":        5,  # 🟢 H/Corg < 0.5, buffer 2-20%, verificação pré-emissão
+        "safeguards":        3,  # 🟡 Forte em comunidade; EIA não obrigatório
+        "total": None,
+    },
+    "puro_earth": {
+        "carbon_accounting": 5,  # 🟢 LCA ISO-14040/44 obrigatória, modelo digital validado
+        "additionality":     3,  # 🟡 TRL 6-7 gap; flexibilidade no tipo de teste financeiro
+        "permanence":        5,  # 🟢 Modelo conservador (80% CI); verificação pré-emissão
+        "safeguards":        5,  # 🟢 Critérios específicos de biochar; FPIC; SDG quantificáveis
+        "total": None,
+    },
+    "verra_vcs": {
+        "carbon_accounting": 1,  # 🔴 Sem LCA ISO obrigatória; emissões alta-tecnologia = 0 (injustificado)
+        "additionality":     3,  # 🟡 Positive list estática; sem reavaliação periódica
+        "permanence":        3,  # 🟡 Só temperatura — ignora H/Corg e reflectância
+        "safeguards":        3,  # 🟡 Sem guia biochar-específico; SDG sem quantificação mínima
+        "total": None,
+    },
+}
+for _m in _INTEGRITY_SCORES:
+    _INTEGRITY_SCORES[_m]["total"] = sum(
+        v for k, v in _INTEGRITY_SCORES[_m].items() if k != "total"
+    )
+_MAX_INTEGRITY = max(d["total"] for d in _INTEGRITY_SCORES.values())  # 18 (Puro)
+
+
+def _calc_composite_score(method_results: dict, credit_volume: dict) -> dict:
+    """
+    Score composto alinhado à abordagem Sylvera:
+      40% volume de créditos (tCO2/t biochar líquido — quem gera mais)
+      35% integridade metodológica (RAG Sylvera — quem tem maior rigor)
+      25% compliance readiness (score atual do engine — quem é mais fácil de registrar)
+
+    Justificativa dos pesos:
+      Volume e integridade são os drivers primários de valor para compradores premium.
+      Compliance readiness é secundário — reflete estado atual de documentação, não fit.
+    """
+    if not method_results:
+        return {}
+
+    # Normaliza volume de créditos (0-100)
+    nets = {m: credit_volume.get(m, {}).get("net_tco2_per_t", 0) for m in method_results}
+    max_net = max(nets.values()) if nets.values() else 1
+    min_net = min(nets.values()) if nets.values() else 0
+    spread  = max_net - min_net or 1
+
+    vol_norm  = {m: (v - min_net) / spread * 100 for m, v in nets.items()}
+
+    # Integridade (0-100)
+    integ_norm = {
+        m: (_INTEGRITY_SCORES.get(m, {}).get("total", 10) / _MAX_INTEGRITY * 100)
+        for m in method_results
+    }
+
+    # Compliance (já em 0-100)
+    compl = {m: method_results[m]["overall"] for m in method_results}
+
+    composite = {}
+    for m in method_results:
+        composite[m] = (
+            0.40 * vol_norm.get(m, 0) +
+            0.35 * integ_norm.get(m, 0) +
+            0.25 * compl.get(m, 0)
+        )
+    return composite
+
+
+_FL = {
+    "forest_biomass": "biomassa florestal", "agricultural_residue": "resíduo agrícola",
+    "urban_wood": "madeira urbana", "food_waste": "resíduo alimentar",
+    "sewage_sludge": "biossólido", "animal_manure": "esterco animal",
+    "mixed": "feedstock misto", "other": "este tipo de feedstock",
+}
+
+_INTEG_LABELS = {
+    "isometric":  "🟢 Contabilidade de Carbono | 🟢 Permanência | 🟡 Adicionalidade | 🟡 Salvaguardas",
+    "puro_earth": "🟢 Contabilidade de Carbono | 🟢 Permanência | 🟡 Adicionalidade | 🟢 Salvaguardas",
+    "verra_vcs":  "🔴 Contabilidade de Carbono | 🟡 Permanência | 🟡 Adicionalidade | 🟡 Salvaguardas",
+}
+
+
+def _build_reasoning(best: str, results: dict, profile: ProjectProfile,
+                     credit_volume: dict | None = None) -> str:
+    """
+    Raciocínio determinístico alinhado à metodologia Sylvera:
+      1. Volume de créditos (quem gera mais com este H/Corg?)
+      2. Integridade metodológica (RAG: carbon accounting, permanência)
+      3. Fatores de elegibilidade de feedstock
+      4. Notas sobre dados faltantes
+    """
+    credit_volume = credit_volume or {}
     label = METHOD_LABELS.get(best, best)
-    score = results[best]["overall"]
-    dims  = results[best].get("dimensions", {})
+    lines = []
 
-    lines = [f"**{label}** apresenta a maior aderência ao perfil do projeto ({score:.0f}%)."]
+    # ── 1. Volume de créditos ──────────────────────────────────────────────
+    cv_best = credit_volume.get(best, {})
+    cv_data = [(m, credit_volume.get(m, {}).get("net_tco2_per_t", 0)) for m in results]
+    cv_data.sort(key=lambda x: -x[1])
 
-    iso_score  = results.get("isometric", {}).get("overall", 0)
-    puro_score = results.get("puro_earth", {}).get("overall", 0)
+    if cv_data and cv_data[0][1] > 0:
+        best_net = cv_data[0][1]
+        worst_net = cv_data[-1][1] if len(cv_data) > 1 else best_net
+        spread_pct = (best_net - worst_net) / worst_net * 100 if worst_net else 0
+        perm_best = credit_volume.get(best, {}).get("permanence_factor")
+        lines.append(
+            f"**Módulo 1 — Volume de Créditos:** {label} gera "
+            f"~{cv_best.get('net_tco2_per_t', 0):.2f} tCO₂/t biochar líquido"
+            + (f" (fator de permanência {perm_best})" if perm_best else "")
+            + "."
+        )
+        if spread_pct > 3:
+            winner_label = METHOD_LABELS.get(cv_data[0][0], cv_data[0][0])
+            loser_label  = METHOD_LABELS.get(cv_data[-1][0], cv_data[-1][0])
+            lines.append(
+                f"Diferença de {spread_pct:.1f}% entre metodologias: "
+                f"{winner_label} ({cv_data[0][1]:.2f}) vs {loser_label} ({cv_data[-1][1]:.2f} tCO₂/t)."
+            )
+        hc = profile.h_c_ratio
+        default_hc = _HC_DEFAULTS.get(profile.feedstock_type, 0.40)
+        if hc is not None and abs(hc - default_hc) < 0.011:
+            ft_label = _FL.get(profile.feedstock_type, "este feedstock")
+            lines.append(
+                f"H/Corg não informado: default conservador {hc:.2f} aplicado "
+                f"(típico para {ft_label}). Informe o valor laboratorial para permanência precisa."
+            )
+        elif hc and hc <= 0.25:
+            lines.append(f"H/Corg={hc:.3f} → alta permanência no Isometric (f₂₀₀≈0.90) e Puro (f₂₀₀≈0.81).")
+
+    # ── 2. Integridade metodológica ────────────────────────────────────────
+    integ = _INTEG_LABELS.get(best, "")
+    if integ:
+        lines.append(f"**Módulo 2 — Integridade:** {integ}.")
+
+    # Aviso Verra se recomendada (raro, mas pode acontecer)
+    if best == "verra_vcs":
+        lines.append(
+            "⚠️ Verra VM0044 recebe avaliação 🔴 (alto risco) em Contabilidade de Carbono "
+            "pela Sylvera: ausência de LCA ISO obrigatória, emissões de alta-tecnologia assumidas zero "
+            "(injustificado), leakage de atividade assumido zero. "
+            "Considere Isometric ou Puro.Earth para compradores que exigem maior rigor."
+        )
+    elif "verra_vcs" in results:
+        lines.append(
+            "Verra VCS recebe 🔴 em Contabilidade de Carbono (Sylvera 2025): sem LCA ISO obrigatória, "
+            "sem quantificação de leakage de atividade. Não recomendada para projetos onde "
+            "integridade de carbono é prioritária."
+        )
+
+    # ── 3. Elegibilidade de feedstock ─────────────────────────────────────
     has_no_cert = not any([
         profile.has_fsc_certification, profile.has_pefc_certification,
         profile.has_sfi_certification, profile.has_isae3000_dossier,
     ])
-
-    # Certificação florestal: ordem de flexibilidade correta
-    # Isometric (mais flexível) > Verra (PEFC/FSC/CDM def.) > Puro.Earth (mais restritiva)
     if profile.is_forest_biomass and has_no_cert:
         lines.append(
-            "Para biomassa florestal sem certificação, a ordem de flexibilidade é: "
-            "Isometric (não exige certificação, apenas LCA e counterfactual de resíduo) > "
-            "Verra (aceita PEFC, FSC ou definição CDM de biomassa renovável) > "
-            "Puro.Earth (exige FSC/ISAE3000 — plano governamental inválido no Brasil, CPI=36)."
+            "Feedstock florestal sem certificação: Isometric é mais flexível "
+            "(não exige certificação formal, apenas LCA e counterfactual de resíduo). "
+            "Verra aceita definição CDM de biomassa renovável como alternativa. "
+            "Puro.Earth exige FSC/ISAE3000 — no Brasil (CPI=36), plano governamental não é válido."
         )
-        if iso_score < puro_score or iso_score < results.get("verra_vcs", {}).get("overall", 0):
-            lines.append(
-                "Nota: a vantagem do Isometric em feedstock pode não se refletir no score total "
-                "se dados técnicos de permanência (H/Corg medido, temperatura do solo) não foram informados."
-            )
-
     if profile.uses_mixed_waste:
-        lines.append("Feedstock misto torna Puro.Earth inelegível — eliminatório absoluto (Clarificação 001).")
-
+        lines.append("Feedstock com material fóssil elimina Puro.Earth (Clar. 001 BCH).")
     if profile.uses_coal_ash:
-        lines.append("Coal ash torna Puro.Earth inelegível — eliminatório absoluto (Clarificação 010).")
-
-    # Permanência: explica o default aplicado
-    hc = profile.h_c_ratio
-    default_hc = _HC_DEFAULTS.get(profile.feedstock_type, 0.40)
-    FEEDSTOCK_LABELS = {
-        "forest_biomass": "biomassa florestal", "agricultural_residue": "resíduo agrícola",
-        "urban_wood": "madeira urbana", "food_waste": "resíduo alimentar",
-        "sewage_sludge": "biossólido", "animal_manure": "esterco animal",
-        "mixed": "feedstock misto", "other": "este tipo de feedstock",
-    }
-    if hc is not None and abs(hc - default_hc) < 0.01:
-        ft_label = FEEDSTOCK_LABELS.get(profile.feedstock_type, "este tipo de feedstock")
+        lines.append("Coal ash como insumo elimina Puro.Earth (Clar. 010 CAM).")
+    if profile.country_cpi is not None and profile.country_cpi < 50 and profile.is_forest_biomass:
         lines.append(
-            f"H/Corg não informado: default conservador {hc:.2f} aplicado "
-            f"(típico para {ft_label}). "
-            "Informe o valor laboratorial para resultados mais precisos."
-        )
-    elif hc is not None and hc < 0.3:
-        lines.append(
-            f"H/Corg={hc:.2f} → permanência alta em Isometric e Puro.Earth (Woolf 2021)."
+            f"CPI={profile.country_cpi} (<50): plano de manejo governamental "
+            f"não válido na Puro.Earth — apenas FSC ou ISAE 3000."
         )
 
-    if profile.pyrolysis_temp_c is not None and profile.pyrolysis_temp_c > 600:
+    # ── 4. Score composto (transparência) ─────────────────────────────────
+    composite_best = results.get(best, {}).get("composite_score")
+    if composite_best:
         lines.append(
-            f"Temperatura de pirólise {profile.pyrolysis_temp_c:.0f}°C → PRde=0.89 na Verra (máxima permanência)."
+            f"Score composto ({label}): {composite_best:.0f}/100 "
+            f"(40% volume créditos + 35% integridade Sylvera + 25% compliance)."
         )
-
-    # CPI e caminho florestal Puro
-    if profile.is_forest_biomass and profile.country_cpi is not None and profile.country_cpi < 50:
-        lines.append(
-            f"CPI do país = {profile.country_cpi} (< 50): plano de manejo governamental não disponível "
-            f"na Puro.Earth — apenas FSC ou ISAE 3000 são caminhos válidos."
-        )
-
-    # Verra feedstock elegível
-    if profile.is_purpose_grown:
-        lines.append("Feedstock purpose-grown exclui o projeto da Verra VCS (AC 4a) e da Puro.Earth.")
-
-    # Sem LCA
-    if not profile.has_lca:
-        lines.append(
-            "Sem LCA iniciada: Puro.Earth é penalizada (cap 45% em carbon_accounting). "
-            "Isometric e Verra aceitam LCA futura no desenvolvimento do PDD."
-        )
-
-    # Gap principal do segundo colocado
-    runners = [(m, d["overall"]) for m, d in results.items() if m != best]
-    runners.sort(key=lambda x: -x[1])
-    if runners:
-        second, second_score = runners[0]
-        diff = score - second_score
-        if diff < 10:
-            lines.append(
-                f"{METHOD_LABELS.get(second, second)} é alternativa próxima "
-                f"(diferença de {diff:.0f}pp) — considere os critérios específicos antes de decidir."
-            )
 
     return " ".join(lines)

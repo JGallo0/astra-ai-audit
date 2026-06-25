@@ -33,6 +33,7 @@ class ProjectProfile:
     has_ownership_evidence:    bool           = False
     has_technical_description: bool           = False
     estimated_credits_tco2:    Optional[float]= None
+    biochar_t_dry_year:        Optional[float]= None   # produção anual de biochar (base seca) — para credit volume
 
     # ── Feedstock ─────────────────────────────────────────────────────────────
     feedstock_type:            str            = "unknown"
