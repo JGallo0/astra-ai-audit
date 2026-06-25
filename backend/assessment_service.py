@@ -470,6 +470,11 @@ async def run_methodology_assessment(
             if profile.uses_coal_ash:
                 _cap("feedstock_eligibility", 0.0)
 
+            # 3b. Queima aberta → proibida explicitamente (Clar. 004 BCH)
+            if profile.reactor_type == "open_burning":
+                _cap("feedstock_eligibility", 0.0)
+                _cap("carbon_accounting", 0.0)
+
             # 4. Gases de pirólise não recuperados/combustados → eliminatório Puro
             # (Hard gate explícito na tabela de elegibilidade do VVB)
             if not profile.has_pyrolysis_gas_recovery:

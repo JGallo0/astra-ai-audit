@@ -109,6 +109,9 @@ def run_pin_audit(
                 _cap("feedstock_eligibility", 0.0)
             if profile.uses_coal_ash:
                 _cap("feedstock_eligibility", 0.0)
+            if profile.reactor_type == "open_burning":
+                _cap("feedstock_eligibility", 0.0)
+                _cap("carbon_accounting", 0.0)
             if not profile.has_pyrolysis_gas_recovery:
                 gsen = next((r for r in findings if r.get("requirement_id") == "P-GSEN-0"), None)
                 if gsen and gsen.get("status") == "non_compliant":
