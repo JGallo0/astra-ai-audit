@@ -196,62 +196,77 @@ function StepProjeto({ form, set, errors }) {
 }
 
 function StepFeedstock({ form, set, errors }) {
+  // is_forest_biomass é derivado do tipo selecionado — sem toggle separado
+  const isForest = form.feedstock_type === "forest_biomass";
+
+  const handleFeedstockType = (name, value) => {
+    set(name, value);
+    // Sincroniza is_forest_biomass automaticamente
+    set("is_forest_biomass", value === "forest_biomass");
+  };
+
   return (
     <>
-      <Field label="Tipo de feedstock" required error={errors.feedstock_type}>
-        <SelectInput name="feedstock_type" value={form.feedstock_type} onChange={set} hasError={!!errors.feedstock_type} options={[
-          { value: "agricultural_residue", label: "Resíduo agrícola (palha, bagaço, casca)" },
-          { value: "forest_biomass",       label: "Biomassa florestal (galhos, serragem, podas)" },
-          { value: "urban_wood",           label: "Madeira urbana / resíduo de processamento" },
+      <Field label="Tipo de feedstock" required error={errors.feedstock_type}
+        help="Selecione o tipo principal. As perguntas abaixo tratam de condições adicionais independentes do tipo.">
+        <SelectInput name="feedstock_type" value={form.feedstock_type}
+          onChange={handleFeedstockType} hasError={!!errors.feedstock_type} options={[
+          { value: "agricultural_residue", label: "Resíduo agrícola (palha, bagaço, casca, podas de lavoura)" },
+          { value: "forest_biomass",       label: "Biomassa florestal (galhos, serragem, podas de reflorestamento)" },
+          { value: "urban_wood",           label: "Madeira urbana / resíduo de processamento de madeira" },
           { value: "food_waste",           label: "Resíduo de processamento alimentar" },
           { value: "sewage_sludge",        label: "Lodo de esgoto (biossólido)" },
           { value: "animal_manure",        label: "Esterco animal" },
-          { value: "mixed",                label: "Misto (múltiplos tipos)" },
+          { value: "mixed",                label: "Misto (múltiplos resíduos biogênicos)" },
           { value: "other",                label: "Outro" },
         ]} />
       </Field>
 
+      {/* Seção de certificação — aparece automaticamente para biomassa florestal */}
+      {isForest && (
+        <div style={{ marginBottom: 16, padding: "14px 16px", background: "#eff6ff", borderRadius: 8, border: "1px solid #bfdbfe" }}>
+          <p style={{ fontWeight: 700, fontSize: 13, margin: "0 0 4px", color: "#1e40af" }}>
+            🌲 Certificação de sustentabilidade florestal
+          </p>
+          <p style={{ fontSize: 11, color: "#475569", margin: "0 0 12px" }}>
+            Obrigatória para Puro.Earth. CPI Brasil = 36 → plano de manejo governamental
+            <strong> não disponível</strong> (exige CPI ≥ 50). Apenas FSC, PEFC ou ISAE 3000 são válidos no Brasil.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 16px" }}>
+            <Toggle name="has_fsc_certification"    value={form.has_fsc_certification}    onChange={set} label="Certificação FSC ativa" />
+            <Toggle name="has_pefc_certification"   value={form.has_pefc_certification}   onChange={set} label="Certificação PEFC ativa" />
+            <Toggle name="has_isae3000_dossier"     value={form.has_isae3000_dossier}     onChange={set} label="Dossiê auditado ISAE 3000" />
+            <Toggle name="has_government_mgmt_plan" value={form.has_government_mgmt_plan} onChange={set} label="Plano de manejo gov. (CPI ≥ 50)" />
+          </div>
+        </div>
+      )}
+
+      {/* Condições de risco — independentes do tipo de feedstock */}
+      <p style={{ fontSize: 12, fontWeight: 600, color: "#475569", margin: "4px 0 10px" }}>
+        Condições adicionais
+      </p>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 16px" }}>
-        <Toggle name="is_forest_biomass"   value={form.is_forest_biomass}   onChange={set} label="Origem florestal?" />
-        <Toggle name="is_purpose_grown"    value={form.is_purpose_grown}    onChange={set} label="Cultivado para este fim (não resíduo)?" />
-        <Toggle name="feedstock_imported"  value={form.feedstock_imported}  onChange={set} label="Feedstock importado de outro país?" />
-        <Toggle name="uses_mixed_waste"    value={form.uses_mixed_waste}    onChange={set} label="Mistura com plásticos / fósseis?" />
-        <Toggle name="uses_coal_ash"       value={form.uses_coal_ash}       onChange={set} label="Inclui cinzas de carvão (coal ash)?" />
-        <Toggle name="from_land_clearing"  value={form.from_land_clearing}  onChange={set} label="Proveniente de desmatamento?" />
+        <Toggle name="is_purpose_grown"   value={form.is_purpose_grown}   onChange={set} label="Cultivado para este fim (não é resíduo)?" />
+        <Toggle name="feedstock_imported" value={form.feedstock_imported} onChange={set} label="Importado de outro país?" />
+        <Toggle name="uses_mixed_waste"   value={form.uses_mixed_waste}   onChange={set} label="Contém materiais fósseis (plásticos, sintéticos)?" />
+        <Toggle name="uses_coal_ash"      value={form.uses_coal_ash}      onChange={set} label="Inclui cinzas de carvão (coal ash)?" />
+        <Toggle name="from_land_clearing" value={form.from_land_clearing} onChange={set} label="Proveniente de desmatamento / limpeza de terra?" />
       </div>
 
-      {/* Alertas imediatos de hard gate */}
-      {form.uses_mixed_waste && (
-        <div style={{ marginTop: 8, padding: "10px 14px", background: "#fef2f2", borderRadius: 6, border: "1px solid #fca5a5", fontSize: 12, color: "#b91c1c" }}>
-          ❌ Feedstock misto elimina Puro.Earth (Clarificação 001 BCH — hard gate absoluto).
-        </div>
-      )}
-      {form.uses_coal_ash && (
-        <div style={{ marginTop: 8, padding: "10px 14px", background: "#fef2f2", borderRadius: 6, border: "1px solid #fca5a5", fontSize: 12, color: "#b91c1c" }}>
-          ❌ Coal ash elimina Puro.Earth (Clarificação 010 CAM — hard gate absoluto).
-        </div>
-      )}
+      {/* Alertas de hard gate */}
       {form.is_purpose_grown && (
         <div style={{ marginTop: 8, padding: "10px 14px", background: "#fef2f2", borderRadius: 6, border: "1px solid #fca5a5", fontSize: 12, color: "#b91c1c" }}>
           ❌ Feedstock cultivado para este fim elimina Verra VCS (AC 4a) e Puro.Earth.
         </div>
       )}
-
-      {form.is_forest_biomass && (
-        <div style={{ marginTop: 16, padding: "14px 16px", background: "#eff6ff", borderRadius: 8, border: "1px solid #bfdbfe" }}>
-          <p style={{ fontWeight: 700, fontSize: 13, margin: "0 0 4px", color: "#1e40af" }}>
-            🌲 Certificação florestal — obrigatória para Puro.Earth
-          </p>
-          <p style={{ fontSize: 11, color: "#475569", margin: "0 0 12px" }}>
-            CPI Brasil = 36 → plano de manejo governamental NÃO disponível na Puro.Earth (exige CPI ≥ 50).
-            Apenas FSC, PEFC ou ISAE 3000 são caminhos válidos no Brasil.
-          </p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 16px" }}>
-            <Toggle name="has_fsc_certification"  value={form.has_fsc_certification}  onChange={set} label="FSC ativa" />
-            <Toggle name="has_pefc_certification" value={form.has_pefc_certification} onChange={set} label="PEFC ativa" />
-            <Toggle name="has_isae3000_dossier"   value={form.has_isae3000_dossier}   onChange={set} label="Dossiê ISAE 3000" />
-            <Toggle name="has_government_mgmt_plan" value={form.has_government_mgmt_plan} onChange={set} label="Plano de manejo gov. (CPI ≥ 50)" />
-          </div>
+      {form.uses_mixed_waste && (
+        <div style={{ marginTop: 8, padding: "10px 14px", background: "#fef2f2", borderRadius: 6, border: "1px solid #fca5a5", fontSize: 12, color: "#b91c1c" }}>
+          ❌ Contaminação fóssil elimina Puro.Earth (Clarificação 001 BCH — hard gate absoluto).
+        </div>
+      )}
+      {form.uses_coal_ash && (
+        <div style={{ marginTop: 8, padding: "10px 14px", background: "#fef2f2", borderRadius: 6, border: "1px solid #fca5a5", fontSize: 12, color: "#b91c1c" }}>
+          ❌ Coal ash elimina Puro.Earth (Clarificação 010 CAM — hard gate absoluto).
         </div>
       )}
     </>
