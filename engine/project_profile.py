@@ -175,6 +175,10 @@ class ProjectProfile:
                                                         # aquaculture | animal_manure | hcfa
     hcfa_fraction:              Optional[float]= None   # fração HCFA — máx 5%
     mineral_additive_fraction:  Optional[float]= None   # aditivos minerais — máx 10%
+    # Sustentabilidade por tipo de feedstock
+    high_residue_removal:       bool           = False  # agrícola: remoção > 50% dos resíduos do campo
+    has_soil_health_docs:       bool           = False  # documentação de saúde do solo (agrícola)
+    residue_volume_increased:   bool           = False  # alimentar: volume aumentou para o projeto
 
     # Baseline e destino do feedstock
     has_baseline_fate_evidence: bool           = False  # evidência AC 4b (decomposição ou queima)
@@ -446,10 +450,13 @@ def profile_to_legacy_dict(p: ProjectProfile) -> dict:
             "certification_scheme": cert,
             "source_locations": p.project_locations,
             # Campos para applies_if dos requisitos Puro
-            "includes_forest_biomass": p.is_forest_biomass,
-            "from_land_clearing":      p.from_land_clearing,
-            "uses_mixed_waste":        p.uses_mixed_waste,
-            "uses_coal_ash":           p.uses_coal_ash,
+            "includes_forest_biomass":  p.is_forest_biomass,
+            "from_land_clearing":       p.from_land_clearing,
+            "uses_mixed_waste":         p.uses_mixed_waste,
+            "uses_coal_ash":            p.uses_coal_ash,
+            "high_residue_removal":     p.high_residue_removal,
+            "has_soil_health_docs":     p.has_soil_health_docs,
+            "residue_volume_increased": p.residue_volume_increased,
         },
         "biochar": {
             "characterization": {
@@ -572,6 +579,32 @@ def profile_to_legacy_dict(p: ProjectProfile) -> dict:
         },
         "ghg_accounting": {
             "system_boundary_defined": p.has_system_boundary or p.has_lca,
+        },
+        "verra": {
+            "technology_class":          p.verra_tech_class,
+            "is_greenfield_facility":    p.is_greenfield_facility,
+            "is_purpose_grown":          p.is_purpose_grown,
+            "feedstock_imported":        p.feedstock_imported,
+            "feedstock_category":        p.verra_feedstock_category,
+            "hcfa_fraction":             p.hcfa_fraction,
+            "has_baseline_fate_evidence":p.has_baseline_fate_evidence,
+            "pyrolysis_temp_c":          p.pyrolysis_temp_c,
+            "has_continuous_temp_monitoring": p.has_continuous_temp_monitoring,
+            "has_gas_recovery":          p.has_pyrolysis_gas_recovery,
+            "soil_application":          p.soil_application,
+            "used_as_fuel":              p.used_as_fuel,
+            "has_continuous_weighing":   p.has_continuous_weighing,
+            "has_fc_lab_analysis":       p.has_fc_lab_analysis,
+            "transport_distance_km":     p.transport_distance_km,
+            "has_chain_of_custody":      p.has_chain_of_custody,
+            "has_application_coordinates": p.has_application_coordinates,
+            "has_offsite_backup":        p.has_offsite_backup,
+            "data_retention_years":      p.data_retention_years,
+            "vt0008_path":               p.vt0008_path,
+            # Sustentabilidade por tipo de feedstock
+            "high_residue_removal":      p.high_residue_removal,
+            "has_soil_health_docs":      p.has_soil_health_docs,
+            "residue_volume_increased":  p.residue_volume_increased,
         },
         "methodology": {
             "storage_pathway":   p.storage_pathway,

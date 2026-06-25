@@ -252,8 +252,30 @@ def eval_verra_feedstock_category_v1(data: dict, audit_mode: str = "development"
         feedstock.get("certification_scheme") in ("FSC", "PEFC", "SFI"),
         verra.get("has_pefc_cert"), verra.get("has_fsc_cert"),
     ])
+    # Agrícola: remoção > 50% sem docs de solo
+    high_residue_removal = verra.get("high_residue_removal", False)
+    has_soil_health_docs = verra.get("has_soil_health_docs", False)
+    # Processamento alimentar: volume aumentado para o projeto
+    residue_volume_increased = verra.get("residue_volume_increased", False)
 
     notes = []
+
+    # Processamento alimentar — volume artificialmente aumentado → inelegível
+    if residue_volume_increased and biomass_type in ("food_waste", "food_processing"):
+        return _non_compliant(
+            gap="Volume de resíduos de processamento alimentar aumentado especificamente para produção de biochar.",
+            recommendation="VM0044 Tabela 1: resíduos de processamento alimentar devem ser subprodutos naturais da operação — o volume por unidade de produção não pode aumentar para fins de biochar.",
+            citation="Tabela 1 — Food processing: production of residues per facility output must not increase.",
+        )
+
+    # Agrícola — remoção > 50% sem documentação de saúde do solo
+    if high_residue_removal and not has_soil_health_docs and biomass_type == "agricultural_residue":
+        return _partial(
+            gap="Remoção de mais de 50% dos resíduos agrícolas sem documentação de saúde do solo.",
+            recommendation="VM0044 Tabela 1: remoção acima de 50% dos resíduos do campo deve ser acompanhada de evidência de que não causa degradação do solo. Forneça análise de solo ou estudo agronômico.",
+            citation="Tabela 1 — Agricultural waste: if removing from fields, must not lead to soil degradation; limited to 50% without documentation.",
+            notes=notes, score=50,
+        )
 
     # HCFA hard gate — máximo 5%
     if feedstock_category == "hcfa" or (hcfa_fraction is not None and hcfa_fraction > 0):

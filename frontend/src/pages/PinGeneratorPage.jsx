@@ -222,15 +222,16 @@ function StepFeedstock({ form, set, errors }) {
         ]} />
       </Field>
 
-      {/* Seção de certificação — aparece automaticamente para biomassa florestal */}
+      {/* Requisitos de sustentabilidade por tipo — aparecem automaticamente */}
+
       {isForest && (
         <div style={{ marginBottom: 16, padding: "14px 16px", background: "#eff6ff", borderRadius: 8, border: "1px solid #bfdbfe" }}>
           <p style={{ fontWeight: 700, fontSize: 13, margin: "0 0 4px", color: "#1e40af" }}>
             🌲 Certificação de sustentabilidade florestal
           </p>
           <p style={{ fontSize: 11, color: "#475569", margin: "0 0 12px" }}>
-            Obrigatória para Puro.Earth. CPI Brasil = 36 → plano de manejo governamental
-            <strong> não disponível</strong> (exige CPI ≥ 50). Apenas FSC, PEFC ou ISAE 3000 são válidos no Brasil.
+            Obrigatória para Puro.Earth. Verra aceita PEFC, FSC ou definição CDM de biomassa renovável.
+            CPI Brasil = 36 → plano de manejo governamental <strong>não disponível</strong> na Puro.Earth (exige CPI ≥ 50).
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 16px" }}>
             <Toggle name="has_fsc_certification"    value={form.has_fsc_certification}    onChange={set} label="Certificação FSC ativa" />
@@ -238,6 +239,68 @@ function StepFeedstock({ form, set, errors }) {
             <Toggle name="has_isae3000_dossier"     value={form.has_isae3000_dossier}     onChange={set} label="Dossiê auditado ISAE 3000" />
             <Toggle name="has_government_mgmt_plan" value={form.has_government_mgmt_plan} onChange={set} label="Plano de manejo gov. (CPI ≥ 50)" />
           </div>
+        </div>
+      )}
+
+      {form.feedstock_type === "agricultural_residue" && (
+        <div style={{ marginBottom: 16, padding: "14px 16px", background: "#fffbeb", borderRadius: 8, border: "1px solid #fde68a" }}>
+          <p style={{ fontWeight: 700, fontSize: 13, margin: "0 0 4px", color: "#92400e" }}>
+            🌾 Resíduo agrícola — limite de remoção (Verra Tabela 1)
+          </p>
+          <p style={{ fontSize: 11, color: "#475569", margin: "0 0 10px" }}>
+            Remover mais de 50% dos resíduos do campo sem documentação de saúde do solo
+            resulta em penalidade de elegibilidade na Verra VCS.
+          </p>
+          <Toggle name="high_residue_removal" value={form.high_residue_removal} onChange={set}
+            label="Remove mais de 50% dos resíduos do campo?" />
+          {form.high_residue_removal && (
+            <Toggle name="has_soil_health_docs" value={form.has_soil_health_docs} onChange={set}
+              label="Possui documentação de que não causa degradação do solo?" />
+          )}
+        </div>
+      )}
+
+      {form.feedstock_type === "food_waste" && (
+        <div style={{ marginBottom: 16, padding: "14px 16px", background: "#fffbeb", borderRadius: 8, border: "1px solid #fde68a" }}>
+          <p style={{ fontWeight: 700, fontSize: 13, margin: "0 0 4px", color: "#92400e" }}>
+            🏭 Resíduo alimentar — critério de proporcionalidade (Verra Tabela 1)
+          </p>
+          <p style={{ fontSize: 11, color: "#475569", margin: "0 0 10px" }}>
+            O volume de resíduos gerado não pode ter aumentado especificamente para produzir biochar.
+            O resíduo deve ser subproduto natural da operação.
+          </p>
+          <Toggle name="residue_volume_increased" value={form.residue_volume_increased} onChange={set}
+            label="Volume de resíduos aumentou para viabilizar o projeto de biochar?" />
+          {form.residue_volume_increased && (
+            <div style={{ marginTop: 6, padding: "8px 12px", background: "#fef2f2", borderRadius: 6, border: "1px solid #fca5a5", fontSize: 12, color: "#b91c1c" }}>
+              ❌ Volume de resíduos aumentado especificamente para biochar → inelegível na Verra VCS (Tabela 1).
+            </div>
+          )}
+        </div>
+      )}
+
+      {form.feedstock_type === "sewage_sludge" && (
+        <div style={{ marginBottom: 16, padding: "14px 16px", background: "#f8fafc", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+          <p style={{ fontWeight: 700, fontSize: 13, margin: "0 0 4px", color: "#475569" }}>
+            💧 Biossólido — conformidade com contaminantes
+          </p>
+          <p style={{ fontSize: 11, color: "#64748b", margin: 0 }}>
+            Biossólidos devem cumprir os limites de metais pesados e contaminantes das diretrizes
+            IBI ou EBC. Verifique os campos de PAH, PCB e metais pesados no Passo 4 (Biochar).
+          </p>
+        </div>
+      )}
+
+      {form.feedstock_type === "mixed" && (
+        <div style={{ marginBottom: 16, padding: "14px 16px", background: "#f8fafc", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+          <p style={{ fontWeight: 700, fontSize: 13, margin: "0 0 4px", color: "#475569" }}>
+            🔀 Misto — cada componente deve ser elegível individualmente
+          </p>
+          <p style={{ fontSize: 11, color: "#64748b", margin: 0 }}>
+            Todos os tipos de resíduo incluídos devem atender os critérios de elegibilidade
+            individualmente. Marque abaixo se algum componente envolve material fóssil ou coal ash
+            (hard gates nas condições adicionais abaixo).
+          </p>
         </div>
       )}
 
@@ -733,6 +796,9 @@ const EMPTY = {
   from_land_clearing: false,
   has_fsc_certification: false, has_pefc_certification: false,
   has_isae3000_dossier: false, has_government_mgmt_plan: false,
+  // Sustentabilidade por tipo
+  high_residue_removal: false, has_soil_health_docs: false, // agrícola
+  residue_volume_increased: false, // processamento alimentar
   // Produção
   pyrolysis_temp_c: null, verra_tech_class: "",
   has_continuous_temp_monitoring: false, has_pyrolysis_gas_recovery: false,
